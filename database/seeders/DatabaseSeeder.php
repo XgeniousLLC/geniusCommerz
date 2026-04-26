@@ -22,10 +22,12 @@ class DatabaseSeeder extends Seeder
             IntegrationSeeder::class,
         ]);
 
-        // Create regular test user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create regular test user (idempotent — safe to run multiple times)
+        if (! User::where('email', 'test@example.com')->exists()) {
+            User::factory()->create([
+                'name'  => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContentTranslation;
+use App\Models\Language;
 use App\Services\AiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -112,5 +114,84 @@ class AiController extends Controller
         }
 
         return response()->json(['text' => trim($text, " \t\n\r\0\x0B\"'")]);
+    }
+
+    public function translateContent(Request $request): JsonResponse
+    {
+        $request->validate([
+            'language_id'       => 'required|integer|exists:languages,id',
+            'translatable_type' => 'required|in:product,blog',
+            'translatable_id'   => 'required|integer',
+            'fields'            => 'required|array',
+        ]);
+
+        if (! $this->ai->hasDefault()) {
+            return response()->json(['error' => 'No AI provider configured. Go to Integrations to set one up.'], 422);
+        }
+
+        $language = Language::findOrFail($request->integer('language_id'));
+        $fields   = $request->input('fields');
+
+        $json   = json_encode($fields, JSON_UNESCAPED_UNICODE);
+        $prompt = <<<PROMPT
+Translate the following JSON key-value pairs into {$language->name} (language code: {$language->code}).
+Keep every key exactly as-is. Translate only the values. Preserve HTML tags exactly as they appear.
+Return ONLY valid JSON, no markdown, no code fences.
+
+$json
+PROMPT;
+
+        try {
+            $raw     = $this->ai->complete($prompt, ['max_tokens' => 3000, 'temperature' => 0.3]);
+            $raw     = preg_replace('/^```json\s*/i', '', trim($raw));
+            $raw     = preg_replace('/```$/', '', $raw);
+            $decoded = json_decode(trim($raw), true);
+
+            if (! is_array($decoded)) {
+                return response()->json(['error' => 'AI returned invalid JSON. Try again.'], 422);
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'AI request failed: ' . $e->getMessage()], 500);
+        }
+
+        $modelClass = $request->input('translatable_type') === 'product'
+            ? \App\Models\Product::class
+            : \App\Models\Blog::class;
+
+        ContentTranslation::updateOrCreate(
+            [
+                'language_id'       => $language->id,
+                'translatable_type' => $modelClass,
+                'translatable_id'   => $request->integer('translatable_id'),
+            ],
+            ['fields' => $decoded]
+        );
+
+        return response()->json(['success' => true, 'fields' => $decoded]);
+    }
+
+    public function saveContentTranslation(Request $request): JsonResponse
+    {
+        $request->validate([
+            'language_id'       => 'required|integer|exists:languages,id',
+            'translatable_type' => 'required|in:product,blog',
+            'translatable_id'   => 'required|integer',
+            'fields'            => 'required|array',
+        ]);
+
+        $modelClass = $request->input('translatable_type') === 'product'
+            ? \App\Models\Product::class
+            : \App\Models\Blog::class;
+
+        ContentTranslation::updateOrCreate(
+            [
+                'language_id'       => $request->integer('language_id'),
+                'translatable_type' => $modelClass,
+                'translatable_id'   => $request->integer('translatable_id'),
+            ],
+            ['fields' => $request->input('fields')]
+        );
+
+        return response()->json(['success' => true]);
     }
 }

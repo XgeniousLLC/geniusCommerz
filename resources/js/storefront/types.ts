@@ -224,6 +224,14 @@ export interface StaticPage {
   metaInformation?: MetaInformation | null;
 }
 
+export interface Currency {
+  code: string;
+  symbol: string;
+  name: string;
+  rate: number;
+  is_default: boolean;
+}
+
 export interface SharedProps {
   site: SiteSettings;
   auth: { user: AuthUser | null };
@@ -232,4 +240,6 @@ export interface SharedProps {
   locale: string;
   strings: Record<string, string>;
   languages: Array<{ name: string; code: string }>;
+  currencies: Currency[];
+  activeCurrency: Currency;
 }

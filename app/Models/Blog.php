@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class Blog extends Model
@@ -61,6 +62,11 @@ class Blog extends Model
     public function metaInformation()
     {
         return $this->morphOne(MetaInformation::class, 'metable');
+    }
+
+    public function contentTranslations(): MorphMany
+    {
+        return $this->morphMany(ContentTranslation::class, 'translatable');
     }
 
     public function comments()

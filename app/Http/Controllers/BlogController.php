@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use App\Models\BlogCategory;
+use App\Models\ContentTranslation;
+use App\Models\Language;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,7 +55,7 @@ class BlogController extends Controller
         ]);
     }
 
-    public function show(Blog $blog): Response
+    public function show(Blog $blog, Request $request): Response
     {
         if ($blog->status !== 'published') {
             abort(404);
@@ -79,12 +82,39 @@ class BlogController extends Controller
             ->with(['replies' => fn($q) => $q->with('replies')])
             ->approved()->topLevel()->latest()->get();
 
+        $blogData = $this->blogFull($blog);
+        $blogData = $this->applyBlogTranslation($blogData, $blog, $request);
+
         return Inertia::render('blog/Show', [
-            'blog'       => $this->blogFull($blog),
+            'blog'       => $blogData,
             'related'    => $related->map(fn($p) => $this->blogCard($p)),
             'categories' => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug, 'blogs_count' => $c->blogs_count]),
             'comments'   => $comments->map(fn($c) => $this->commentData($c)),
         ]);
+    }
+
+    private function applyBlogTranslation(array $data, Blog $blog, Request $request): array
+    {
+        $locale = $request->cookie('locale');
+        if (! $locale) return $data;
+
+        $lang = Language::where('code', $locale)->where('is_active', true)->first();
+        if (! $lang) return $data;
+
+        $ct = ContentTranslation::where('language_id', $lang->id)
+            ->where('translatable_type', Blog::class)
+            ->where('translatable_id', $blog->id)
+            ->first();
+
+        if (! $ct) return $data;
+
+        foreach (['title', 'excerpt', 'content'] as $field) {
+            if (! empty($ct->fields[$field])) {
+                $data[$field] = $ct->fields[$field];
+            }
+        }
+
+        return $data;
     }
 
     private function blogCard($post): array

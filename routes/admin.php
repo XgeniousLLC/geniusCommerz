@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AiController;
+use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FraudController;
@@ -168,9 +169,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/fraud-check', [FraudController::class, 'check'])->name('fraud.check');
 
         // AI generation
-        Route::post('/ai/product-description', [AiController::class, 'generateProductDescription'])->name('ai.product-description');
-        Route::post('/ai/blog-content',         [AiController::class, 'generateBlogContent'])->name('ai.blog-content');
-        Route::post('/ai/meta-description',     [AiController::class, 'generateMetaDescription'])->name('ai.meta-description');
+        Route::post('/ai/product-description',    [AiController::class, 'generateProductDescription'])->name('ai.product-description');
+        Route::post('/ai/blog-content',           [AiController::class, 'generateBlogContent'])->name('ai.blog-content');
+        Route::post('/ai/meta-description',       [AiController::class, 'generateMetaDescription'])->name('ai.meta-description');
+        Route::post('/ai/translate-content',      [AiController::class, 'translateContent'])->name('ai.translate-content');
+        Route::post('/ai/save-content-translation', [AiController::class, 'saveContentTranslation'])->name('ai.save-content-translation');
+
+        // Currencies
+        Route::get('/currencies',                          [CurrencyController::class, 'index'])->name('currencies.index');
+        Route::post('/currencies',                         [CurrencyController::class, 'store'])->name('currencies.store');
+        Route::put('/currencies/{currency}',               [CurrencyController::class, 'update'])->name('currencies.update');
+        Route::delete('/currencies/{currency}',            [CurrencyController::class, 'destroy'])->name('currencies.destroy');
+        Route::post('/currencies/{currency}/set-default',  [CurrencyController::class, 'setDefault'])->name('currencies.set-default');
 
         // Languages & translations
         Route::get('/languages',                              [LanguageController::class, 'index'])->name('languages.index');

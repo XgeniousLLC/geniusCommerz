@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Currency;
 use App\Models\Language;
 use App\Models\Media;
 use App\Models\Menu;
@@ -81,10 +82,19 @@ class HandleInertiaRequests extends Middleware
         $languages = Language::where('is_active', true)->orderByDesc('is_default')->orderBy('name')
             ->get(['name', 'code'])->toArray();
 
+        $currencies     = Currency::where('is_active', true)->orderByDesc('is_default')->orderBy('code')
+            ->get(['code', 'symbol', 'name', 'rate', 'is_default'])->toArray();
+        $currencyCode   = $request->cookie('currency');
+        $activeCurrency = collect($currencies)->firstWhere('code', $currencyCode)
+            ?? collect($currencies)->firstWhere('is_default', true)
+            ?? ($currencies[0] ?? ['code' => 'BDT', 'symbol' => '৳', 'name' => 'Bangladeshi Taka', 'rate' => 1.0, 'is_default' => true]);
+
         return array_merge(parent::share($request), [
-            'locale'      => $i18n['locale'],
-            'strings'     => $i18n['strings'],
-            'languages'   => $languages,
+            'locale'         => $i18n['locale'],
+            'strings'        => $i18n['strings'],
+            'languages'      => $languages,
+            'currencies'     => $currencies,
+            'activeCurrency' => $activeCurrency,
             'site' => [
                 'name'        => SiteSetting::get('general.site_name', config('app.name')),
                 'tagline'     => SiteSetting::get('general.site_tagline', ''),

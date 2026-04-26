@@ -279,6 +279,12 @@
                     Languages
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
+                    :href="route('admin.currencies.index')"
+                    :active="request()->routeIs('admin.currencies.*')"
+                    icon="currency-dollar">
+                    Currencies
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
                     :href="route('admin.audit.index')"
                     :active="request()->routeIs('admin.audit.*')"
                     icon="clipboard-list">

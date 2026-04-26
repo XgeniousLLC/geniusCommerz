@@ -443,6 +443,148 @@
     </div>
 </form>
 
+@php $activeLanguages = \App\Models\Language::where('is_active', true)->get(); @endphp
+@if($activeLanguages->isNotEmpty())
+<div class="mt-6" x-data="contentTranslator('product', {{ $product->id }})">
+    <x-admin.card>
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-900">Content Translations</h3>
+            <span class="text-xs text-gray-400">Translate product content per language</span>
+        </div>
+
+        <div class="flex gap-2 mb-5 border-b border-gray-100 pb-3 flex-wrap">
+            @foreach($activeLanguages as $lang)
+            <button type="button"
+                @click="activeTab = '{{ $lang->code }}'"
+                :class="activeTab === '{{ $lang->code }}' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
+                {{ $lang->name }}
+            </button>
+            @endforeach
+        </div>
+
+        @foreach($activeLanguages as $lang)
+        @php
+            $existing = $product->contentTranslations()->where('language_id', $lang->id)->first();
+            $existing_fields = $existing?->fields ?? [];
+        @endphp
+        <div x-show="activeTab === '{{ $lang->code }}'" x-cloak>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="ct_{{ $lang->code }}_name"
+                        x-model="tabs['{{ $lang->code }}'].name"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="{{ $product->name }}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                    <textarea id="ct_{{ $lang->code }}_short_description"
+                        x-model="tabs['{{ $lang->code }}'].short_description"
+                        rows="2"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="{{ $product->short_description }}"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="ct_{{ $lang->code }}_description"
+                        x-model="tabs['{{ $lang->code }}'].description"
+                        rows="5"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Translated HTML description..."></textarea>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="aiTranslate('{{ $lang->code }}', {{ $lang->id }})"
+                        :disabled="loading === '{{ $lang->code }}'"
+                        class="inline-flex items-center gap-2 bg-purple-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span x-text="loading === '{{ $lang->code }}' ? 'Translating...' : 'AI Translate'"></span>
+                    </button>
+                    <button type="button" @click="saveTranslation('{{ $lang->code }}', {{ $lang->id }})"
+                        :disabled="saving === '{{ $lang->code }}'"
+                        class="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                        <span x-text="saving === '{{ $lang->code }}' ? 'Saving...' : 'Save'"></span>
+                    </button>
+                    <span x-show="saved === '{{ $lang->code }}'" class="text-xs text-green-600">✓ Saved</span>
+                </div>
+                <p x-show="errors['{{ $lang->code }}']" x-text="errors['{{ $lang->code }}']"
+                    class="text-xs text-red-600"></p>
+            </div>
+        </div>
+        @endforeach
+    </x-admin.card>
+</div>
+
+<script>
+function contentTranslator(type, id) {
+    return {
+        activeTab: '{{ $activeLanguages->first()?->code }}',
+        loading: null,
+        saving: null,
+        saved: null,
+        errors: {},
+        tabs: @json($activeLanguages->mapWithKeys(function($lang) use ($product) {
+            $existing = $product->contentTranslations()->where('language_id', $lang->id)->first();
+            $fields = $existing?->fields ?? [];
+            return [$lang->code => [
+                'name'              => $fields['name'] ?? '',
+                'short_description' => $fields['short_description'] ?? '',
+                'description'       => $fields['description'] ?? '',
+            ]];
+        })),
+
+        async aiTranslate(code, langId) {
+            this.loading = code;
+            this.errors[code] = null;
+            const original = {
+                name:              document.querySelector('[name="name"]')?.value || '',
+                short_description: document.querySelector('[name="short_description"]')?.value || '',
+                description:       document.getElementById('description-hidden')?.value || '',
+            };
+            try {
+                const res  = await fetch('{{ route('admin.ai.translate-content') }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': _csrf, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ language_id: langId, translatable_type: 'product', translatable_id: id, fields: original }),
+                });
+                const data = await res.json();
+                if (data.error) { this.errors[code] = data.error; return; }
+                this.tabs[code] = { ...this.tabs[code], ...data.fields };
+                this.saved = code;
+                setTimeout(() => { if (this.saved === code) this.saved = null; }, 3000);
+            } catch (e) {
+                this.errors[code] = e.message;
+            } finally {
+                this.loading = null;
+            }
+        },
+
+        async saveTranslation(code, langId) {
+            this.saving = code;
+            this.errors[code] = null;
+            try {
+                const res  = await fetch('{{ route('admin.ai.save-content-translation') }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': _csrf, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ language_id: langId, translatable_type: 'product', translatable_id: id, fields: this.tabs[code] }),
+                });
+                const data = await res.json();
+                if (data.error) { this.errors[code] = data.error; return; }
+                this.saved = code;
+                setTimeout(() => { if (this.saved === code) this.saved = null; }, 3000);
+            } catch (e) {
+                this.errors[code] = e.message;
+            } finally {
+                this.saving = null;
+            }
+        },
+    };
+}
+</script>
+@endif
+
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>

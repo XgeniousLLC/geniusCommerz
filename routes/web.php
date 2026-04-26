@@ -98,6 +98,14 @@ Route::post('/reset-password', [UserAuthController::class, 'resetPassword'])->na
 Route::get('/feeds/google-merchant.xml', [FeedController::class, 'googleMerchant'])->name('feeds.google-merchant');
 Route::get('/feeds/facebook-catalog.json', [FeedController::class, 'facebookCatalog'])->name('feeds.facebook-catalog');
 
+// Currency switcher
+Route::get('/currency/{code}', function (string $code) {
+    if (\App\Models\Currency::where('code', $code)->where('is_active', true)->exists()) {
+        cookie()->queue(cookie()->forever('currency', strtoupper($code)));
+    }
+    return redirect()->back();
+})->name('currency.switch');
+
 // Locale switcher (sets cookie, redirects back)
 Route::get('/locale/{code}', function (string $code) {
     $lang = \App\Models\Language::where('code', $code)->where('is_active', true)->first();

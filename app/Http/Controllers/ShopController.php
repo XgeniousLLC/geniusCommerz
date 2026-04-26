@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\ContentTranslation;
+use App\Models\Language;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,7 +28,7 @@ class ShopController extends Controller
         return $this->buildListing($request, activeBrand: $brand);
     }
 
-    public function show(Product $product): Response
+    public function show(Product $product, Request $request): Response
     {
         if ($product->status !== 'active') {
             abort(404);
@@ -44,10 +46,37 @@ class ShopController extends Controller
             ->limit(4)
             ->get();
 
+        $productData = $this->productFull($product);
+        $productData = $this->applyContentTranslation($productData, $product, $request);
+
         return Inertia::render('Shop/Show', [
-            'product' => $this->productFull($product),
+            'product' => $productData,
             'related' => $related->map(fn ($p) => $this->productCard($p)),
         ]);
+    }
+
+    private function applyContentTranslation(array $data, Product $product, Request $request): array
+    {
+        $locale = $request->cookie('locale');
+        if (! $locale) return $data;
+
+        $lang = Language::where('code', $locale)->where('is_active', true)->first();
+        if (! $lang) return $data;
+
+        $ct = ContentTranslation::where('language_id', $lang->id)
+            ->where('translatable_type', Product::class)
+            ->where('translatable_id', $product->id)
+            ->first();
+
+        if (! $ct) return $data;
+
+        foreach (['name', 'short_description', 'description'] as $field) {
+            if (! empty($ct->fields[$field])) {
+                $data[$field] = $ct->fields[$field];
+            }
+        }
+
+        return $data;
     }
 
     private function buildListing(

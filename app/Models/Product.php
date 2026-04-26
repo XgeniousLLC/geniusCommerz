@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Product extends Model
@@ -81,6 +82,11 @@ class Product extends Model
     public function meta(): MorphOne
     {
         return $this->morphOne(MetaInformation::class, 'metable');
+    }
+
+    public function contentTranslations(): MorphMany
+    {
+        return $this->morphMany(ContentTranslation::class, 'translatable');
     }
 
     /** @return BelongsTo<Admin, $this> */
