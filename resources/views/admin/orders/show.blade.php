@@ -249,6 +249,124 @@
             </div>
         </x-admin.card>
 
+        {{-- Fraud Check --}}
+        @if($order->customer_phone)
+        <x-admin.card x-data="fraudCheck('{{ $order->customer_phone }}')">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    Fraud Check
+                </h2>
+                <button @click="run" :disabled="loading"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 disabled:opacity-50 transition-colors">
+                    <svg x-show="!loading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <svg x-show="loading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    <span x-text="checked ? 'Re-check' : 'Check Now'"></span>
+                </button>
+            </div>
+
+            {{-- Phone display --}}
+            <p class="text-xs text-gray-500 mb-3">Checking: <strong class="text-gray-700">{{ $order->customer_phone }}</strong></p>
+
+            {{-- Idle state --}}
+            <template x-if="!checked && !loading && !error">
+                <p class="text-xs text-gray-400 italic">Click "Check Now" to verify this customer's courier history via FraudBD.</p>
+            </template>
+
+            {{-- Loading --}}
+            <template x-if="loading">
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    Fetching courier data…
+                </div>
+            </template>
+
+            {{-- Error --}}
+            <template x-if="error">
+                <div class="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" x-text="error"></div>
+            </template>
+
+            {{-- Sandbox notice --}}
+            <template x-if="sandbox && checked">
+                <div class="mb-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    ⚠️ Sandbox mode — dummy data. Add your live API key in <a href="{{ route('admin.integrations.index') }}" class="underline">Integrations → FraudBD</a>.
+                </div>
+            </template>
+
+            {{-- Results --}}
+            <template x-if="checked && couriers.length > 0">
+                <div class="space-y-2">
+                    <template x-for="c in couriers" :key="c.name">
+                        <div class="rounded-lg border p-3 text-sm"
+                            :class="{
+                                'border-green-200 bg-green-50':  c.risk_color === 'green',
+                                'border-yellow-200 bg-yellow-50': c.risk_color === 'yellow',
+                                'border-orange-200 bg-orange-50': c.risk_color === 'orange',
+                                'border-red-200 bg-red-50':      c.risk_color === 'red',
+                                'border-gray-200 bg-gray-50':    c.risk_color === 'gray',
+                            }">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-gray-800 capitalize" x-text="c.name"></span>
+                                <div class="flex items-center gap-1.5">
+                                    {{-- Risk badge --}}
+                                    <template x-if="c.risk_level">
+                                        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                                            :class="{
+                                                'bg-green-100 text-green-700':   c.risk_color === 'green',
+                                                'bg-yellow-100 text-yellow-700': c.risk_color === 'yellow',
+                                                'bg-orange-100 text-orange-700': c.risk_color === 'orange',
+                                                'bg-red-100 text-red-700':       c.risk_color === 'red',
+                                                'bg-gray-100 text-gray-500':     c.risk_color === 'gray',
+                                            }"
+                                            x-text="c.risk_level.replace('_',' ')"></span>
+                                    </template>
+                                    {{-- Rating badge --}}
+                                    <template x-if="c.rating">
+                                        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                                            :class="{
+                                                'bg-green-100 text-green-700':  c.rating_color === 'green',
+                                                'bg-blue-100 text-blue-700':    c.rating_color === 'blue',
+                                                'bg-yellow-100 text-yellow-700':c.rating_color === 'yellow',
+                                                'bg-red-100 text-red-700':      c.rating_color === 'red',
+                                                'bg-gray-100 text-gray-500':    c.rating_color === 'gray',
+                                            }"
+                                            x-text="c.rating.replace('_',' ')"></span>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                                <template x-if="c.total_orders !== null">
+                                    <div><span class="text-gray-400 block">Orders</span><span class="font-medium" x-text="c.total_orders"></span></div>
+                                </template>
+                                <template x-if="c.success_rate !== null">
+                                    <div><span class="text-gray-400 block">Success</span><span class="font-medium text-green-700" x-text="c.success_rate"></span></div>
+                                </template>
+                                <template x-if="c.cancel_rate !== null">
+                                    <div><span class="text-gray-400 block">Cancel</span><span class="font-medium text-red-600" x-text="c.cancel_rate"></span></div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            {{-- No data --}}
+            <template x-if="checked && couriers.length === 0 && !error">
+                <p class="text-xs text-gray-400 italic">No courier history found for this number.</p>
+            </template>
+        </x-admin.card>
+        @endif
+
         {{-- Update Status --}}
         <x-admin.card>
             <h2 class="text-base font-semibold text-gray-900 mb-4">Update Order</h2>
@@ -323,4 +441,53 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+function fraudCheck(phone) {
+    return {
+        phone,
+        loading:  false,
+        checked:  false,
+        error:    null,
+        sandbox:  false,
+        couriers: [],
+
+        async run() {
+            this.loading  = true;
+            this.error    = null;
+            this.checked  = false;
+            this.couriers = [];
+
+            try {
+                const res = await fetch('{{ route('admin.fraud.check') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept':       'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ phone: this.phone }),
+                });
+
+                const json = await res.json();
+
+                if (!json.success) {
+                    this.error = json.message || 'Unexpected error.';
+                } else {
+                    this.couriers = json.data.couriers ?? [];
+                    this.sandbox  = json.data.sandbox  ?? false;
+                    this.checked  = true;
+                }
+            } catch (e) {
+                this.error = 'Network error — could not reach FraudBD.';
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+}
+</script>
+@endpush
+
 @endsection

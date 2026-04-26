@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\FraudController;
 use App\Http\Controllers\Admin\LoyaltyController;
 use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\ReportController;
@@ -157,6 +158,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Sitemap
         Route::get('/sitemap', [SitemapController::class, 'index'])->name('sitemap.index');
         Route::post('/sitemap/generate', [SitemapController::class, 'generate'])->name('sitemap.generate');
+
+        // Fraud check
+        Route::post('/fraud-check', [FraudController::class, 'check'])->name('fraud.check');
 
         // Media Library
         Route::get('/media', [MediaController::class, 'index'])->name('media.index');
