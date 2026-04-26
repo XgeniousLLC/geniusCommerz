@@ -14,6 +14,16 @@ export interface SiteSettings {
   productCallEnabled: boolean;
   productCallNumber: string;
   globalReturnPolicy: string;
+  shippingCost: number;
+  freeShippingAbove: number;
+  cartGoals: CartGoal[];
+}
+
+export interface CartGoal {
+  amount: number;
+  reward: string;    // 'free_shipping' | 'discount_pct' | 'discount_fixed'
+  value?: number;    // discount amount/pct when reward is not free_shipping
+  label?: string;    // custom label override
 }
 
 export interface AuthUser {

@@ -1,6 +1,61 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useCartDerived, useCartStore } from '../store/cartStore';
+import type { SharedProps } from '../types';
+
+function CartGoalBanner({ subtotal }: { subtotal: number }) {
+  const { site } = usePage<SharedProps>().props;
+  const goals = site.cartGoals ?? [];
+  const freeShip = site.freeShippingAbove > 0
+    ? { amount: site.freeShippingAbove, reward: 'free_shipping' as const }
+    : null;
+
+  // Build full list: configured goals + free shipping threshold
+  const allGoals = [
+    ...goals,
+    ...(freeShip ? [freeShip] : []),
+  ].sort((a, b) => a.amount - b.amount);
+
+  if (allGoals.length === 0) return null;
+
+  // Find the next unachieved goal
+  const next = allGoals.find(g => subtotal < g.amount);
+  if (!next) {
+    // All goals unlocked
+    return (
+      <div className="px-5 py-2.5 bg-green-50 border-b border-green-100">
+        <div className="flex items-center gap-2 text-green-700 text-xs font-semibold">
+          <span>🎉</span>
+          <span>You've unlocked all rewards!</span>
+        </div>
+        <div className="w-full h-1.5 rounded-full bg-green-200 mt-1.5">
+          <div className="h-1.5 rounded-full bg-green-500 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  const needed = next.amount - subtotal;
+  const prev   = allGoals.filter(g => g.amount <= subtotal).at(-1);
+  const from   = prev?.amount ?? 0;
+  const pct    = Math.min(100, Math.round(((subtotal - from) / (next.amount - from)) * 100));
+
+  const label = next.reward === 'free_shipping'
+    ? `free shipping`
+    : next.label || (next.reward === 'discount_pct' ? `${next.value}% off` : `৳${next.value} off`);
+
+  return (
+    <div className="px-5 py-2.5 border-b border-gray-100" style={{ background: '#F0F9FF' }}>
+      <p className="text-xs font-medium" style={{ color: '#0369A1' }}>
+        Add <span className="font-bold">৳{needed.toLocaleString()}</span> more to get{' '}
+        <span className="font-bold">{label}</span>
+      </p>
+      <div className="w-full h-1.5 rounded-full bg-sky-200 mt-1.5 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-sky-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
 
 export default function CartDrawer() {
   const items        = useCartStore(s => s.items);
@@ -45,6 +100,9 @@ export default function CartDrawer() {
             </svg>
           </button>
         </div>
+
+        {/* Cart goal banner */}
+        {items.length > 0 && <CartGoalBanner subtotal={subtotal} />}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">

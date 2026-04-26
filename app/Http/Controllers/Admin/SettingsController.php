@@ -31,6 +31,21 @@ class SettingsController extends Controller
         $data = $request->input('settings', []);
 
         foreach ($data as $key => $value) {
+            // cart.goals_json is a JSON-encoded array — store it normalised as cart.goals
+            if ($key === 'cart.goals_json') {
+                $decoded = json_decode($value ?: '[]', true);
+                $goals   = is_array($decoded) ? array_values($decoded) : [];
+                $goalKey = 'cart.goals';
+                $existing = SiteSetting::where('key', $goalKey)->first();
+                if ($existing) {
+                    $existing->value = json_encode($goals);
+                    $existing->save();
+                } else {
+                    SiteSetting::create(['key' => $goalKey, 'value' => json_encode($goals), 'type' => 'text', 'group' => 'cart']);
+                }
+                continue;
+            }
+
             $value    = ($value === '') ? null : $value;
             $existing = SiteSetting::where('key', $key)->first();
 

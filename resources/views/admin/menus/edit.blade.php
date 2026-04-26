@@ -94,6 +94,43 @@ document.addEventListener('DOMContentLoaded', () => {
     {{-- Right: add items + rename --}}
     <div class="space-y-4">
 
+        {{-- Static Pages --}}
+        <x-admin.card x-data="{ open: false }">
+            <button type="button" @click="open = !open" class="w-full flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-gray-900">Storefront Pages</h3>
+                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open?'rotate-180':''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open" x-collapse class="mt-3 space-y-1">
+                @php
+                    $staticPages = [
+                        ['label' => 'Home',          'url' => '/'],
+                        ['label' => 'Shop',          'url' => '/shop'],
+                        ['label' => 'Blog',          'url' => '/blog'],
+                        ['label' => 'Track Order',   'url' => '/track'],
+                        ['label' => 'Wishlist',      'url' => '/wishlist'],
+                        ['label' => 'Loyalty',       'url' => '/loyalty'],
+                        ['label' => 'My Account',    'url' => '/account'],
+                        ['label' => 'My Orders',     'url' => '/account/orders'],
+                        ['label' => 'Contact Us',    'url' => '/contact'],
+                    ];
+                @endphp
+                @foreach($staticPages as $sp)
+                <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="hidden" name="type" value="custom">
+                    <input type="hidden" name="label" value="{{ $sp['label'] }}">
+                    <input type="hidden" name="url" value="{{ $sp['url'] }}">
+                    <input type="hidden" name="target" value="_self">
+                    <div class="flex-1 flex items-center gap-2 px-2 py-1.5 rounded bg-gray-50 border border-gray-100">
+                        <span class="text-sm text-gray-700 flex-1">{{ $sp['label'] }}</span>
+                        <span class="text-xs text-gray-400 font-mono">{{ $sp['url'] }}</span>
+                    </div>
+                    <button type="submit" class="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap px-2 py-1.5 rounded border border-blue-200 hover:bg-blue-50 transition-colors">+ Add</button>
+                </form>
+                @endforeach
+            </div>
+        </x-admin.card>
+
         {{-- Add custom link --}}
         <x-admin.card>
             <h3 class="text-sm font-semibold text-gray-900 mb-3">Add Custom Link</h3>

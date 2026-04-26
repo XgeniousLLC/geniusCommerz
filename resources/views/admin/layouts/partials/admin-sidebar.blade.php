@@ -108,12 +108,40 @@
         </x-admin.sidebar-link>
 
         {{-- Reports --}}
-        <x-admin.sidebar-link
-            :href="route('admin.reports.sales')"
-            :active="request()->routeIs('admin.reports.*')"
-            icon="chart-bar">
-            Reports
-        </x-admin.sidebar-link>
+        @php $reportsOpen = request()->routeIs('admin.reports.*'); @endphp
+        <div x-data="{ open: {{ $reportsOpen ? 'true' : 'false' }} }">
+            <button type="button" @click="open = !open"
+                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
+                       {{ $reportsOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
+                <span>Reports</span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
+                {{-- Sales & Revenue --}}
+                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Sales</p>
+                <x-admin.sidebar-link :href="route('admin.reports.sales')" :active="request()->routeIs('admin.reports.sales')" icon="chart-bar">Sales Overview</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.profit')" :active="request()->routeIs('admin.reports.profit')" icon="chart-bar">Profit Analysis</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.top-products')" :active="request()->routeIs('admin.reports.top-products')" icon="chart-bar">Top Products</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.demand-trends')" :active="request()->routeIs('admin.reports.demand-trends')" icon="chart-bar">Demand Trends</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.category-revenue')" :active="request()->routeIs('admin.reports.category-revenue')" icon="chart-bar">Category & Brand</x-admin.sidebar-link>
+                {{-- Inventory --}}
+                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Inventory</p>
+                <x-admin.sidebar-link :href="route('admin.reports.inventory')" :active="request()->routeIs('admin.reports.inventory')" icon="chart-bar">Inventory Status</x-admin.sidebar-link>
+                {{-- Customers --}}
+                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Customers</p>
+                <x-admin.sidebar-link :href="route('admin.reports.customers')" :active="request()->routeIs('admin.reports.customers')" icon="chart-bar">Customer Report</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.customer-ltv')" :active="request()->routeIs('admin.reports.customer-ltv')" icon="chart-bar">Customer LTV</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.geographic')" :active="request()->routeIs('admin.reports.geographic')" icon="chart-bar">Geographic Sales</x-admin.sidebar-link>
+                {{-- Orders & Finance --}}
+                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Finance</p>
+                <x-admin.sidebar-link :href="route('admin.reports.orders')" :active="request()->routeIs('admin.reports.orders')" icon="chart-bar">Orders Report</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.coupon-usage')" :active="request()->routeIs('admin.reports.coupon-usage')" icon="chart-bar">Coupon Usage</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.refund-analysis')" :active="request()->routeIs('admin.reports.refund-analysis')" icon="chart-bar">Refund Analysis</x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.reports.payment-trends')" :active="request()->routeIs('admin.reports.payment-trends')" icon="chart-bar">Payment Trends</x-admin.sidebar-link>
+            </div>
+        </div>
 
         {{-- Content --}}
         @php $contentOpen = request()->routeIs('admin.pages.*', 'admin.blogs.*', 'admin.blog-categories.*', 'admin.media.*'); @endphp

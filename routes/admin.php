@@ -137,11 +137,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/sales', [ReportController::class, 'salesOverview'])->name('sales');
-            Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
-            Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
-            Route::get('/orders', [ReportController::class, 'ordersReport'])->name('orders');
-            Route::get('/export', [ReportController::class, 'export'])->name('export');
+            Route::get('/sales',            [ReportController::class, 'salesOverview'])->name('sales');
+            Route::get('/profit',           [ReportController::class, 'profitAnalysis'])->name('profit');
+            Route::get('/top-products',     [ReportController::class, 'topProducts'])->name('top-products');
+            Route::get('/demand-trends',    [ReportController::class, 'demandTrends'])->name('demand-trends');
+            Route::get('/category-revenue', [ReportController::class, 'categoryRevenue'])->name('category-revenue');
+            Route::get('/inventory',        [ReportController::class, 'inventory'])->name('inventory');
+            Route::get('/customers',        [ReportController::class, 'customers'])->name('customers');
+            Route::get('/customer-ltv',     [ReportController::class, 'customerLtv'])->name('customer-ltv');
+            Route::get('/orders',           [ReportController::class, 'ordersReport'])->name('orders');
+            Route::get('/coupon-usage',     [ReportController::class, 'couponUsage'])->name('coupon-usage');
+            Route::get('/refund-analysis',  [ReportController::class, 'refundAnalysis'])->name('refund-analysis');
+            Route::get('/payment-trends',   [ReportController::class, 'paymentTrends'])->name('payment-trends');
+            Route::get('/geographic',       [ReportController::class, 'geographic'])->name('geographic');
+            Route::get('/export',           [ReportController::class, 'export'])->name('export');
         });
 
         // Media Library

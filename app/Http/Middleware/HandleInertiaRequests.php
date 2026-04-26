@@ -41,6 +41,9 @@ class HandleInertiaRequests extends Middleware
                 'productCallEnabled'     => (bool) SiteSetting::get('storefront.product_call_enabled'),
                 'productCallNumber'      => SiteSetting::get('storefront.product_call_number', ''),
                 'globalReturnPolicy'     => SiteSetting::get('storefront.global_return_policy', ''),
+                'shippingCost'           => (float) SiteSetting::get('shipping.flat_rate', 60),
+                'freeShippingAbove'      => (float) SiteSetting::get('shipping.free_above', 0),
+                'cartGoals'              => json_decode(SiteSetting::get('cart.goals', '[]'), true) ?: [],
             ],
             'auth' => [
                 'user' => $request->user()

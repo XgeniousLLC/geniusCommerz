@@ -566,8 +566,8 @@
                     <label class="block text-sm font-medium text-gray-700">Free Shipping Threshold</label>
                     <div class="mt-1 flex rounded-md shadow-sm">
                         <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">৳</span>
-                        <input type="number" name="settings[shipping.free_threshold]" min="0" step="0.01"
-                            value="{{ old('shipping.free_threshold', $settings->get('shipping.free_threshold')?->value ?? '') }}"
+                        <input type="number" name="settings[shipping.free_above]" min="0" step="0.01"
+                            value="{{ old('shipping.free_above', $settings->get('shipping.free_above')?->value ?? '') }}"
                             placeholder="Leave blank to disable"
                             class="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm h-9 px-3" />
                     </div>
@@ -644,11 +644,66 @@
             </div>
         </x-admin.card>
 
+        {{-- Cart Goals --}}
+        <x-admin.card x-data="cartGoals()">
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Cart Goals / Progress Milestones</h3>
+            <p class="text-sm text-gray-500 mb-4">Show a progress bar in the cart drawer: "Add ৳X more to get Y". Goals are evaluated in order of amount.</p>
+
+            <div class="space-y-3 mb-4">
+                <template x-for="(goal, i) in goals" :key="i">
+                    <div class="flex items-end gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-0.5">Cart Amount (৳)</label>
+                            <input type="number" :name="`settings[cart.goals][${i}][amount]`" x-model="goal.amount" min="0" step="1"
+                                class="w-28 border border-gray-200 rounded px-2 py-1.5 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-0.5">Reward</label>
+                            <select :name="`settings[cart.goals][${i}][reward]`" x-model="goal.reward"
+                                class="border border-gray-200 rounded px-2 py-1.5 text-sm">
+                                <option value="free_shipping">Free Shipping</option>
+                                <option value="discount_pct">% Discount</option>
+                                <option value="discount_fixed">Fixed Discount</option>
+                            </select>
+                        </div>
+                        <div x-show="goal.reward !== 'free_shipping'">
+                            <label class="text-xs text-gray-500 block mb-0.5">Value</label>
+                            <input type="number" :name="`settings[cart.goals][${i}][value]`" x-model="goal.value" min="0"
+                                class="w-20 border border-gray-200 rounded px-2 py-1.5 text-sm" placeholder="e.g. 10">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-0.5">Custom Label (optional)</label>
+                            <input type="text" :name="`settings[cart.goals][${i}][label]`" x-model="goal.label"
+                                class="w-40 border border-gray-200 rounded px-2 py-1.5 text-sm" placeholder="e.g. a gift">
+                        </div>
+                        <button type="button" @click="goals.splice(i,1)" class="text-red-400 hover:text-red-600 pb-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </template>
+
+                <button type="button" @click="goals.push({amount:0,reward:'free_shipping',value:'',label:''})"
+                    class="text-sm text-blue-600 hover:underline">+ Add Goal</button>
+            </div>
+
+            {{-- Hidden field to send empty array when no goals --}}
+            <input type="hidden" name="settings[cart.goals_json]" :value="JSON.stringify(goals)">
+        </x-admin.card>
+
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Shipping Settings</x-admin.button>
         </div>
     </div>
 </form>
+
+<script>
+function cartGoals() {
+    return {
+        goals: @json(json_decode($settings->get('cart.goals')?->value ?? '[]', true) ?: []),
+    };
+}
+</script>
+
 @endif
 
 {{-- Legal tab --}}
