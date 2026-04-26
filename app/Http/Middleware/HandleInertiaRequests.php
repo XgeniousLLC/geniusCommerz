@@ -107,10 +107,12 @@ class HandleInertiaRequests extends Middleware
             ? Currency::where('is_active', true)->orderByDesc('is_default')->orderBy('code')
                 ->get(['code', 'symbol', 'name', 'rate', 'is_default'])->toArray()
             : [];
-        $currencyCode   = $request->cookie('currency');
-        $activeCurrency = collect($currencies)->firstWhere('code', $currencyCode)
+        $currencyCode        = $request->cookie('currency');
+        $defaultCurrencyCode = SiteSetting::get('general.currency', 'BDT');
+        $activeCurrency      = collect($currencies)->firstWhere('code', $currencyCode)
             ?? collect($currencies)->firstWhere('is_default', true)
-            ?? ($currencies[0] ?? ['code' => 'BDT', 'symbol' => '৳', 'name' => 'Bangladeshi Taka', 'rate' => 1.0, 'is_default' => true]);
+            ?? collect($currencies)->firstWhere('code', $defaultCurrencyCode)
+            ?? ($currencies[0] ?? ['code' => $defaultCurrencyCode, 'symbol' => '৳', 'name' => 'Default', 'rate' => 1.0, 'is_default' => true]);
 
         return array_merge(parent::share($request), [
             'locale'               => $i18n['locale'],
