@@ -364,6 +364,17 @@
     </x-admin.card>
 </div>
 
+@php
+$ctBlogTabs = $activeLanguages->mapWithKeys(function($lang) use ($blog) {
+    $existing = $blog->contentTranslations()->where('language_id', $lang->id)->first();
+    $fields = $existing?->fields ?? [];
+    return [$lang->code => [
+        'title'   => $fields['title'] ?? '',
+        'excerpt' => $fields['excerpt'] ?? '',
+        'content' => $fields['content'] ?? '',
+    ]];
+})->all();
+@endphp
 <script>
 function blogContentTranslator(type, id) {
     return {
@@ -372,15 +383,7 @@ function blogContentTranslator(type, id) {
         saving: null,
         saved: null,
         errors: {},
-        tabs: @json($activeLanguages->mapWithKeys(function($lang) use ($blog) {
-            $existing = $blog->contentTranslations()->where('language_id', $lang->id)->first();
-            $fields = $existing?->fields ?? [];
-            return [$lang->code => [
-                'title'   => $fields['title'] ?? '',
-                'excerpt' => $fields['excerpt'] ?? '',
-                'content' => $fields['content'] ?? '',
-            ]];
-        })),
+        tabs: @json($ctBlogTabs),
 
         async aiTranslate(code, langId) {
             this.loading = code;
