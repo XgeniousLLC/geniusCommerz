@@ -92,6 +92,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::patch('/orders/{order}/address', [OrderController::class, 'updateAddress'])->name('orders.update-address');
         Route::get('/orders/{order}/print', [OrderController::class, 'printSlip'])->name('orders.print');
+        Route::post('/orders/{order}/dispatch-courier', [OrderController::class, 'dispatchToCourier'])->name('orders.dispatch-courier');
+        Route::post('/orders/{order}/refresh-courier-status', [OrderController::class, 'refreshCourierStatus'])->name('orders.refresh-courier-status');
 
         // Coupons
         Route::resource('coupons', CouponController::class)->except(['show']);
@@ -125,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations.index');
         Route::get('/integrations/{integration}/edit', [IntegrationController::class, 'edit'])->name('integrations.edit');
         Route::put('/integrations/{integration}', [IntegrationController::class, 'update'])->name('integrations.update');
+        Route::post('/integrations/{integration}/set-default', [IntegrationController::class, 'setDefault'])->name('integrations.set-default');
 
         // Audit log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');

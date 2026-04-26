@@ -25,6 +25,7 @@ class Order extends Model
         'coupon_id','coupon_code','discount_amount',
         'subtotal','shipping_cost','tax','total',
         'status','payment_status','payment_method','tracking_number',
+        'courier_provider','consignment_id','courier_status','courier_data',
         'notes','admin_note','paid_at',
     ];
 
@@ -37,6 +38,7 @@ class Order extends Model
         'total'            => 'decimal:2',
         'discount_amount'  => 'decimal:2',
         'paid_at'          => 'datetime',
+        'courier_data'     => 'array',
     ];
 
     public const STATUSES         = ['pending','processing','shipped','delivered','cancelled','refunded'];

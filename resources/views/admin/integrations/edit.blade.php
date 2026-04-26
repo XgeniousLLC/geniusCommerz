@@ -59,11 +59,20 @@ $fields = match($integration->provider) {
         'api_key'         => ['label' => 'API Key',           'type' => 'text'],
         'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
     ],
-    'sms' => [
-        'provider'        => ['label' => 'Provider Name',     'type' => 'text', 'hint' => 'e.g. Infobip, Twilio'],
+    'bulksmsbd' => [
+        'api_key'         => ['label' => 'API Key',           'type' => 'password'],
+        'sender_id'       => ['label' => 'Sender ID',         'type' => 'text', 'hint' => 'Approved sender name or number'],
+        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://bulksmsbd.net/api/smsapi'],
+    ],
+    'smsbd' => [
         'api_key'         => ['label' => 'API Key',           'type' => 'password'],
         'sender_id'       => ['label' => 'Sender ID',         'type' => 'text'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
+        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://sms.smsbd.in/api/v2/send'],
+    ],
+    'twilio' => [
+        'account_sid'     => ['label' => 'Account SID',       'type' => 'text'],
+        'auth_token'      => ['label' => 'Auth Token',         'type' => 'password'],
+        'from_number'     => ['label' => 'From Number',        'type' => 'text', 'hint' => 'e.g. +15551234567'],
     ],
     default => [],
 };

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Notifications\OrderStatusChanged;
+use App\Services\CourierService;
 use App\Services\LoyaltyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -318,6 +319,57 @@ class OrderController extends Controller
         );
 
         return back()->with('success', $label . ' address updated.');
+    }
+
+    public function dispatchToCourier(Request $request, Order $order, CourierService $courier): RedirectResponse
+    {
+        $extra = $request->validate([
+            'city_id'      => 'nullable|integer',
+            'zone_id'      => 'nullable|integer',
+            'area_id'      => 'nullable|integer',
+            'area'         => 'nullable|string|max:200',
+            'item_weight'  => 'nullable|numeric|min:0.1',
+            'cod_amount'   => 'nullable|numeric|min:0',
+            'notes'        => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $result = $courier->driver()->createOrder($order, array_filter($extra));
+
+            $order->update([
+                'courier_provider' => $courier->driver()->name(),
+                'consignment_id'   => $result['consignment_id'],
+                'courier_status'   => 'dispatched',
+                'courier_data'     => $result['raw'],
+                'tracking_number'  => $result['tracking_code'] ?? $result['consignment_id'],
+            ]);
+
+            $order->logActivity('courier_dispatched', 'Order dispatched via ' . $courier->driver()->name(), null, $result, Auth::guard('admin')->id());
+
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Courier dispatch failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Order dispatched to courier. Consignment: ' . $result['consignment_id']);
+    }
+
+    public function refreshCourierStatus(Order $order, CourierService $courier): RedirectResponse
+    {
+        if (! $order->consignment_id) {
+            return back()->with('error', 'No consignment ID found for this order.');
+        }
+
+        try {
+            $result = $courier->driver()->getStatus($order->consignment_id);
+            $order->update([
+                'courier_status' => $result['status'],
+                'courier_data'   => array_merge($order->courier_data ?? [], ['last_status_check' => $result]),
+            ]);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Status refresh failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Courier status updated: ' . $result['status']);
     }
 
     public function destroy(Order $order): RedirectResponse

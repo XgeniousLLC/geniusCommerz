@@ -418,6 +418,70 @@
             </form>
         </x-admin.card>
 
+        {{-- Courier Dispatch --}}
+        @php $hasCourier = \App\Services\CourierService::class && app(\App\Services\CourierService::class)->hasDefault(); @endphp
+        <x-admin.card>
+            <h2 class="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l1.993 1.994M2 3h11l4 7v4h-2m-4 0H9"/>
+                </svg>
+                Courier Dispatch
+            </h2>
+
+            @if($order->consignment_id)
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-3 text-sm">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <p class="font-medium text-green-800">Dispatched via {{ $order->courier_provider }}</p>
+                            <p class="text-green-700 font-mono text-xs mt-0.5">{{ $order->consignment_id }}</p>
+                            @if($order->courier_status)
+                            <p class="text-green-600 text-xs mt-1">Status: <span class="font-medium">{{ $order->courier_status }}</span></p>
+                            @endif
+                        </div>
+                        <form method="POST" action="{{ route('admin.orders.refresh-courier-status', $order) }}">
+                            @csrf
+                            <button type="submit" class="text-xs text-green-700 border border-green-300 rounded px-2 py-1 hover:bg-green-100">
+                                Refresh Status
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
+            @if(! $hasCourier)
+                <p class="text-sm text-gray-400 italic">
+                    No default courier configured.
+                    <a href="{{ route('admin.integrations.index') }}" class="text-blue-600 hover:underline">Set one up →</a>
+                </p>
+            @elseif(! $order->consignment_id)
+                <form method="POST" action="{{ route('admin.orders.dispatch-courier', $order) }}" class="space-y-3">
+                    @csrf
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Weight (kg)</label>
+                            <input type="number" name="item_weight" step="0.1" min="0.1" value="0.5"
+                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">COD Amount (৳)</label>
+                            <input type="number" name="cod_amount" step="0.01" value="{{ $order->total }}"
+                                class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Delivery Area (if required)</label>
+                        <input type="text" name="area" value="{{ ($order->shipping_address['city'] ?? '') }}"
+                            class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            placeholder="e.g. Dhaka, Mirpur">
+                    </div>
+                    <x-admin.button type="submit" class="w-full justify-center">
+                        Push to Courier
+                    </x-admin.button>
+                </form>
+            @endif
+        </x-admin.card>
+
         {{-- Payment info --}}
         <x-admin.card>
             <h2 class="text-base font-semibold text-gray-900 mb-3">Payment</h2>

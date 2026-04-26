@@ -35,12 +35,32 @@ class IntegrationController extends Controller
 
         $integration->update([
             'credentials' => $merged,
-            'is_active' => $request->boolean('is_active'),
+            'is_active'   => $request->boolean('is_active'),
             'environment' => $request->input('environment', 'sandbox'),
-            'notes' => $request->input('notes'),
+            'notes'       => $request->input('notes'),
         ]);
 
         return redirect()->route('admin.integrations.index')
             ->with('success', "{$integration->label} credentials saved.");
+    }
+
+    public function setDefault(Integration $integration): RedirectResponse
+    {
+        $group = in_array($integration->provider, Integration::COURIER_PROVIDERS)
+            ? 'courier'
+            : (in_array($integration->provider, Integration::SMS_PROVIDERS) ? 'sms' : null);
+
+        if (! $group) {
+            return back()->with('error', 'This integration does not support default selection.');
+        }
+
+        if (! $integration->is_active) {
+            return back()->with('error', "Please activate {$integration->label} before setting it as default.");
+        }
+
+        $integration->setAsDefault();
+
+        return redirect()->route('admin.integrations.index')
+            ->with('success', "{$integration->label} is now the default {$group}.");
     }
 }

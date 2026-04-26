@@ -18,8 +18,10 @@ class IntegrationSeeder extends Seeder
         ['provider' => 'redx',         'label' => 'RedX Courier'],
         // Fraud screening
         ['provider' => 'fraudbd',      'label' => 'FraudBD'],
-        // Messaging
-        ['provider' => 'sms',          'label' => 'SMS Provider'],
+        // SMS Gateways
+        ['provider' => 'bulksmsbd',    'label' => 'BulkSMSBD'],
+        ['provider' => 'smsbd',        'label' => 'SMS.BD'],
+        ['provider' => 'twilio',       'label' => 'Twilio'],
     ];
 
     public function run(): void
