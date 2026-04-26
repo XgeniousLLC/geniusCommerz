@@ -10,6 +10,10 @@ class FeedController extends Controller
 {
     public function googleMerchant(): Response
     {
+        if (! SiteSetting::get('tracking.google_merchant_enabled')) {
+            abort(404);
+        }
+
         $siteName = SiteSetting::get('general.site_name', config('app.name'));
         $baseUrl  = rtrim(config('app.url'), '/');
 
@@ -73,6 +77,10 @@ class FeedController extends Controller
 
     public function facebookCatalog(): Response
     {
+        if (! SiteSetting::get('tracking.facebook_catalog_enabled')) {
+            abort(404);
+        }
+
         $baseUrl = rtrim(config('app.url'), '/');
 
         $products = Product::where('status', 'active')

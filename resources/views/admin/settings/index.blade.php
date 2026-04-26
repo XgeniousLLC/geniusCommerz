@@ -798,6 +798,40 @@ function cartGoals() {
         </x-admin.card>
 
         <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Product Feeds</h3>
+            <p class="text-sm text-gray-500 mb-4">Enable product catalog feeds for Google Merchant Center and Facebook Shop.</p>
+            <div class="space-y-4">
+
+                <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <div class="flex items-center gap-3 mt-0.5">
+                        <input type="hidden" name="settings[tracking.google_merchant_enabled]" value="0">
+                        <input type="checkbox" name="settings[tracking.google_merchant_enabled]" value="1"
+                            {{ old('tracking.google_merchant_enabled', $settings->get('tracking.google_merchant_enabled')?->value) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    </div>
+                    <div class="flex-1">
+                        <span class="block text-sm font-medium text-gray-800">Google Merchant Center Feed</span>
+                        <span class="block text-xs text-gray-400 mt-0.5">Enables <code class="bg-gray-100 px-1 rounded">/feeds/google-merchant.xml</code> — submit this URL to Google Merchant Center.</span>
+                    </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <div class="flex items-center gap-3 mt-0.5">
+                        <input type="hidden" name="settings[tracking.facebook_catalog_enabled]" value="0">
+                        <input type="checkbox" name="settings[tracking.facebook_catalog_enabled]" value="1"
+                            {{ old('tracking.facebook_catalog_enabled', $settings->get('tracking.facebook_catalog_enabled')?->value) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    </div>
+                    <div class="flex-1">
+                        <span class="block text-sm font-medium text-gray-800">Facebook / Instagram Shop Catalog Feed</span>
+                        <span class="block text-xs text-gray-400 mt-0.5">Enables <code class="bg-gray-100 px-1 rounded">/feeds/facebook-catalog.json</code> — submit this URL to Facebook Commerce Manager.</span>
+                    </div>
+                </label>
+
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
             <h3 class="text-base font-semibold text-gray-900 mb-1">Meta (Facebook) Pixel</h3>
             <p class="text-sm text-gray-500 mb-4">Client-side pixel fires PageView on every page. Purchase event is also sent server-side via CAPI.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
