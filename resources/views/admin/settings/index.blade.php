@@ -781,93 +781,235 @@ function cartGoals() {
 
 {{-- Tracking tab --}}
 @if($tab === 'tracking')
+
+@php
+$stepStyle = 'display:inline-flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:#2563eb;color:#fff;font-size:.7rem;font-weight:700;flex-shrink:0;margin-top:.1rem';
+$infoBoxStyle = 'margin-top:.75rem;padding:.75rem 1rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:.625rem;font-size:.8rem;color:#0369a1;line-height:1.6';
+$warnBoxStyle = 'margin-top:.75rem;padding:.75rem 1rem;background:#fffbeb;border:1px solid #fde68a;border-radius:.625rem;font-size:.8rem;color:#92400e;line-height:1.6';
+@endphp
+
 <form method="POST" action="{{ route('admin.settings.update', 'tracking') }}">
     @csrf
-    <div class="space-y-6">
+    <div class="space-y-8">
 
+        {{-- ── Google Tag Manager ── --}}
         <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-1">Google Tag Manager</h3>
-            <p class="text-sm text-gray-500 mb-4">Add your GTM container ID to load all tags (GA4, Ads, etc.) via one snippet.</p>
-            <x-admin.form-group class="max-w-sm">
-                <label class="block text-sm font-medium text-gray-700">GTM Container ID</label>
+            <div class="flex items-start gap-3 mb-4">
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900">Google Tag Manager (GTM)</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">
+                        GTM is a free Google tool that lets you add/manage all your tracking scripts (GA4, Facebook Pixel, Google Ads, etc.) from one place — without touching the website code every time.
+                    </p>
+                </div>
+            </div>
+
+            {{-- How to find GTM ID --}}
+            <div style="{{ $infoBoxStyle }}">
+                <strong class="block mb-1">📋 How to get your GTM Container ID</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Go to <strong>tagmanager.google.com</strong> and sign in with your Google account.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Create a new account (or open an existing one). Choose <strong>Web</strong> as the platform.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Your Container ID is shown at the top — it looks like <strong>GTM-XXXXXXXX</strong>. Copy and paste it below.</span></li>
+                </ol>
+                <p class="mt-1.5 text-xs text-sky-700">✅ Once saved, GTM loads on every page automatically. You can then add GA4, Ads conversion tags etc. inside GTM without needing to change the store settings again.</p>
+            </div>
+
+            <div class="mt-4 max-w-xs">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Container ID</label>
                 <x-admin.input type="text" name="settings[tracking.gtm_id]"
                     value="{{ old('tracking.gtm_id', $settings->get('tracking.gtm_id')?->value ?? '') }}"
                     placeholder="GTM-XXXXXXXX" />
-                <p class="text-xs text-gray-400 mt-1">Leave blank to disable GTM.</p>
-            </x-admin.form-group>
-        </x-admin.card>
-
-        <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-1">Product Feeds</h3>
-            <p class="text-sm text-gray-500 mb-4">Enable product catalog feeds for Google Merchant Center and Facebook Shop.</p>
-            <div class="space-y-4">
-
-                <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <div class="flex items-center gap-3 mt-0.5">
-                        <input type="hidden" name="settings[tracking.google_merchant_enabled]" value="0">
-                        <input type="checkbox" name="settings[tracking.google_merchant_enabled]" value="1"
-                            {{ old('tracking.google_merchant_enabled', $settings->get('tracking.google_merchant_enabled')?->value) ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                    </div>
-                    <div class="flex-1">
-                        <span class="block text-sm font-medium text-gray-800">Google Merchant Center Feed</span>
-                        <span class="block text-xs text-gray-400 mt-0.5">Enables <code class="bg-gray-100 px-1 rounded">/feeds/google-merchant.xml</code> — submit this URL to Google Merchant Center.</span>
-                    </div>
-                </label>
-
-                <label class="flex items-start gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <div class="flex items-center gap-3 mt-0.5">
-                        <input type="hidden" name="settings[tracking.facebook_catalog_enabled]" value="0">
-                        <input type="checkbox" name="settings[tracking.facebook_catalog_enabled]" value="1"
-                            {{ old('tracking.facebook_catalog_enabled', $settings->get('tracking.facebook_catalog_enabled')?->value) ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                    </div>
-                    <div class="flex-1">
-                        <span class="block text-sm font-medium text-gray-800">Facebook / Instagram Shop Catalog Feed</span>
-                        <span class="block text-xs text-gray-400 mt-0.5">Enables <code class="bg-gray-100 px-1 rounded">/feeds/facebook-catalog.json</code> — submit this URL to Facebook Commerce Manager.</span>
-                    </div>
-                </label>
-
+                <p class="text-xs text-gray-400 mt-1">Leave blank to disable GTM entirely.</p>
             </div>
         </x-admin.card>
 
+        {{-- ── Meta (Facebook) Pixel ── --}}
         <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-1">Meta (Facebook) Pixel</h3>
-            <p class="text-sm text-gray-500 mb-4">Client-side pixel fires PageView on every page. Purchase event is also sent server-side via CAPI.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-gray-900">Meta (Facebook) Pixel</h3>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    The Pixel tracks visitors on your store so Facebook can optimise your ads and show them to people likely to buy. It also powers Retargeting (showing ads to people who visited your store but didn't buy).
+                </p>
+            </div>
+
+            {{-- Two-part explanation --}}
+            <div class="grid md:grid-cols-2 gap-4 mb-5">
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">🌐 Pixel ID — client-side</strong>
+                    Fires a <em>PageView</em> event every time a visitor opens a page. Required for Facebook Ads to work properly. Free and no extra setup needed beyond the ID.
+                </div>
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">🔒 CAPI Token — server-side</strong>
+                    Sends a <em>Purchase</em> event directly from the server after each order — bypassing ad blockers and iOS privacy restrictions. Strongly recommended for accurate purchase tracking.
+                </div>
+            </div>
+
+            <div style="{{ $infoBoxStyle }}">
+                <strong class="block mb-1">📋 How to get your Pixel ID</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Open <strong>business.facebook.com</strong> → <strong>Events Manager</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Select your Pixel (or click <strong>Connect Data Sources → Web</strong> to create one).</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the <strong>Pixel ID</strong> — a 15–16 digit number shown at the top of the page.</span></li>
+                </ol>
+            </div>
+
+            <div style="{{ $infoBoxStyle }} margin-top:.625rem">
+                <strong class="block mb-1">📋 How to get your CAPI Access Token</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>In <strong>Events Manager</strong>, click your Pixel → <strong>Settings</strong> tab.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Scroll to <strong>Conversions API</strong> → click <strong>Generate Access Token</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the long token that starts with <strong>EAAx…</strong> and paste it below.</span></li>
+                </ol>
+                <p class="mt-1.5 text-xs" style="color:#0369a1">⚠️ Keep this token private — it has permission to send events on behalf of your Pixel.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
                 <x-admin.form-group>
                     <label class="block text-sm font-medium text-gray-700">Pixel ID</label>
                     <x-admin.input type="text" name="settings[tracking.meta_pixel_id]"
                         value="{{ old('tracking.meta_pixel_id', $settings->get('tracking.meta_pixel_id')?->value ?? '') }}"
                         placeholder="123456789012345" />
+                    <p class="text-xs text-gray-400 mt-1">15–16 digit number from Events Manager. Leave blank to disable the Pixel.</p>
                 </x-admin.form-group>
                 <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">CAPI Access Token</label>
+                    <label class="block text-sm font-medium text-gray-700">CAPI Access Token <span class="text-gray-400 font-normal">(optional but recommended)</span></label>
                     <x-admin.input type="password" name="settings[tracking.meta_capi_token]"
                         value="{{ old('tracking.meta_capi_token', $settings->get('tracking.meta_capi_token')?->value ?? '') }}"
                         placeholder="EAAx..." />
-                    <p class="text-xs text-gray-400 mt-1">Required for server-side purchase events via Conversions API.</p>
+                    <p class="text-xs text-gray-400 mt-1">Enables server-side Purchase events. Improves accuracy on iOS devices and with ad blockers.</p>
                 </x-admin.form-group>
             </div>
         </x-admin.card>
 
+        {{-- ── Google Analytics 4 ── --}}
         <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-1">Google Analytics 4</h3>
-            <p class="text-sm text-gray-500 mb-4">Server-side purchase events sent via Measurement Protocol after every successful order.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-gray-900">Google Analytics 4 (GA4)</h3>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    GA4 tracks your store's traffic, user behaviour, and revenue. The <strong>Measurement ID</strong> is enough for basic page tracking (add it via GTM). The <strong>API Secret</strong> enables a server-side purchase event that sends reliable order data even when JavaScript is blocked.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-5">
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">📊 Measurement ID — for GTM / basic tracking</strong>
+                    Looks like <strong>G-XXXXXXXXXX</strong>. Add it inside Google Tag Manager to track page views, sessions, and events automatically.
+                </div>
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">🔒 API Secret — server-side purchase events</strong>
+                    Sends a <em>purchase</em> event directly from the server after every order. Orders appear in GA4 → Reports → Monetisation → Ecommerce purchases.
+                </div>
+            </div>
+
+            <div style="{{ $infoBoxStyle }}">
+                <strong class="block mb-1">📋 How to get your Measurement ID</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Open <strong>analytics.google.com</strong> → go to your GA4 property.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Click <strong>Admin</strong> (bottom-left cog icon) → <strong>Data Streams</strong> → click your web stream.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the <strong>Measurement ID</strong> at the top right — it starts with <strong>G-</strong>.</span></li>
+                </ol>
+            </div>
+
+            <div style="{{ $infoBoxStyle }} margin-top:.625rem">
+                <strong class="block mb-1">📋 How to get the API Secret (for server-side events)</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Inside the same <strong>Data Stream</strong> page, scroll down to <strong>Measurement Protocol API secrets</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Click <strong>Create</strong>, give it a name (e.g. "Store server"), then click <strong>Create</strong> again.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the <strong>Secret value</strong> shown and paste it below.</span></li>
+                </ol>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
                 <x-admin.form-group>
                     <label class="block text-sm font-medium text-gray-700">Measurement ID</label>
                     <x-admin.input type="text" name="settings[tracking.ga4_measurement_id]"
                         value="{{ old('tracking.ga4_measurement_id', $settings->get('tracking.ga4_measurement_id')?->value ?? '') }}"
                         placeholder="G-XXXXXXXXXX" />
+                    <p class="text-xs text-gray-400 mt-1">Starts with <strong>G-</strong>. Also used if you add GA4 via GTM.</p>
                 </x-admin.form-group>
                 <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">API Secret</label>
+                    <label class="block text-sm font-medium text-gray-700">API Secret <span class="text-gray-400 font-normal">(optional but recommended)</span></label>
                     <x-admin.input type="password" name="settings[tracking.ga4_api_secret]"
                         value="{{ old('tracking.ga4_api_secret', $settings->get('tracking.ga4_api_secret')?->value ?? '') }}"
                         placeholder="your_api_secret" />
-                    <p class="text-xs text-gray-400 mt-1">Found in GA4 → Admin → Data Streams → Measurement Protocol API secrets.</p>
+                    <p class="text-xs text-gray-400 mt-1">Enables server-side purchase events. Keeps revenue data accurate when users have ad blockers.</p>
                 </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        {{-- ── Product Feeds ── --}}
+        <x-admin.card>
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-gray-900">Product Feeds</h3>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Product feeds are files the store generates automatically containing your full product catalogue. Google and Facebook read these files to show your products in Shopping ads and the Facebook/Instagram Shop.
+                </p>
+            </div>
+
+            <div class="space-y-5">
+
+                {{-- Google Merchant --}}
+                <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
+                    <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="mt-0.5">
+                            <input type="hidden" name="settings[tracking.google_merchant_enabled]" value="0">
+                            <input type="checkbox" name="settings[tracking.google_merchant_enabled]" value="1"
+                                id="gmc-toggle"
+                                {{ old('tracking.google_merchant_enabled', $settings->get('tracking.google_merchant_enabled')?->value) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                        </div>
+                        <div class="flex-1">
+                            <span class="block text-sm font-semibold text-gray-900">Google Merchant Center Feed</span>
+                            <span class="block text-xs text-gray-500 mt-0.5">
+                                Enables a product feed at
+                                <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{{ url('feeds/google-merchant.xml') }}</code>
+                                — submit this URL to Google Merchant Center so your products appear in Google Shopping.
+                            </span>
+                        </div>
+                    </label>
+                    <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
+                        <strong class="block mb-1">📋 How to submit to Google Merchant Center</strong>
+                        <ol class="space-y-1 pl-1">
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and click <strong>Save</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Go to <strong>merchants.google.com</strong> and sign in.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Navigate to <strong>Products → Feeds → Add a primary feed</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>Choose <strong>Scheduled fetch</strong>, paste the URL above, and set fetch frequency to <strong>Daily</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Google will review products within 1–3 business days and then show them in Shopping.</span></li>
+                        </ol>
+                    </div>
+                </div>
+
+                {{-- Facebook Catalog --}}
+                <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
+                    <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                        <div class="mt-0.5">
+                            <input type="hidden" name="settings[tracking.facebook_catalog_enabled]" value="0">
+                            <input type="checkbox" name="settings[tracking.facebook_catalog_enabled]" value="1"
+                                id="fb-catalog-toggle"
+                                {{ old('tracking.facebook_catalog_enabled', $settings->get('tracking.facebook_catalog_enabled')?->value) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                        </div>
+                        <div class="flex-1">
+                            <span class="block text-sm font-semibold text-gray-900">Facebook &amp; Instagram Shop Catalog Feed</span>
+                            <span class="block text-xs text-gray-500 mt-0.5">
+                                Enables a product feed at
+                                <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{{ url('feeds/facebook-catalog.json') }}</code>
+                                — submit this URL to Facebook Commerce Manager to power Dynamic Ads and the Instagram Shop.
+                            </span>
+                        </div>
+                    </label>
+                    <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
+                        <strong class="block mb-1">📋 How to submit to Facebook Commerce Manager</strong>
+                        <ol class="space-y-1 pl-1">
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and click <strong>Save</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Go to <strong>business.facebook.com → Commerce Manager</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Open your catalog → <strong>Data sources → Add items → Use a data feed</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>Choose <strong>Scheduled recurring upload</strong>, paste the URL above, set schedule to <strong>Daily</strong>.</span></li>
+                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Facebook will sync products automatically. You can then run <strong>Dynamic Product Ads</strong> or set up the <strong>Instagram Shop</strong>.</span></li>
+                        </ol>
+                    </div>
+                </div>
+
             </div>
         </x-admin.card>
 
