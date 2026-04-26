@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\LoyaltyController;
+use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
@@ -152,6 +153,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/geographic',       [ReportController::class, 'geographic'])->name('geographic');
             Route::get('/export',           [ReportController::class, 'export'])->name('export');
         });
+
+        // Sitemap
+        Route::get('/sitemap', [SitemapController::class, 'index'])->name('sitemap.index');
+        Route::post('/sitemap/generate', [SitemapController::class, 'generate'])->name('sitemap.generate');
 
         // Media Library
         Route::get('/media', [MediaController::class, 'index'])->name('media.index');

@@ -12,6 +12,7 @@ use App\Notifications\OrderConfirmed;
 use App\Services\LoyaltyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,21 +30,35 @@ class CheckoutController extends Controller
             'rocket' => 'Rocket',
         ];
 
-        return Inertia::render('Checkout', compact('shippingCost', 'freeAbove', 'paymentMethods'));
+        $loyaltyEnabled = (bool) SiteSetting::get('loyalty.enabled', false);
+        $loyaltyBalance = 0;
+        $loyaltyTaka    = 0;
+
+        if ($loyaltyEnabled && auth()->check()) {
+            $service        = app(LoyaltyService::class);
+            $loyaltyBalance = $service->getBalance(auth()->user());
+            $loyaltyTaka    = $service->pointsToTaka($loyaltyBalance);
+        }
+
+        return Inertia::render('Checkout', compact(
+            'shippingCost', 'freeAbove', 'paymentMethods',
+            'loyaltyEnabled', 'loyaltyBalance', 'loyaltyTaka'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'customer_name'    => 'required|string|max:255',
-            'customer_phone'   => 'required|string|max:50',
-            'customer_email'   => 'nullable|email|max:255',
-            'address'          => 'required|string|max:500',
-            'city'             => 'required|string|max:100',
-            'notes'            => 'nullable|string|max:1000',
-            'payment_method'   => 'required|string|max:50',
-            'coupon_code'      => 'nullable|string|max:100',
-            'items'            => 'required|array|min:1',
+            'customer_name'         => 'required|string|max:255',
+            'customer_phone'        => 'required|string|max:50',
+            'customer_email'        => 'nullable|email|max:255',
+            'address'               => 'required|string|max:500',
+            'city'                  => 'required|string|max:100',
+            'notes'                 => 'nullable|string|max:1000',
+            'payment_method'        => 'required|string|max:50',
+            'coupon_code'           => 'nullable|string|max:100',
+            'loyalty_points_redeem' => 'nullable|integer|min:0',
+            'items'                 => 'required|array|min:1',
             'items.*.product_id'    => 'required|integer|exists:products,id',
             'items.*.variant_id'    => 'nullable|integer|exists:product_variants,id',
             'items.*.name'          => 'required|string|max:255',
@@ -76,6 +91,20 @@ class CheckoutController extends Controller
             }
         }
 
+        // Resolve loyalty points redemption
+        $loyaltyService      = app(LoyaltyService::class);
+        $loyaltyDiscount     = 0;
+        $loyaltyPointsUsed   = 0;
+        $pointsToRedeem      = (int) ($data['loyalty_points_redeem'] ?? 0);
+
+        if ($pointsToRedeem > 0 && auth()->check()) {
+            $user = auth()->user();
+            if ($loyaltyService->canRedeem($user, $pointsToRedeem)) {
+                $loyaltyDiscount   = $loyaltyService->pointsToTaka($pointsToRedeem);
+                $loyaltyPointsUsed = $pointsToRedeem;
+            }
+        }
+
         // Shipping — free if every product has shipping included
         $productIds    = array_column($data['items'], 'product_id');
         $allIncluded   = Product::whereIn('id', $productIds)->where('shipping_included', false)->doesntExist();
@@ -85,7 +114,7 @@ class CheckoutController extends Controller
             $shippingCost = 0;
         }
 
-        $total = max(0, $subtotal + $shippingCost - $discountAmount);
+        $total = max(0, $subtotal + $shippingCost - $discountAmount - $loyaltyDiscount);
 
         // Resolve/create user
         $userId = auth()->id();
@@ -115,7 +144,7 @@ class CheckoutController extends Controller
             ],
             'coupon_id'       => $coupon?->id,
             'coupon_code'     => $coupon?->code,
-            'discount_amount' => $discountAmount,
+            'discount_amount' => $discountAmount + $loyaltyDiscount,
             'subtotal'        => $subtotal,
             'shipping_cost'   => $shippingCost,
             'total'           => $total,
@@ -145,7 +174,16 @@ class CheckoutController extends Controller
         $order->logActivity('created', 'Order placed', 'Order placed via website.');
 
         if ($order->user_id) {
-            app(LoyaltyService::class)->earnPoints($order);
+            $loyaltyService->earnPoints($order);
+
+            // Deduct redeemed points
+            if ($loyaltyPointsUsed > 0) {
+                $loyaltyService->redeemPoints(
+                    User::find($order->user_id),
+                    $loyaltyPointsUsed,
+                    $order
+                );
+            }
         }
 
         // Send confirmation notification
@@ -157,8 +195,93 @@ class CheckoutController extends Controller
             try { $notifiable->notify(new OrderConfirmed($order)); } catch (\Throwable) {}
         }
 
+        // Server-side tracking
+        $order->load('items');
+        $this->trackPurchase($order, $request);
+
         return redirect()->route('order.confirm', $order->order_number)
             ->with('order_placed', true);
+    }
+
+    private function trackPurchase(Order $order, Request $request): void
+    {
+        $pixelId   = SiteSetting::get('tracking.meta_pixel_id');
+        $capiToken = SiteSetting::get('tracking.meta_capi_token');
+        $ga4MId    = SiteSetting::get('tracking.ga4_measurement_id');
+        $ga4Secret = SiteSetting::get('tracking.ga4_api_secret');
+
+        $orderItems = $order->items->map(fn($i) => [
+            'id'         => (string) $i->product_id,
+            'item_name'  => $i->product_name,
+            'quantity'   => $i->quantity,
+            'price'      => (float) $i->unit_price,
+        ])->all();
+
+        // Meta CAPI — Purchase event
+        if ($pixelId && $capiToken) {
+            try {
+                $userData = [];
+                if ($order->customer_email) {
+                    $userData['em'] = [hash('sha256', strtolower(trim($order->customer_email)))];
+                }
+                if ($order->customer_phone) {
+                    $userData['ph'] = [hash('sha256', preg_replace('/\D/', '', $order->customer_phone))];
+                }
+
+                Http::timeout(5)->post(
+                    "https://graph.facebook.com/v18.0/{$pixelId}/events?access_token={$capiToken}",
+                    [
+                        'data' => [[
+                            'event_name'       => 'Purchase',
+                            'event_time'       => time(),
+                            'event_source_url' => $request->header('referer', config('app.url')),
+                            'action_source'    => 'website',
+                            'user_data'        => $userData,
+                            'custom_data'      => [
+                                'currency'    => 'BDT',
+                                'value'       => (float) $order->total,
+                                'order_id'    => $order->order_number,
+                                'contents'    => array_map(fn($i) => [
+                                    'id'         => $i['id'],
+                                    'quantity'   => $i['quantity'],
+                                    'item_price' => $i['price'],
+                                ], $orderItems),
+                                'content_type' => 'product',
+                            ],
+                        ]],
+                    ]
+                );
+            } catch (\Throwable) {}
+        }
+
+        // GA4 Measurement Protocol — purchase event
+        if ($ga4MId && $ga4Secret) {
+            try {
+                Http::timeout(5)->post(
+                    "https://www.google-analytics.com/mp/collect?measurement_id={$ga4MId}&api_secret={$ga4Secret}",
+                    [
+                        'client_id' => $request->cookie('_ga') ?? Str::uuid()->toString(),
+                        'events'    => [[
+                            'name'   => 'purchase',
+                            'params' => [
+                                'currency'       => 'BDT',
+                                'value'          => (float) $order->total,
+                                'transaction_id' => $order->order_number,
+                                'shipping'       => (float) $order->shipping_cost,
+                                'coupon'         => $order->coupon_code ?? '',
+                                'items'          => array_map(fn($i) => [
+                                    'item_id'   => $i['id'],
+                                    'item_name' => $i['item_name'],
+                                    'quantity'  => $i['quantity'],
+                                    'price'     => $i['price'],
+                                    'currency'  => 'BDT',
+                                ], $orderItems),
+                            ],
+                        ]],
+                    ]
+                );
+            } catch (\Throwable) {}
+        }
     }
 
     private function resolvePrice(array $row): float

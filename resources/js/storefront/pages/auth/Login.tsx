@@ -39,10 +39,15 @@ export default function Login() {
                   placeholder="••••••••" required
                   className="kb-input text-sm" />
               </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="remember" checked={data.remember}
-                  onChange={(e) => setData('remember', e.target.checked)} className="rounded" />
-                <label htmlFor="remember" className="text-sm" style={{ color: 'var(--kb-ink-muted)' }}>Remember me</label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="remember" checked={data.remember}
+                    onChange={(e) => setData('remember', e.target.checked)} className="rounded" />
+                  <label htmlFor="remember" className="text-sm" style={{ color: 'var(--kb-ink-muted)' }}>Remember me</label>
+                </div>
+                <Link href="/forgot-password" className="text-sm hover:underline" style={{ color: 'var(--kb-primary)' }}>
+                  Forgot password?
+                </Link>
               </div>
               <button type="submit" disabled={processing}
                 className="kb-btn kb-btn-primary w-full py-2.5 text-sm font-semibold">

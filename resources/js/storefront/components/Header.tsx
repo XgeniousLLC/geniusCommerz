@@ -6,9 +6,10 @@ import type { NavItem, SharedProps } from '../types';
 
 export default function Header() {
   const { site, auth } = usePage<SharedProps>().props;
-  const [userOpen,   setUserOpen]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSearch, setMobileSearch] = useState('');
+  const [userOpen,      setUserOpen]      = useState(false);
+  const [mobileOpen,    setMobileOpen]    = useState(false);
+  const [mobileSearch,  setMobileSearch]  = useState('');
+  const [desktopSearch, setDesktopSearch] = useState('');
   const url = usePage().url;
   const openCart     = useCartStore(s => s.openCart);
   const { count }    = useCartDerived();
@@ -22,6 +23,11 @@ export default function Header() {
     e.preventDefault();
     if (mobileSearch.trim()) router.visit(`/shop?q=${encodeURIComponent(mobileSearch.trim())}`);
   }, [mobileSearch]);
+
+  const handleDesktopSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (desktopSearch.trim()) router.visit(`/shop?q=${encodeURIComponent(desktopSearch.trim())}`);
+  }, [desktopSearch]);
 
   const navItems: NavItem[] = (site.mainNav && site.mainNav.length > 0)
     ? site.mainNav
@@ -43,6 +49,19 @@ export default function Header() {
               : <span className="text-xl font-extrabold tracking-tight" style={{ color: 'var(--kb-primary)' }}>{site.name}</span>
             }
           </Link>
+
+          {/* Desktop search */}
+          <form onSubmit={handleDesktopSearch} className="hidden lg:flex items-center flex-1 max-w-md mx-6">
+            <div className="relative w-full">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <input type="text" placeholder="Search products…"
+                value={desktopSearch}
+                onChange={e => setDesktopSearch(e.target.value)}
+                className="kb-input pl-9 pr-4 w-full text-sm h-9" style={{ borderRadius: 9999 }} />
+            </div>
+          </form>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-6 text-sm">

@@ -28,6 +28,7 @@
             'shipping'   => 'Shipping',
             'cart'       => 'Cart',
             'legal'      => 'Legal',
+            'tracking'   => 'Tracking',
         ] as $slug => $label)
             <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
                style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
@@ -775,6 +776,71 @@ function cartGoals() {
             <x-admin.button type="submit">Save Legal Settings</x-admin.button>
         </div>
     </x-admin.card>
+</form>
+@endif
+
+{{-- Tracking tab --}}
+@if($tab === 'tracking')
+<form method="POST" action="{{ route('admin.settings.update', 'tracking') }}">
+    @csrf
+    <div class="space-y-6">
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Google Tag Manager</h3>
+            <p class="text-sm text-gray-500 mb-4">Add your GTM container ID to load all tags (GA4, Ads, etc.) via one snippet.</p>
+            <x-admin.form-group class="max-w-sm">
+                <label class="block text-sm font-medium text-gray-700">GTM Container ID</label>
+                <x-admin.input type="text" name="settings[tracking.gtm_id]"
+                    value="{{ old('tracking.gtm_id', $settings->get('tracking.gtm_id')?->value ?? '') }}"
+                    placeholder="GTM-XXXXXXXX" />
+                <p class="text-xs text-gray-400 mt-1">Leave blank to disable GTM.</p>
+            </x-admin.form-group>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Meta (Facebook) Pixel</h3>
+            <p class="text-sm text-gray-500 mb-4">Client-side pixel fires PageView on every page. Purchase event is also sent server-side via CAPI.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Pixel ID</label>
+                    <x-admin.input type="text" name="settings[tracking.meta_pixel_id]"
+                        value="{{ old('tracking.meta_pixel_id', $settings->get('tracking.meta_pixel_id')?->value ?? '') }}"
+                        placeholder="123456789012345" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">CAPI Access Token</label>
+                    <x-admin.input type="password" name="settings[tracking.meta_capi_token]"
+                        value="{{ old('tracking.meta_capi_token', $settings->get('tracking.meta_capi_token')?->value ?? '') }}"
+                        placeholder="EAAx..." />
+                    <p class="text-xs text-gray-400 mt-1">Required for server-side purchase events via Conversions API.</p>
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Google Analytics 4</h3>
+            <p class="text-sm text-gray-500 mb-4">Server-side purchase events sent via Measurement Protocol after every successful order.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Measurement ID</label>
+                    <x-admin.input type="text" name="settings[tracking.ga4_measurement_id]"
+                        value="{{ old('tracking.ga4_measurement_id', $settings->get('tracking.ga4_measurement_id')?->value ?? '') }}"
+                        placeholder="G-XXXXXXXXXX" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">API Secret</label>
+                    <x-admin.input type="password" name="settings[tracking.ga4_api_secret]"
+                        value="{{ old('tracking.ga4_api_secret', $settings->get('tracking.ga4_api_secret')?->value ?? '') }}"
+                        placeholder="your_api_secret" />
+                    <p class="text-xs text-gray-400 mt-1">Found in GA4 → Admin → Data Streams → Measurement Protocol API secrets.</p>
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        <div class="flex justify-end">
+            <x-admin.button type="submit">Save Tracking Settings</x-admin.button>
+        </div>
+    </div>
 </form>
 @endif
 

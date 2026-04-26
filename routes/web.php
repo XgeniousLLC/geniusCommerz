@@ -4,6 +4,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CouponValidationController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
@@ -75,3 +76,20 @@ Route::post('/login', [UserAuthController::class, 'login'])->name('login.post');
 Route::get('/register', [UserAuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [UserAuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
+
+// Password reset
+Route::get('/forgot-password', [UserAuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [UserAuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [UserAuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [UserAuthController::class, 'resetPassword'])->name('password.update');
+
+// Product feeds
+Route::get('/feeds/google-merchant.xml', [FeedController::class, 'googleMerchant'])->name('feeds.google-merchant');
+Route::get('/feeds/facebook-catalog.json', [FeedController::class, 'facebookCatalog'])->name('feeds.facebook-catalog');
+
+// Robots.txt
+Route::get('/robots.txt', function () {
+    $sitemapUrl = url('sitemap.xml');
+    $content    = "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /checkout\n\nSitemap: {$sitemapUrl}\n";
+    return response($content, 200, ['Content-Type' => 'text/plain']);
+});

@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal'];
+    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking'];
 
     public function index(Request $request): View
     {
@@ -73,6 +73,7 @@ class SettingsController extends Controller
         cache()->forget('site_settings_storefront');
         cache()->forget('site_settings_payment');
         cache()->forget('site_settings_shipping');
+        cache()->forget('site_settings_tracking');
 
         return redirect()->route('admin.settings.index', ['tab' => $group])
             ->with('success', 'Settings saved.');
