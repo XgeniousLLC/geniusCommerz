@@ -231,7 +231,7 @@
         </div>
 
         {{-- System --}}
-        @php $systemOpen = request()->routeIs('admin.settings.*','admin.integrations.*','admin.audit.*','admin.failed-jobs.*') || request()->is('horizon*'); @endphp
+        @php $systemOpen = request()->routeIs('admin.settings.*','admin.integrations.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*') || request()->is('horizon*'); @endphp
         <div x-data="{ open: {{ $systemOpen ? 'true' : 'false' }} }">
             <button type="button" @click="open = !open"
                 class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
@@ -244,9 +244,21 @@
             <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
                 <x-admin.sidebar-link
                     :href="route('admin.settings.index')"
-                    :active="request()->routeIs('admin.settings.*')"
+                    :active="request()->routeIs('admin.settings.*') && !request()->is('admin/settings*tab=tracking*')"
                     icon="cog">
                     Settings
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
+                    :href="route('admin.settings.index', ['tab' => 'tracking'])"
+                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'tracking'"
+                    icon="signal">
+                    Tracking & Feeds
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
+                    :href="route('admin.sitemap.index')"
+                    :active="request()->routeIs('admin.sitemap.*')"
+                    icon="globe-alt">
+                    Sitemap
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
                     :href="route('admin.integrations.index')"
