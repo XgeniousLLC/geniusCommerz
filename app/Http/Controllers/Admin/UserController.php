@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangePasswordRequest;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -51,7 +53,59 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return view('admin.users.show', compact('user'));
+        $user->load(['addresses', 'reviews.product']);
+
+        // Orders with items
+        $orders = $user->orders()->with('items')->latest()->get();
+
+        // Summary stats
+        $totalOrders   = $orders->count();
+        $totalSpent    = $orders->whereIn('status', ['processing','shipped','delivered'])->sum('total');
+        $completedOrders = $orders->where('status', 'delivered')->count();
+        $cancelledOrders = $orders->where('status', 'cancelled')->count();
+        $avgOrderValue = $totalOrders ? round($totalSpent / max($completedOrders, 1), 2) : 0;
+
+        // Refunds
+        $refunds = $user->refunds()->with('order')->latest()->get();
+
+        // Loyalty
+        $loyaltyBalance  = $user->loyaltyBalance();
+        $loyaltyHistory  = $user->loyaltyPoints()->latest()->take(10)->get();
+
+        // Most purchased products
+        $topProducts = OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.user_id', $user->id)
+            ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as total_qty'), DB::raw('SUM(order_items.total) as total_spent'))
+            ->groupBy('order_items.product_name')
+            ->orderByDesc('total_qty')
+            ->limit(10)
+            ->get();
+
+        // Order status distribution
+        $statusCounts = $orders->groupBy('status')->map->count();
+
+        // Monthly spend (last 12 months)
+        $monthlySpend = $user->orders()
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('SUM(total) as total'))
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->whereIn('status', ['processing','shipped','delivered'])
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month');
+
+        // Payment method preference
+        $paymentPreference = $orders->groupBy('payment_method')->map->count()->sortDesc();
+
+        // Reviews
+        $reviews = $user->reviews()->with('product')->latest()->get();
+
+        return view('admin.users.show', compact(
+            'user', 'orders', 'refunds', 'reviews',
+            'totalOrders', 'totalSpent', 'completedOrders', 'cancelledOrders', 'avgOrderValue',
+            'loyaltyBalance', 'loyaltyHistory',
+            'topProducts', 'statusCounts', 'monthlySpend', 'paymentPreference',
+        ));
     }
 
     public function edit(User $user)

@@ -19,12 +19,13 @@ class CurrencyController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'code'   => 'required|string|max:10|unique:currencies,code|alpha_upper',
+            'code'   => ['required', 'string', 'max:10', 'unique:currencies,code', 'regex:/^[A-Z0-9]+$/'],
             'symbol' => 'required|string|max:10',
             'name'   => 'required|string|max:60',
             'rate'   => 'required|numeric|min:0.000001',
         ]);
 
+        $data['code'] = strtoupper($data['code']);
         Currency::create($data + ['is_active' => true]);
         return redirect()->route('admin.currencies.index')->with('success', 'Currency added.');
     }
