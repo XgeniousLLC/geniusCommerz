@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Services\LoyaltyService;
 
 class User extends Authenticatable
 {
@@ -44,6 +45,16 @@ class User extends Authenticatable
     public function refunds(): HasMany
     {
         return $this->hasMany(Refund::class);
+    }
+
+    public function loyaltyPoints(): HasMany
+    {
+        return $this->hasMany(LoyaltyPoint::class);
+    }
+
+    public function loyaltyBalance(): int
+    {
+        return app(LoyaltyService::class)->getBalance($this);
     }
 
     public function defaultAddress(): ?UserAddress

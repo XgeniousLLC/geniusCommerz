@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\LoyaltyController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CouponController;
@@ -92,6 +94,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Coupons
         Route::resource('coupons', CouponController::class)->except(['show']);
 
+        // Loyalty / points
+        Route::get('/loyalty', [LoyaltyController::class, 'settings'])->name('loyalty.settings');
+        Route::post('/loyalty', [LoyaltyController::class, 'updateSettings'])->name('loyalty.update');
+        Route::get('/loyalty/transactions', [LoyaltyController::class, 'index'])->name('loyalty.index');
+        Route::post('/loyalty/adjust', [LoyaltyController::class, 'adjust'])->name('loyalty.adjust');
+
         // Refunds
         Route::get('/refunds', [RefundController::class, 'index'])->name('refunds.index');
         Route::get('/refunds/{refund}', [RefundController::class, 'show'])->name('refunds.show');
@@ -126,6 +134,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/failed-jobs/retry-all', [FailedJobController::class, 'retryAll'])->name('failed-jobs.retry-all');
         Route::delete('/failed-jobs/{uuid}', [FailedJobController::class, 'destroy'])->name('failed-jobs.destroy');
         Route::delete('/failed-jobs', [FailedJobController::class, 'destroyAll'])->name('failed-jobs.destroy-all');
+
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/sales', [ReportController::class, 'salesOverview'])->name('sales');
+            Route::get('/inventory', [ReportController::class, 'inventory'])->name('inventory');
+            Route::get('/customers', [ReportController::class, 'customers'])->name('customers');
+            Route::get('/orders', [ReportController::class, 'ordersReport'])->name('orders');
+            Route::get('/export', [ReportController::class, 'export'])->name('export');
+        });
 
         // Media Library
         Route::get('/media', [MediaController::class, 'index'])->name('media.index');

@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Notifications\OrderConfirmed;
+use App\Services\LoyaltyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -142,6 +143,10 @@ class CheckoutController extends Controller
         }
 
         $order->logActivity('created', 'Order placed', 'Order placed via website.');
+
+        if ($order->user_id) {
+            app(LoyaltyService::class)->earnPoints($order);
+        }
 
         // Send confirmation notification
         if ($order->customer_email) {

@@ -99,6 +99,22 @@
             Menus
         </x-admin.sidebar-link>
 
+        {{-- Loyalty --}}
+        <x-admin.sidebar-link
+            :href="route('admin.loyalty.settings')"
+            :active="request()->routeIs('admin.loyalty.*')"
+            icon="star">
+            Loyalty
+        </x-admin.sidebar-link>
+
+        {{-- Reports --}}
+        <x-admin.sidebar-link
+            :href="route('admin.reports.sales')"
+            :active="request()->routeIs('admin.reports.*')"
+            icon="chart-bar">
+            Reports
+        </x-admin.sidebar-link>
+
         {{-- Content --}}
         @php $contentOpen = request()->routeIs('admin.pages.*', 'admin.blogs.*', 'admin.blog-categories.*', 'admin.media.*'); @endphp
         <div x-data="{ open: {{ $contentOpen ? 'true' : 'false' }} }">

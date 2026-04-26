@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Notifications\OrderStatusChanged;
+use App\Services\LoyaltyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -263,7 +264,17 @@ class OrderController extends Controller
             $order->logActivity('note_added', 'Customer note updated', null, [], $adminId);
         }
 
+        $previousStatus = $order->status;
         $order->update($data);
+
+        if (isset($data['status']) && $data['status'] !== $previousStatus) {
+            $loyalty = app(LoyaltyService::class);
+            if ($data['status'] === 'delivered') {
+                $loyalty->earnPoints($order->fresh());
+            } elseif ($data['status'] === 'cancelled') {
+                $loyalty->reverseEarnedPoints($order->fresh());
+            }
+        }
 
         // Notify customer on key status changes
         if (isset($data['status']) && in_array($data['status'], ['shipped', 'delivered', 'cancelled']) && $order->customer_email) {

@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/coupon/validate', [CouponValidationController::class, 'validate'])->name('coupon.validate');
 
 Route::get('/wishlist', fn() => inertia('Wishlist'))->name('wishlist');
+Route::get('/loyalty', [\App\Http\Controllers\LoyaltyPageController::class, 'show'])->name('loyalty');
 
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
