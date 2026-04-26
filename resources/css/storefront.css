@@ -1,0 +1,118 @@
+@import 'tailwindcss';
+
+@source '../js/storefront/**/*.tsx';
+
+:root {
+    --kb-primary:     #1F3A8A;
+    --kb-primary-600: #2649B8;
+    --kb-primary-50:  #EEF2FF;
+    --kb-accent:      #F97316;
+    --kb-accent-600:  #EA580C;
+    --kb-accent-50:   #FFF7ED;
+    --kb-ink:         #0F172A;
+    --kb-ink-muted:   #475569;
+    --kb-ink-soft:    #94A3B8;
+    --kb-bg:          #FAFAF9;
+    --kb-card:        #FFFFFF;
+    --kb-border:      #CBD5E1;
+    --kb-success:     #16A34A;
+    --kb-success-50:  #F0FDF4;
+    --kb-success-200: #BBF7D0;
+    --kb-surface-2:   #F1F5F9;
+    --kb-danger:      #DC2626;
+    --kb-warn:        #D97706;
+}
+
+html, body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--kb-ink);
+    background: var(--kb-bg);
+}
+
+.bn { font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif; }
+
+@layer components {
+
+    /* Buttons */
+    .kb-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all .15s;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        text-decoration: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    .kb-btn:focus { outline: none; box-shadow: none; }
+    .kb-btn:focus-visible { outline: 2px solid var(--kb-primary); outline-offset: 2px; }
+    .kb-btn-primary { background-color: var(--kb-primary) !important; color: #fff !important; }
+    .kb-btn-primary:hover { background-color: var(--kb-primary-600) !important; }
+    .kb-btn-accent { background-color: var(--kb-accent) !important; color: #fff !important; }
+    .kb-btn-accent:hover { background-color: var(--kb-accent-600) !important; }
+    .kb-btn-ghost { background-color: transparent; color: var(--kb-primary); border: 1px solid var(--kb-border); }
+    .kb-btn-ghost:hover { background-color: var(--kb-primary-50); }
+    .kb-btn-md { padding: 0.625rem 1.125rem; font-size: 0.95rem; }
+    .kb-btn-lg { padding: 0.875rem 1.4rem; font-size: 1rem; }
+
+    /* Chips */
+    .kb-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 600; }
+    .kb-chip-sale  { background-color: var(--kb-accent-50);  color: var(--kb-accent-600); }
+    .kb-chip-new   { background-color: var(--kb-primary-50); color: var(--kb-primary); }
+    .kb-chip-best  { background-color: #DCFCE7; color: #166534; }
+
+    /* Cards */
+    .kb-card { background-color: var(--kb-card); border: 1px solid var(--kb-border); border-radius: 1rem; }
+    .kb-shadow-card { box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.08); }
+
+    /* Inputs */
+    .kb-input {
+        width: 100%;
+        border: 1.5px solid var(--kb-border);
+        border-radius: 0.75rem;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.95rem;
+        outline: none;
+        background-color: #fff;
+        color: var(--kb-ink);
+        transition: border-color .15s, box-shadow .15s;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    .kb-input:focus { border-color: var(--kb-primary); box-shadow: 0 0 0 3px rgba(31,58,138,0.12); }
+    .kb-input::placeholder { color: var(--kb-ink-soft); }
+
+    /* Nav */
+    .kb-nav-link { color: var(--kb-ink-muted); font-weight: 500; transition: color .15s; text-decoration: none; background: none; border: none; cursor: pointer; }
+    .kb-nav-link:hover { color: var(--kb-primary); }
+
+    /* Announce bar */
+    .kb-bar-announce { background-color: var(--kb-primary); color: #fff; font-size: 0.82rem; padding: 0.5rem 1rem; text-align: center; letter-spacing: 0.02em; }
+
+    /* Footer */
+    .kb-footer { background-color: #0F172A; color: #CBD5E1; }
+    .kb-footer h4 { color: #fff; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.85rem; }
+    .kb-footer a { color: #CBD5E1; text-decoration: none; }
+    .kb-footer a:hover { color: #fff; }
+
+    /* Prose / blog content */
+    .kb-prose h2 { font-size: 1.5rem; font-weight: 700; margin: 2rem 0 0.75rem; color: var(--kb-ink); }
+    .kb-prose h3 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--kb-ink); }
+    .kb-prose p  { margin-bottom: 1rem; line-height: 1.75; }
+    .kb-prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .kb-prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .kb-prose li { margin-bottom: 0.25rem; }
+    .kb-prose a  { color: var(--kb-primary); text-decoration: underline; }
+    .kb-prose blockquote { border-left: 3px solid var(--kb-primary); padding-left: 1rem; color: var(--kb-ink-muted); font-style: italic; margin: 1.5rem 0; }
+    .kb-prose pre { background: #f1f5f9; border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: 0.875rem; margin-bottom: 1rem; }
+    .kb-prose img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
+    .kb-prose strong { font-weight: 700; }
+
+}
+
+:focus-visible { outline: 2px solid var(--kb-primary); outline-offset: 2px; border-radius: 4px; }

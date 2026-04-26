@@ -1,0 +1,650 @@
+parameters:
+	ignoreErrors:
+		# Larastan limitation: morphTo() $this return type is invariant and cannot be declared exactly
+		-
+			message: '#^Method App\\Models\\AuditLog\:\:auditable\(\) should return .+ but returns .+\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditLog.php
+
+		-
+			message: '#^Method App\\Models\\AuditLog\:\:user\(\) should return .+ but returns .+\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditLog.php
+
+		-
+			message: '#^Method App\\Models\\Media\:\:model\(\) should return .+ but returns .+\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Media.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:changePassword\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:editProfile\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:showChangePassword\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:updatePassword\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AdminController\:\:updateProfile\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AuthController\:\:login\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AuthController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\AuthController\:\:logout\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/AuthController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\DashboardController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Relation ''creator'' is not found in App\\Models\\Page model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Relation ''metaInformation'' is not found in App\\Models\\Page model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Page\:\:\$metaInformation\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:analyzeSEO\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:sanitizeContent\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:sanitizeContent\(\) has parameter \$content with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\PageController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Admin\\PageController\:\:\$seoAnalyzer has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Relation ''creator'' is not found in App\\Models\\Page model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Relation ''metaInformation'' is not found in App\\Models\\Page model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:changePassword\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\UserController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PageController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PageController.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\ChangePasswordRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/ChangePasswordRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\ChangePasswordRequest\:\:withValidator\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Requests/Admin/ChangePasswordRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\ChangePasswordRequest\:\:withValidator\(\) has parameter \$validator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Requests/Admin/ChangePasswordRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StoreAdminRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StoreAdminRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StorePageRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StorePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StorePageRequest\:\:withValidator\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Requests/Admin/StorePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StorePageRequest\:\:withValidator\(\) has parameter \$validator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Requests/Admin/StorePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StoreUserRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StoreUserRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StoreUserRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StoreUserRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateAdminRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateAdminRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdatePageRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdatePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdatePageRequest\:\:withValidator\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Requests/Admin/UpdatePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdatePageRequest\:\:withValidator\(\) has parameter \$validator with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Requests/Admin/UpdatePageRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateProfileRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateProfileRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateUserRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateUserRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateUserRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateUserRequest.php
+
+		-
+			message: '#^Class App\\Models\\Admin uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Admin.php
+
+		-
+			message: '#^Method App\\Models\\Admin\:\:createdPages\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Admin.php
+
+		-
+			message: '#^Method App\\Models\\Admin\:\:scopeActive\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Admin.php
+
+		-
+			message: '#^Method App\\Models\\Admin\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Admin.php
+
+		-
+			message: '#^Method App\\Models\\Admin\:\:updatedPages\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Admin.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\MetaInformation\:\:\$metable\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Class App\\Models\\MetaInformation uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveMetaDescriptionAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveMetaTitleAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveOgDescriptionAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveOgTitleAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveTwitterDescriptionAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:getEffectiveTwitterTitleAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Method App\\Models\\MetaInformation\:\:metable\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/MetaInformation.php
+
+		-
+			message: '#^Class App\\Models\\Page uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:creator\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:metaInformation\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:scopeDraft\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:scopeDraft\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:scopePublished\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:scopePublished\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:setTitleAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:setTitleAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Method App\\Models\\Page\:\:updater\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Class App\\Models\\SiteSetting uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:get\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:get\(\) has parameter \$default with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:get\(\) has parameter \$key with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:getValueAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:getValueAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:scopeGroup\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:scopeGroup\(\) has parameter \$group with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:scopeGroup\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has parameter \$description with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has parameter \$group with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has parameter \$key with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has parameter \$type with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:set\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:setValueAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Models\\SiteSetting\:\:setValueAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/SiteSetting.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:analyzePage\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:analyzePage\(\) has parameter \$content with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:analyzePage\(\) has parameter \$description with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:analyzePage\(\) has parameter \$keywords with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:analyzePage\(\) has parameter \$title with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:getGrade\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
+
+		-
+			message: '#^Method App\\Services\\SEOAnalyzerService\:\:getGrade\(\) has parameter \$score with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/SEOAnalyzerService.php
