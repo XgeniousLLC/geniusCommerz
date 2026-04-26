@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCartDerived, useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import type { NavItem, SharedProps } from '../types';
@@ -8,15 +8,20 @@ export default function Header() {
   const { site, auth } = usePage<SharedProps>().props;
   const [userOpen,   setUserOpen]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState('');
   const url = usePage().url;
   const openCart     = useCartStore(s => s.openCart);
   const { count }    = useCartDerived();
   const wishlistCount = useWishlistStore(s => s.items.length);
 
-  // Close mobile nav on route change
   useEffect(() => { setMobileOpen(false); }, [url]);
 
   function logout() { router.post('/logout'); }
+
+  const handleMobileSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (mobileSearch.trim()) router.visit(`/shop?q=${encodeURIComponent(mobileSearch.trim())}`);
+  }, [mobileSearch]);
 
   const navItems: NavItem[] = (site.mainNav && site.mainNav.length > 0)
     ? site.mainNav
@@ -140,12 +145,17 @@ export default function Header() {
 
         {/* Mobile search */}
         <div className="md:hidden pb-3">
-          <div className="relative">
-            <svg className="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <form onSubmit={handleMobileSearch} className="relative">
+            <svg className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <input className="kb-input pl-9 text-sm" placeholder="Search products…"/>
-          </div>
+            <input
+              className="kb-input pl-9 text-sm"
+              placeholder="Search products…"
+              value={mobileSearch}
+              onChange={e => setMobileSearch(e.target.value)}
+            />
+          </form>
         </div>
       </div>
 

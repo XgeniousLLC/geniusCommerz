@@ -17,7 +17,7 @@ export default function Register() {
           <div className="kb-card p-8" style={{ borderRadius: 20 }}>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-extrabold" style={{ color: 'var(--kb-ink)' }}>Create account</h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Join us to leave comments</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Create your account to start shopping</p>
             </div>
 
             {Object.keys(errors).length > 0 && (
