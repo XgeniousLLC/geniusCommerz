@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\SmsService;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +23,55 @@ class UserAuthController extends Controller
         if (Auth::check()) {
             return redirect('/');
         }
-        return Inertia::render('auth/Login');
+        $loginMethod = SiteSetting::get('auth.login_method', 'email_password');
+        return Inertia::render('auth/Login', ['loginMethod' => $loginMethod]);
+    }
+
+    public function sendOtp(Request $request): JsonResponse
+    {
+        $request->validate(['phone' => 'required|string|max:20']);
+
+        $phone = $request->input('phone');
+        $user  = User::where('phone', $phone)->where('is_active', true)->first();
+
+        if (! $user) {
+            return response()->json(['message' => 'No account found with this phone number.'], 422);
+        }
+
+        $otp = $user->generateOtp();
+
+        try {
+            $sms = app(SmsService::class);
+            $sms->send($phone, "Your klixbd login OTP is: {$otp}. Valid for 5 minutes.");
+        } catch (\Throwable $e) {
+            // If SMS fails in non-production, surface the OTP for testing
+            if (app()->environment('local', 'testing')) {
+                return response()->json(['message' => 'OTP sent (dev: ' . $otp . ')']);
+            }
+            return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
+        }
+
+        return response()->json(['message' => 'OTP sent to your phone.']);
+    }
+
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'phone' => 'required|string|max:20',
+            'otp'   => 'required|string|size:6',
+        ]);
+
+        $user = User::where('phone', $request->input('phone'))->where('is_active', true)->first();
+
+        if (! $user || ! $user->isOtpValid($request->input('otp'))) {
+            return response()->json(['message' => 'Invalid or expired OTP.'], 422);
+        }
+
+        $user->clearOtp();
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return response()->json(['redirect' => session()->pull('url.intended', '/')]);
     }
 
     public function login(Request $request): RedirectResponse

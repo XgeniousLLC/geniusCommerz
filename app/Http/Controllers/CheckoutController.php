@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Notifications\OrderConfirmed;
+use App\Services\CourierService;
 use App\Services\LoyaltyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,9 +56,14 @@ class CheckoutController extends Controller
             $loyaltyTaka    = $service->pointsToTaka($loyaltyBalance);
         }
 
+        $courierService         = app(CourierService::class);
+        $courierLocationEnabled = $courierService->hasDefault()
+            && (bool) SiteSetting::get('shipping.courier_location_charges', false);
+
         return Inertia::render('Checkout', compact(
             'shippingCost', 'freeAbove', 'paymentMethods',
-            'loyaltyEnabled', 'loyaltyBalance', 'loyaltyTaka'
+            'loyaltyEnabled', 'loyaltyBalance', 'loyaltyTaka',
+            'courierLocationEnabled'
         ));
     }
 

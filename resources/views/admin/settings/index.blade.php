@@ -150,6 +150,17 @@
                 <p class="text-xs text-gray-400 mt-1">Visitors see a maintenance page; admins can still log in.</p>
             </x-admin.form-group>
 
+            <x-admin.form-group>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Customer Login Method</label>
+                @php $loginMethod = old('auth.login_method', $settings->get('auth.login_method')?->value ?? 'email_password'); @endphp
+                <x-admin.select name="settings[auth.login_method]">
+                    <option value="email_password" {{ $loginMethod === 'email_password' ? 'selected' : '' }}>Email &amp; Password only</option>
+                    <option value="phone_otp"      {{ $loginMethod === 'phone_otp'      ? 'selected' : '' }}>Phone OTP only</option>
+                    <option value="both"           {{ $loginMethod === 'both'           ? 'selected' : '' }}>Both (user can choose)</option>
+                </x-admin.select>
+                <p class="text-xs text-gray-400 mt-1">Phone OTP requires an active default SMS gateway in <a href="{{ route('admin.integrations.index') }}" class="text-blue-600 hover:underline">Integrations</a>.</p>
+            </x-admin.form-group>
+
         </div>
         <div class="flex justify-end mt-6">
             <x-admin.button type="submit">Save General Settings</x-admin.button>
@@ -578,6 +589,21 @@
                 </x-admin.form-group>
 
             </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-2">Courier Location-Based Charges</h3>
+            <p class="text-sm text-gray-500 mb-4">When enabled, customers select their city/zone at checkout and the shipping cost is fetched live from the default courier API (e.g. Pathao). Requires an active default courier in <a href="{{ route('admin.integrations.index') }}" class="text-blue-600 hover:underline">Integrations</a>.</p>
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="hidden" name="settings[shipping.courier_location_charges]" value="0">
+                <input type="checkbox" name="settings[shipping.courier_location_charges]" value="1"
+                    {{ old('shipping.courier_location_charges', $settings->get('shipping.courier_location_charges')?->value) ? 'checked' : '' }}
+                    class="mt-0.5 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                <span>
+                    <span class="block text-sm font-medium text-gray-800">Enable location-based courier charges</span>
+                    <span class="block text-xs text-gray-400 mt-0.5">Shows city/zone/area dropdowns and live courier charge at checkout</span>
+                </span>
+            </label>
         </x-admin.card>
 
         <x-admin.card>

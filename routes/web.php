@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CourierLocationController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CouponValidationController;
@@ -55,6 +56,14 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/coupon/validate', [CouponValidationController::class, 'validate'])->name('coupon.validate');
 
+// Courier location + charge (public, throttled)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/api/courier/cities',          [CourierLocationController::class, 'cities'])->name('courier.cities');
+    Route::get('/api/courier/zones/{cityId}',  [CourierLocationController::class, 'zones'])->name('courier.zones');
+    Route::get('/api/courier/areas/{zoneId}',  [CourierLocationController::class, 'areas'])->name('courier.areas');
+    Route::post('/api/courier/charge',         [CourierLocationController::class, 'charge'])->name('courier.charge');
+});
+
 Route::get('/wishlist', fn() => inertia('Wishlist'))->name('wishlist');
 Route::get('/loyalty', [\App\Http\Controllers\LoyaltyPageController::class, 'show'])->name('loyalty');
 
@@ -73,6 +82,8 @@ Route::get('/order/confirmed/{orderNumber}', function (string $orderNumber) {
 
 Route::get('/login', [UserAuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [UserAuthController::class, 'login'])->name('login.post');
+Route::post('/login/otp/send',   [UserAuthController::class, 'sendOtp'])->middleware('throttle:5,1')->name('login.otp.send');
+Route::post('/login/otp/verify', [UserAuthController::class, 'verifyOtp'])->middleware('throttle:10,1')->name('login.otp.verify');
 Route::get('/register', [UserAuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [UserAuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');

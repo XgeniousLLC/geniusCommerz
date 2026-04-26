@@ -1,15 +1,29 @@
 import { Head, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Layout from '../layouts/Layout';
 import { useCartStore, useCartDerived } from '../store/cartStore';
+
+interface LocationOption { id: number; name: string; }
 
 interface Props {
   shippingCost: number;
   freeAbove: number;
   paymentMethods: Record<string, string>;
+  loyaltyEnabled?: boolean;
+  loyaltyBalance?: number;
+  loyaltyTaka?: number;
+  courierLocationEnabled?: boolean;
 }
 
-export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Props) {
+export default function Checkout({
+  shippingCost,
+  freeAbove,
+  paymentMethods,
+  loyaltyEnabled = false,
+  loyaltyBalance = 0,
+  loyaltyTaka    = 0,
+  courierLocationEnabled = false,
+}: Props) {
   const items        = useCartStore(s => s.items);
   const coupon       = useCartStore(s => s.coupon);
   const applyCoupon  = useCartStore(s => s.applyCoupon);
@@ -17,11 +31,98 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
   const clearCart    = useCartStore(s => s.clearCart);
   const { subtotal, discount } = useCartDerived();
 
-  // Shipping is free if every item in the cart has shipping included
   const allShippingIncluded = items.length > 0 && items.every(i => i.shipping_included);
-  const shipping = allShippingIncluded ? 0
-    : (freeAbove > 0 && subtotal >= freeAbove ? 0 : shippingCost);
-  const total    = Math.max(0, subtotal - discount + shipping);
+
+  // Courier location state
+  const [cities, setCities]         = useState<LocationOption[]>([]);
+  const [zones, setZones]           = useState<LocationOption[]>([]);
+  const [areas, setAreas]           = useState<LocationOption[]>([]);
+  const [cityId, setCityId]         = useState<number | null>(null);
+  const [zoneId, setZoneId]         = useState<number | null>(null);
+  const [areaId, setAreaId]         = useState<number | null>(null);
+  const [courierCharge, setCourierCharge] = useState<number | null>(null);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingZones, setLoadingZones]   = useState(false);
+  const [loadingAreas, setLoadingAreas]   = useState(false);
+  const [loadingCharge, setLoadingCharge] = useState(false);
+
+  // Load cities on mount if location mode is enabled
+  useEffect(() => {
+    if (!courierLocationEnabled) return;
+    setLoadingCities(true);
+    fetch('/api/courier/cities')
+      .then(r => r.json())
+      .then(d => setCities(d.cities ?? []))
+      .catch(() => setCities([]))
+      .finally(() => setLoadingCities(false));
+  }, [courierLocationEnabled]);
+
+  const handleCityChange = useCallback((id: number) => {
+    setCityId(id);
+    setZoneId(null);
+    setAreaId(null);
+    setZones([]);
+    setAreas([]);
+    setCourierCharge(null);
+    if (!id) return;
+    setLoadingZones(true);
+    fetch(`/api/courier/zones/${id}`)
+      .then(r => r.json())
+      .then(d => setZones(d.zones ?? []))
+      .catch(() => setZones([]))
+      .finally(() => setLoadingZones(false));
+  }, []);
+
+  const handleZoneChange = useCallback((id: number) => {
+    setZoneId(id);
+    setAreaId(null);
+    setAreas([]);
+    setCourierCharge(null);
+    if (!id) return;
+
+    // Load areas if available
+    setLoadingAreas(true);
+    fetch(`/api/courier/areas/${id}`)
+      .then(r => r.json())
+      .then(d => setAreas(d.areas ?? []))
+      .catch(() => setAreas([]))
+      .finally(() => setLoadingAreas(false));
+
+    // Fetch charge as soon as zone is selected
+    fetchCharge(cityId!, id, null);
+  }, [cityId]);
+
+  const handleAreaChange = useCallback((id: number) => {
+    setAreaId(id);
+    fetchCharge(cityId!, zoneId!, id);
+  }, [cityId, zoneId]);
+
+  const fetchCharge = (c: number, z: number, a: number | null) => {
+    setLoadingCharge(true);
+    fetch('/api/courier/charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '' },
+      body: JSON.stringify({ city_id: c, zone_id: z, area_id: a, item_weight: 0.5 }),
+    })
+      .then(r => r.json())
+      .then(d => setCourierCharge(d.charge !== null && d.charge !== undefined ? Number(d.charge) : null))
+      .catch(() => setCourierCharge(null))
+      .finally(() => setLoadingCharge(false));
+  };
+
+  // Compute effective shipping
+  const effectiveShipping = (() => {
+    if (allShippingIncluded) return 0;
+    if (courierLocationEnabled && courierCharge !== null) return courierCharge;
+    if (freeAbove > 0 && subtotal >= freeAbove) return 0;
+    return shippingCost;
+  })();
+
+  // Loyalty
+  const [redeemPoints, setRedeemPoints] = useState(false);
+  const loyaltyDiscount = redeemPoints ? loyaltyTaka : 0;
+
+  const total = Math.max(0, subtotal - discount - loyaltyDiscount + effectiveShipping);
 
   const [form, setForm] = useState({
     customer_name:  '',
@@ -32,13 +133,12 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
     notes:          '',
     payment_method: Object.keys(paymentMethods)[0] ?? 'cod',
   });
-  const [errors, setErrors]         = useState<Record<string, string>>({});
+  const [errors, setErrors]           = useState<Record<string, string>>({});
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [submitting, setSubmitting]   = useState(false);
 
-  // Redirect away if cart is empty (after hydration)
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
   useEffect(() => {
@@ -69,7 +169,11 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
 
     router.post('/checkout', {
       ...form,
-      coupon_code: coupon?.code ?? '',
+      coupon_code:           coupon?.code ?? '',
+      loyalty_points_redeem: redeemPoints ? loyaltyBalance : 0,
+      courier_city_id:       cityId,
+      courier_zone_id:       zoneId,
+      courier_area_id:       areaId,
       items: items.map(i => ({
         product_id:    i.product_id,
         variant_id:    i.variant_id,
@@ -140,17 +244,88 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
                     <textarea className="kb-input resize-none" rows={2} value={form.address} onChange={set('address')} placeholder="Street address, house no." required />
                     {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>City / District <span className="text-red-500">*</span></label>
-                    <input className="kb-input" value={form.city} onChange={set('city')} placeholder="e.g. Dhaka" required />
-                    {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-                  </div>
+
+                  {courierLocationEnabled ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>City / District <span className="text-red-500">*</span></label>
+                        <select className="kb-input" required
+                          value={cityId ?? ''}
+                          onChange={e => handleCityChange(Number(e.target.value))}>
+                          <option value="">{loadingCities ? 'Loading cities…' : 'Select city'}</option>
+                          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                        {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                      </div>
+
+                      {zones.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>Zone / Thana <span className="text-red-500">*</span></label>
+                          <select className="kb-input" required
+                            value={zoneId ?? ''}
+                            onChange={e => handleZoneChange(Number(e.target.value))}>
+                            <option value="">{loadingZones ? 'Loading zones…' : 'Select zone'}</option>
+                            {zones.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
+                          </select>
+                        </div>
+                      )}
+
+                      {areas.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>Area</label>
+                          <select className="kb-input"
+                            value={areaId ?? ''}
+                            onChange={e => handleAreaChange(Number(e.target.value))}>
+                            <option value="">{loadingAreas ? 'Loading areas…' : 'Select area (optional)'}</option>
+                            {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                          </select>
+                        </div>
+                      )}
+
+                      {courierLocationEnabled && cityId && (
+                        <div className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--kb-surface-2)' }}>
+                          <span style={{ color: 'var(--kb-ink-soft)' }}>Delivery charge: </span>
+                          {loadingCharge
+                            ? <span style={{ color: 'var(--kb-ink-soft)' }}>calculating…</span>
+                            : courierCharge !== null
+                              ? <span className="font-bold" style={{ color: 'var(--kb-ink)' }}>৳{courierCharge}</span>
+                              : <span style={{ color: 'var(--kb-ink-soft)' }}>Select zone to see charge</span>
+                          }
+                        </div>
+                      )}
+
+                      {/* Hidden text city for server */}
+                      <input type="hidden" name="city" value={cities.find(c => c.id === cityId)?.name ?? ''} />
+                    </>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>City / District <span className="text-red-500">*</span></label>
+                      <input className="kb-input" value={form.city} onChange={set('city')} placeholder="e.g. Dhaka" required />
+                      {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--kb-ink)' }}>Order Note <span className="text-xs font-normal" style={{ color: 'var(--kb-ink-soft)' }}>(optional)</span></label>
                     <textarea className="kb-input resize-none" rows={2} value={form.notes} onChange={set('notes')} placeholder="Any special instructions…" />
                   </div>
                 </div>
               </div>
+
+              {/* Loyalty */}
+              {loyaltyEnabled && loyaltyTaka > 0 && (
+                <div className="kb-card p-6">
+                  <h2 className="text-base font-semibold mb-3" style={{ color: 'var(--kb-ink)' }}>Loyalty Points</h2>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" className="mt-0.5 rounded"
+                      checked={redeemPoints}
+                      onChange={e => setRedeemPoints(e.target.checked)} />
+                    <span className="text-sm" style={{ color: 'var(--kb-ink)' }}>
+                      Use {loyaltyBalance.toLocaleString()} points → save <strong>৳{loyaltyTaka.toLocaleString()}</strong>
+                    </span>
+                  </label>
+                </div>
+              )}
 
               {/* Payment */}
               <div className="kb-card p-6">
@@ -249,12 +424,20 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
                       <span>−৳{discount.toLocaleString()}</span>
                     </div>
                   )}
+                  {loyaltyDiscount > 0 && (
+                    <div className="flex justify-between" style={{ color: 'var(--kb-success)' }}>
+                      <span>Loyalty</span>
+                      <span>−৳{loyaltyDiscount.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between" style={{ color: 'var(--kb-ink-soft)' }}>
                     <span>Shipping</span>
                     <span>
-                      {shipping === 0
+                      {effectiveShipping === 0
                         ? <span style={{ color: 'var(--kb-success)' }}>Free</span>
-                        : `৳${shipping}`}
+                        : loadingCharge
+                          ? <span className="opacity-50">…</span>
+                          : `৳${effectiveShipping}`}
                     </span>
                   </div>
                   {allShippingIncluded && (
@@ -262,7 +445,7 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods }: Pr
                       Shipping included in product price
                     </p>
                   )}
-                  {!allShippingIncluded && freeAbove > 0 && shipping > 0 && (
+                  {!allShippingIncluded && !courierLocationEnabled && freeAbove > 0 && effectiveShipping > 0 && (
                     <p className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>
                       Add ৳{(freeAbove - subtotal).toLocaleString()} more for free shipping
                     </p>
