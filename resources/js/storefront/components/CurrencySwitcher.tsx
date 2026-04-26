@@ -19,15 +19,16 @@ export default function CurrencySwitcher() {
           <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
         </svg>
       </button>
-      <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 hidden group-hover:block">
+      <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 hidden group-hover:block min-w-[100px]">
         {currencies.map((c) => (
           <button
             key={c.code}
             onClick={() => switchCurrency(c.code)}
-            className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors
+            className={`flex items-center gap-2 w-full text-left px-3 py-2 text-sm whitespace-nowrap hover:bg-gray-50 transition-colors
               ${c.code === activeCurrency.code ? 'font-semibold text-blue-600' : 'text-gray-700'}`}
           >
-            <span className="font-mono mr-2">{c.symbol}</span>{c.code} — {c.name}
+            <span className="font-mono">{c.symbol}</span>
+            <span>{c.code}</span>
           </button>
         ))}
       </div>
