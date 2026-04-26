@@ -32,13 +32,6 @@
         <p class="text-gray-600">Update your account password for enhanced security</p>
     </div>
 
-    <!-- Success Message -->
-    @if(session('success'))
-        <x-admin.alert type="success" class="mb-6">
-            {{ session('success') }}
-        </x-admin.alert>
-    @endif
-
     <x-admin.card>
         <x-slot name="header">
             <div class="flex items-center space-x-3">

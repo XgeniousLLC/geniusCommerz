@@ -229,4 +229,7 @@ export interface SharedProps {
   auth: { user: AuthUser | null };
   flash: { success: string | null; comment_success: string | null; error: string | null };
   errors: Record<string, string>;
+  locale: string;
+  strings: Record<string, string>;
+  languages: Array<{ name: string; code: string }>;
 }

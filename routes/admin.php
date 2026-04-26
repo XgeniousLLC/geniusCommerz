@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AiController;
+use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FraudController;
 use App\Http\Controllers\Admin\LoyaltyController;
@@ -164,6 +166,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Fraud check
         Route::post('/fraud-check', [FraudController::class, 'check'])->name('fraud.check');
+
+        // AI generation
+        Route::post('/ai/product-description', [AiController::class, 'generateProductDescription'])->name('ai.product-description');
+        Route::post('/ai/blog-content',         [AiController::class, 'generateBlogContent'])->name('ai.blog-content');
+        Route::post('/ai/meta-description',     [AiController::class, 'generateMetaDescription'])->name('ai.meta-description');
+
+        // Languages & translations
+        Route::get('/languages',                              [LanguageController::class, 'index'])->name('languages.index');
+        Route::post('/languages',                             [LanguageController::class, 'store'])->name('languages.store');
+        Route::get('/languages/{language}/edit',             [LanguageController::class, 'edit'])->name('languages.edit');
+        Route::put('/languages/{language}',                  [LanguageController::class, 'update'])->name('languages.update');
+        Route::delete('/languages/{language}',               [LanguageController::class, 'destroy'])->name('languages.destroy');
+        Route::post('/languages/{language}/set-default',     [LanguageController::class, 'setDefault'])->name('languages.set-default');
+        Route::post('/languages/{language}/translate-ai',    [LanguageController::class, 'translateWithAi'])->name('languages.translate-ai');
 
         // Media Library
         Route::get('/media', [MediaController::class, 'index'])->name('media.index');

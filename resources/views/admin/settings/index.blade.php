@@ -653,8 +653,6 @@
                     'shipping.courier_pathao'    => ['label' => 'Pathao',     'desc' => 'Pathao courier service'],
                     'shipping.courier_shohoz'    => ['label' => 'Shohoz',     'desc' => 'Shohoz delivery'],
                     'shipping.courier_redx'      => ['label' => 'RedX',       'desc' => 'RedX last-mile delivery'],
-                    'shipping.courier_paperfly'  => ['label' => 'Paperfly',   'desc' => 'Paperfly courier'],
-                    'shipping.courier_sundarban' => ['label' => 'Sundarban',  'desc' => 'Sundarban courier service'],
                     'shipping.courier_custom'    => ['label' => 'Own Courier','desc' => 'In-house or custom delivery'],
                 ] as $key => $info)
                 <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">

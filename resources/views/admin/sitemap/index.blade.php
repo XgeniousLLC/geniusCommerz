@@ -19,12 +19,6 @@
 <x-admin.card>
     <div class="space-y-5">
 
-        @if(session('success'))
-        <div class="p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
-            {{ session('success') }}
-        </div>
-        @endif
-
         <div class="flex items-start gap-4">
             <div class="flex-1">
                 @if($exists)

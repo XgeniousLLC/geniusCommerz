@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Language;
 use App\Models\Media;
 use App\Models\Menu;
 use App\Models\SiteSetting;
@@ -12,6 +13,31 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
+
+    private static function resolveTranslations(Request $request): array
+    {
+        $defaults = config('storefront_strings', []);
+
+        $cookieLocale = $request->cookie('locale');
+        $lang = null;
+
+        if ($cookieLocale) {
+            $lang = Language::where('code', $cookieLocale)->where('is_active', true)->first();
+        }
+
+        if (! $lang) {
+            $lang = Language::default();
+        }
+
+        if (! $lang) {
+            return ['locale' => 'en', 'strings' => $defaults];
+        }
+
+        $overrides = $lang->translationsMap();
+        $merged    = array_merge($defaults, array_filter($overrides, fn ($v) => $v !== ''));
+
+        return ['locale' => $lang->code, 'strings' => $merged];
+    }
 
     private static function resolveMainNav(): array
     {
@@ -51,7 +77,14 @@ class HandleInertiaRequests extends Middleware
         $logoUrl        = $logoMediaId    ? Media::find((int) $logoMediaId)?->getUrl('thumb')  : null;
         $faviconUrl     = $faviconMediaId ? Media::find((int) $faviconMediaId)?->getUrl()      : null;
 
+        $i18n      = self::resolveTranslations($request);
+        $languages = Language::where('is_active', true)->orderByDesc('is_default')->orderBy('name')
+            ->get(['name', 'code'])->toArray();
+
         return array_merge(parent::share($request), [
+            'locale'      => $i18n['locale'],
+            'strings'     => $i18n['strings'],
+            'languages'   => $languages,
             'site' => [
                 'name'        => SiteSetting::get('general.site_name', config('app.name')),
                 'tagline'     => SiteSetting::get('general.site_tagline', ''),

@@ -273,6 +273,12 @@
                     Integrations
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
+                    :href="route('admin.languages.index')"
+                    :active="request()->routeIs('admin.languages.*')"
+                    icon="translate">
+                    Languages
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
                     :href="route('admin.audit.index')"
                     :active="request()->routeIs('admin.audit.*')"
                     icon="clipboard-list">

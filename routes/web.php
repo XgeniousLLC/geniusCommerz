@@ -98,6 +98,15 @@ Route::post('/reset-password', [UserAuthController::class, 'resetPassword'])->na
 Route::get('/feeds/google-merchant.xml', [FeedController::class, 'googleMerchant'])->name('feeds.google-merchant');
 Route::get('/feeds/facebook-catalog.json', [FeedController::class, 'facebookCatalog'])->name('feeds.facebook-catalog');
 
+// Locale switcher (sets cookie, redirects back)
+Route::get('/locale/{code}', function (string $code) {
+    $lang = \App\Models\Language::where('code', $code)->where('is_active', true)->first();
+    if ($lang) {
+        cookie()->queue(cookie()->forever('locale', $code));
+    }
+    return redirect()->back();
+})->name('locale.switch');
+
 // Robots.txt
 Route::get('/robots.txt', function () {
     $sitemapUrl = url('sitemap.xml');
