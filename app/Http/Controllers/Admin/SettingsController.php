@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'legal'];
+    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal'];
 
     public function index(Request $request): View
     {
@@ -31,6 +31,9 @@ class SettingsController extends Controller
         $data = $request->input('settings', []);
 
         foreach ($data as $key => $value) {
+            // Skip any unexpected PHP arrays (e.g. from malformed form submissions)
+            if (is_array($value) && $key !== 'cart.goals_json') continue;
+
             // cart.goals_json is a JSON-encoded array — store it normalised as cart.goals
             if ($key === 'cart.goals_json') {
                 $decoded = json_decode($value ?: '[]', true);

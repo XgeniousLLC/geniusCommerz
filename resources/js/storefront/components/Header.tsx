@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useCartDerived, useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
-import type { SharedProps } from '../types';
+import type { NavItem, SharedProps } from '../types';
 
 export default function Header() {
   const { site, auth } = usePage<SharedProps>().props;
@@ -31,9 +31,14 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-7 text-sm">
-            <Link href="/shop" className="kb-nav-link">Shop</Link>
-            <Link href="/blog" className={`kb-nav-link ${url.startsWith('/blog') ? 'font-semibold !text-slate-900' : ''}`}>Blog</Link>
-            <Link href="/track" className="kb-nav-link">Track Order</Link>
+            {site.mainNav && site.mainNav.length > 0
+              ? site.mainNav.map((item) => <DynamicNavItem key={item.url + item.label} item={item} url={url} />)
+              : <>
+                  <Link href="/shop" className="kb-nav-link">Shop</Link>
+                  <Link href="/blog" className={`kb-nav-link ${url.startsWith('/blog') ? 'font-semibold !text-slate-900' : ''}`}>Blog</Link>
+                  <Link href="/track" className="kb-nav-link">Track Order</Link>
+                </>
+            }
           </nav>
 
           {/* Right icons */}
@@ -130,5 +135,50 @@ export default function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+function DynamicNavItem({ item, url }: { item: NavItem; url: string }) {
+  const [open, setOpen] = useState(false);
+  const isActive = url === item.url || url.startsWith(item.url + '/');
+
+  if (!item.children || item.children.length === 0) {
+    return (
+      <Link
+        href={item.url}
+        target={item.target}
+        className={`kb-nav-link ${isActive ? 'font-semibold !text-slate-900' : ''}`}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        className={`kb-nav-link flex items-center gap-1 ${isActive ? 'font-semibold !text-slate-900' : ''}`}
+        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+      >
+        {item.label}
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 min-w-[180px] bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50">
+          {item.children.map((child) => (
+            <Link
+              key={child.url + child.label}
+              href={child.url}
+              target={child.target}
+              className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+            >
+              {child.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

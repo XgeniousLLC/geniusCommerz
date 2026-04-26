@@ -52,10 +52,17 @@ class MenuController extends Controller
     public function update(Request $request, Menu $menu): RedirectResponse
     {
         $data = $request->validate([
-            'name' => 'required|string|max:100',
+            'name'     => 'required|string|max:100',
+            'location' => 'nullable|string|in:' . implode(',', array_keys(Menu::LOCATIONS)),
         ]);
-        $menu->update($data);
-        return back()->with('success', 'Menu name updated.');
+
+        // Each location can only belong to one menu — clear any existing assignment
+        if (!empty($data['location'])) {
+            Menu::where('location', $data['location'])->where('id', '!=', $menu->id)->update(['location' => null]);
+        }
+
+        $menu->update(['name' => $data['name'], 'location' => $data['location'] ?: null]);
+        return back()->with('success', 'Menu settings saved.');
     }
 
     public function destroy(Menu $menu): RedirectResponse

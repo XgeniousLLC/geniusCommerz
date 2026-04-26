@@ -17,6 +17,14 @@ export interface SiteSettings {
   shippingCost: number;
   freeShippingAbove: number;
   cartGoals: CartGoal[];
+  mainNav: NavItem[];
+}
+
+export interface NavItem {
+  label: string;
+  url: string;
+  target: string;
+  children: Array<{ label: string; url: string; target: string }>;
 }
 
 export interface CartGoal {

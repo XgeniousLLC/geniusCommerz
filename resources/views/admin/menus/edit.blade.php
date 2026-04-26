@@ -219,16 +219,26 @@ document.addEventListener('DOMContentLoaded', () => {
         </x-admin.card>
         @endif
 
-        {{-- Rename menu --}}
+        {{-- Menu Settings --}}
         <x-admin.card>
             <h3 class="text-sm font-semibold text-gray-900 mb-3">Menu Settings</h3>
-            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" class="space-y-2">
+            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" class="space-y-3">
                 @csrf @method('PUT')
                 <div>
                     <label class="text-xs text-gray-500 block mb-0.5">Menu Name</label>
                     <x-admin.input name="name" value="{{ $menu->name }}" required />
                 </div>
-                <x-admin.button type="submit" variant="secondary" class="w-full justify-center text-sm">Save</x-admin.button>
+                <div>
+                    <label class="text-xs text-gray-500 block mb-0.5">Display Location</label>
+                    <select name="location" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                        <option value="">— None —</option>
+                        @foreach(\App\Models\Menu::LOCATIONS as $slug => $label)
+                            <option value="{{ $slug }}" {{ $menu->location === $slug ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Assign a location to use this menu in the storefront (e.g. Main Navigation).</p>
+                </div>
+                <x-admin.button type="submit" variant="secondary" class="w-full justify-center text-sm">Save Settings</x-admin.button>
             </form>
         </x-admin.card>
     </div>

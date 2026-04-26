@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Media;
+use App\Models\Menu;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,6 +12,32 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     protected $rootView = 'app';
+
+    private static function resolveMainNav(): array
+    {
+        $menu = Menu::where('location', 'main_nav')
+            ->with(['items' => fn ($q) => $q->orderBy('sort_order')])
+            ->first();
+
+        if (!$menu) return [];
+
+        $items = $menu->items->toArray();
+
+        // Build a simple two-level tree: root items + their children
+        $byParent = collect($items)->groupBy('parent_id');
+        return collect($byParent->get(null) ?? [])
+            ->map(fn ($item) => [
+                'label'    => $item['label'],
+                'url'      => $item['url'],
+                'target'   => $item['target'] ?? '_self',
+                'children' => collect($byParent->get($item['id']) ?? [])
+                    ->map(fn ($child) => [
+                        'label'  => $child['label'],
+                        'url'    => $child['url'],
+                        'target' => $child['target'] ?? '_self',
+                    ])->values()->toArray(),
+            ])->values()->toArray();
+    }
 
     public function version(Request $request): ?string
     {
@@ -44,6 +71,7 @@ class HandleInertiaRequests extends Middleware
                 'shippingCost'           => (float) SiteSetting::get('shipping.flat_rate', 60),
                 'freeShippingAbove'      => (float) SiteSetting::get('shipping.free_above', 0),
                 'cartGoals'              => json_decode(SiteSetting::get('cart.goals', '[]'), true) ?: [],
+                'mainNav'                => self::resolveMainNav(),
             ],
             'auth' => [
                 'user' => $request->user()
