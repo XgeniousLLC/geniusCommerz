@@ -197,7 +197,10 @@ class ShopController extends Controller
             ]),
             'reviews_count'     => $p->reviews->count(),
             'reviews_avg'       => $p->reviews->count() ? round($p->reviews->avg('rating'), 1) : null,
-            'specifications'  => $p->specifications ?? [],
+            'specifications'         => $p->specifications ?? [],
+            'preorder_enabled'       => (bool) $p->preorder_enabled,
+            'preorder_message'       => $p->preorder_message,
+            'preorder_expected_date' => $p->preorder_expected_date?->toDateString(),
             'meta' => $p->meta ? [
                 'meta_title'       => $p->meta->meta_title,
                 'meta_description' => $p->meta->meta_description,

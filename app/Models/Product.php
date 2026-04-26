@@ -19,13 +19,16 @@ class Product extends Model
         'status', 'is_featured', 'has_variants', 'sku', 'price',
         'compare_at_price', 'cost_price', 'weight', 'shipping_included', 'warranty', 'return_policy',
         'specifications', 'stock_qty', 'sort_order', 'created_by', 'updated_by',
+        'preorder_enabled', 'preorder_message', 'preorder_expected_date',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
-        'is_featured'        => 'boolean',
-        'has_variants'       => 'boolean',
-        'shipping_included'  => 'boolean',
+        'is_featured'            => 'boolean',
+        'has_variants'           => 'boolean',
+        'shipping_included'      => 'boolean',
+        'preorder_enabled'       => 'boolean',
+        'preorder_expected_date' => 'date',
         'price' => 'decimal:2',
         'compare_at_price' => 'decimal:2',
         'cost_price' => 'decimal:2',

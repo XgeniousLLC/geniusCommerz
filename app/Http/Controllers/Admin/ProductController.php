@@ -74,11 +74,14 @@ class ProductController extends Controller
         $data['specifications'] = $this->decodeSpecifications($data['specifications'] ?? null);
 
         $product = Product::create(array_merge($data, [
-            'is_featured'       => $request->boolean('is_featured'),
-            'has_variants'      => $request->boolean('has_variants'),
-            'shipping_included' => $request->boolean('shipping_included'),
-            'created_by'        => auth('admin')->id(),
-            'updated_by'        => auth('admin')->id(),
+            'is_featured'            => $request->boolean('is_featured'),
+            'has_variants'           => $request->boolean('has_variants'),
+            'shipping_included'      => $request->boolean('shipping_included'),
+            'preorder_enabled'       => $request->boolean('preorder_enabled'),
+            'preorder_message'       => $request->input('preorder_message'),
+            'preorder_expected_date' => $request->input('preorder_expected_date') ?: null,
+            'created_by'             => auth('admin')->id(),
+            'updated_by'             => auth('admin')->id(),
         ]));
 
         $product->categories()->sync($request->input('categories', []));
@@ -109,10 +112,13 @@ class ProductController extends Controller
         $data['specifications'] = $this->decodeSpecifications($data['specifications'] ?? null);
 
         $product->update(array_merge($data, [
-            'is_featured'       => $request->boolean('is_featured'),
-            'has_variants'      => $request->boolean('has_variants'),
-            'shipping_included' => $request->boolean('shipping_included'),
-            'updated_by'        => auth('admin')->id(),
+            'is_featured'            => $request->boolean('is_featured'),
+            'has_variants'           => $request->boolean('has_variants'),
+            'shipping_included'      => $request->boolean('shipping_included'),
+            'preorder_enabled'       => $request->boolean('preorder_enabled'),
+            'preorder_message'       => $request->input('preorder_message'),
+            'preorder_expected_date' => $request->input('preorder_expected_date') ?: null,
+            'updated_by'             => auth('admin')->id(),
         ]));
 
         $product->categories()->sync($request->input('categories', []));

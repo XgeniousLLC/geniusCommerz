@@ -61,8 +61,49 @@
                         @error('excerpt')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </x-admin.form-group>
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                    <x-admin.form-group x-data="aiBlogGen()">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-gray-700">Content</label>
+                            <button type="button" @click="open = !open"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-purple-700 border border-purple-200 rounded-lg px-2.5 py-1 hover:bg-purple-50 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Generate with AI
+                            </button>
+                        </div>
+                        <div x-show="open" x-transition class="mb-3 border border-purple-200 rounded-xl p-4 bg-purple-50 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tone</label>
+                                    <select x-model="tone" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                                        <option value="informative">Informative</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="conversational">Conversational</option>
+                                        <option value="persuasive">Persuasive</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Length</label>
+                                    <select x-model="length" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                                        <option value="short">Short (~300 words)</option>
+                                        <option value="medium">Medium (~600 words)</option>
+                                        <option value="long">Long (~1000 words)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Keywords <span class="font-normal text-gray-400">(optional, comma-separated)</span></label>
+                                <input type="text" x-model="keywords" placeholder="e.g. skincare, summer, tips"
+                                    class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" @click="generate()" :disabled="loading"
+                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 transition-colors">
+                                    <span x-show="!loading">Generate</span>
+                                    <span x-show="loading">Generating…</span>
+                                </button>
+                                <span x-show="error" x-text="error" class="text-xs text-red-600"></span>
+                            </div>
+                        </div>
                         <div id="content-editor" class="bg-white"></div>
                         <textarea name="content" id="content-input" class="hidden">{{ old('content') }}</textarea>
                     </x-admin.form-group>
@@ -295,6 +336,39 @@ document.getElementById('blog-title').addEventListener('input', function () {
 document.getElementById('blog-slug').addEventListener('input', function () {
     this._userEdited = this.value !== '';
 });
+
+function aiBlogGen() {
+    return {
+        open: false,
+        loading: false,
+        error: '',
+        tone: 'informative',
+        length: 'medium',
+        keywords: '',
+        async generate() {
+            this.loading = true;
+            this.error   = '';
+            const title = document.querySelector('[name="title"]')?.value || '';
+            if (!title) { this.error = 'Please enter a title first.'; this.loading = false; return; }
+            try {
+                const res = await fetch('{{ route('admin.ai.blog-content') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ title, tone: this.tone, length: this.length, keywords: this.keywords }),
+                });
+                const json = await res.json();
+                if (json.error) { this.error = json.error; return; }
+                contentQuill.setText('');
+                contentQuill.clipboard.dangerouslyPasteHTML('<p>' + json.text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>');
+                this.open = false;
+            } catch (e) {
+                this.error = 'Network error.';
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+}
 </script>
 @endpush
 

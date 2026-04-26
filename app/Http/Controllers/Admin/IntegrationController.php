@@ -48,7 +48,9 @@ class IntegrationController extends Controller
     {
         $group = in_array($integration->provider, Integration::COURIER_PROVIDERS)
             ? 'courier'
-            : (in_array($integration->provider, Integration::SMS_PROVIDERS) ? 'sms' : null);
+            : (in_array($integration->provider, Integration::SMS_PROVIDERS)
+                ? 'sms'
+                : (in_array($integration->provider, Integration::AI_PROVIDERS) ? 'ai' : null));
 
         if (! $group) {
             return back()->with('error', 'This integration does not support default selection.');

@@ -74,6 +74,22 @@ $fields = match($integration->provider) {
         'auth_token'      => ['label' => 'Auth Token',         'type' => 'password'],
         'from_number'     => ['label' => 'From Number',        'type' => 'text', 'hint' => 'e.g. +15551234567'],
     ],
+    'openai' => [
+        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'Starts with sk-…'],
+        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. gpt-4o, gpt-4o-mini, gpt-3.5-turbo'],
+    ],
+    'gemini' => [
+        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'From Google AI Studio'],
+        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. gemini-1.5-flash, gemini-1.5-pro'],
+    ],
+    'claude' => [
+        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'Starts with sk-ant-…'],
+        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. claude-haiku-4-5-20251001, claude-sonnet-4-6'],
+    ],
+    'deepseek' => [
+        'api_key'         => ['label' => 'API Key',            'type' => 'password'],
+        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. deepseek-chat, deepseek-reasoner'],
+    ],
     default => [],
 };
 $creds = $integration->credentials ?? [];

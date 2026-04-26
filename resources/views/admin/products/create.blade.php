@@ -58,8 +58,50 @@
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('short_description') }}</textarea>
                     </x-admin.form-group>
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <x-admin.form-group x-data="aiDescGen()">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                            <button type="button" @click="open = !open"
+                                class="inline-flex items-center gap-1.5 text-xs font-medium text-purple-700 border border-purple-200 rounded-lg px-2.5 py-1 hover:bg-purple-50 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Generate with AI
+                            </button>
+                        </div>
+                        {{-- AI panel --}}
+                        <div x-show="open" x-transition class="mb-3 border border-purple-200 rounded-xl p-4 bg-purple-50 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tone</label>
+                                    <select x-model="tone" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                                        <option value="professional">Professional</option>
+                                        <option value="casual">Casual</option>
+                                        <option value="enthusiastic">Enthusiastic</option>
+                                        <option value="minimal">Minimal</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Length</label>
+                                    <select x-model="length" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                                        <option value="short">Short</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="long">Long</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Key Attributes <span class="font-normal text-gray-400">(optional)</span></label>
+                                <input type="text" x-model="attributes" placeholder="e.g. waterproof, bluetooth 5.0, 10h battery"
+                                    class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" @click="generate()" :disabled="loading"
+                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 transition-colors">
+                                    <span x-show="!loading">Generate</span>
+                                    <span x-show="loading">Generating…</span>
+                                </button>
+                                <span x-show="error" x-text="error" class="text-xs text-red-600"></span>
+                            </div>
+                        </div>
                         <div id="description-editor" class="bg-white"></div>
                         <textarea name="description" id="description-input" class="hidden">{{ old('description') }}</textarea>
                         @error('description')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
@@ -359,6 +401,34 @@
                 </div>
             </x-admin.card>
 
+            @if(\App\Models\SiteSetting::get('storefront.preorder_enabled'))
+            <x-admin.card>
+                <h3 class="text-base font-semibold text-gray-900 mb-4">Pre-order</h3>
+                <div class="space-y-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="preorder_enabled" value="1"
+                            {{ old('preorder_enabled') ? 'checked' : '' }}
+                            id="preorder-toggle"
+                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                        <span class="text-sm font-medium text-gray-700">Enable pre-order for this product</span>
+                    </label>
+                    <div id="preorder-fields" class="{{ old('preorder_enabled') ? '' : 'hidden' }} space-y-3">
+                        <x-admin.form-group>
+                            <label class="block text-sm font-medium text-gray-700">Pre-order Message <span class="font-normal text-gray-400">(optional)</span></label>
+                            <x-admin.input type="text" name="preorder_message"
+                                value="{{ old('preorder_message') }}"
+                                placeholder="e.g. Ships in 2-3 weeks" />
+                        </x-admin.form-group>
+                        <x-admin.form-group>
+                            <label class="block text-sm font-medium text-gray-700">Expected Date <span class="font-normal text-gray-400">(optional)</span></label>
+                            <x-admin.input type="date" name="preorder_expected_date"
+                                value="{{ old('preorder_expected_date') }}" />
+                        </x-admin.form-group>
+                    </div>
+                </div>
+            </x-admin.card>
+            @endif
+
             @php $oldSpecs = old('specifications', '[]'); @endphp
             <x-admin.card x-data="specEditor({{ $oldSpecs }})">
                 <div class="flex items-center justify-between mb-4">
@@ -558,6 +628,46 @@ function variantBuilder() {
                 valueIds: combo.map(v => v.id),
             }));
         },
+    };
+}
+
+// Pre-order toggle
+document.getElementById('preorder-toggle')?.addEventListener('change', function () {
+    document.getElementById('preorder-fields').classList.toggle('hidden', !this.checked);
+});
+
+function aiDescGen() {
+    return {
+        open: false,
+        loading: false,
+        error: '',
+        tone: 'professional',
+        length: 'medium',
+        attributes: '',
+
+        async generate() {
+            this.loading = true;
+            this.error   = '';
+            const name     = document.getElementById('prod-name')?.value || document.querySelector('[name="name"]')?.value || '';
+            const category = document.querySelector('[name="category_id"] option:checked')?.text || '';
+            const brand    = document.querySelector('[name="brand_id"] option:checked')?.text    || '';
+            try {
+                const res = await fetch('{{ route('admin.ai.product-description') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ name, category, brand, tone: this.tone, length: this.length, attributes: this.attributes }),
+                });
+                const json = await res.json();
+                if (json.error) { this.error = json.error; return; }
+                descQuill.setText('');
+                descQuill.clipboard.dangerouslyPasteHTML('<p>' + json.text.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>') + '</p>');
+                this.open = false;
+            } catch (e) {
+                this.error = 'Network error.';
+            } finally {
+                this.loading = false;
+            }
+        }
     };
 }
 </script>

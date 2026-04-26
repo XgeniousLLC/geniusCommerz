@@ -26,6 +26,7 @@ class Order extends Model
         'subtotal','shipping_cost','tax','total',
         'status','payment_status','payment_method','tracking_number',
         'courier_provider','consignment_id','courier_status','courier_data',
+        'is_preorder',
         'notes','admin_note','paid_at',
     ];
 
@@ -39,6 +40,7 @@ class Order extends Model
         'discount_amount'  => 'decimal:2',
         'paid_at'          => 'datetime',
         'courier_data'     => 'array',
+        'is_preorder'      => 'boolean',
     ];
 
     public const STATUSES         = ['pending','processing','shipped','delivered','cancelled','refunded'];

@@ -72,6 +72,9 @@ class HandleInertiaRequests extends Middleware
                 'freeShippingAbove'      => (float) SiteSetting::get('shipping.free_above', 0),
                 'cartGoals'              => json_decode(SiteSetting::get('cart.goals', '[]'), true) ?: [],
                 'mainNav'                => self::resolveMainNav(),
+                'visitorCounterEnabled'  => (bool) SiteSetting::get('storefront.visitor_counter_enabled'),
+                'visitorCounterMin'      => (int) SiteSetting::get('storefront.visitor_counter_min', 5),
+                'visitorCounterMax'      => (int) SiteSetting::get('storefront.visitor_counter_max', 20),
             ],
             'auth' => [
                 'user' => $request->user()

@@ -8,6 +8,7 @@ class Integration extends Model
 {
     public const COURIER_PROVIDERS = ['pathao', 'redx', 'steadfast'];
     public const SMS_PROVIDERS     = ['bulksmsbd', 'smsbd', 'twilio'];
+    public const AI_PROVIDERS      = ['openai', 'gemini', 'claude', 'deepseek'];
 
     protected $fillable = [
         'provider',
@@ -58,6 +59,14 @@ class Integration extends Model
             ->first();
     }
 
+    public static function defaultAi(): ?self
+    {
+        return static::whereIn('provider', self::AI_PROVIDERS)
+            ->where('is_default', true)
+            ->where('is_active', true)
+            ->first();
+    }
+
     /**
      * Set this integration as the default for its group (courier or sms),
      * unsetting all others in the same group first.
@@ -78,6 +87,9 @@ class Integration extends Model
         }
         if (in_array($this->provider, self::SMS_PROVIDERS)) {
             return self::SMS_PROVIDERS;
+        }
+        if (in_array($this->provider, self::AI_PROVIDERS)) {
+            return self::AI_PROVIDERS;
         }
         return null;
     }

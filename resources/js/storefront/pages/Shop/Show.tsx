@@ -88,9 +88,16 @@ export default function ShopShow({ product, related }: Props) {
   const comparePrice = selectedVariant ? selectedVariant.compare_at_price : product.compare_at_price;
   const discount = comparePrice ? Math.round((1 - displayPrice / comparePrice) * 100) : null;
 
-  const isInStock  = selectedVariant ? selectedVariant.in_stock : product.in_stock;
-  const stockQty   = selectedVariant ? selectedVariant.stock_qty : product.stock_qty;
-  const isLowStock = stockQty !== null && stockQty > 0 && stockQty <= 5;
+  const isInStock    = selectedVariant ? selectedVariant.in_stock : product.in_stock;
+  const stockQty     = selectedVariant ? selectedVariant.stock_qty : product.stock_qty;
+  const isLowStock   = stockQty !== null && stockQty > 0 && stockQty <= 5;
+  const isPreorder   = !isInStock && product.preorder_enabled;
+  const canAddToCart = isInStock || isPreorder;
+
+  const { visitorCounterEnabled, visitorCounterMin, visitorCounterMax } = site;
+  const visitorCount = visitorCounterEnabled
+    ? Math.floor(Math.random() * (visitorCounterMax - visitorCounterMin + 1)) + visitorCounterMin
+    : 0;
 
   const groupedOptions = product.variants.length > 0
     ? product.variants[0].options.map(o => o.attribute)
@@ -266,6 +273,17 @@ export default function ShopShow({ product, related }: Props) {
               }
             </div>
 
+            {/* Visitor counter */}
+            {visitorCounterEnabled && (
+              <div className="inline-flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full"
+                style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }}>
+                <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.14 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                </svg>
+                <span>{visitorCount} people are viewing this item right now</span>
+              </div>
+            )}
+
             {/* Qty + Buttons — Desktop (hidden on mobile, replaced by sticky bar) */}
             <div className="hidden lg:block space-y-2">
               <div className="flex items-center gap-3">
@@ -284,19 +302,30 @@ export default function ShopShow({ product, related }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                   </svg>
                 </button>
-                {/* Add to Cart */}
-                <button onClick={handleAddToCart} disabled={!isInStock}
-                  className={`flex-1 kb-btn kb-btn-lg flex items-center justify-center gap-2 ${added ? 'bg-green-600 text-white' : 'kb-btn-primary'} disabled:opacity-50`}>
+                {/* Add to Cart / Pre-order */}
+                <button onClick={handleAddToCart} disabled={!canAddToCart}
+                  className={`flex-1 kb-btn kb-btn-lg flex items-center justify-center gap-2 ${added ? 'bg-green-600 text-white' : isPreorder ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'kb-btn-primary'} disabled:opacity-50`}>
                   {added
                     ? <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>Added!</>
-                    : <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Add to Cart</>
+                    : isPreorder
+                      ? <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Pre-order Now</>
+                      : <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Add to Cart</>
                   }
                 </button>
               </div>
-              <button onClick={handleBuyNow} disabled={!isInStock}
+              {isPreorder && (product.preorder_message || product.preorder_expected_date) && (
+                <div className="flex items-center gap-2 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <span>
+                    {product.preorder_message || 'Available for pre-order'}
+                    {product.preorder_expected_date && <span className="ml-1 font-medium">· Expected: {new Date(product.preorder_expected_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+                  </span>
+                </div>
+              )}
+              <button onClick={handleBuyNow} disabled={!canAddToCart}
                 className="w-full kb-btn kb-btn-lg flex items-center justify-center gap-2 font-semibold disabled:opacity-50"
                 style={{ background: '#0f172a', color: '#fff' }}>
-                Buy Now
+                {isPreorder ? 'Pre-order & Checkout' : 'Buy Now'}
               </button>
             </div>
 

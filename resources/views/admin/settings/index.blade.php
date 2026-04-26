@@ -448,6 +448,44 @@
             </div>
         </x-admin.card>
 
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-2">Custom Product Visitor Counter</h3>
+            <p class="text-sm text-gray-500 mb-4">Shows "X people are viewing this item right now" on product pages with a random number within the configured range. Increases social proof and urgency.</p>
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="hidden" name="settings[storefront.visitor_counter_enabled]" value="0">
+                    <input type="checkbox" name="settings[storefront.visitor_counter_enabled]" value="1"
+                        {{ old('storefront.visitor_counter_enabled', $settings->get('storefront.visitor_counter_enabled')?->value) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    <span class="text-sm font-medium text-gray-700">Show visitor counter on product pages</span>
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <x-admin.form-group>
+                        <label class="block text-sm font-medium text-gray-700">Min Visitors</label>
+                        <x-admin.input type="number" name="settings[storefront.visitor_counter_min]" min="1"
+                            value="{{ old('storefront.visitor_counter_min', $settings->get('storefront.visitor_counter_min')?->value ?? '5') }}" />
+                    </x-admin.form-group>
+                    <x-admin.form-group>
+                        <label class="block text-sm font-medium text-gray-700">Max Visitors</label>
+                        <x-admin.input type="number" name="settings[storefront.visitor_counter_max]" min="1"
+                            value="{{ old('storefront.visitor_counter_max', $settings->get('storefront.visitor_counter_max')?->value ?? '20') }}" />
+                    </x-admin.form-group>
+                </div>
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-2">Pre-order Module</h3>
+            <p class="text-sm text-gray-500 mb-4">When enabled, individual products can be set to accept pre-orders even when out of stock. The "Add to Cart" button becomes "Pre-order Now" with an optional expected date.</p>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="hidden" name="settings[storefront.preorder_enabled]" value="0">
+                <input type="checkbox" name="settings[storefront.preorder_enabled]" value="1"
+                    {{ old('storefront.preorder_enabled', $settings->get('storefront.preorder_enabled')?->value) ? 'checked' : '' }}
+                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">Enable pre-order feature</span>
+            </label>
+        </x-admin.card>
+
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Storefront Settings</x-admin.button>
         </div>

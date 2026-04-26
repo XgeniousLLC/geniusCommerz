@@ -18,13 +18,15 @@
 @section('content')
 @php
     $groups = [
-        'Payments' => ['bkash', 'nagad', 'sslcommerz'],
-        'Couriers' => ['pathao', 'steadfast', 'redx'],
+        'AI Providers' => ['openai', 'gemini', 'claude', 'deepseek'],
+        'Payments'     => ['bkash', 'nagad', 'sslcommerz'],
+        'Couriers'     => ['pathao', 'steadfast', 'redx'],
         'SMS Gateways' => ['bulksmsbd', 'smsbd', 'twilio'],
-        'Services'  => ['fraudbd'],
+        'Services'     => ['fraudbd'],
     ];
     $courierProviders = \App\Models\Integration::COURIER_PROVIDERS;
     $smsProviders     = \App\Models\Integration::SMS_PROVIDERS;
+    $aiProviders      = \App\Models\Integration::AI_PROVIDERS;
 @endphp
 
 @foreach($groups as $groupName => $providers)
@@ -32,7 +34,9 @@
     @if($groupIntegrations->isNotEmpty())
         <div class="flex items-center justify-between mb-3 mt-6 first:mt-0">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">{{ $groupName }}</h2>
-            @if($groupName === 'Couriers')
+            @if($groupName === 'AI Providers')
+                <span class="text-xs text-gray-400">Only one AI provider can be the default</span>
+            @elseif($groupName === 'Couriers')
                 <span class="text-xs text-gray-400">Only one courier can be the default</span>
             @elseif($groupName === 'SMS Gateways')
                 <span class="text-xs text-gray-400">Only one gateway can be the default</span>
@@ -67,7 +71,7 @@
                         </a>
                     </div>
 
-                    @if(in_array($integration->provider, $courierProviders) || in_array($integration->provider, $smsProviders))
+                    @if(in_array($integration->provider, $courierProviders) || in_array($integration->provider, $smsProviders) || in_array($integration->provider, $aiProviders))
                         <div class="mt-3 pt-3 border-t border-gray-100">
                             @if($integration->is_default)
                                 <span class="text-xs text-blue-600 font-medium">✓ Currently default</span>

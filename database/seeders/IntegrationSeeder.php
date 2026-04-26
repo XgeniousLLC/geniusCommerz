@@ -22,6 +22,11 @@ class IntegrationSeeder extends Seeder
         ['provider' => 'bulksmsbd',    'label' => 'BulkSMSBD'],
         ['provider' => 'smsbd',        'label' => 'SMS.BD'],
         ['provider' => 'twilio',       'label' => 'Twilio'],
+        // AI Providers
+        ['provider' => 'openai',       'label' => 'OpenAI'],
+        ['provider' => 'gemini',       'label' => 'Google Gemini'],
+        ['provider' => 'claude',       'label' => 'Anthropic Claude'],
+        ['provider' => 'deepseek',     'label' => 'DeepSeek'],
     ];
 
     public function run(): void

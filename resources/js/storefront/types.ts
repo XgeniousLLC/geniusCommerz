@@ -18,6 +18,9 @@ export interface SiteSettings {
   freeShippingAbove: number;
   cartGoals: CartGoal[];
   mainNav: NavItem[];
+  visitorCounterEnabled: boolean;
+  visitorCounterMin: number;
+  visitorCounterMax: number;
 }
 
 export interface NavItem {
@@ -151,6 +154,9 @@ export interface ProductFull {
   return_policy: string | null;
   specifications: Array<{ key: string; value: string }>;
   meta: { meta_title: string | null; meta_description: string | null } | null;
+  preorder_enabled: boolean;
+  preorder_message: string | null;
+  preorder_expected_date: string | null;
 }
 
 export interface Brand {
