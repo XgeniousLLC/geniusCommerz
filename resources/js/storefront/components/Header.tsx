@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useCartDerived, useCartStore } from '../store/cartStore';
+import { useWishlistStore } from '../store/wishlistStore';
 import type { SharedProps } from '../types';
 
 export default function Header() {
@@ -9,6 +10,7 @@ export default function Header() {
   const url = usePage().url;
   const openCart = useCartStore(s => s.openCart);
   const { count } = useCartDerived();
+  const wishlistCount = useWishlistStore(s => s.items.length);
 
   function logout() {
     router.post('/logout');
@@ -51,15 +53,37 @@ export default function Header() {
                 {userOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl py-1 z-50 shadow-lg">
-                      <div className="px-4 py-2 text-xs border-b border-slate-100 text-slate-400">{auth.user.email}</div>
-                      <button
-                        onClick={logout}
-                        className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-ink)' }}
-                      >
-                        Sign out
-                      </button>
+                    <div className="absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl py-1 z-50 shadow-lg">
+                      <div className="px-4 py-2.5 border-b border-slate-100">
+                        <p className="text-sm font-semibold text-slate-800 truncate">{auth.user.name}</p>
+                        <p className="text-xs text-slate-400 truncate">{auth.user.email}</p>
+                      </div>
+                      {[
+                        { href: '/account', label: 'Dashboard' },
+                        { href: '/account/orders', label: 'My Orders' },
+                        { href: '/account/reviews', label: 'My Reviews' },
+                        { href: '/account/address', label: 'Address Book' },
+                        { href: '/account/refunds', label: 'Refunds' },
+                      ].map(item => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setUserOpen(false)}
+                          className="block px-4 py-2 text-sm hover:bg-slate-50 transition-colors"
+                          style={{ color: 'var(--kb-ink)' }}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <div className="border-t border-slate-100 mt-1 pt-1">
+                        <button
+                          onClick={() => { setUserOpen(false); logout(); }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 transition-colors"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-danger)' }}
+                        >
+                          Sign out
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
@@ -71,6 +95,16 @@ export default function Header() {
                 </svg>
               </Link>
             )}
+            <Link href="/wishlist" className="kb-nav-link relative" title="Wishlist">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center" style={{ background: 'var(--kb-danger)' }}>
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </span>
+              )}
+            </Link>
             <button onClick={openCart} className="kb-nav-link relative" title="Cart" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
