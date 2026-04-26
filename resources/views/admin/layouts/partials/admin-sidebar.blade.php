@@ -244,7 +244,7 @@
             <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
                 <x-admin.sidebar-link
                     :href="route('admin.settings.index')"
-                    :active="request()->routeIs('admin.settings.*') && !request()->is('admin/settings*tab=tracking*')"
+                    :active="request()->routeIs('admin.settings.*') && !in_array(request()->get('tab'), ['tracking','feeds'])"
                     icon="cog">
                     Settings
                 </x-admin.sidebar-link>
@@ -252,12 +252,18 @@
                     :href="route('admin.settings.index', ['tab' => 'tracking'])"
                     :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'tracking'"
                     icon="signal">
-                    Tracking & Feeds
+                    Tracking
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
+                    :href="route('admin.settings.index', ['tab' => 'feeds'])"
+                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'feeds'"
+                    icon="globe-alt">
+                    Product Feeds
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
                     :href="route('admin.sitemap.index')"
                     :active="request()->routeIs('admin.sitemap.*')"
-                    icon="globe-alt">
+                    icon="document-text">
                     Sitemap
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link

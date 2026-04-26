@@ -29,6 +29,7 @@
             'cart'       => 'Cart',
             'legal'      => 'Legal',
             'tracking'   => 'Tracking',
+            'feeds'      => 'Product Feeds',
         ] as $slug => $label)
             <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
                style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
@@ -937,84 +938,124 @@ $warnBoxStyle = 'margin-top:.75rem;padding:.75rem 1rem;background:#fffbeb;border
             </div>
         </x-admin.card>
 
-        {{-- ── Product Feeds ── --}}
+        <div class="flex justify-end">
+            <x-admin.button type="submit">Save Tracking Settings</x-admin.button>
+        </div>
+    </div>
+</form>
+@endif
+
+{{-- Product Feeds tab --}}
+@if($tab === 'feeds')
+@php
+$stepStyle = 'display:inline-flex;align-items:center;justify-content:center;width:1.375rem;height:1.375rem;border-radius:9999px;background:#2563eb;color:#fff;font-size:.7rem;font-weight:700;flex-shrink:0;margin-top:.1rem';
+@endphp
+<form method="POST" action="{{ route('admin.settings.update', 'feeds') }}">
+    @csrf
+    <div class="space-y-8">
+
+        {{-- Intro --}}
         <x-admin.card>
-            <div class="mb-4">
-                <h3 class="text-base font-semibold text-gray-900">Product Feeds</h3>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Product Feeds</h3>
+            <p class="text-sm text-gray-500">
+                Product feeds are files your store generates automatically containing your full product catalogue.
+                Google and Facebook read these files to show your products in Shopping ads and the Facebook/Instagram Shop.
+                Enable a feed below, then submit its URL to the relevant platform — the store keeps it up-to-date automatically.
+            </p>
+        </x-admin.card>
+
+        {{-- Google Merchant Center --}}
+        <x-admin.card>
+            <div class="mb-5">
+                <h3 class="text-base font-semibold text-gray-900">Google Merchant Center (Google Shopping)</h3>
                 <p class="text-sm text-gray-500 mt-0.5">
-                    Product feeds are files the store generates automatically containing your full product catalogue. Google and Facebook read these files to show your products in Shopping ads and the Facebook/Instagram Shop.
+                    Once enabled, Google can fetch your product list and show it in Google Shopping results, Google Images, and Search.
+                    It's free to list — you only pay when running Shopping Ads on top of it.
                 </p>
             </div>
 
-            <div class="space-y-5">
-
-                {{-- Google Merchant --}}
-                <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
-                    <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="mt-0.5">
-                            <input type="hidden" name="settings[tracking.google_merchant_enabled]" value="0">
-                            <input type="checkbox" name="settings[tracking.google_merchant_enabled]" value="1"
-                                id="gmc-toggle"
-                                {{ old('tracking.google_merchant_enabled', $settings->get('tracking.google_merchant_enabled')?->value) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                        </div>
-                        <div class="flex-1">
-                            <span class="block text-sm font-semibold text-gray-900">Google Merchant Center Feed</span>
-                            <span class="block text-xs text-gray-500 mt-0.5">
-                                Enables a product feed at
-                                <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{{ url('feeds/google-merchant.xml') }}</code>
-                                — submit this URL to Google Merchant Center so your products appear in Google Shopping.
-                            </span>
-                        </div>
-                    </label>
-                    <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
-                        <strong class="block mb-1">📋 How to submit to Google Merchant Center</strong>
-                        <ol class="space-y-1 pl-1">
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and click <strong>Save</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Go to <strong>merchants.google.com</strong> and sign in.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Navigate to <strong>Products → Feeds → Add a primary feed</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>Choose <strong>Scheduled fetch</strong>, paste the URL above, and set fetch frequency to <strong>Daily</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Google will review products within 1–3 business days and then show them in Shopping.</span></li>
-                        </ol>
+            <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
+                <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                    <div class="mt-0.5">
+                        <input type="hidden" name="settings[feeds.google_merchant_enabled]" value="0">
+                        <input type="checkbox" name="settings[feeds.google_merchant_enabled]" value="1"
+                            {{ old('feeds.google_merchant_enabled', $settings->get('feeds.google_merchant_enabled')?->value) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
                     </div>
-                </div>
-
-                {{-- Facebook Catalog --}}
-                <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
-                    <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div class="mt-0.5">
-                            <input type="hidden" name="settings[tracking.facebook_catalog_enabled]" value="0">
-                            <input type="checkbox" name="settings[tracking.facebook_catalog_enabled]" value="1"
-                                id="fb-catalog-toggle"
-                                {{ old('tracking.facebook_catalog_enabled', $settings->get('tracking.facebook_catalog_enabled')?->value) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                        </div>
-                        <div class="flex-1">
-                            <span class="block text-sm font-semibold text-gray-900">Facebook &amp; Instagram Shop Catalog Feed</span>
-                            <span class="block text-xs text-gray-500 mt-0.5">
-                                Enables a product feed at
-                                <code class="bg-gray-100 px-1 py-0.5 rounded text-gray-700">{{ url('feeds/facebook-catalog.json') }}</code>
-                                — submit this URL to Facebook Commerce Manager to power Dynamic Ads and the Instagram Shop.
-                            </span>
-                        </div>
-                    </label>
-                    <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
-                        <strong class="block mb-1">📋 How to submit to Facebook Commerce Manager</strong>
-                        <ol class="space-y-1 pl-1">
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and click <strong>Save</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Go to <strong>business.facebook.com → Commerce Manager</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Open your catalog → <strong>Data sources → Add items → Use a data feed</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>Choose <strong>Scheduled recurring upload</strong>, paste the URL above, set schedule to <strong>Daily</strong>.</span></li>
-                            <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Facebook will sync products automatically. You can then run <strong>Dynamic Product Ads</strong> or set up the <strong>Instagram Shop</strong>.</span></li>
-                        </ol>
+                    <div class="flex-1">
+                        <span class="block text-sm font-semibold text-gray-900">Enable Google Merchant Center Feed</span>
+                        <span class="block text-xs text-gray-500 mt-0.5">
+                            When enabled, the feed becomes publicly accessible at:<br>
+                            <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 text-xs mt-0.5 inline-block">{{ url('feeds/google-merchant.xml') }}</code>
+                        </span>
                     </div>
+                </label>
+                <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
+                    <strong class="block mb-2">📋 How to connect to Google Merchant Center — step by step</strong>
+                    <ol class="space-y-1.5 pl-1">
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span><strong>Enable</strong> the feed above and click <strong>Save Product Feed Settings</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Open <strong>merchants.google.com</strong> in a new tab and sign in with your Google account.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>If this is your first time, complete the <strong>Business information</strong> setup (name, country, currency).</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>In the left menu go to <strong>Products → Feeds</strong>, then click the blue <strong>+</strong> button.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Select your country and language, click <strong>Continue</strong>. Give the feed a name (e.g. "Store Products").</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">6</span><span>Choose <strong>Scheduled fetch</strong> as the input method.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">7</span><span>Paste the feed URL above into the <strong>File URL</strong> field. Set fetch frequency to <strong>Daily</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">8</span><span>Click <strong>Save</strong>. Google will fetch and review your products within <strong>1–3 business days</strong>.</span></li>
+                    </ol>
+                    <p class="mt-2 text-xs" style="color:#075985">
+                        💡 <strong>Tip:</strong> After approval, go to <strong>Growth → Manage programs → Free listings</strong> to show products for free in Google Shopping.
+                    </p>
                 </div>
+            </div>
+        </x-admin.card>
 
+        {{-- Facebook / Instagram Shop --}}
+        <x-admin.card>
+            <div class="mb-5">
+                <h3 class="text-base font-semibold text-gray-900">Facebook &amp; Instagram Shop (Commerce Manager)</h3>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Once enabled, Facebook reads your product list and syncs it to your Facebook/Instagram Shop and Dynamic Product Ads.
+                    Customers can browse and buy without leaving the app, or click through to your store.
+                </p>
+            </div>
+
+            <div style="border:1px solid #e5e7eb;border-radius:.75rem;overflow:hidden">
+                <label class="flex items-start gap-4 p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                    <div class="mt-0.5">
+                        <input type="hidden" name="settings[feeds.facebook_catalog_enabled]" value="0">
+                        <input type="checkbox" name="settings[feeds.facebook_catalog_enabled]" value="1"
+                            {{ old('feeds.facebook_catalog_enabled', $settings->get('feeds.facebook_catalog_enabled')?->value) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    </div>
+                    <div class="flex-1">
+                        <span class="block text-sm font-semibold text-gray-900">Enable Facebook &amp; Instagram Catalog Feed</span>
+                        <span class="block text-xs text-gray-500 mt-0.5">
+                            When enabled, the feed becomes publicly accessible at:<br>
+                            <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 text-xs mt-0.5 inline-block">{{ url('feeds/facebook-catalog.json') }}</code>
+                        </span>
+                    </div>
+                </label>
+                <div style="padding:.875rem 1rem 1rem;background:#f0f9ff;border-top:1px solid #bae6fd;font-size:.8rem;color:#0369a1;line-height:1.6">
+                    <strong class="block mb-2">📋 How to connect to Facebook Commerce Manager — step by step</strong>
+                    <ol class="space-y-1.5 pl-1">
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span><strong>Enable</strong> the feed above and click <strong>Save Product Feed Settings</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Open <strong>business.facebook.com</strong> → click <strong>Commerce Manager</strong> in the left menu.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>If you don't have a catalog yet, click <strong>Get Started</strong> and select <strong>Ecommerce</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">4</span><span>Inside your catalog, click <strong>Data sources</strong> → <strong>Add items</strong> → <strong>Use a data feed</strong> → <strong>Next</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">5</span><span>Choose <strong>Set a URL for scheduled uploads</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">6</span><span>Paste the feed URL above into the <strong>Data feed URL</strong> field. Set upload schedule to <strong>Daily</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">7</span><span>Click <strong>Upload</strong>. Facebook will import your products immediately, then re-sync daily.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">8</span><span>Once products are approved, go to <strong>Shop</strong> to set up your Instagram/Facebook storefront, or use the catalog in <strong>Dynamic Ads</strong>.</span></li>
+                    </ol>
+                    <p class="mt-2 text-xs" style="color:#075985">
+                        💡 <strong>Tip:</strong> Make sure your Meta Pixel is connected to the same catalog in Commerce Manager — this unlocks <strong>Dynamic Product Ads</strong> (showing the exact products a visitor viewed).
+                    </p>
+                </div>
             </div>
         </x-admin.card>
 
         <div class="flex justify-end">
-            <x-admin.button type="submit">Save Tracking Settings</x-admin.button>
+            <x-admin.button type="submit">Save Product Feed Settings</x-admin.button>
         </div>
     </div>
 </form>

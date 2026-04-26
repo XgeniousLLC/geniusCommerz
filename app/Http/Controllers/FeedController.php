@@ -10,7 +10,7 @@ class FeedController extends Controller
 {
     public function googleMerchant(): Response
     {
-        if (! SiteSetting::get('tracking.google_merchant_enabled')) {
+        if (! SiteSetting::get('feeds.google_merchant_enabled')) {
             abort(404);
         }
 
@@ -77,7 +77,7 @@ class FeedController extends Controller
 
     public function facebookCatalog(): Response
     {
-        if (! SiteSetting::get('tracking.facebook_catalog_enabled')) {
+        if (! SiteSetting::get('feeds.facebook_catalog_enabled')) {
             abort(404);
         }
 

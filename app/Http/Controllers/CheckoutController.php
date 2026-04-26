@@ -23,12 +23,27 @@ class CheckoutController extends Controller
     {
         $shippingCost = (float) SiteSetting::get('shipping.flat_rate', 60);
         $freeAbove    = (float) SiteSetting::get('shipping.free_above', 0);
-        $paymentMethods = [
-            'cod'    => 'Cash on Delivery',
-            'bkash'  => 'bKash',
-            'nagad'  => 'Nagad',
-            'rocket' => 'Rocket',
+
+        $allMethods = [
+            'cod'        => ['label' => 'Cash on Delivery', 'key' => 'payment.cod_enabled'],
+            'bkash'      => ['label' => 'bKash',            'key' => 'payment.bkash_enabled'],
+            'nagad'      => ['label' => 'Nagad',            'key' => 'payment.nagad_enabled'],
+            'rocket'     => ['label' => 'Rocket',           'key' => 'payment.rocket_enabled'],
+            'sslcommerz' => ['label' => 'Card / Net Banking','key' => 'payment.sslcommerz_enabled'],
+            'stripe'     => ['label' => 'Credit / Debit Card','key' => 'payment.stripe_enabled'],
         ];
+
+        $paymentMethods = [];
+        foreach ($allMethods as $value => $meta) {
+            if (SiteSetting::get($meta['key'])) {
+                $paymentMethods[$value] = $meta['label'];
+            }
+        }
+
+        // Always fall back to COD if nothing is enabled
+        if (empty($paymentMethods)) {
+            $paymentMethods['cod'] = 'Cash on Delivery';
+        }
 
         $loyaltyEnabled = (bool) SiteSetting::get('loyalty.enabled', false);
         $loyaltyBalance = 0;
