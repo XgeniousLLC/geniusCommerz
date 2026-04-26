@@ -229,7 +229,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
           <div className="flex rounded-2xl overflow-hidden shadow-md" style={{ minHeight: 380 }}>
 
             {/* ── Category Sidebar (desktop only) ───────────────────── */}
-            <div className="hidden lg:flex flex-col shrink-0 bg-white border-r border-gray-100" style={{ width: 240 }}>
+            {site.showCategories !== false && <div className="hidden lg:flex flex-col shrink-0 bg-white border-r border-gray-100" style={{ width: 240 }}>
 
               {/* Header */}
               <div className="flex items-center gap-3 px-4 py-3.5 font-bold text-sm uppercase tracking-widest text-white select-none"
@@ -275,7 +275,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
                 View All Products
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
               </Link>
-            </div>
+            </div>}
 
             {/* ── Banner Slider ──────────────────────────────────────── */}
             <div className="flex-1 relative overflow-hidden" style={{ minHeight: 380 }}>
@@ -393,7 +393,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
           </div>{/* end flex */}
 
           {/* ── Mobile: category pills below banner ──────────────────── */}
-          <div className="lg:hidden mt-3 -mx-3 sm:-mx-4 px-3 sm:px-4 overflow-x-auto">
+          {site.showCategories !== false && <div className="lg:hidden mt-3 -mx-3 sm:-mx-4 px-3 sm:px-4 overflow-x-auto">
             <div className="flex gap-2 pb-1 min-w-max">
               <Link href="/shop"
                 className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap border transition-colors hover:bg-blue-50"
@@ -408,7 +408,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
                 </Link>
               ))}
             </div>
-          </div>
+          </div>}
 
         </div>
       </section>
@@ -443,7 +443,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       </section>
 
       {/* ═══ FEATURED PRODUCTS ═══════════════════════════════════════════════ */}
-      {featuredProducts.length > 0 && (
+      {site.showFeaturedProducts !== false && featuredProducts.length > 0 && (
         <section style={{ background: 'var(--kb-primary-50)' }}>
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 lg:py-12">
             <SectionHeader title="⚡ Featured Products" href="/shop?sort=featured"/>
@@ -477,7 +477,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       </section>
 
       {/* ═══ NEW ARRIVALS ════════════════════════════════════════════════════ */}
-      {newArrivals.length > 0 && (
+      {site.showNewArrivals !== false && newArrivals.length > 0 && (
         <section className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pb-8 lg:pb-12">
           <SectionHeader title="🆕 New Arrivals" href="/shop?sort=newest"/>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 lg:gap-4">
@@ -492,7 +492,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       )}
 
       {/* ═══ BLOG POSTS ══════════════════════════════════════════════════════ */}
-      {latestPosts.length > 0 && (
+      {site.showBlog !== false && latestPosts.length > 0 && (
         <section style={{ background: '#F8FAFF' }}>
           <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 lg:py-12">
             <SectionHeader title="From the Blog" href="/blog"/>

@@ -1,7 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
 import Layout from '../../layouts/Layout';
-import type { Brand, Paginated, ProductCard, ShopCategory } from '../../types';
+import type { Brand, Paginated, ProductCard, SharedProps, ShopCategory } from '../../types';
 
 interface Filters {
   q?: string;
@@ -94,7 +94,10 @@ export default function ShopIndex({
   activeCategorySlug, activeCategoryName,
   activeBrandSlug, activeBrandName,
 }: Props) {
-  const [localFilters, setLocalFilters] = useState<Filters>(filters);
+  const { site } = usePage<SharedProps>().props;
+  const showFilters   = site.shopShowFilters !== false;
+  const defaultSort   = site.shopDefaultSort ?? 'newest';
+  const [localFilters, setLocalFilters] = useState<Filters>({ sort: defaultSort, ...filters });
   const [sidebarOpen, setSidebarOpen]   = useState(false);
 
   const baseUrl = activeCategorySlug
@@ -223,7 +226,7 @@ export default function ShopIndex({
           </form>
 
           {/* Sort — always visible */}
-          <select value={localFilters.sort ?? 'newest'}
+          <select value={localFilters.sort ?? defaultSort}
             onChange={e => update('sort', e.target.value)}
             className="kb-input text-xs sm:text-sm shrink-0 max-w-[110px] sm:max-w-[160px]">
             <option value="newest">Newest</option>
@@ -233,23 +236,27 @@ export default function ShopIndex({
           </select>
 
           {/* Filter drawer toggle — mobile */}
-          <button onClick={() => setSidebarOpen(o => !o)}
-            className="lg:hidden kb-btn text-sm flex items-center gap-1.5 shrink-0 px-3">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M10 12h4"/>
-            </svg>
-            <span className="hidden sm:inline">Filter</span>
-          </button>
+          {showFilters && (
+            <button onClick={() => setSidebarOpen(o => !o)}
+              className="lg:hidden kb-btn text-sm flex items-center gap-1.5 shrink-0 px-3">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M10 12h4"/>
+              </svg>
+              <span className="hidden sm:inline">Filter</span>
+            </button>
+          )}
         </div>
 
         <div className="flex gap-6">
           {/* Sidebar desktop */}
-          <div className="hidden lg:block w-52 shrink-0">
-            <SidebarContent />
-          </div>
+          {showFilters && (
+            <div className="hidden lg:block w-52 shrink-0">
+              <SidebarContent />
+            </div>
+          )}
 
           {/* Mobile filter drawer */}
-          {sidebarOpen && (
+          {showFilters && sidebarOpen && (
             <div className="lg:hidden fixed inset-0 z-50 flex">
               <div className="fixed inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
               <div className="relative bg-white w-72 h-full overflow-y-auto p-5 shadow-xl ml-auto">

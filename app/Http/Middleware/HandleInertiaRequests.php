@@ -149,6 +149,36 @@ class HandleInertiaRequests extends Middleware
                 'saleAlertIntervalMin'   => (int) SiteSetting::get('storefront.sale_alert_interval_min', 10),
                 'saleAlertIntervalMax'   => (int) SiteSetting::get('storefront.sale_alert_interval_max', 30),
                 'saleAlertProducts'      => self::resolveSaleAlertProducts(),
+                // Footer
+                'newsletterEnabled'      => (bool) SiteSetting::get('storefront.newsletter_enabled', '1'),
+                'newsletterHeading'      => SiteSetting::get('storefront.newsletter_heading', 'Subscribe to our newsletter'),
+                'socialLinks'            => [
+                    'facebook'  => SiteSetting::get('storefront.facebook_url', ''),
+                    'instagram' => SiteSetting::get('storefront.instagram_url', ''),
+                    'youtube'   => SiteSetting::get('storefront.youtube_url', ''),
+                    'tiktok'    => SiteSetting::get('storefront.tiktok_url', ''),
+                    'twitter'   => SiteSetting::get('storefront.twitter_url', ''),
+                    'linkedin'  => SiteSetting::get('storefront.linkedin_url', ''),
+                ],
+                'footerCol1'             => [
+                    'title' => SiteSetting::get('storefront.footer_col1_title', 'Help'),
+                    'links' => json_decode(SiteSetting::get('storefront.footer_col1_links', '[]'), true) ?: [],
+                ],
+                'footerCol2'             => [
+                    'title' => SiteSetting::get('storefront.footer_col2_title', 'Company'),
+                    'links' => json_decode(SiteSetting::get('storefront.footer_col2_links', '[]'), true) ?: [],
+                ],
+                // Shop
+                'shopPerPage'            => (int) SiteSetting::get('storefront.shop_per_page', 12),
+                'shopDefaultSort'        => SiteSetting::get('storefront.shop_default_sort', 'newest'),
+                'shopLayout'             => SiteSetting::get('storefront.shop_layout', 'grid'),
+                'shopShowFilters'        => (bool) SiteSetting::get('storefront.shop_show_filters', '1'),
+                'shopShowOutOfStock'     => (bool) SiteSetting::get('storefront.shop_show_out_of_stock', '1'),
+                // Homepage sections
+                'showFeaturedProducts'   => (bool) SiteSetting::get('storefront.show_featured_products', '1'),
+                'showNewArrivals'        => (bool) SiteSetting::get('storefront.show_new_arrivals', '1'),
+                'showCategories'         => (bool) SiteSetting::get('storefront.show_categories', '1'),
+                'showBlog'               => (bool) SiteSetting::get('storefront.show_blog', '1'),
             ],
             'auth' => [
                 'user' => $request->user()

@@ -21,6 +21,23 @@ export interface SiteSettings {
   visitorCounterEnabled: boolean;
   visitorCounterMin: number;
   visitorCounterMax: number;
+  // Footer
+  newsletterEnabled: boolean;
+  newsletterHeading: string;
+  socialLinks: { facebook: string; instagram: string; youtube: string; tiktok: string; twitter: string; linkedin: string };
+  footerCol1: { title: string; links: Array<{ label: string; url: string }> };
+  footerCol2: { title: string; links: Array<{ label: string; url: string }> };
+  // Shop
+  shopPerPage: number;
+  shopDefaultSort: string;
+  shopLayout: string;
+  shopShowFilters: boolean;
+  shopShowOutOfStock: boolean;
+  // Homepage sections
+  showFeaturedProducts: boolean;
+  showNewArrivals: boolean;
+  showCategories: boolean;
+  showBlog: boolean;
   saleAlertEnabled: boolean;
   saleAlertIntervalMin: number;
   saleAlertIntervalMax: number;

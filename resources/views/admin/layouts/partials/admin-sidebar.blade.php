@@ -115,6 +115,30 @@
             Social Proof
         </x-admin.sidebar-link>
 
+        {{-- Storefront --}}
+        @php $storefrontOpen = request()->routeIs('admin.storefront.*'); @endphp
+        <div x-data="{ open: {{ $storefrontOpen ? 'true' : 'false' }} }">
+            <button type="button" @click="open = !open"
+                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
+                       {{ $storefrontOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
+                <span>Storefront</span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
+                <x-admin.sidebar-link :href="route('admin.storefront.homepage')" :active="request()->routeIs('admin.storefront.homepage')" icon="home">
+                    Homepage
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.storefront.footer')" :active="request()->routeIs('admin.storefront.footer')" icon="document-text">
+                    Footer
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.storefront.shop')" :active="request()->routeIs('admin.storefront.shop')" icon="shopping-bag">
+                    Shop
+                </x-admin.sidebar-link>
+            </div>
+        </div>
+
         {{-- Reports --}}
         @php $reportsOpen = request()->routeIs('admin.reports.*'); @endphp
         <div x-data="{ open: {{ $reportsOpen ? 'true' : 'false' }} }">

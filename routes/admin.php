@@ -101,6 +101,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Coupons
         Route::resource('coupons', CouponController::class)->except(['show']);
 
+        // Storefront pages
+        Route::get('/storefront/homepage',  [\App\Http\Controllers\Admin\StorefrontPageController::class, 'homepage'])->name('storefront.homepage');
+        Route::post('/storefront/homepage', [\App\Http\Controllers\Admin\StorefrontPageController::class, 'updateHomepage'])->name('storefront.homepage.update');
+        Route::get('/storefront/footer',    [\App\Http\Controllers\Admin\StorefrontPageController::class, 'footer'])->name('storefront.footer');
+        Route::post('/storefront/footer',   [\App\Http\Controllers\Admin\StorefrontPageController::class, 'updateFooter'])->name('storefront.footer.update');
+        Route::get('/storefront/shop',      [\App\Http\Controllers\Admin\StorefrontPageController::class, 'shop'])->name('storefront.shop');
+        Route::post('/storefront/shop',     [\App\Http\Controllers\Admin\StorefrontPageController::class, 'updateShop'])->name('storefront.shop.update');
+
         // Social Proof
         Route::get('/social-proof', [\App\Http\Controllers\Admin\SocialProofController::class, 'index'])->name('social-proof.index');
         Route::post('/social-proof', [\App\Http\Controllers\Admin\SocialProofController::class, 'update'])->name('social-proof.update');
