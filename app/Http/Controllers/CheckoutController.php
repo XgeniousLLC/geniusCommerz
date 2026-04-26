@@ -275,6 +275,25 @@ class CheckoutController extends Controller
             } catch (\Throwable) {}
         }
 
+        // TikTok Events API — Purchase event
+        (new \App\Services\TikTokService())->sendPurchase(
+            [
+                'id'       => $order->id,
+                'total'    => $order->total,
+                'currency' => 'BDT',
+                'items'    => $order->items->map(fn($i) => [
+                    'product_id'   => $i->product_id,
+                    'product_name' => $i->product_name,
+                    'quantity'     => $i->quantity,
+                    'price'        => (float) $i->unit_price,
+                ])->all(),
+            ],
+            email:     $order->customer_email,
+            phone:     $order->customer_phone,
+            ip:        $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
         // GA4 Measurement Protocol — purchase event
         if ($ga4MId && $ga4Secret) {
             try {

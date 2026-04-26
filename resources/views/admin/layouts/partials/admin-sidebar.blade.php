@@ -107,6 +107,14 @@
             Loyalty
         </x-admin.sidebar-link>
 
+        {{-- Social Proof --}}
+        <x-admin.sidebar-link
+            :href="route('admin.social-proof.index')"
+            :active="request()->routeIs('admin.social-proof.*')"
+            icon="trending-up">
+            Social Proof
+        </x-admin.sidebar-link>
+
         {{-- Reports --}}
         @php $reportsOpen = request()->routeIs('admin.reports.*'); @endphp
         <div x-data="{ open: {{ $reportsOpen ? 'true' : 'false' }} }">
@@ -268,9 +276,15 @@
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
                     :href="route('admin.integrations.index')"
-                    :active="request()->routeIs('admin.integrations.*')"
+                    :active="request()->routeIs('admin.integrations.*') && !request()->routeIs('admin.ai-settings.*')"
                     icon="puzzle">
                     Integrations
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link
+                    :href="route('admin.ai-settings.index')"
+                    :active="request()->routeIs('admin.ai-settings.*')"
+                    icon="lightning-bolt">
+                    AI Settings
                 </x-admin.sidebar-link>
                 <x-admin.sidebar-link
                     :href="route('admin.languages.index')"

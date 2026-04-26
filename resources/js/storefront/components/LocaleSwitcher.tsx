@@ -1,17 +1,8 @@
 import { usePage } from '@inertiajs/react';
 import type { SharedProps } from '../types';
 
-interface Language {
-  name: string;
-  code: string;
-}
-
-interface Props {
-  languages: Language[];
-}
-
-export default function LocaleSwitcher({ languages }: Props) {
-  const { locale } = usePage<SharedProps>().props;
+export default function LocaleSwitcher() {
+  const { locale, languages } = usePage<SharedProps>().props;
 
   if (!languages || languages.length <= 1) return null;
 

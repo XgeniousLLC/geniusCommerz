@@ -21,6 +21,10 @@ export interface SiteSettings {
   visitorCounterEnabled: boolean;
   visitorCounterMin: number;
   visitorCounterMax: number;
+  saleAlertEnabled: boolean;
+  saleAlertIntervalMin: number;
+  saleAlertIntervalMax: number;
+  saleAlertProducts: Array<{ id: number; name: string; image: string | null }>;
 }
 
 export interface NavItem {
@@ -240,6 +244,8 @@ export interface SharedProps {
   locale: string;
   strings: Record<string, string>;
   languages: Array<{ name: string; code: string }>;
+  multiLanguageEnabled: boolean;
   currencies: Currency[];
+  multiCurrencyEnabled: boolean;
   activeCurrency: Currency;
 }

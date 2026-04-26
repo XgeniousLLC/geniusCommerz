@@ -6,6 +6,7 @@ use App\Models\Currency;
 use App\Models\Language;
 use App\Models\Media;
 use App\Models\Menu;
+use App\Models\Product;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -66,6 +67,22 @@ class HandleInertiaRequests extends Middleware
             ])->values()->toArray();
     }
 
+    private static function resolveSaleAlertProducts(): array
+    {
+        $ids = json_decode(SiteSetting::get('storefront.sale_alert_product_ids', '[]'), true);
+        if (empty($ids) || !is_array($ids)) return [];
+
+        return Product::whereIn('id', $ids)
+            ->where('status', 'active')
+            ->with('images')
+            ->get(['id', 'name'])
+            ->map(fn ($p) => [
+                'id'    => $p->id,
+                'name'  => $p->name,
+                'image' => $p->images->first()?->getUrl('thumb'),
+            ])->values()->toArray();
+    }
+
     public function version(Request $request): ?string
     {
         return parent::version($request);
@@ -78,23 +95,31 @@ class HandleInertiaRequests extends Middleware
         $logoUrl        = $logoMediaId    ? Media::find((int) $logoMediaId)?->getUrl('thumb')  : null;
         $faviconUrl     = $faviconMediaId ? Media::find((int) $faviconMediaId)?->getUrl()      : null;
 
-        $i18n      = self::resolveTranslations($request);
-        $languages = Language::where('is_active', true)->orderByDesc('is_default')->orderBy('name')
-            ->get(['name', 'code'])->toArray();
+        $i18n                  = self::resolveTranslations($request);
+        $multiLanguageEnabled  = (bool) SiteSetting::get('general.multilingual_enabled', '0');
+        $languages             = $multiLanguageEnabled
+            ? Language::where('is_active', true)->orderByDesc('is_default')->orderBy('name')
+                ->get(['name', 'code'])->toArray()
+            : [];
 
-        $currencies     = Currency::where('is_active', true)->orderByDesc('is_default')->orderBy('code')
-            ->get(['code', 'symbol', 'name', 'rate', 'is_default'])->toArray();
+        $multiCurrencyEnabled = (bool) SiteSetting::get('currencies.enabled', '0');
+        $currencies     = $multiCurrencyEnabled
+            ? Currency::where('is_active', true)->orderByDesc('is_default')->orderBy('code')
+                ->get(['code', 'symbol', 'name', 'rate', 'is_default'])->toArray()
+            : [];
         $currencyCode   = $request->cookie('currency');
         $activeCurrency = collect($currencies)->firstWhere('code', $currencyCode)
             ?? collect($currencies)->firstWhere('is_default', true)
             ?? ($currencies[0] ?? ['code' => 'BDT', 'symbol' => '৳', 'name' => 'Bangladeshi Taka', 'rate' => 1.0, 'is_default' => true]);
 
         return array_merge(parent::share($request), [
-            'locale'         => $i18n['locale'],
-            'strings'        => $i18n['strings'],
-            'languages'      => $languages,
-            'currencies'     => $currencies,
-            'activeCurrency' => $activeCurrency,
+            'locale'               => $i18n['locale'],
+            'strings'              => $i18n['strings'],
+            'languages'            => $languages,
+            'multiLanguageEnabled' => $multiLanguageEnabled,
+            'currencies'           => $currencies,
+            'multiCurrencyEnabled' => $multiCurrencyEnabled,
+            'activeCurrency'       => $activeCurrency,
             'site' => [
                 'name'        => SiteSetting::get('general.site_name', config('app.name')),
                 'tagline'     => SiteSetting::get('general.site_tagline', ''),
@@ -118,6 +143,10 @@ class HandleInertiaRequests extends Middleware
                 'visitorCounterEnabled'  => (bool) SiteSetting::get('storefront.visitor_counter_enabled'),
                 'visitorCounterMin'      => (int) SiteSetting::get('storefront.visitor_counter_min', 5),
                 'visitorCounterMax'      => (int) SiteSetting::get('storefront.visitor_counter_max', 20),
+                'saleAlertEnabled'       => (bool) SiteSetting::get('storefront.sale_alert_enabled'),
+                'saleAlertIntervalMin'   => (int) SiteSetting::get('storefront.sale_alert_interval_min', 10),
+                'saleAlertIntervalMax'   => (int) SiteSetting::get('storefront.sale_alert_interval_max', 30),
+                'saleAlertProducts'      => self::resolveSaleAlertProducts(),
             ],
             'auth' => [
                 'user' => $request->user()

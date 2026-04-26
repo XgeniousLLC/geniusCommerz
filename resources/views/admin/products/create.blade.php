@@ -109,6 +109,55 @@
                 </div>
             </x-admin.card>
 
+            {{-- Warranty & Returns --}}
+            <x-admin.card>
+                <h3 class="text-base font-semibold text-gray-900 mb-4">Warranty &amp; Returns</h3>
+                <div class="space-y-4">
+                    <x-admin.form-group>
+                        <label class="block text-sm font-medium text-gray-700">Warranty</label>
+                        <x-admin.input type="text" name="warranty"
+                            value="{{ old('warranty') }}"
+                            placeholder="e.g. 1 year manufacturer warranty" />
+                        <p class="text-xs text-gray-400 mt-1">Leave blank to hide warranty info on the product page.</p>
+                    </x-admin.form-group>
+                    <x-admin.form-group>
+                        <label class="block text-sm font-medium text-gray-700">Return Policy</label>
+                        <textarea name="return_policy" rows="3"
+                            placeholder="Leave blank to use the global return policy from Settings → Storefront"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('return_policy') }}</textarea>
+                        <p class="text-xs text-gray-400 mt-1">Overrides the global return policy for this product only.</p>
+                    </x-admin.form-group>
+                </div>
+            </x-admin.card>
+
+            {{-- Specifications --}}
+            @php $oldSpecs = old('specifications', '[]'); @endphp
+            <x-admin.card x-data="specEditor({{ $oldSpecs }})">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-semibold text-gray-900">Specifications</h3>
+                    <button type="button" @click="add()"
+                        class="text-xs font-medium text-blue-600 hover:text-blue-800">+ Add row</button>
+                </div>
+                <div class="space-y-2">
+                    <template x-for="(row, i) in rows" :key="i">
+                        <div class="flex items-center gap-2">
+                            <input type="text" x-model="row.key" placeholder="e.g. Material"
+                                class="flex-1 rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                            <input type="text" x-model="row.value" placeholder="e.g. Cotton 100%"
+                                class="flex-1 rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                            <button type="button" @click="remove(i)"
+                                class="shrink-0 w-8 h-8 flex items-center justify-center rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </template>
+                    <p x-show="rows.length === 0" class="text-sm text-gray-400 text-center py-3 border border-dashed border-gray-200 rounded-md">
+                        No specifications added yet.
+                    </p>
+                </div>
+                <input type="hidden" name="specifications" :value="JSON.stringify(rows.filter(r => r.key.trim()))">
+            </x-admin.card>
+
             {{-- Pricing / Variants --}}
             <x-admin.card x-data="variantBuilder()" x-init="init()">
                 <div class="flex items-center justify-between mb-4">
@@ -361,7 +410,7 @@
                     </div>
                     <p x-show="error" x-text="error" class="text-red-500 text-xs mt-1"></p>
                 </div>
-                <div id="categories-list" class="space-y-1 max-h-56 overflow-y-auto">
+                <div id="categories-list" class="space-y-1 max-h-[300px] overflow-y-auto">
                     @foreach($categories as $cat)
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="categories[]" value="{{ $cat->id }}"
@@ -378,26 +427,6 @@
                         </label>
                         @endforeach
                     @endforeach
-                </div>
-            </x-admin.card>
-
-            <x-admin.card>
-                <h3 class="text-base font-semibold text-gray-900 mb-4">Warranty &amp; Returns</h3>
-                <div class="space-y-4">
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Warranty</label>
-                        <x-admin.input type="text" name="warranty"
-                            value="{{ old('warranty') }}"
-                            placeholder="e.g. 1 year manufacturer warranty" />
-                        <p class="text-xs text-gray-400 mt-1">Leave blank to hide warranty info on the product page.</p>
-                    </x-admin.form-group>
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Return Policy</label>
-                        <textarea name="return_policy" rows="3"
-                            placeholder="Leave blank to use the global return policy from Settings → Storefront"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('return_policy') }}</textarea>
-                        <p class="text-xs text-gray-400 mt-1">Overrides the global return policy for this product only.</p>
-                    </x-admin.form-group>
                 </div>
             </x-admin.card>
 
@@ -428,33 +457,6 @@
                 </div>
             </x-admin.card>
             @endif
-
-            @php $oldSpecs = old('specifications', '[]'); @endphp
-            <x-admin.card x-data="specEditor({{ $oldSpecs }})">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-semibold text-gray-900">Specifications</h3>
-                    <button type="button" @click="add()"
-                        class="text-xs font-medium text-blue-600 hover:text-blue-800">+ Add row</button>
-                </div>
-                <div class="space-y-2">
-                    <template x-for="(row, i) in rows" :key="i">
-                        <div class="flex items-center gap-2">
-                            <input type="text" x-model="row.key" placeholder="e.g. Material"
-                                class="flex-1 rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-                            <input type="text" x-model="row.value" placeholder="e.g. Cotton 100%"
-                                class="flex-1 rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-                            <button type="button" @click="remove(i)"
-                                class="shrink-0 w-8 h-8 flex items-center justify-center rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                    </template>
-                    <p x-show="rows.length === 0" class="text-sm text-gray-400 text-center py-3 border border-dashed border-gray-200 rounded-md">
-                        No specifications added yet.
-                    </p>
-                </div>
-                <input type="hidden" name="specifications" :value="JSON.stringify(rows.filter(r => r.key.trim()))">
-            </x-admin.card>
 
             <div class="flex space-x-3">
                 <x-admin.button type="submit" class="flex-1 justify-center">Save Product</x-admin.button>

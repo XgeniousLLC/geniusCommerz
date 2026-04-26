@@ -17,6 +17,16 @@ class IntegrationController extends Controller
         return view('admin.integrations.index', compact('integrations'));
     }
 
+    public function aiSettings(): View
+    {
+        $integrations = Integration::whereIn('provider', Integration::AI_PROVIDERS)
+            ->orderByDesc('is_default')
+            ->orderBy('provider')
+            ->get();
+
+        return view('admin.ai-settings.index', compact('integrations'));
+    }
+
     public function edit(Integration $integration): View
     {
         return view('admin.integrations.edit', compact('integration'));
@@ -40,7 +50,11 @@ class IntegrationController extends Controller
             'notes'       => $request->input('notes'),
         ]);
 
-        return redirect()->route('admin.integrations.index')
+        $redirect = in_array($integration->provider, Integration::AI_PROVIDERS)
+            ? route('admin.ai-settings.index')
+            : route('admin.integrations.index');
+
+        return redirect($redirect)
             ->with('success', "{$integration->label} credentials saved.");
     }
 
@@ -62,7 +76,11 @@ class IntegrationController extends Controller
 
         $integration->setAsDefault();
 
-        return redirect()->route('admin.integrations.index')
+        $redirect = $group === 'ai'
+            ? route('admin.ai-settings.index')
+            : route('admin.integrations.index');
+
+        return redirect($redirect)
             ->with('success', "{$integration->label} is now the default {$group}.");
     }
 }

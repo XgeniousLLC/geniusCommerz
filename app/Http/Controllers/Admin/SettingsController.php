@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
+use App\Models\Product;
 use App\Models\SiteSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,14 +12,16 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds'];
+    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds', 'currencies'];
 
     public function index(Request $request): View
     {
         $tab = in_array($request->get('tab'), self::TABS) ? $request->get('tab') : 'general';
         $settings = SiteSetting::group($tab)->get()->keyBy('key');
+        $currencies = $tab === 'currencies' ? Currency::orderByDesc('is_default')->orderBy('code')->get() : collect();
+        $products   = $tab === 'storefront' ? Product::where('status', 'active')->orderBy('name')->get(['id', 'name']) : collect();
 
-        return view('admin.settings.index', compact('tab', 'settings'));
+        return view('admin.settings.index', compact('tab', 'settings', 'currencies', 'products'));
     }
 
     public function update(Request $request, string $group): RedirectResponse
@@ -32,7 +36,20 @@ class SettingsController extends Controller
 
         foreach ($data as $key => $value) {
             // Skip any unexpected PHP arrays (e.g. from malformed form submissions)
-            if (is_array($value) && $key !== 'cart.goals_json') continue;
+            if (is_array($value) && !in_array($key, ['cart.goals_json', 'storefront.sale_alert_product_ids'])) continue;
+
+            // storefront.sale_alert_product_ids is a checkbox array — store as JSON
+            if ($key === 'storefront.sale_alert_product_ids') {
+                $ids = is_array($value) ? array_map('intval', $value) : [];
+                $existing = SiteSetting::where('key', $key)->first();
+                if ($existing) {
+                    $existing->value = json_encode($ids);
+                    $existing->save();
+                } else {
+                    SiteSetting::create(['key' => $key, 'value' => json_encode($ids), 'type' => 'text', 'group' => 'storefront']);
+                }
+                continue;
+            }
 
             // cart.goals_json is a JSON-encoded array — store it normalised as cart.goals
             if ($key === 'cart.goals_json') {

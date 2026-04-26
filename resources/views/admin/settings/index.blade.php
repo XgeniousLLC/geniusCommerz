@@ -30,6 +30,7 @@
             'legal'      => 'Legal',
             'tracking'   => 'Tracking',
             'feeds'      => 'Product Feeds',
+            'currencies' => 'Currencies',
         ] as $slug => $label)
             <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
                style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
@@ -162,6 +163,26 @@
             </x-admin.form-group>
 
         </div>
+
+        <div class="border-t border-gray-100 pt-6 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <x-admin.form-group>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Multi-Language</label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="hidden" name="settings[general.multilingual_enabled]" value="0">
+                    <input type="checkbox" name="settings[general.multilingual_enabled]" value="1"
+                        {{ old('general.multilingual_enabled', $settings->get('general.multilingual_enabled')?->value) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    <span class="text-sm text-gray-700">Enable multi-language storefront</span>
+                </label>
+                <p class="text-xs text-gray-400 mt-1">Shows the language switcher when 2+ active languages exist. Manage languages in <a href="{{ route('admin.languages.index') }}" class="text-blue-600 hover:underline">Languages</a>.</p>
+            </x-admin.form-group>
+
+            <x-admin.form-group>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Multi-Currency</label>
+                <p class="text-xs text-gray-500">Managed in the <a href="{{ route('admin.settings.index', ['tab' => 'currencies']) }}" class="text-blue-600 hover:underline">Currencies tab</a>.</p>
+            </x-admin.form-group>
+        </div>
+
         <div class="flex justify-end mt-6">
             <x-admin.button type="submit">Save General Settings</x-admin.button>
         </div>
@@ -449,28 +470,17 @@
         </x-admin.card>
 
         <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-2">Custom Product Visitor Counter</h3>
-            <p class="text-sm text-gray-500 mb-4">Shows "X people are viewing this item right now" on product pages with a random number within the configured range. Increases social proof and urgency.</p>
-            <div class="space-y-3">
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="hidden" name="settings[storefront.visitor_counter_enabled]" value="0">
-                    <input type="checkbox" name="settings[storefront.visitor_counter_enabled]" value="1"
-                        {{ old('storefront.visitor_counter_enabled', $settings->get('storefront.visitor_counter_enabled')?->value) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                    <span class="text-sm font-medium text-gray-700">Show visitor counter on product pages</span>
-                </label>
-                <div class="grid grid-cols-2 gap-4">
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Min Visitors</label>
-                        <x-admin.input type="number" name="settings[storefront.visitor_counter_min]" min="1"
-                            value="{{ old('storefront.visitor_counter_min', $settings->get('storefront.visitor_counter_min')?->value ?? '5') }}" />
-                    </x-admin.form-group>
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Max Visitors</label>
-                        <x-admin.input type="number" name="settings[storefront.visitor_counter_max]" min="1"
-                            value="{{ old('storefront.visitor_counter_max', $settings->get('storefront.visitor_counter_max')?->value ?? '20') }}" />
-                    </x-admin.form-group>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900">Social Proof</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">Visitor counter and sale alert popups are managed in the dedicated Social Proof page.</p>
                 </div>
+                <a href="{{ route('admin.social-proof.index') }}" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium">
+                    Manage
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
             </div>
         </x-admin.card>
 
@@ -1000,6 +1010,62 @@ $warnBoxStyle = 'margin-top:.75rem;padding:.75rem 1rem;background:#fffbeb;border
             </div>
         </x-admin.card>
 
+        {{-- ── TikTok Pixel ── --}}
+        <x-admin.card>
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-gray-900">TikTok Pixel</h3>
+                <p class="text-sm text-gray-500 mt-0.5">
+                    Track visitor actions on your store and send them to TikTok Ads Manager to optimise campaigns. The Pixel fires client-side events (PageView, ViewContent, AddToCart, InitiateCheckout). The Events API token enables a server-side <em>Purchase</em> event after each order for accurate conversion tracking.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-5">
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">📱 Pixel ID — client-side events</strong>
+                    Tracks page views, product views, add-to-cart, and checkout start. Required for TikTok Ads optimisation and audience building.
+                </div>
+                <div style="padding:.875rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.625rem;font-size:.8rem;color:#334155;line-height:1.6">
+                    <strong class="block text-gray-700 mb-1">🔒 Events API Token — server-side</strong>
+                    Sends a <em>Purchase</em> event from the server after each order, bypassing ad blockers. Improves conversion reporting accuracy significantly.
+                </div>
+            </div>
+
+            <div style="{{ $infoBoxStyle }}">
+                <strong class="block mb-1">📋 How to get your TikTok Pixel ID</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>Go to <strong>ads.tiktok.com</strong> → <strong>Assets</strong> → <strong>Events</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Click <strong>Manage</strong> next to Web Events → <strong>Set Up Web Events</strong> → <strong>TikTok Pixel</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Create or select a pixel. Copy the <strong>Pixel ID</strong> — a string like <strong>C1XXXXXXXXXXXXXXXX</strong>.</span></li>
+                </ol>
+            </div>
+
+            <div style="{{ $infoBoxStyle }} margin-top:.625rem">
+                <strong class="block mb-1">📋 How to get your Events API Access Token</strong>
+                <ol class="space-y-1 pl-1">
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">1</span><span>In the same Pixel page, click the <strong>Settings</strong> tab.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">2</span><span>Scroll to <strong>Events API</strong> → click <strong>Generate Access Token</strong>.</span></li>
+                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the token and paste it below. Keep it private.</span></li>
+                </ol>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Pixel ID</label>
+                    <x-admin.input type="text" name="settings[tracking.tiktok_pixel_id]"
+                        value="{{ old('tracking.tiktok_pixel_id', $settings->get('tracking.tiktok_pixel_id')?->value ?? '') }}"
+                        placeholder="C1XXXXXXXXXXXXXXXX" />
+                    <p class="text-xs text-gray-400 mt-1">Leave blank to disable TikTok tracking.</p>
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Events API Access Token <span class="text-gray-400 font-normal">(optional)</span></label>
+                    <x-admin.input type="password" name="settings[tracking.tiktok_access_token]"
+                        value="{{ old('tracking.tiktok_access_token', $settings->get('tracking.tiktok_access_token')?->value ?? '') }}"
+                        placeholder="Your access token…" />
+                    <p class="text-xs text-gray-400 mt-1">Enables server-side Purchase events after orders.</p>
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Tracking Settings</x-admin.button>
         </div>
@@ -1118,6 +1184,92 @@ $stepStyle = 'display:inline-flex;align-items:center;justify-content:center;widt
 
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Product Feed Settings</x-admin.button>
+        </div>
+    </div>
+</form>
+@endif
+
+{{-- Currencies tab --}}
+@if($tab === 'currencies')
+<form method="POST" action="{{ route('admin.settings.update', 'currencies') }}">
+    @csrf
+    <div class="space-y-6">
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-6">Multi-Currency Settings</h3>
+            <div class="space-y-4">
+                <div class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 bg-gray-50">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">Enable Multi-Currency</p>
+                        <p class="text-xs text-gray-500 mt-0.5">When enabled, customers can switch between currencies in the storefront. Prices are converted using the rates you configure.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                        <input type="hidden" name="settings[currencies.enabled]" value="0">
+                        <input type="checkbox" name="settings[currencies.enabled]" value="1"
+                            {{ old('currencies.enabled', \App\Models\SiteSetting::get('currencies.enabled', '0')) == '1' ? 'checked' : '' }}
+                            class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 bg-gray-50">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-800">Show Currency Switcher</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Display a currency selector in the storefront header, allowing customers to choose their preferred currency.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                        <input type="hidden" name="settings[currencies.show_switcher]" value="0">
+                        <input type="checkbox" name="settings[currencies.show_switcher]" value="1"
+                            {{ old('currencies.show_switcher', \App\Models\SiteSetting::get('currencies.show_switcher', '1')) == '1' ? 'checked' : '' }}
+                            class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900">Configured Currencies</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ $currencies->count() }} {{ Str::plural('currency', $currencies->count()) }} configured</p>
+                </div>
+                <a href="{{ route('admin.currencies.index') }}"
+                   class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800">
+                    Manage currencies
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+            @if($currencies->isEmpty())
+                <p class="text-sm text-gray-400 text-center py-6 border border-dashed border-gray-200 rounded-lg">No currencies configured yet. <a href="{{ route('admin.currencies.index') }}" class="text-blue-600 hover:underline">Add one</a>.</p>
+            @else
+            <div class="divide-y divide-gray-100">
+                @foreach($currencies as $currency)
+                <div class="flex items-center justify-between py-3">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 text-base font-semibold text-gray-700">{{ $currency->symbol }}</span>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ $currency->name }} <span class="text-gray-400 font-normal">({{ $currency->code }})</span></p>
+                            <p class="text-xs text-gray-500">Rate: {{ $currency->rate }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if($currency->is_default)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">Default</span>
+                        @endif
+                        @if($currency->is_active)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">Inactive</span>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </x-admin.card>
+
+        <div class="flex justify-end">
+            <x-admin.button type="submit">Save Currency Settings</x-admin.button>
         </div>
     </div>
 </form>

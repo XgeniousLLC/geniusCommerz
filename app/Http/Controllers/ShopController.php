@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ContentTranslation;
 use App\Models\Language;
 use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,6 +17,32 @@ class ShopController extends Controller
     public function index(Request $request): Response
     {
         return $this->buildListing($request);
+    }
+
+    public function suggest(Request $request): JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Product::where('status', 'active')
+            ->where('name', 'like', '%' . $q . '%')
+            ->with('images')
+            ->select('id', 'name', 'slug', 'price', 'compare_at_price')
+            ->limit(6)
+            ->get()
+            ->map(fn ($p) => [
+                'id'               => $p->id,
+                'name'             => $p->name,
+                'slug'             => $p->slug,
+                'price'            => $p->price,
+                'compare_at_price' => $p->compare_at_price,
+                'image'            => $p->images->first()?->getUrl('thumb') ?? $p->images->first()?->getUrl(),
+            ]);
+
+        return response()->json($results);
     }
 
     public function category(Request $request, Category $category): Response

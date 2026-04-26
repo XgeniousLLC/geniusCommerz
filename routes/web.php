@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class);
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/shop/suggest', [ShopController::class, 'suggest'])->name('shop.suggest');
 Route::get('/shop/c/{category:slug}', [ShopController::class, 'category'])->name('shop.category');
 Route::get('/shop/b/{brand:slug}', [ShopController::class, 'brand'])->name('shop.brand');
 Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.show');

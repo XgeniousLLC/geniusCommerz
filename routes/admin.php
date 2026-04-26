@@ -101,6 +101,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Coupons
         Route::resource('coupons', CouponController::class)->except(['show']);
 
+        // Social Proof
+        Route::get('/social-proof', [\App\Http\Controllers\Admin\SocialProofController::class, 'index'])->name('social-proof.index');
+        Route::post('/social-proof', [\App\Http\Controllers\Admin\SocialProofController::class, 'update'])->name('social-proof.update');
+
         // Loyalty / points
         Route::get('/loyalty', [LoyaltyController::class, 'settings'])->name('loyalty.settings');
         Route::post('/loyalty', [LoyaltyController::class, 'updateSettings'])->name('loyalty.update');
@@ -131,6 +135,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/integrations/{integration}/edit', [IntegrationController::class, 'edit'])->name('integrations.edit');
         Route::put('/integrations/{integration}', [IntegrationController::class, 'update'])->name('integrations.update');
         Route::post('/integrations/{integration}/set-default', [IntegrationController::class, 'setDefault'])->name('integrations.set-default');
+
+        // AI Settings
+        Route::get('/ai-settings', [IntegrationController::class, 'aiSettings'])->name('ai-settings.index');
 
         // Audit log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');
