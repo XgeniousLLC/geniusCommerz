@@ -383,6 +383,24 @@
         </x-admin.card>
 
         <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-6">Newsletter</h3>
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <input type="hidden" name="settings[storefront.newsletter_enabled]" value="0">
+                    <input type="checkbox" name="settings[storefront.newsletter_enabled]" id="newsletter-enabled" value="1"
+                        {{ ($settings->get('storefront.newsletter_enabled')?->value ?? '1') === '1' ? 'checked' : '' }}>
+                    <label for="newsletter-enabled" class="text-sm font-medium text-gray-700">Show newsletter subscribe banner above footer</label>
+                </div>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Newsletter Heading</label>
+                    <x-admin.input type="text" name="settings[storefront.newsletter_heading]"
+                        value="{{ old('storefront.newsletter_heading', $settings->get('storefront.newsletter_heading')?->value ?? '') }}"
+                        placeholder="Subscribe to our newsletter" />
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
             <h3 class="text-base font-semibold text-gray-900 mb-6">Footer</h3>
             <div class="space-y-4">
                 <x-admin.form-group>

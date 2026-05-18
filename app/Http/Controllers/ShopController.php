@@ -112,6 +112,8 @@ class ShopController extends Controller
         ?Brand    $activeBrand    = null,
     ): Response {
         $query = Product::with(['images', 'variants', 'categories'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->where('status', 'active');
 
         if ($activeCategory) {
@@ -148,22 +150,52 @@ class ShopController extends Controller
             $query->where('price', '<=', (float) $request->input('max_price'));
         }
 
+        if ($request->boolean('in_stock')) {
+            $query->where(function ($sq) {
+                $sq->where(function ($q2) {
+                    $q2->where('has_variants', false)
+                       ->where(fn ($q3) => $q3->whereNull('stock_qty')->orWhere('stock_qty', '>', 0));
+                })->orWhere(function ($q2) {
+                    $q2->where('has_variants', true)
+                       ->whereHas('variants', fn ($q3) =>
+                           $q3->where('is_active', true)
+                              ->where(fn ($q4) => $q4->whereNull('stock_qty')->orWhere('stock_qty', '>', 0))
+                       );
+                });
+            });
+        }
+
+        if ($request->boolean('on_sale')) {
+            $query->whereNotNull('compare_at_price')->whereColumn('price', '<', 'compare_at_price');
+        }
+
+        if ($request->filled('min_rating')) {
+            $query->whereHas('reviews', fn ($sq) =>
+                $sq->havingRaw('AVG(rating) >= ?', [(float) $request->input('min_rating')])
+            );
+        }
+
         match ($request->input('sort', 'newest')) {
             'price_asc'  => $query->orderBy('price'),
             'price_desc' => $query->orderByDesc('price'),
             'featured'   => $query->orderByDesc('is_featured')->orderByDesc('created_at'),
+            'rating'     => $query->orderByDesc('reviews_avg_rating'),
+            'discount'   => $query->orderByRaw('CASE WHEN compare_at_price > 0 THEN (compare_at_price - price) / compare_at_price ELSE 0 END DESC'),
             default      => $query->orderByDesc('created_at'),
         };
 
         $products   = $query->paginate(24)->withQueryString();
-        $categories = Category::where('is_active', true)->whereNull('parent_id')->orderBy('sort_order')->get(['id','name','slug']);
-        $brands     = Brand::orderBy('name')->get(['id','name','slug']);
+        $categories = Category::where('is_active', true)->whereNull('parent_id')
+            ->withCount(['products' => fn ($q) => $q->where('status', 'active')])
+            ->orderBy('sort_order')->get(['id','name','slug']);
+        $brands     = Brand::withCount(['products' => fn ($q) => $q->where('status', 'active')])
+            ->orderBy('name')->get(['id','name','slug']);
 
         return Inertia::render('Shop/Index', [
             'products'            => $products->through(fn ($p) => $this->productCard($p)),
-            'categories'          => $categories,
-            'brands'              => $brands,
-            'filters'             => $request->only(['q','min_price','max_price','sort']),
+            'categories'          => $categories->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug, 'products_count' => $c->products_count]),
+            'brands'              => $brands->map(fn ($b) => ['id' => $b->id, 'name' => $b->name, 'slug' => $b->slug, 'products_count' => $b->products_count]),
+            'filters'             => $request->only(['q','min_price','max_price','sort','in_stock','on_sale','min_rating']),
             'activeCategorySlug'  => $activeCategory?->slug,
             'activeCategoryName'  => $activeCategory?->name,
             'activeBrandSlug'     => $activeBrand?->slug,
@@ -185,6 +217,9 @@ class ShopController extends Controller
             'image_url'        => $firstImage?->getUrl('thumb'),
             'is_featured'      => $p->is_featured,
             'in_stock'         => $this->isInStock($p),
+            'avg_rating'       => $p->reviews_avg_rating ? round((float) $p->reviews_avg_rating, 1) : null,
+            'reviews_count'    => (int) ($p->reviews_count ?? 0),
+            'category_name'    => $p->categories->first()?->name,
         ];
     }
 

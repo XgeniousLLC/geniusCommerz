@@ -54,7 +54,7 @@ export default function OrderShow({ order, reviewedProductIds }: Props) {
             <p className="text-xs mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Placed on {order.created_at}</p>
           </div>
           {order.status === 'delivered' && !hasRefund && (
-            <Link href="/account/refunds" className="kb-btn text-xs px-3 py-2" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>
+            <Link href="/account/refunds" className="kb-btn text-xs px-3 py-2 outline-none" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>
               Request Refund
             </Link>
           )}

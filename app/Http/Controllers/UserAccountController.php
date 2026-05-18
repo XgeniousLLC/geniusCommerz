@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoyaltyPoint;
 use App\Models\Order;
 use App\Models\ProductReview;
 use App\Models\Refund;
@@ -32,7 +33,13 @@ class UserAccountController extends Controller
             ->get()
             ->map(fn ($o) => $this->formatOrder($o));
 
-        return Inertia::render('Account/Dashboard', compact('stats', 'recentOrders'));
+        $loyaltyPoints = LoyaltyPoint::where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->value('balance_after') ?? 0;
+
+        $defaultAddress = $user->addresses()->where('is_default', true)->first();
+
+        return Inertia::render('Account/Dashboard', compact('stats', 'recentOrders', 'loyaltyPoints', 'defaultAddress'));
     }
 
     public function orders(Request $request): Response

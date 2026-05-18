@@ -3,24 +3,32 @@
 @source '../js/storefront/**/*.tsx';
 
 :root {
-    --kb-primary:     #1F3A8A;
-    --kb-primary-600: #2649B8;
-    --kb-primary-50:  #EEF2FF;
-    --kb-accent:      #F97316;
-    --kb-accent-600:  #EA580C;
-    --kb-accent-50:   #FFF7ED;
-    --kb-ink:         #0F172A;
-    --kb-ink-muted:   #475569;
-    --kb-ink-soft:    #94A3B8;
-    --kb-bg:          #FAFAF9;
-    --kb-card:        #FFFFFF;
-    --kb-border:      #CBD5E1;
-    --kb-success:     #16A34A;
-    --kb-success-50:  #F0FDF4;
-    --kb-success-200: #BBF7D0;
-    --kb-surface-2:   #F1F5F9;
-    --kb-danger:      #DC2626;
-    --kb-warn:        #D97706;
+    --kb-primary:      #0B1F4F;
+    --kb-primary-600:  #102B6B;
+    --kb-primary-700:  #0A1A40;
+    --kb-primary-100:  #DDE4F4;
+    --kb-primary-50:   #EEF2FB;
+    --kb-accent:       #F97316;
+    --kb-accent-600:   #EA580C;
+    --kb-accent-50:    #FFF7ED;
+    --kb-ink:          #0E1320;
+    --kb-ink-2:        #2A3142;
+    --kb-ink-muted:    #5A6478;
+    --kb-ink-soft:     #8A93A6;
+    --kb-bg:           #F7F8FB;
+    --kb-card:         #FFFFFF;
+    --kb-surface-2:    #F2F4F9;
+    --kb-border:       #E6E8EE;
+    --kb-border-2:     #EFF1F5;
+    --kb-success:      #0F8A5F;
+    --kb-success-50:   #E6F5EE;
+    --kb-success-200:  #A3D9C0;
+    --kb-danger:       #C43030;
+    --kb-danger-50:    #FCEDED;
+    --kb-warn:         #B25E09;
+    --kb-shadow-1:     0 1px 0 rgba(14,19,32,.04), 0 1px 2px rgba(14,19,32,.04);
+    --kb-shadow-2:     0 1px 2px rgba(14,19,32,.06), 0 8px 24px rgba(14,19,32,.06);
+    --kb-shadow-3:     0 12px 40px rgba(14,19,32,.12);
 }
 
 html, body {
@@ -50,7 +58,7 @@ html, body {
         appearance: none;
     }
     .kb-btn:focus { outline: none; box-shadow: none; }
-    .kb-btn:focus-visible { outline: 2px solid var(--kb-primary); outline-offset: 2px; }
+    .kb-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--kb-primary); }
     .kb-btn-primary { background-color: var(--kb-primary) !important; color: #fff !important; }
     .kb-btn-primary:hover { background-color: var(--kb-primary-600) !important; }
     .kb-btn-accent { background-color: var(--kb-accent) !important; color: #fff !important; }
@@ -84,7 +92,7 @@ html, body {
         -webkit-appearance: none;
         appearance: none;
     }
-    .kb-input:focus { border-color: var(--kb-primary); box-shadow: 0 0 0 3px rgba(31,58,138,0.12); }
+    .kb-input:focus { border-color: var(--kb-primary); box-shadow: 0 0 0 3px rgba(11,31,79,0.12); }
     .kb-input::placeholder { color: var(--kb-ink-soft); }
 
     /* Nav */

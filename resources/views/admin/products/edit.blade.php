@@ -235,6 +235,7 @@
                                     <th class="px-3 py-2 text-left font-medium text-gray-600">Cost</th>
                                     <th class="px-3 py-2 text-left font-medium text-gray-600">Stock</th>
                                     <th class="px-3 py-2 text-left font-medium text-gray-600">Active</th>
+                                    <th class="px-3 py-2 text-left font-medium text-gray-600">Image</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -277,6 +278,13 @@
                                         <input type="checkbox" name="variants[{{ $i }}][is_active]" value="1"
                                             {{ old("variants.{$i}.is_active", $variant->is_active) ? 'checked' : '' }}
                                             class="rounded border-gray-300 text-blue-600" />
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        <x-admin.media-picker
+                                            :name="'variants[' . $i . '][image_media_id]'"
+                                            accept="image"
+                                            label="Pick image"
+                                            :value="old('variants.' . $i . '.image_media_id', $variant->image_media_id)" />
                                     </td>
                                 </tr>
                                 @endforeach

@@ -60,10 +60,23 @@ class CheckoutController extends Controller
         $courierLocationEnabled = $courierService->hasDefault()
             && (bool) SiteSetting::get('shipping.courier_location_charges', false);
 
+        $prefill = null;
+        if (auth()->check()) {
+            $user           = auth()->user();
+            $defaultAddress = $user->addresses()->where('is_default', true)->first();
+            $prefill = [
+                'name'    => $user->name ?? '',
+                'email'   => $user->email ?? '',
+                'phone'   => $user->phone ?? '',
+                'address' => $defaultAddress?->address ?? '',
+                'city'    => $defaultAddress?->city ?? '',
+            ];
+        }
+
         return Inertia::render('Checkout', compact(
             'shippingCost', 'freeAbove', 'paymentMethods',
             'loyaltyEnabled', 'loyaltyBalance', 'loyaltyTaka',
-            'courierLocationEnabled'
+            'courierLocationEnabled', 'prefill'
         ));
     }
 

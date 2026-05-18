@@ -11,7 +11,7 @@ class ProductVariant extends Model
     /** @var list<string> */
     protected $fillable = [
         'product_id', 'sku', 'price', 'compare_at_price', 'cost_price',
-        'weight', 'image', 'is_active', 'stock_qty', 'sort_order',
+        'weight', 'image', 'image_media_id', 'is_active', 'stock_qty', 'sort_order',
     ];
 
     /** @var array<string, string> */
@@ -27,6 +27,12 @@ class ProductVariant extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /** @return BelongsTo<Media, $this> */
+    public function imageMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'image_media_id');
     }
 
     /** @return HasMany<ProductVariantValue, $this> */

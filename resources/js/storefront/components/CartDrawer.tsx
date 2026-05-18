@@ -155,7 +155,7 @@ export default function CartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-gray-100 px-5 py-4 space-y-4">
+          <div className="border-t border-gray-100 px-5 pt-4 pb-[calc(1rem+56px)] md:pb-4 space-y-4">
             {/* Coupon */}
             {!coupon ? (
               <form onSubmit={handleCoupon} className="flex gap-2">
@@ -201,7 +201,7 @@ export default function CartDrawer() {
               </div>
             </div>
 
-            <Link href="/checkout" onClick={closeCart} className="kb-btn kb-btn-primary w-full justify-center text-sm font-semibold">
+            <Link href="/checkout" onClick={closeCart} className="kb-btn kb-btn-primary w-full justify-center text-sm font-semibold py-3 outline-none">
               Proceed to Checkout →
             </Link>
           </div>

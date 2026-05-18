@@ -112,6 +112,7 @@ export interface ShopCategory {
   id: number;
   name: string;
   slug: string;
+  products_count?: number;
 }
 
 export interface ProductCard {
@@ -124,6 +125,9 @@ export interface ProductCard {
   image_url: string | null;
   is_featured: boolean;
   in_stock: boolean;
+  avg_rating: number | null;
+  reviews_count: number;
+  category_name: string | null;
 }
 
 export interface ProductVariantOption {
@@ -184,6 +188,7 @@ export interface Brand {
   id: number;
   name: string;
   slug: string;
+  products_count?: number;
 }
 
 export interface PaginationLink {

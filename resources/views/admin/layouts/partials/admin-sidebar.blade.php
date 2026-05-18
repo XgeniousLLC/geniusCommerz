@@ -175,6 +175,30 @@
             </div>
         </div>
 
+        {{-- Accounting --}}
+        @php $accountingOpen = request()->routeIs('admin.accounting.*'); @endphp
+        <div x-data="{ open: {{ $accountingOpen ? 'true' : 'false' }} }">
+            <button type="button" @click="open = !open"
+                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
+                       {{ $accountingOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
+                <span>Accounting</span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
+                <x-admin.sidebar-link :href="route('admin.accounting.index')" :active="request()->routeIs('admin.accounting.index')" icon="chart-bar">
+                    Dashboard
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.accounting.purchases.index')" :active="request()->routeIs('admin.accounting.purchases.*')" icon="shopping-bag">
+                    Purchase Orders
+                </x-admin.sidebar-link>
+                <x-admin.sidebar-link :href="route('admin.accounting.ad-spend.index')" :active="request()->routeIs('admin.accounting.ad-spend.*')" icon="trending-up">
+                    Ad Spend
+                </x-admin.sidebar-link>
+            </div>
+        </div>
+
         {{-- Content --}}
         @php $contentOpen = request()->routeIs('admin.pages.*', 'admin.blogs.*', 'admin.blog-categories.*', 'admin.media.*'); @endphp
         <div x-data="{ open: {{ $contentOpen ? 'true' : 'false' }} }">

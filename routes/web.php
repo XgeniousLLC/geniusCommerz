@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\CourierLocationController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CommentController;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class);
 
+Route::get('/lp/{product:slug}', [LandingPageController::class, 'show'])->name('lp.show');
+
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/suggest', [ShopController::class, 'suggest'])->name('shop.suggest');
 Route::get('/shop/c/{category:slug}', [ShopController::class, 'category'])->name('shop.category');
@@ -28,6 +31,8 @@ Route::get('/blog/c/{category:slug}', [BlogController::class, 'category'])->name
 Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
+
+Route::get('/cart', fn() => \Inertia\Inertia::render('Cart'))->name('cart');
 
 Route::get('/track', [OrderTrackingController::class, 'show'])->name('order.track');
 

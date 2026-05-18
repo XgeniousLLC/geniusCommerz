@@ -6,6 +6,7 @@ import type { BlogCategory, BlogPost, Comment, SharedProps } from '../../types';
 interface Props {
   blog: BlogPost;
   related: BlogPost[];
+  recent: BlogPost[];
   categories: BlogCategory[];
   comments: Comment[];
 }
@@ -22,59 +23,55 @@ function CommentItem({ comment, blogId }: { comment: Comment; blogId: number }) 
 
   return (
     <div className="flex gap-4" id={`comment-${comment.id}`}>
-      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-        style={{ background: 'var(--kb-primary)' }}>
+      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
         {comment.name[0].toUpperCase()}
       </div>
-      <div className="flex-1">
-        <div className="kb-card p-4" style={{ borderRadius: 12 }}>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="font-semibold text-sm" style={{ color: 'var(--kb-ink)' }}>{comment.name}</span>
-            <span className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>{comment.created_at}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--kb-ink)' }}>{comment.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)' }}>{comment.created_at}</span>
           </div>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--kb-ink-muted)' }}>{comment.body}</p>
+          <p style={{ fontSize: 14, color: 'var(--kb-ink-muted)', lineHeight: 1.55, margin: 0 }}>{comment.body}</p>
         </div>
 
         {auth.user ? (
-          <div className="mt-2">
-            <button onClick={() => setReplyOpen((o) => !o)} type="button"
-              className="text-xs font-medium hover:underline flex items-center gap-1"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-primary)' }}>
+          <div style={{ marginTop: 8 }}>
+            <button type="button" onClick={() => setReplyOpen((o) => !o)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-primary)', fontWeight: 600, fontSize: 13, padding: 0 }}>
               ↳ Reply
             </button>
             {replyOpen && (
-              <form onSubmit={submitReply} className="mt-3 space-y-3">
+              <form onSubmit={submitReply} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <textarea name="body" rows={2} placeholder="Write a reply…" required
                   value={data.body} onChange={(e) => setData('body', e.target.value)}
-                  className="w-full text-sm px-3 py-2 rounded-lg border outline-none resize-none"
-                  style={{ borderColor: '#e2e8f0', background: '#f8fafc', color: 'var(--kb-ink)' }} />
+                  style={{ width: '100%', fontSize: 14, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--kb-border)', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 <button type="submit" disabled={processing}
-                  className="kb-btn kb-btn-primary text-sm px-4 py-1.5">
+                  style={{ alignSelf: 'flex-start', height: 34, padding: '0 16px', borderRadius: 7, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer' }}>
                   Post reply
                 </button>
               </form>
             )}
           </div>
         ) : (
-          <p className="mt-2 text-xs" style={{ color: 'var(--kb-ink-soft)' }}>
-            <Link href="/login" className="font-medium hover:underline" style={{ color: 'var(--kb-primary)' }}>Sign in</Link> to reply
+          <p style={{ marginTop: 8, fontSize: 12, color: 'var(--kb-ink-soft)' }}>
+            <Link href="/login" style={{ fontWeight: 600, color: 'var(--kb-primary)', textDecoration: 'none' }}>Sign in</Link> to reply
           </p>
         )}
 
         {comment.replies.length > 0 && (
-          <div className="mt-4 space-y-4 pl-4" style={{ borderLeft: '2px solid var(--kb-border)' }}>
+          <div style={{ marginTop: 16, paddingLeft: 16, borderLeft: '2px solid var(--kb-border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {comment.replies.map((reply) => (
-              <div key={reply.id} className="flex gap-3" id={`comment-${reply.id}`}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                  style={{ background: 'var(--kb-accent)' }}>
+              <div key={reply.id} style={{ display: 'flex', gap: 12 }} id={`comment-${reply.id}`}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--kb-primary-100)', color: 'var(--kb-primary)', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
                   {reply.name[0].toUpperCase()}
                 </div>
-                <div className="kb-card p-3 flex-1" style={{ borderRadius: 10 }}>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-semibold text-xs" style={{ color: 'var(--kb-ink)' }}>{reply.name}</span>
-                    <span className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>{reply.created_at}</span>
+                <div style={{ flex: 1, background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 10, padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--kb-ink)' }}>{reply.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--kb-ink-soft)' }}>{reply.created_at}</span>
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--kb-ink-muted)' }}>{reply.body}</p>
+                  <p style={{ fontSize: 13, color: 'var(--kb-ink-muted)', lineHeight: 1.5, margin: 0 }}>{reply.body}</p>
                 </div>
               </div>
             ))}
@@ -100,10 +97,10 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
     });
     setItems(list);
     const onScroll = () => {
-      let cur = '';
+      let cur = list[0]?.id ?? '';
       list.forEach(({ id }) => {
-        const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 120) cur = id;
+        const el2 = document.getElementById(id);
+        if (el2 && window.scrollY >= el2.offsetTop - 120) cur = id;
       });
       setActive(cur);
     };
@@ -114,18 +111,20 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
   if (!items.length) return null;
 
   return (
-    <div className="kb-card p-4">
-      <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--kb-ink)' }}>Contents</h3>
-      <nav className="space-y-1 text-sm" style={{ color: 'var(--kb-ink-soft)' }}>
+    <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
+      <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Contents</h4>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {items.map((item) => (
           <a key={item.id} href={`#${item.id}`}
-            className="block hover:opacity-80 transition-colors"
             style={{
-              color: active === item.id ? 'var(--kb-primary)' : 'inherit',
-              paddingLeft: item.level === 3 ? 14 : 0,
-              fontSize: item.level === 3 ? '0.79rem' : '0.83rem',
+              display: 'block', padding: '6px 10px',
+              paddingLeft: item.level === 3 ? 20 : 10,
+              borderRadius: 6,
+              fontSize: item.level === 3 ? 12 : 13,
               fontWeight: item.level === 2 ? 600 : 400,
-              lineHeight: 1.6,
+              textDecoration: 'none', lineHeight: 1.4,
+              color: active === item.id ? 'var(--kb-primary)' : 'var(--kb-ink-muted)',
+              background: active === item.id ? 'var(--kb-primary-50)' : 'transparent',
             }}>
             {item.text}
           </a>
@@ -135,7 +134,59 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
   );
 }
 
-export default function BlogShow({ blog, related, categories, comments }: Props) {
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden' }}>
+      <button type="button" onClick={() => setOpen((o) => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kb-ink)', paddingRight: 16 }}>{question}</span>
+        <svg style={{ width: 16, height: 16, flexShrink: 0, color: 'var(--kb-ink-soft)', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div style={{ padding: '0 16px 16px', fontSize: 14, color: 'var(--kb-ink-muted)', lineHeight: 1.6 }}>{answer}</div>
+      )}
+    </div>
+  );
+}
+
+function NewsletterCard() {
+  const [email, setEmail] = useState('');
+  const [done, setDone] = useState(false);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (email) setDone(true);
+  }
+
+  return (
+    <div style={{ background: 'linear-gradient(135deg, var(--kb-primary) 0%, var(--kb-primary-600) 100%)', color: '#fff', borderRadius: 12, padding: '16px 20px', border: 'none' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,.7)', marginBottom: 6 }}>Newsletter</div>
+      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Get the best of klixbd</div>
+      <div style={{ fontSize: 12, color: 'rgba(255,255,255,.8)', marginBottom: 14, lineHeight: 1.5 }}>
+        Weekly buying guides, sales, and reviews.
+      </div>
+      {done ? (
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#A3D9C0' }}>Subscribed — thanks!</div>
+      ) : (
+        <form onSubmit={submit}>
+          <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', height: 38, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.12)', color: '#fff', outline: 'none', marginBottom: 8, fontSize: 13, boxSizing: 'border-box' }} />
+          <button type="submit"
+            style={{ width: '100%', height: 36, borderRadius: 7, border: 'none', background: '#fff', color: 'var(--kb-primary)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            Subscribe
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+export default function BlogShow({ blog, related, recent, categories, comments }: Props) {
   const { auth, flash } = usePage<SharedProps>().props;
   const contentRef = useRef<HTMLDivElement>(null);
   const { data, setData, post, processing, errors, reset } = useForm({ commentable_type: 'blog', commentable_id: blog.id, body: '' });
@@ -170,37 +221,44 @@ export default function BlogShow({ blog, related, categories, comments }: Props)
         )}
       </Head>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-10">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Breadcrumb */}
-        <nav className="text-xs mb-4 flex items-center gap-1.5" style={{ color: 'var(--kb-ink-soft)' }}>
-          <Link href="/" className="hover:text-slate-900">Home</Link>
-          <span>›</span>
-          <Link href="/blog" className="hover:text-slate-900">Blog</Link>
-          <span>›</span>
-          <span style={{ color: 'var(--kb-ink)' }}>{blog.title.substring(0, 50)}{blog.title.length > 50 ? '…' : ''}</span>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', padding: '16px 0 8px' }}>
+          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Home</Link>
+          <span>/</span>
+          <Link href="/blog" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Journal</Link>
+          <span>/</span>
+          <span style={{ color: 'var(--kb-ink)' }}>{blog.title.length > 50 ? blog.title.substring(0, 50) + '…' : blog.title}</span>
         </nav>
 
-        <div className="grid lg:grid-cols-[1fr_280px] gap-10">
+        <div className="grid lg:grid-cols-[1fr_280px]" style={{ gap: 48, padding: '16px 0', alignItems: 'start' }}>
 
+          {/* Article */}
           <article>
             {blog.blogCategory ? (
-              <Link href={`/blog/c/${blog.blogCategory.slug}`} className="kb-chip kb-chip-new mb-3 hover:opacity-80" style={{ textDecoration: 'none' }}>
+              <Link href={`/blog/c/${blog.blogCategory.slug}`}
+                style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, textDecoration: 'none', marginBottom: 16 }}>
                 {blog.category_name}
               </Link>
             ) : blog.category_name ? (
-              <span className="kb-chip kb-chip-new mb-3">{blog.category_name}</span>
+              <span style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
+                {blog.category_name}
+              </span>
             ) : null}
 
-            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">{blog.title}</h1>
+            <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.08, margin: '0 0 16px', color: 'var(--kb-ink)' }}>
+              {blog.title}
+            </h1>
 
-            <div className="flex flex-wrap items-center gap-3 text-sm mt-4" style={{ color: 'var(--kb-ink-soft)' }}>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                  style={{ background: 'var(--kb-primary)' }}>
-                  {blog.author_display_name[0].toUpperCase()}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: '16px 0', borderBottom: '1px solid var(--kb-border)', fontSize: 13, color: 'var(--kb-ink-soft)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                  {blog.author_display_name[0]?.toUpperCase()}
                 </div>
-                <span className="font-semibold" style={{ color: 'var(--kb-ink)' }}>{blog.author_display_name}</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--kb-ink)' }}>{blog.author_display_name}</div>
+                </div>
               </div>
               <span>·</span>
               <span>{blog.published_at}</span>
@@ -209,21 +267,18 @@ export default function BlogShow({ blog, related, categories, comments }: Props)
             </div>
 
             {blog.cover_url && (
-              <img className="w-full rounded-2xl mt-6 object-cover kb-shadow-card" style={{ maxHeight: 480 }}
+              <img style={{ width: '100%', borderRadius: 16, marginTop: 24, objectFit: 'cover', maxHeight: 480 }}
                 src={blog.cover_url} alt={blog.title} />
             )}
 
-            <div ref={contentRef}
-              className="mt-7 kb-prose leading-relaxed"
-              style={{ color: '#334155' }}
-              dangerouslySetInnerHTML={{ __html: blog.content ?? '' }}
-            />
+            <div ref={contentRef} className="kb-prose" style={{ marginTop: 28, color: '#334155' }}
+              dangerouslySetInnerHTML={{ __html: blog.content ?? '' }} />
 
             {/* FAQs */}
             {blog.faqs && blog.faqs.length > 0 && (
-              <div className="mt-10">
-                <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--kb-ink)' }}>Frequently Asked Questions</h2>
-                <div className="space-y-3">
+              <div style={{ marginTop: 40 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: 'var(--kb-ink)' }}>Frequently Asked Questions</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {blog.faqs.map((faq, i) => (
                     <FaqItem key={i} question={faq.question} answer={faq.answer} />
                   ))}
@@ -232,42 +287,114 @@ export default function BlogShow({ blog, related, categories, comments }: Props)
             )}
 
             {/* Share */}
-            <div className="mt-8 flex items-center gap-3 text-sm">
-              <span style={{ color: 'var(--kb-ink-soft)' }}>Share:</span>
-              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 0', borderTop: '1px solid var(--kb-border)', borderBottom: '1px solid var(--kb-border)', margin: '28px 0' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kb-ink-muted)' }}>Share this article</span>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                 target="_blank" rel="noopener"
-                className="w-9 h-9 rounded-full grid place-items-center hover:opacity-80"
-                style={{ background: '#f1f5f9' }}>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--kb-border)', background: '#fff', display: 'grid', placeItems: 'center', color: '#1877F2', textDecoration: 'none' }}>
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
                 </svg>
               </a>
-              <button onClick={() => navigator.clipboard.writeText(window.location.href)}
-                className="w-9 h-9 rounded-full grid place-items-center hover:opacity-80"
-                style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer' }} title="Copy link">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                onClick={() => typeof navigator !== 'undefined' && navigator.clipboard?.writeText(window.location.href)}
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--kb-border)', background: '#fff', display: 'grid', placeItems: 'center', color: 'var(--kb-ink-muted)', cursor: 'pointer' }}
+                title="Copy link">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
               </button>
             </div>
+
+            {/* Author card */}
+            <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: 24, display: 'grid', gridTemplateColumns: '56px 1fr', gap: 16, alignItems: 'center', marginBottom: 32 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 700 }}>
+                {blog.author_display_name[0]?.toUpperCase()}
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--kb-ink)' }}>Written by {blog.author_display_name}</h4>
+                <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--kb-ink-muted)' }}>Writes about the things they actually use.</p>
+              </div>
+            </div>
+
+            {/* Comments */}
+            <div id="comments">
+              {flash.comment_success && (
+                <div style={{ marginBottom: 24, padding: '12px 16px', borderRadius: 10, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', fontSize: 14, fontWeight: 500 }}>
+                  {flash.comment_success}
+                </div>
+              )}
+
+              {comments.length > 0 && (
+                <>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 16px', color: 'var(--kb-ink)' }}>
+                    {comments.length} Comment{comments.length !== 1 ? 's' : ''}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 32 }}>
+                    {comments.map((c) => <CommentItem key={c.id} comment={c} blogId={blog.id} />)}
+                  </div>
+                </>
+              )}
+
+              {auth.user ? (
+                <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 16, padding: 28 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700 }}>
+                      {auth.user.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--kb-ink)' }}>{auth.user.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--kb-ink-soft)' }}>Commenting as yourself</div>
+                    </div>
+                  </div>
+                  <form onSubmit={submitComment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--kb-ink)' }}>
+                        Comment <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      <textarea name="body" rows={5} placeholder="Share your thoughts…" required
+                        value={data.body} onChange={(e) => setData('body', e.target.value)}
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--kb-border)', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: '#f8fafc', color: 'var(--kb-ink)' }} />
+                      {errors.body && <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>{errors.body}</div>}
+                    </div>
+                    <div>
+                      <button type="submit" disabled={processing}
+                        style={{ height: 44, padding: '0 24px', borderRadius: 10, background: processing ? 'var(--kb-ink-soft)' : 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 15, border: 'none', cursor: processing ? 'not-allowed' : 'pointer' }}>
+                        Post Comment
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <p style={{ fontSize: 14, color: 'var(--kb-ink-soft)' }}>
+                  <Link href="/login" style={{ fontWeight: 700, color: 'var(--kb-primary)', textDecoration: 'none' }}>Sign in</Link>
+                  {' or '}
+                  <Link href="/register" style={{ fontWeight: 700, color: 'var(--kb-primary)', textDecoration: 'none' }}>create an account</Link>
+                  {' to leave a comment.'}
+                </p>
+              )}
+            </div>
           </article>
 
           {/* Sidebar */}
-          <aside className="space-y-5">
+          <aside style={{ position: 'sticky', top: 96, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {blog.enable_toc && <TocBox contentRef={contentRef} />}
 
             {categories.length > 0 && (
-              <div className="kb-card p-4">
-                <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--kb-ink)' }}>Categories</h3>
-                <div className="space-y-1">
+              <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
+                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Categories</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {categories.map((cat) => (
                     <Link key={cat.id} href={`/blog/c/${cat.slug}`}
-                      className="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition hover:opacity-80"
-                      style={blog.blog_category_id === cat.id
-                        ? { background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', fontWeight: 600 }
-                        : { color: 'var(--kb-ink-muted)' }}>
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 10px', borderRadius: 7, fontSize: 13, textDecoration: 'none',
+                        ...(blog.blog_category_id === cat.id
+                          ? { background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', fontWeight: 600 }
+                          : { color: 'var(--kb-ink-muted)' }),
+                      }}>
                       <span>{cat.name}</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: '#f1f5f9', color: 'var(--kb-ink-soft)' }}>
+                      <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, background: 'var(--kb-surface-2)', color: 'var(--kb-ink-soft)' }}>
                         {cat.blogs_count}
                       </span>
                     </Link>
@@ -275,26 +402,75 @@ export default function BlogShow({ blog, related, categories, comments }: Props)
                 </div>
               </div>
             )}
+
+            {recent.length > 0 && (
+              <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
+                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Recent Posts</h4>
+                <div>
+                  {recent.map((b, i) => (
+                    <Link key={b.id} href={`/blog/${b.slug}`}
+                      style={{
+                        display: 'flex', gap: 10, alignItems: 'flex-start', textDecoration: 'none',
+                        padding: '8px 0',
+                        borderBottom: i < recent.length - 1 ? '1px solid var(--kb-border-2)' : 'none',
+                      }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 8, flexShrink: 0, overflow: 'hidden', background: 'var(--kb-primary-50)' }}>
+                        {b.cover_url
+                          ? <img src={b.cover_url} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : null
+                        }
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.35, color: 'var(--kb-ink)',
+                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {b.title}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--kb-ink-soft)', marginTop: 4 }}>
+                          {b.published_at} · {b.read_time}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <NewsletterCard />
           </aside>
         </div>
 
         {/* Related articles */}
         {related.length > 0 && (
-          <div className="mt-14">
-            <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--kb-ink)' }}>Related Articles</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--kb-border)', paddingBottom: 64 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', margin: 0, color: 'var(--kb-ink)' }}>Related Articles</h2>
+                <div style={{ fontSize: 13, color: 'var(--kb-ink-soft)', marginTop: 4 }}>More from the Journal you might like.</div>
+              </div>
+              <Link href="/blog" style={{ fontSize: 13, fontWeight: 600, color: 'var(--kb-primary)', textDecoration: 'none' }}>All articles →</Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 20 }}>
               {related.map((rel) => (
                 <Link key={rel.id} href={`/blog/${rel.slug}`}
-                  className="kb-card group flex flex-col overflow-hidden kb-shadow-card hover:shadow-lg transition-shadow"
-                  style={{ borderRadius: 16, textDecoration: 'none' }}>
-                  {rel.cover_url
-                    ? <img className="w-full object-cover" style={{ height: 180 }} src={rel.cover_url} alt={rel.title} />
-                    : <div style={{ height: 180, background: 'var(--kb-primary-50)' }} />
-                  }
-                  <div className="p-4 flex flex-col gap-2 flex-1">
-                    {rel.category_name && <span className="kb-chip kb-chip-new text-xs self-start">{rel.category_name}</span>}
-                    <div className="font-semibold text-sm leading-snug group-hover:underline line-clamp-2" style={{ color: 'var(--kb-ink)' }}>{rel.title}</div>
-                    <div className="flex items-center gap-2 text-xs mt-auto pt-2" style={{ color: 'var(--kb-ink-soft)' }}>
+                  style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none' }}
+                  className="hover:shadow-md hover:-translate-y-0.5 transition-all">
+                  <div style={{ height: 160, background: 'var(--kb-primary-50)', overflow: 'hidden' }}>
+                    {rel.cover_url
+                      ? <img src={rel.cover_url} alt={rel.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : null
+                    }
+                  </div>
+                  <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {rel.category_name && (
+                      <span style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', alignSelf: 'flex-start' }}>
+                        {rel.category_name}
+                      </span>
+                    )}
+                    <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, color: 'var(--kb-ink)',
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {rel.title}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', marginTop: 'auto' }}>
                       <span>{rel.published_at}</span>
                       <span>·</span>
                       <span>{rel.read_time}</span>
@@ -305,81 +481,7 @@ export default function BlogShow({ blog, related, categories, comments }: Props)
             </div>
           </div>
         )}
-
-        {/* Comments */}
-        <div className="mt-14" id="comments">
-          {flash.comment_success && (
-            <div className="mb-6 px-4 py-3 rounded-xl text-sm font-medium" style={{ background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>
-              {flash.comment_success}
-            </div>
-          )}
-
-          {comments.length > 0 && (
-            <>
-              <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--kb-ink)' }}>
-                {comments.length} Comment{comments.length !== 1 ? 's' : ''}
-              </h2>
-              <div className="space-y-6 mb-12">
-                {comments.map((c) => <CommentItem key={c.id} comment={c} blogId={blog.id} />)}
-              </div>
-            </>
-          )}
-
-          {auth.user ? (
-            <div className="kb-card p-6 lg:p-8" style={{ borderRadius: 20 }}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                  style={{ background: 'var(--kb-primary)' }}>
-                  {auth.user.name[0].toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold" style={{ color: 'var(--kb-ink)' }}>{auth.user.name}</div>
-                  <div className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Commenting as yourself</div>
-                </div>
-              </div>
-              <form onSubmit={submitComment} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--kb-ink)' }}>Comment <span style={{ color: '#ef4444' }}>*</span></label>
-                  <textarea name="body" rows={5} placeholder="Share your thoughts…" required
-                    value={data.body} onChange={(e) => setData('body', e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none resize-none"
-                    style={{ borderColor: '#e2e8f0', background: '#f8fafc', color: 'var(--kb-ink)' }} />
-                  {errors.body && <div className="text-xs text-red-600 mt-1">{errors.body}</div>}
-                </div>
-                <button type="submit" disabled={processing} className="kb-btn kb-btn-primary px-6 py-2.5">Post Comment</button>
-              </form>
-            </div>
-          ) : (
-            <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>
-              <Link href="/login" className="font-semibold hover:underline" style={{ color: 'var(--kb-primary)' }}>Sign in</Link>
-              {' or '}
-              <Link href="/register" className="font-semibold hover:underline" style={{ color: 'var(--kb-primary)' }}>create an account</Link>
-              {' to leave a comment.'}
-            </p>
-          )}
-        </div>
-
       </div>
     </Layout>
-  );
-}
-
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="kb-card overflow-hidden" style={{ borderRadius: 12 }}>
-      <button type="button" onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between p-4 text-left"
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-        <span className="font-semibold text-sm pr-4" style={{ color: 'var(--kb-ink)' }}>{question}</span>
-        <svg className="w-4 h-4 flex-shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none', color: 'var(--kb-ink-soft)' }}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      {open && (
-        <div className="px-4 pb-4 text-sm leading-relaxed" style={{ color: 'var(--kb-ink-muted)' }}>{answer}</div>
-      )}
-    </div>
   );
 }

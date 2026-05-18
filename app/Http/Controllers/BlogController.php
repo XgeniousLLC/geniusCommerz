@@ -26,13 +26,15 @@ class BlogController extends Controller
         $featured   = (clone $query)->first();
         $posts      = (clone $query)->skip(1)->take(12)->get();
         $categories = BlogCategory::whereHas('blogs', fn($q) => $q->where('status', 'published'))
+            ->withCount(['blogs' => fn($q) => $q->where('status', 'published')])
             ->orderBy('name')->get();
 
         return Inertia::render('blog/Index', [
             'featured'       => $featured ? $this->blogCard($featured) : null,
             'posts'          => $posts->map(fn($p) => $this->blogCard($p)),
-            'categories'     => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug]),
+            'categories'     => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug, 'blogs_count' => $c->blogs_count]),
             'activeCategory' => $activeCategory ? ['id' => $activeCategory->id, 'name' => $activeCategory->name, 'slug' => $activeCategory->slug] : null,
+            'totalCount'     => Blog::published()->count(),
         ]);
     }
 
@@ -45,13 +47,15 @@ class BlogController extends Controller
         $featured   = (clone $query)->first();
         $posts      = (clone $query)->skip(1)->take(12)->get();
         $categories = BlogCategory::whereHas('blogs', fn($q) => $q->where('status', 'published'))
+            ->withCount(['blogs' => fn($q) => $q->where('status', 'published')])
             ->orderBy('name')->get();
 
         return Inertia::render('blog/Index', [
             'featured'       => $featured ? $this->blogCard($featured) : null,
             'posts'          => $posts->map(fn($p) => $this->blogCard($p)),
-            'categories'     => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug]),
+            'categories'     => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug, 'blogs_count' => $c->blogs_count]),
             'activeCategory' => ['id' => $category->id, 'name' => $category->name, 'slug' => $category->slug],
+            'totalCount'     => Blog::published()->count(),
         ]);
     }
 
@@ -82,12 +86,17 @@ class BlogController extends Controller
             ->with(['replies' => fn($q) => $q->with('replies')])
             ->approved()->topLevel()->latest()->get();
 
+        $recent = Blog::published()
+            ->where('id', '!=', $blog->id)
+            ->orderByDesc('published_at')->take(4)->get();
+
         $blogData = $this->blogFull($blog);
         $blogData = $this->applyBlogTranslation($blogData, $blog, $request);
 
         return Inertia::render('blog/Show', [
             'blog'       => $blogData,
             'related'    => $related->map(fn($p) => $this->blogCard($p)),
+            'recent'     => $recent->map(fn($p) => $this->blogCard($p)),
             'categories' => $categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name, 'slug' => $c->slug, 'blogs_count' => $c->blogs_count]),
             'comments'   => $comments->map(fn($c) => $this->commentData($c)),
         ]);

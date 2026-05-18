@@ -22,7 +22,7 @@ export default function Reviews({ reviews }: Props) {
         <div className="kb-card p-8 text-center">
           <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>You haven't written any reviews yet.</p>
           <p className="text-xs mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Reviews can be left from your delivered orders.</p>
-          <Link href="/account/orders" className="kb-btn kb-btn-primary text-sm mt-4 inline-flex">View Orders</Link>
+          <Link href="/account/orders" className="kb-btn kb-btn-primary kb-btn-md text-sm mt-4 inline-flex outline-none">View Orders</Link>
         </div>
       ) : (
         <div className="space-y-3">

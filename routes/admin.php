@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountingController;
+use App\Http\Controllers\Admin\AdSpendController;
+use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\AiController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\LanguageController;
@@ -174,6 +177,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/payment-trends',   [ReportController::class, 'paymentTrends'])->name('payment-trends');
             Route::get('/geographic',       [ReportController::class, 'geographic'])->name('geographic');
             Route::get('/export',           [ReportController::class, 'export'])->name('export');
+        });
+
+        // Accounting
+        Route::prefix('accounting')->name('accounting.')->group(function () {
+            Route::get('/',                                    [AccountingController::class, 'index'])->name('index');
+            Route::get('/purchases',                           [PurchaseOrderController::class, 'index'])->name('purchases.index');
+            Route::get('/purchases/create',                    [PurchaseOrderController::class, 'create'])->name('purchases.create');
+            Route::post('/purchases',                          [PurchaseOrderController::class, 'store'])->name('purchases.store');
+            Route::get('/purchases/{purchase}',                [PurchaseOrderController::class, 'show'])->name('purchases.show');
+            Route::patch('/purchases/{purchase}/receive',      [PurchaseOrderController::class, 'receive'])->name('purchases.receive');
+            Route::delete('/purchases/{purchase}',             [PurchaseOrderController::class, 'destroy'])->name('purchases.destroy');
+            Route::get('/ad-spend',                            [AdSpendController::class, 'index'])->name('ad-spend.index');
+            Route::post('/ad-spend',                           [AdSpendController::class, 'store'])->name('ad-spend.store');
+            Route::delete('/ad-spend/{adSpend}',               [AdSpendController::class, 'destroy'])->name('ad-spend.destroy');
         });
 
         // Sitemap

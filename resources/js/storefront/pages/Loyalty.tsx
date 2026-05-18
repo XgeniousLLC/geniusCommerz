@@ -39,7 +39,7 @@ export default function Loyalty({ settings, userProps }: Props) {
           <div className="text-5xl mb-4">⭐</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Loyalty Program Coming Soon</h1>
           <p className="text-gray-500">We're setting up our rewards program. Check back soon!</p>
-          <Link href="/shop" className="kb-btn kb-btn-primary mt-6 inline-flex">Browse Products</Link>
+          <Link href="/shop" className="kb-btn kb-btn-primary mt-6 inline-flex outline-none">Browse Products</Link>
         </div>
       </Layout>
     );
@@ -82,7 +82,7 @@ export default function Loyalty({ settings, userProps }: Props) {
                   <p className="text-sm opacity-80 mt-2">
                     Sign in to start earning {(settings.points_per_taka * 10).toFixed(0)} point{settings.points_per_taka * 10 !== 1 ? 's' : ''} for every ৳10 you spend.
                   </p>
-                  <Link href="/login" className="kb-btn mt-4 inline-flex font-semibold px-5 py-2.5 rounded-lg" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)' }}>
+                  <Link href="/login" className="kb-btn mt-4 inline-flex font-semibold px-5 py-2.5 rounded-lg outline-none" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)' }}>
                     Sign in to check balance
                   </Link>
                 </>
@@ -198,8 +198,8 @@ export default function Loyalty({ settings, userProps }: Props) {
             <p className="text-gray-700 font-medium text-lg mb-2">Ready to start earning?</p>
             <p className="text-gray-500 text-sm mb-4">Create an account and earn {(settings.points_per_taka * 10).toFixed(0)} point{settings.points_per_taka * 10 !== 1 ? 's' : ''} for every ৳10 you spend.</p>
             <div className="flex gap-3 justify-center">
-              <Link href="/register" className="kb-btn kb-btn-primary px-6 py-2.5">Create Account</Link>
-              <Link href="/login" className="kb-btn px-6 py-2.5" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>Sign In</Link>
+              <Link href="/register" className="kb-btn kb-btn-primary px-6 py-2.5 outline-none">Create Account</Link>
+              <Link href="/login" className="kb-btn px-6 py-2.5 outline-none" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>Sign In</Link>
             </div>
           </div>
         )}

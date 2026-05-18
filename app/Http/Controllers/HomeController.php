@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\SiteSetting;
 use Inertia\Inertia;
@@ -27,26 +29,41 @@ class HomeController extends Controller
 
         $featuredProducts = Product::where('is_featured', true)
             ->where('status', 'active')
-            ->with(['images', 'variants'])
+            ->with(['images', 'variants', 'categories'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->orderByDesc('created_at')
             ->take(8)
             ->get()
             ->map(fn($p) => $this->productCard($p));
 
         $newArrivals = Product::where('status', 'active')
-            ->with(['images', 'variants'])
+            ->with(['images', 'variants', 'categories'])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->orderByDesc('created_at')
             ->take(8)
             ->get()
             ->map(fn($p) => $this->productCard($p));
+
+        $brands = Brand::orderBy('name')
+            ->take(8)
+            ->get(['id', 'name', 'slug']);
+
+        $heroImageMediaId = SiteSetting::get('storefront.hero_image_media_id');
+        $heroImageUrl     = $heroImageMediaId
+            ? Media::find((int) $heroImageMediaId)?->getUrl()
+            : null;
 
         return Inertia::render('Home', [
             'latestPosts'      => $latestPosts,
             'shopCategories'   => $shopCategories,
             'featuredProducts' => $featuredProducts,
             'newArrivals'      => $newArrivals,
+            'brands'           => $brands,
             'heroTitle'        => SiteSetting::get('general.hero_title', ''),
             'heroSub'          => SiteSetting::get('general.hero_subtitle', ''),
+            'heroImageUrl'     => $heroImageUrl,
         ]);
     }
 
@@ -67,6 +84,9 @@ class HomeController extends Controller
             'image_url'        => $firstImage?->getUrl('thumb'),
             'is_featured'      => $p->is_featured,
             'in_stock'         => $inStock,
+            'avg_rating'       => $p->reviews_avg_rating ? round((float) $p->reviews_avg_rating, 1) : null,
+            'reviews_count'    => (int) ($p->reviews_count ?? 0),
+            'category_name'    => $p->categories->first()?->name,
         ];
     }
 
