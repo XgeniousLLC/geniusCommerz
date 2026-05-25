@@ -3,6 +3,14 @@ import { useMemo } from 'react';
 import Layout from '../layouts/Layout';
 import { usePrice } from '../usePrice';
 
+interface OrderItem {
+  product_name: string;
+  variant_label: string | null;
+  quantity: number;
+  unit_price: number;
+  total: number;
+}
+
 interface Props {
   order: {
     order_number: string;
@@ -10,6 +18,7 @@ interface Props {
     total: number;
     payment_method: string;
     status: string;
+    items: OrderItem[];
   };
 }
 
@@ -70,7 +79,7 @@ export default function OrderConfirmed({ order }: Props) {
             </svg>
           </div>
           <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--kb-ink)' }}>
-            ধন্যবাদ — Thank you for your order!
+            Thank you for your order!
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--kb-ink-soft)' }}>
             Order{' '}
@@ -97,6 +106,32 @@ export default function OrderConfirmed({ order }: Props) {
             <div className="font-bold text-sm" style={{ color: 'var(--kb-ink)' }}>2–4 business days</div>
           </div>
         </div>
+
+        {/* Ordered items */}
+        {order.items && order.items.length > 0 && (
+          <div className="kb-card mb-5 divide-y" style={{ borderColor: 'var(--kb-border)' }}>
+            {order.items.map((item, i) => (
+              <div key={i} className="flex items-center justify-between px-4 py-3 gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate" style={{ color: 'var(--kb-ink)' }}>
+                    {item.product_name}
+                  </div>
+                  {item.variant_label && (
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>
+                      {item.variant_label}
+                    </div>
+                  )}
+                </div>
+                <div className="text-xs shrink-0" style={{ color: 'var(--kb-ink-soft)' }}>
+                  ×{item.quantity}
+                </div>
+                <div className="text-sm font-semibold shrink-0" style={{ color: 'var(--kb-ink)' }}>
+                  {fmt(item.total)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">

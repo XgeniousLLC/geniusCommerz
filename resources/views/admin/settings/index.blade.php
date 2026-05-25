@@ -31,6 +31,7 @@
             'tracking'   => 'Tracking',
             'feeds'      => 'Product Feeds',
             'currencies' => 'Currencies',
+            'storage'    => 'Storage',
         ] as $slug => $label)
             <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
                style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
@@ -1288,6 +1289,109 @@ $stepStyle = 'display:inline-flex;align-items:center;justify-content:center;widt
 
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Currency Settings</x-admin.button>
+        </div>
+    </div>
+</form>
+@endif
+
+{{-- ══ STORAGE ══════════════════════════════════════════════════════════════ --}}
+@if($tab === 'storage')
+<form method="POST" action="{{ route('admin.settings.update', 'storage') }}">
+    @csrf @method('PUT')
+    <div class="space-y-6">
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Storage Driver</h3>
+            <p class="text-sm text-gray-500 mb-5">Choose where uploaded media is stored. Credentials are saved in the database.</p>
+            <div class="space-y-3">
+                @foreach(['public' => 'Local (server disk — default)', 's3' => 'AWS S3', 'r2' => 'Cloudflare R2'] as $val => $label)
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="settings[storage.driver]" value="{{ $val }}"
+                        {{ ($settings->get('storage.driver')?->value ?? 'public') === $val ? 'checked' : '' }}
+                        class="text-blue-600">
+                    <span class="text-sm font-medium text-gray-700">{{ $label }}</span>
+                </label>
+                @endforeach
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-5">AWS S3</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Access Key ID</label>
+                    <x-admin.input type="text" name="settings[storage.s3_key]"
+                        value="{{ old('storage.s3_key', $settings->get('storage.s3_key')?->value ?? '') }}"
+                        placeholder="AKIA..." />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Secret Access Key</label>
+                    <x-admin.input type="password" name="settings[storage.s3_secret]"
+                        value="{{ old('storage.s3_secret', $settings->get('storage.s3_secret')?->value ?? '') }}"
+                        placeholder="Leave blank to keep existing" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Region</label>
+                    <x-admin.input type="text" name="settings[storage.s3_region]"
+                        value="{{ old('storage.s3_region', $settings->get('storage.s3_region')?->value ?? '') }}"
+                        placeholder="us-east-1" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Bucket</label>
+                    <x-admin.input type="text" name="settings[storage.s3_bucket]"
+                        value="{{ old('storage.s3_bucket', $settings->get('storage.s3_bucket')?->value ?? '') }}"
+                        placeholder="my-bucket" />
+                </x-admin.form-group>
+                <x-admin.form-group class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">CDN / Public URL <span class="text-gray-400 font-normal">(optional)</span></label>
+                    <x-admin.input type="url" name="settings[storage.s3_url]"
+                        value="{{ old('storage.s3_url', $settings->get('storage.s3_url')?->value ?? '') }}"
+                        placeholder="https://cdn.example.com" />
+                    <p class="text-xs text-gray-400 mt-1">If set, all media URLs use this base instead of the S3 URL.</p>
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        <x-admin.card>
+            <h3 class="text-base font-semibold text-gray-900 mb-1">Cloudflare R2</h3>
+            <p class="text-sm text-gray-500 mb-5">R2 uses the S3 API. Generate an API token in Cloudflare → R2 → Manage API tokens.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Access Key ID</label>
+                    <x-admin.input type="text" name="settings[storage.r2_key]"
+                        value="{{ old('storage.r2_key', $settings->get('storage.r2_key')?->value ?? '') }}"
+                        placeholder="R2 Access Key ID" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Secret Access Key</label>
+                    <x-admin.input type="password" name="settings[storage.r2_secret]"
+                        value="{{ old('storage.r2_secret', $settings->get('storage.r2_secret')?->value ?? '') }}"
+                        placeholder="Leave blank to keep existing" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Bucket</label>
+                    <x-admin.input type="text" name="settings[storage.r2_bucket]"
+                        value="{{ old('storage.r2_bucket', $settings->get('storage.r2_bucket')?->value ?? '') }}"
+                        placeholder="my-bucket" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Endpoint</label>
+                    <x-admin.input type="url" name="settings[storage.r2_endpoint]"
+                        value="{{ old('storage.r2_endpoint', $settings->get('storage.r2_endpoint')?->value ?? '') }}"
+                        placeholder="https://<accountid>.r2.cloudflarestorage.com" />
+                </x-admin.form-group>
+                <x-admin.form-group class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Public / CDN URL <span class="text-red-500">*</span></label>
+                    <x-admin.input type="url" name="settings[storage.r2_url]"
+                        value="{{ old('storage.r2_url', $settings->get('storage.r2_url')?->value ?? '') }}"
+                        placeholder="https://pub-xxx.r2.dev or https://media.yourstore.com" />
+                    <p class="text-xs text-gray-400 mt-1">R2 buckets are not public by default — enable "Public Access" in Cloudflare or point a custom domain.</p>
+                </x-admin.form-group>
+            </div>
+        </x-admin.card>
+
+        <div class="flex justify-end">
+            <x-admin.button type="submit">Save Storage Settings</x-admin.button>
         </div>
     </div>
 </form>

@@ -222,6 +222,7 @@ class ProductController extends Controller
                         'stock_qty'        => isset($row['stock_qty']) && $row['stock_qty'] !== '' ? (int) $row['stock_qty'] : null,
                         'is_active'        => isset($row['is_active']) ? (bool) $row['is_active'] : true,
                         'sort_order'       => $i,
+                        'image_media_id'   => isset($row['image_media_id']) && $row['image_media_id'] !== '' ? (int) $row['image_media_id'] : null,
                     ]);
                     $incoming[] = $variant->id;
                 }
