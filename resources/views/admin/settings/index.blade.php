@@ -31,7 +31,8 @@
             'tracking'   => 'Tracking',
             'feeds'      => 'Product Feeds',
             'currencies' => 'Currencies',
-            'storage'    => 'Storage',
+            'storage'       => 'Storage',
+            'notifications' => 'Notifications',
         ] as $slug => $label)
             <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
                style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
@@ -1393,6 +1394,55 @@ $stepStyle = 'display:inline-flex;align-items:center;justify-content:center;widt
         <div class="flex justify-end">
             <x-admin.button type="submit">Save Storage Settings</x-admin.button>
         </div>
+    </div>
+</form>
+@endif
+
+@if($tab === 'notifications')
+<form method="POST" action="{{ route('admin.settings.update', 'notifications') }}">
+    @csrf
+    <x-admin.card>
+        <h3 class="text-base font-semibold text-gray-900 mb-2">SMS Notifications</h3>
+        <p class="text-sm text-gray-500 mb-6">Requires an active SMS integration (Admin → Integrations). If no SMS gateway is configured, messages are silently skipped.</p>
+
+        <div class="space-y-6">
+            <x-admin.form-group>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Order confirmation SMS trigger</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="on_order"
+                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? 'on_order') === 'on_order' ? 'checked' : '' }}
+                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="text-sm text-gray-700">
+                            <span class="font-medium">Send immediately</span>
+                            <span class="text-gray-500"> — SMS sent as soon as customer places an order</span>
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="on_confirmed"
+                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? '') === 'on_confirmed' ? 'checked' : '' }}
+                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="text-sm text-gray-700">
+                            <span class="font-medium">Send when order status changes to Confirmed</span>
+                            <span class="text-gray-500"> — SMS sent when admin manually confirms the order</span>
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="disabled"
+                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? '') === 'disabled' ? 'checked' : '' }}
+                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="text-sm text-gray-700">
+                            <span class="font-medium">Disabled</span>
+                            <span class="text-gray-500"> — no order confirmation SMS sent</span>
+                        </span>
+                    </label>
+                </div>
+            </x-admin.form-group>
+        </div>
+    </x-admin.card>
+
+    <div class="mt-6 flex justify-end">
+        <x-admin.button type="submit">Save Notifications</x-admin.button>
     </div>
 </form>
 @endif

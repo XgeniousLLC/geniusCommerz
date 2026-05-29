@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderConfirmed;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -227,6 +228,18 @@ class CheckoutController extends Controller
                 'email' => $order->customer_email,
             ]);
             try { $notifiable->notify(new OrderConfirmed($order)); } catch (\Throwable) {}
+        }
+
+        // Send SMS confirmation if trigger is set to immediate
+        $smsTrigger = SiteSetting::get('notifications.sms_order_trigger', 'on_order');
+        if ($smsTrigger === 'on_order' && $order->customer_phone) {
+            try {
+                $sms = app(SmsService::class);
+                if ($sms->hasDefault()) {
+                    $message = "Order #{$order->order_number} confirmed. Total: {$order->total} BDT. Thank you for shopping with us!";
+                    $sms->send($order->customer_phone, $message);
+                }
+            } catch (\Throwable) {}
         }
 
         // Server-side tracking

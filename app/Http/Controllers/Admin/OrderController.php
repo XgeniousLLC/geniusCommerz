@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderStatusChanged;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\SmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -284,6 +285,21 @@ class OrderController extends Controller
                 'email' => $order->customer_email,
             ]);
             try { $notifiable->notify(new OrderStatusChanged($order->fresh(), $data['status'])); } catch (\Throwable) {}
+        }
+
+        // Send SMS when status changes to confirmed (if setting is on_confirmed)
+        if (isset($data['status']) && $data['status'] === 'confirmed' && $data['status'] !== $previousStatus) {
+            $smsTrigger = SiteSetting::get('notifications.sms_order_trigger', 'on_order');
+            if ($smsTrigger === 'on_confirmed' && $order->customer_phone) {
+                try {
+                    $sms = app(SmsService::class);
+                    if ($sms->hasDefault()) {
+                        $fresh = $order->fresh();
+                        $message = "Order #{$fresh->order_number} has been confirmed. Total: {$fresh->total} BDT. Thank you for shopping with us!";
+                        $sms->send($fresh->customer_phone, $message);
+                    }
+                } catch (\Throwable) {}
+            }
         }
 
         return back()->with('success', 'Order updated.');

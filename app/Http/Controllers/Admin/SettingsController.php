@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds', 'currencies', 'accounting', 'storage'];
+    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds', 'currencies', 'accounting', 'storage', 'notifications'];
 
     public function index(Request $request): View
     {
