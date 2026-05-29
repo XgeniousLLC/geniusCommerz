@@ -222,7 +222,108 @@
                 {{-- Variant matrix --}}
                 <div id="variant-matrix" style="{{ $product->has_variants ? '' : 'display:none' }}">
                     @if($product->variants->isEmpty())
-                        <p class="text-sm text-gray-500">No variants yet. Use the Create form to generate variant combinations.</p>
+                    <div x-data="variantBuilderEdit()" x-init="init()">
+                        <div class="mb-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Select up to 3 variant axes:</p>
+                            <div class="flex flex-wrap gap-3">
+                                @foreach($attributes as $attr)
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" value="{{ $attr->id }}"
+                                        x-model="selectedAttributes"
+                                        @change="generateCombinations()"
+                                        :disabled="!selectedAttributes.includes({{ $attr->id }}) && selectedAttributes.length >= 3"
+                                        class="rounded border-gray-300 text-blue-600">
+                                    <span class="text-sm text-gray-700">{{ $attr->name }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <template x-for="attrId in selectedAttributes" :key="attrId">
+                            <div class="mb-4 p-3 bg-gray-50 rounded-md">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <p class="text-sm font-semibold text-gray-700" x-text="attrName(attrId)"></p>
+                                    <input type="text"
+                                        :value="newValues[attrId] ?? ''"
+                                        @input="newValues[attrId] = $event.target.value"
+                                        @keydown.enter.prevent="quickAddAttrValue(attrId)"
+                                        placeholder="New value…"
+                                        class="h-6 w-32 rounded border-gray-300 text-xs px-2 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                    <button type="button"
+                                        @click="quickAddAttrValue(attrId)"
+                                        class="h-6 px-2 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                        :disabled="addingValue[attrId]">+</button>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="val in attrValues(attrId)" :key="val.id">
+                                        <label class="flex items-center space-x-1 cursor-pointer">
+                                            <input type="checkbox" :value="val.id"
+                                                x-model="selectedValues[attrId]"
+                                                @change="generateCombinations()"
+                                                class="rounded border-gray-300 text-blue-600">
+                                            <span class="text-sm text-gray-700" x-text="val.value"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div x-show="combinations.length > 0">
+                            <p class="text-sm font-medium text-gray-700 mb-2">
+                                <span x-text="combinations.length"></span> variant(s) — fill in pricing:
+                            </p>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm border border-gray-200 rounded">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">Variant</th>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">SKU</th>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">Price *</th>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">Compare At</th>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">Cost</th>
+                                            <th class="px-3 py-2 text-left font-medium text-gray-600">Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(combo, idx) in combinations" :key="idx">
+                                            <tr class="border-t border-gray-200">
+                                                <td class="px-3 py-2 font-medium text-gray-800" x-text="combo.label"></td>
+                                                <td class="px-3 py-2">
+                                                    <template x-for="vid in combo.valueIds" :key="vid">
+                                                        <input type="hidden"
+                                                            :name="`variants[${idx}][attribute_value_ids][]`"
+                                                            :value="vid">
+                                                    </template>
+                                                    <input type="text" :name="`variants[${idx}][sku]`"
+                                                        class="w-24 rounded border-gray-300 text-sm px-2 py-1 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" :name="`variants[${idx}][price]`"
+                                                        step="0.01" min="0" required placeholder="0.00"
+                                                        class="w-24 rounded border-gray-300 text-sm px-2 py-1 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" :name="`variants[${idx}][compare_at_price]`"
+                                                        step="0.01" min="0" placeholder="0.00"
+                                                        class="w-24 rounded border-gray-300 text-sm px-2 py-1 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" :name="`variants[${idx}][cost_price]`"
+                                                        step="0.01" min="0" placeholder="0.00"
+                                                        class="w-24 rounded border-gray-300 text-sm px-2 py-1 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                                </td>
+                                                <td class="px-3 py-2">
+                                                    <input type="number" :name="`variants[${idx}][stock_qty]`"
+                                                        min="0" placeholder="∞"
+                                                        class="w-20 rounded border-gray-300 text-sm px-2 py-1 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                     @else
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm border border-gray-200 rounded">
@@ -596,6 +697,14 @@ function contentTranslator(type, id) {
 </script>
 @endif
 
+@php
+    $attributeJson = json_encode($attributes->map(fn($a) => [
+        'id'     => $a->id,
+        'name'   => $a->name,
+        'values' => $a->values->map(fn($v) => ['id' => $v->id, 'value' => $v->value])->values(),
+    ])->values());
+@endphp
+
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
@@ -678,6 +787,84 @@ function specEditor(initial) {
         rows: Array.isArray(initial) && initial.length ? initial : [],
         add()  { this.rows.push({ key: '', value: '' }); },
         remove(i) { this.rows.splice(i, 1); },
+    };
+}
+
+const _editAttributeDataRaw = {!! $attributeJson !!};
+
+function variantBuilderEdit() {
+    return {
+        selectedAttributes: [],
+        selectedValues: {},
+        combinations: [],
+        newValues: {},
+        addingValue: {},
+        data: [],
+
+        init() {
+            this.data = JSON.parse(JSON.stringify(_editAttributeDataRaw));
+            this.data.forEach(attr => {
+                this.selectedValues[attr.id] = [];
+                this.newValues[attr.id] = '';
+                this.addingValue[attr.id] = false;
+            });
+        },
+
+        attrName(id) {
+            return this.data.find(a => a.id == id)?.name ?? '';
+        },
+
+        attrValues(id) {
+            return this.data.find(a => a.id == id)?.values ?? [];
+        },
+
+        async quickAddAttrValue(attrId) {
+            const val = (this.newValues[attrId] ?? '').trim();
+            if (!val || this.addingValue[attrId]) return;
+            const attr = this.data.find(a => a.id == attrId);
+            if (attr && attr.values.find(v => v.value.toLowerCase() === val.toLowerCase())) {
+                this.newValues[attrId] = '';
+                return;
+            }
+            this.addingValue[attrId] = true;
+            try {
+                const res = await fetch('{{ route("admin.attributes.quick-add-value") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+                    body: JSON.stringify({ attribute_id: attrId, value: val }),
+                });
+                const json = await res.json();
+                if (!res.ok) return;
+                if (attr && !attr.values.find(v => v.id == json.id)) {
+                    attr.values = [...attr.values, { id: json.id, value: json.value }];
+                }
+                this.newValues[attrId] = '';
+            } finally {
+                this.addingValue[attrId] = false;
+            }
+        },
+
+        generateCombinations() {
+            const axes = this.selectedAttributes
+                .map(id => (this.selectedValues[id] ?? []).map(vid => {
+                    const attr = this.data.find(a => a.id == id);
+                    const val  = attr?.values.find(v => v.id == vid);
+                    return { id: vid, label: val?.value ?? vid };
+                }))
+                .filter(ax => ax.length > 0);
+
+            if (axes.length === 0) { this.combinations = []; return; }
+
+            let result = [[]];
+            for (const axis of axes) {
+                result = result.flatMap(r => axis.map(v => [...r, v]));
+            }
+
+            this.combinations = result.map(combo => ({
+                label:    combo.map(v => v.label).join(' / '),
+                valueIds: combo.map(v => v.id),
+            }));
+        },
     };
 }
 

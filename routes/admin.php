@@ -86,6 +86,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('brands', BrandController::class)->except(['show']);
         Route::resource('products', ProductController::class)->except(['show']);
         Route::resource('attributes', AttributeController::class)->except(['show']);
+        Route::post('/attributes/quick-add-value', [AttributeController::class, 'quickAddValue'])->name('attributes.quick-add-value');
 
         // Order settings
         Route::get('/order-settings', [OrderSettingsController::class, 'index'])->name('order-settings.index');

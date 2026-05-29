@@ -226,6 +226,31 @@ class ProductController extends Controller
                     ]);
                     $incoming[] = $variant->id;
                 }
+            } else {
+                $variant = ProductVariant::create([
+                    'product_id'       => $product->id,
+                    'sku'              => $row['sku'] ?? null,
+                    'price'            => $row['price'],
+                    'compare_at_price' => $row['compare_at_price'] ?? null,
+                    'cost_price'       => $row['cost_price'] ?? null,
+                    'weight'           => $row['weight'] ?? null,
+                    'stock_qty'        => isset($row['stock_qty']) && $row['stock_qty'] !== '' ? (int) $row['stock_qty'] : null,
+                    'is_active'        => true,
+                    'sort_order'       => $i,
+                ]);
+
+                foreach ($row['attribute_value_ids'] ?? [] as $valueId) {
+                    $value = AttributeValue::find($valueId);
+                    if ($value) {
+                        ProductVariantValue::create([
+                            'variant_id'         => $variant->id,
+                            'attribute_id'       => $value->attribute_id,
+                            'attribute_value_id' => $value->id,
+                        ]);
+                    }
+                }
+
+                $incoming[] = $variant->id;
             }
         }
 

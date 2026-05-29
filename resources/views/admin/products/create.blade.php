@@ -241,7 +241,19 @@
                     {{-- Step 2: pick values per attribute --}}
                     <template x-for="attrId in selectedAttributes" :key="attrId">
                         <div class="mb-4 p-3 bg-gray-50 rounded-md">
-                            <p class="text-sm font-semibold text-gray-700 mb-2" x-text="attrName(attrId)"></p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <p class="text-sm font-semibold text-gray-700" x-text="attrName(attrId)"></p>
+                                <input type="text"
+                                    :value="newValues[attrId] ?? ''"
+                                    @input="newValues[attrId] = $event.target.value"
+                                    @keydown.enter.prevent="quickAddAttrValue(attrId)"
+                                    placeholder="New value…"
+                                    class="h-6 w-32 rounded border-gray-300 text-xs px-2 focus:border-blue-300 focus:ring focus:ring-blue-200" />
+                                <button type="button"
+                                    @click="quickAddAttrValue(attrId)"
+                                    class="h-6 px-2 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                    :disabled="addingValue[attrId]">+</button>
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 <template x-for="val in attrValues(attrId)" :key="val.id">
                                     <label class="flex items-center space-x-1 cursor-pointer">
@@ -585,7 +597,7 @@ function specEditor(initial) {
 }
 
 // Variant builder
-const attributeData = {!! $attributeJson !!};
+const _attributeDataRaw = {!! $attributeJson !!};
 
 function variantBuilder() {
     return {
@@ -593,26 +605,58 @@ function variantBuilder() {
         selectedAttributes: [],
         selectedValues: {},
         combinations: [],
+        newValues: {},
+        addingValue: {},
+        data: [],
 
         init() {
             this.hasVariants = document.getElementById('has-variants').checked;
-            attributeData.forEach(attr => {
+            this.data = JSON.parse(JSON.stringify(_attributeDataRaw));
+            this.data.forEach(attr => {
                 this.selectedValues[attr.id] = [];
+                this.newValues[attr.id] = '';
+                this.addingValue[attr.id] = false;
             });
         },
 
         attrName(id) {
-            return attributeData.find(a => a.id == id)?.name ?? '';
+            return this.data.find(a => a.id == id)?.name ?? '';
         },
 
         attrValues(id) {
-            return attributeData.find(a => a.id == id)?.values ?? [];
+            return this.data.find(a => a.id == id)?.values ?? [];
+        },
+
+        async quickAddAttrValue(attrId) {
+            const val = (this.newValues[attrId] ?? '').trim();
+            if (!val || this.addingValue[attrId]) return;
+            const attr = this.data.find(a => a.id == attrId);
+            if (attr && attr.values.find(v => v.value.toLowerCase() === val.toLowerCase())) {
+                this.newValues[attrId] = '';
+                return;
+            }
+            this.addingValue[attrId] = true;
+            try {
+                const res = await fetch('{{ route("admin.attributes.quick-add-value") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+                    body: JSON.stringify({ attribute_id: attrId, value: val }),
+                });
+                const json = await res.json();
+                if (!res.ok) return;
+                if (attr && !attr.values.find(v => v.id == json.id)) {
+                    attr.values = [...attr.values, { id: json.id, value: json.value }];
+                }
+                this.newValues[attrId] = '';
+            } finally {
+                this.addingValue[attrId] = false;
+            }
         },
 
         generateCombinations() {
             const axes = this.selectedAttributes
                 .map(id => (this.selectedValues[id] ?? []).map(vid => {
-                    const attr = attributeData.find(a => a.id == id);
+                    const attr = this.data.find(a => a.id == id);
                     const val  = attr?.values.find(v => v.id == vid);
                     return { id: vid, label: val?.value ?? vid };
                 }))
