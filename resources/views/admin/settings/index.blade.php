@@ -1403,41 +1403,32 @@ $stepStyle = 'display:inline-flex;align-items:center;justify-content:center;widt
     @csrf
     <x-admin.card>
         <h3 class="text-base font-semibold text-gray-900 mb-2">SMS Notifications</h3>
-        <p class="text-sm text-gray-500 mb-6">Requires an active SMS integration (Admin → Integrations). If no SMS gateway is configured, messages are silently skipped.</p>
+        <p class="text-sm text-gray-500 mb-6">Requires an active SMS gateway (Admin → Integrations). If no gateway is configured, messages are silently skipped.</p>
 
-        <div class="space-y-6">
-            <x-admin.form-group>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Order confirmation SMS trigger</label>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="on_order"
-                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? 'on_order') === 'on_order' ? 'checked' : '' }}
-                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
-                        <span class="text-sm text-gray-700">
-                            <span class="font-medium">Send immediately</span>
-                            <span class="text-gray-500"> — SMS sent as soon as customer places an order</span>
-                        </span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="on_confirmed"
-                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? '') === 'on_confirmed' ? 'checked' : '' }}
-                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
-                        <span class="text-sm text-gray-700">
-                            <span class="font-medium">Send when order status changes to Confirmed</span>
-                            <span class="text-gray-500"> — SMS sent when admin manually confirms the order</span>
-                        </span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="settings[notifications.sms_order_trigger]" value="disabled"
-                            {{ ($settings->get('notifications.sms_order_trigger')?->value ?? '') === 'disabled' ? 'checked' : '' }}
-                            class="text-blue-600 border-gray-300 focus:ring-blue-500">
-                        <span class="text-sm text-gray-700">
-                            <span class="font-medium">Disabled</span>
-                            <span class="text-gray-500"> — no order confirmation SMS sent</span>
-                        </span>
-                    </label>
-                </div>
-            </x-admin.form-group>
+        @php
+            $smsOnOrder     = $settings->get('notifications.sms_on_order')?->value     ?? '0';
+            $smsOnConfirmed = $settings->get('notifications.sms_on_confirmed')?->value ?? '1';
+            $smsOnDelivered = $settings->get('notifications.sms_on_delivered')?->value ?? '1';
+        @endphp
+
+        <div class="space-y-4">
+            @foreach([
+                ['key' => 'notifications.sms_on_order',     'val' => $smsOnOrder,     'label' => 'Send SMS when order is placed',    'desc' => 'Customer receives an SMS as soon as they complete checkout.'],
+                ['key' => 'notifications.sms_on_confirmed', 'val' => $smsOnConfirmed, 'label' => 'Send SMS when order is confirmed', 'desc' => 'Triggered when admin changes order status to Confirmed.'],
+                ['key' => 'notifications.sms_on_delivered', 'val' => $smsOnDelivered, 'label' => 'Send SMS when order is delivered', 'desc' => 'Triggered when admin changes order status to Delivered.'],
+            ] as $row)
+            <div class="flex items-start gap-3">
+                <input type="hidden" name="settings[{{ $row['key'] }}]" value="0">
+                <input type="checkbox" name="settings[{{ $row['key'] }}]" value="1"
+                    id="sms-{{ str_replace('.', '-', $row['key']) }}"
+                    {{ $row['val'] === '1' ? 'checked' : '' }}
+                    class="mt-0.5 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                <label for="sms-{{ str_replace('.', '-', $row['key']) }}" class="cursor-pointer">
+                    <span class="block text-sm font-medium text-gray-700">{{ $row['label'] }}</span>
+                    <span class="block text-xs text-gray-500 mt-0.5">{{ $row['desc'] }}</span>
+                </label>
+            </div>
+            @endforeach
         </div>
     </x-admin.card>
 

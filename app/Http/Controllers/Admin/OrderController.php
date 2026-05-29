@@ -287,15 +287,21 @@ class OrderController extends Controller
             try { $notifiable->notify(new OrderStatusChanged($order->fresh(), $data['status'])); } catch (\Throwable) {}
         }
 
-        // Send SMS when status changes to confirmed (if setting is on_confirmed)
-        if (isset($data['status']) && $data['status'] === 'confirmed' && $data['status'] !== $previousStatus) {
-            $smsTrigger = SiteSetting::get('notifications.sms_order_trigger', 'on_order');
-            if ($smsTrigger === 'on_confirmed' && $order->customer_phone) {
+        // Send SMS on confirmed / delivered status transitions
+        if (isset($data['status']) && $data['status'] !== $previousStatus && $order->customer_phone) {
+            $settingKey = match($data['status']) {
+                'confirmed' => 'notifications.sms_on_confirmed',
+                'delivered' => 'notifications.sms_on_delivered',
+                default     => null,
+            };
+            if ($settingKey && SiteSetting::get($settingKey, '1') === '1') {
                 try {
                     $sms = app(SmsService::class);
                     if ($sms->hasDefault()) {
                         $fresh = $order->fresh();
-                        $message = "Order #{$fresh->order_number} has been confirmed. Total: {$fresh->total} BDT. Thank you for shopping with us!";
+                        $message = $data['status'] === 'confirmed'
+                            ? "Your order #{$fresh->order_number} has been confirmed. Total: {$fresh->total} BDT. Thank you for shopping with us!"
+                            : "Your order #{$fresh->order_number} has been delivered. Thank you for shopping with us!";
                         $sms->send($fresh->customer_phone, $message);
                     }
                 } catch (\Throwable) {}

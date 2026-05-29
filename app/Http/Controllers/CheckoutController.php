@@ -230,13 +230,12 @@ class CheckoutController extends Controller
             try { $notifiable->notify(new OrderConfirmed($order)); } catch (\Throwable) {}
         }
 
-        // Send SMS confirmation if trigger is set to immediate
-        $smsTrigger = SiteSetting::get('notifications.sms_order_trigger', 'on_order');
-        if ($smsTrigger === 'on_order' && $order->customer_phone) {
+        // Send SMS on order placement
+        if ($order->customer_phone && SiteSetting::get('notifications.sms_on_order', '0') === '1') {
             try {
                 $sms = app(SmsService::class);
                 if ($sms->hasDefault()) {
-                    $message = "Order #{$order->order_number} confirmed. Total: {$order->total} BDT. Thank you for shopping with us!";
+                    $message = "Order #{$order->order_number} placed. Total: {$order->total} BDT. We will confirm your order shortly.";
                     $sms->send($order->customer_phone, $message);
                 }
             } catch (\Throwable) {}
