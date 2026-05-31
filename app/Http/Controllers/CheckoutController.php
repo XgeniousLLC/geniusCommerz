@@ -235,7 +235,13 @@ class CheckoutController extends Controller
             try {
                 $sms = app(SmsService::class);
                 if ($sms->hasDefault()) {
-                    $message = "Order #{$order->order_number} placed. Total: {$order->total} BDT. We will confirm your order shortly.";
+                    $default  = "Thank you for your order at KlixBD!\nYour order #{{order_id}} has been placed successfully.\nTotal: {{amount}} BDT.";
+                    $template = SiteSetting::get('notifications.sms_template_placed', $default);
+                    $message  = SmsService::renderTemplate($template, [
+                        'order_id'      => $order->order_number,
+                        'amount'        => $order->total,
+                        'customer_name' => $order->customer_name,
+                    ]);
                     $sms->send($order->customer_phone, $message);
                 }
             } catch (\Throwable) {}

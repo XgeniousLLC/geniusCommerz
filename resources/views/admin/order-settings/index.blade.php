@@ -6,34 +6,20 @@
 <ol class="flex items-center space-x-2 text-sm text-gray-500">
     <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
     <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">Order Settings</li>
+    <li><a href="{{ route('admin.settings.index') }}" class="hover:text-gray-700">Settings</a></li>
+    <li><span class="mx-1">/</span></li>
+    <li class="text-gray-900 font-medium">Orders</li>
 </ol>
 @endsection
 
 @section('page-header')
 <div>
-    <h1 class="text-2xl font-bold text-gray-900">Order Settings</h1>
+    <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
     <p class="text-gray-500 mt-1 text-sm">Configure order number format, serial counter and invoice defaults.</p>
 </div>
 @endsection
 
 @section('content')
-
-{{-- Shared tab nav --}}
-<div style="border-bottom:1px solid #e5e7eb;margin-bottom:1.5rem">
-    <nav style="display:flex;gap:0;margin-bottom:-1px">
-        @foreach(['general' => 'General', 'meta' => 'SEO / Meta', 'social' => 'Social', 'storefront' => 'Storefront', 'payment' => 'Payment', 'shipping' => 'Shipping', 'legal' => 'Legal'] as $slug => $label)
-        <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
-           style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid transparent;color:#6b7280;transition:color .15s">
-            {{ $label }}
-        </a>
-        @endforeach
-        <a href="{{ route('admin.order-settings.index') }}"
-           style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid #3b82f6;color:#2563eb;transition:color .15s">
-            Orders
-        </a>
-    </nav>
-</div>
 
 <form method="POST" action="{{ route('admin.order-settings.update') }}" class="space-y-6">
 @csrf

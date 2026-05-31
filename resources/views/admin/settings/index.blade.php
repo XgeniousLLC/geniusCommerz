@@ -1,51 +1,43 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Settings')
+@php
+    $tabLabels = [
+        'general'       => 'General',
+        'meta'          => 'SEO / Meta',
+        'social'        => 'Social',
+        'storefront'    => 'Storefront',
+        'payment'       => 'Payment',
+        'shipping'      => 'Shipping',
+        'cart'          => 'Cart',
+        'legal'         => 'Legal',
+        'tracking'      => 'Tracking',
+        'feeds'         => 'Product Feeds',
+        'currencies'    => 'Currencies',
+        'accounting'    => 'Accounting',
+        'storage'       => 'Storage',
+        'notifications' => 'Notifications',
+    ];
+    $currentTabLabel = $tabLabels[$tab] ?? ucfirst($tab);
+@endphp
+
+@section('title', $currentTabLabel . ' — Settings')
 
 @section('breadcrumbs')
     <ol class="flex items-center space-x-2 text-sm text-gray-500">
         <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
         <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Settings</li>
+        <li><a href="{{ route('admin.settings.index') }}" class="hover:text-gray-700">Settings</a></li>
+        <li><span class="mx-1">/</span></li>
+        <li class="text-gray-900 font-medium">{{ $currentTabLabel }}</li>
     </ol>
 @endsection
 
 @section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-    <p class="text-gray-600 mt-1">Manage global store configuration</p>
+    <h1 class="text-2xl font-bold text-gray-900">{{ $currentTabLabel }}</h1>
+    <p class="text-gray-600 mt-1">Settings › {{ $currentTabLabel }}</p>
 @endsection
 
 @section('content')
-{{-- Tab nav --}}
-<div style="border-bottom:1px solid #e5e7eb;margin-bottom:1.5rem">
-    <nav style="display:flex;gap:0;margin-bottom:-1px" aria-label="Settings tabs">
-        @foreach([
-            'general'    => 'General',
-            'meta'       => 'SEO / Meta',
-            'social'     => 'Social',
-            'storefront' => 'Storefront',
-            'payment'    => 'Payment',
-            'shipping'   => 'Shipping',
-            'cart'       => 'Cart',
-            'legal'      => 'Legal',
-            'tracking'   => 'Tracking',
-            'feeds'      => 'Product Feeds',
-            'currencies' => 'Currencies',
-            'storage'       => 'Storage',
-            'notifications' => 'Notifications',
-        ] as $slug => $label)
-            <a href="{{ route('admin.settings.index', ['tab' => $slug]) }}"
-               style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid {{ $tab === $slug ? '#3b82f6' : 'transparent' }};color:{{ $tab === $slug ? '#2563eb' : '#6b7280' }};transition:color .15s,border-color .15s">
-                {{ $label }}
-            </a>
-        @endforeach
-        {{-- Orders settings is a separate page --}}
-        <a href="{{ route('admin.order-settings.index') }}"
-           style="display:inline-block;padding:10px 18px;font-size:0.875rem;font-weight:500;white-space:nowrap;text-decoration:none;border-bottom:2px solid transparent;color:#6b7280;transition:color .15s,border-color .15s">
-            Orders
-        </a>
-    </nav>
-</div>
 
 {{-- General tab --}}
 @if($tab === 'general')
@@ -1427,6 +1419,51 @@ $stepStyle = 'display:inline-flex;align-items:center;justify-content:center;widt
                     <span class="block text-sm font-medium text-gray-700">{{ $row['label'] }}</span>
                     <span class="block text-xs text-gray-500 mt-0.5">{{ $row['desc'] }}</span>
                 </label>
+            </div>
+            @endforeach
+        </div>
+    </x-admin.card>
+
+    {{-- SMS Message Templates --}}
+    <x-admin.card class="mt-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-1">SMS Message Templates</h3>
+        <p class="text-sm text-gray-500 mb-1">Customize the message sent for each event. Use placeholders below — they are replaced automatically at send time.</p>
+        @php
+            $smsPlaceholders = [
+                '{{order_id}}'      => 'Order number',
+                '{{amount}}'        => 'Order total',
+                '{{customer_name}}' => 'Customer name',
+            ];
+        @endphp
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
+            @foreach($smsPlaceholders as $placeholder => $hint)
+            <span style="display:inline-flex;align-items:center;gap:4px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:2px 8px;font-size:0.75rem">
+                <code style="font-family:monospace;color:#1d4ed8;font-weight:600">{{ $placeholder }}</code>
+                <span style="color:#6b7280">— {{ $hint }}</span>
+            </span>
+            @endforeach
+        </div>
+
+        @php
+            $tplPlaced    = $settings->get('notifications.sms_template_placed')?->value
+                ?? "Thank you for your order at KlixBD!\nYour order #{{order_id}} has been placed successfully.\nTotal: {{amount}} BDT.";
+            $tplConfirmed = $settings->get('notifications.sms_template_confirmed')?->value
+                ?? "Your order #{{order_id}} has been confirmed by KlixBD.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you for shopping with us!";
+            $tplDelivered = $settings->get('notifications.sms_template_delivered')?->value
+                ?? "Your order #{{order_id}} has been delivered. Thank you for shopping with us!";
+        @endphp
+
+        <div class="space-y-5">
+            @foreach([
+                ['key' => 'notifications.sms_template_placed',    'label' => 'Order Placed',    'val' => $tplPlaced],
+                ['key' => 'notifications.sms_template_confirmed',  'label' => 'Order Confirmed',  'val' => $tplConfirmed],
+                ['key' => 'notifications.sms_template_delivered',  'label' => 'Order Delivered',  'val' => $tplDelivered],
+            ] as $tpl)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $tpl['label'] }}</label>
+                <textarea name="settings[{{ $tpl['key'] }}]" rows="3"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 resize-y"
+                >{{ old('settings[' . $tpl['key'] . ']', $tpl['val']) }}</textarea>
             </div>
             @endforeach
         </div>

@@ -289,19 +289,27 @@ class OrderController extends Controller
 
         // Send SMS on confirmed / delivered status transitions
         if (isset($data['status']) && $data['status'] !== $previousStatus && $order->customer_phone) {
-            $settingKey = match($data['status']) {
+            $smsToggleKey = match($data['status']) {
                 'confirmed' => 'notifications.sms_on_confirmed',
                 'delivered' => 'notifications.sms_on_delivered',
                 default     => null,
             };
-            if ($settingKey && SiteSetting::get($settingKey, '1') === '1') {
+            if ($smsToggleKey && SiteSetting::get($smsToggleKey, '1') === '1') {
                 try {
                     $sms = app(SmsService::class);
                     if ($sms->hasDefault()) {
-                        $fresh = $order->fresh();
-                        $message = $data['status'] === 'confirmed'
-                            ? "Your order #{$fresh->order_number} has been confirmed. Total: {$fresh->total} BDT. Thank you for shopping with us!"
-                            : "Your order #{$fresh->order_number} has been delivered. Thank you for shopping with us!";
+                        $fresh    = $order->fresh();
+                        $defaults = [
+                            'confirmed' => "Your order #{{order_id}} has been confirmed by KlixBD.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you for shopping with us!",
+                            'delivered' => "Your order #{{order_id}} has been delivered. Thank you for shopping with us!",
+                        ];
+                        $templateKey = 'notifications.sms_template_' . $data['status'];
+                        $template    = SiteSetting::get($templateKey, $defaults[$data['status']]);
+                        $message     = SmsService::renderTemplate($template, [
+                            'order_id'      => $fresh->order_number,
+                            'amount'        => $fresh->total,
+                            'customer_name' => $fresh->customer_name,
+                        ]);
                         $sms->send($fresh->customer_phone, $message);
                     }
                 } catch (\Throwable) {}
