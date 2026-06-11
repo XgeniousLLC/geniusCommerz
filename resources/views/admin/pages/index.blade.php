@@ -104,7 +104,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $page->created_at->format('M d, Y') }}</td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
-                                        <x-admin.button href="{{ route('admin.pages.show', $page) }}" variant="outline" size="sm">
+                                        <x-admin.button href="{{ route('page.show', $page) }}" variant="outline" size="sm" target="_blank">
                                             View
                                         </x-admin.button>
                                         <x-admin.button href="{{ route('admin.pages.edit', $page) }}" variant="primary" size="sm">
