@@ -2,6 +2,15 @@
 
 @section('title', 'Create Page')
 
+@push('styles')
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<style>
+    #page-content-editor .ql-editor { min-height: 280px; font-size: 0.875rem; }
+    #page-content-editor .ql-container { border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
+    #page-content-editor .ql-toolbar { border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; }
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-4xl mx-auto">
     <div class="mb-6">
@@ -59,15 +68,9 @@
                 </x-admin.form-group>
 
                 <x-admin.form-group>
-                    <label for="content" class="block text-sm font-medium text-gray-700">Content *</label>
-                    <textarea 
-                        id="content" 
-                        name="content" 
-                        rows="8" 
-                        required
-                        placeholder="Enter page content"
-                        class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >{{ old('content') }}</textarea>
+                    <label class="block text-sm font-medium text-gray-700">Content *</label>
+                    <div id="page-content-editor" class="bg-white"></div>
+                    <textarea id="content-input" name="content" class="hidden" required>{{ old('content') }}</textarea>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -506,4 +509,29 @@ document.addEventListener('DOMContentLoaded', function() {
     showTab('basic-seo');
 });
 </script>
+
+@push('scripts')
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script>
+const pageContentQuill = new Quill('#page-content-editor', {
+    theme: 'snow',
+    modules: {
+        toolbar: [
+            [{ header: [2, 3, 4, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['blockquote', 'link'],
+            ['clean'],
+        ]
+    }
+});
+
+const pageContentInitial = document.getElementById('content-input').value;
+if (pageContentInitial) pageContentQuill.clipboard.dangerouslyPasteHTML(pageContentInitial);
+
+pageContentQuill.on('text-change', function () {
+    document.getElementById('content-input').value = pageContentQuill.root.innerHTML === '<p><br></p>' ? '' : pageContentQuill.root.innerHTML;
+});
+</script>
+@endpush
 @endsection
