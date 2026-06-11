@@ -57,7 +57,7 @@ class UpdatePageRequest extends FormRequest
 
             // Advanced Meta Fields
             'canonical_url' => 'nullable|url|max:500',
-            'robots' => 'nullable|in:index,follow,noindex,follow,index,nofollow,noindex,nofollow',
+            'robots' => ['nullable', Rule::in(['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow'])],
         ];
     }
 

@@ -18,7 +18,7 @@
         <p class="text-gray-600">Edit page and meta information</p>
     </div>
 
-    <form action="{{ route('admin.pages.update', $page) }}" method="POST" class="space-y-6">
+    <form id="page-form" action="{{ route('admin.pages.update', $page) }}" method="POST" class="space-y-6" novalidate>
         @csrf
         @method('PUT')
 
@@ -47,11 +47,10 @@
                 <x-admin.form-group>
                     <label for="slug" class="block text-sm font-medium text-gray-700">Slug *</label>
                     <div class="relative">
-                        <x-admin.input 
-                            type="text" 
-                            id="slug" 
-                            name="slug" 
-                            required 
+                        <x-admin.input
+                            type="text"
+                            id="slug"
+                            name="slug"
                             placeholder="page-url-slug"
                             value="{{ old('slug', $page->slug) }}"
                             readonly
@@ -72,7 +71,7 @@
                 <x-admin.form-group>
                     <label class="block text-sm font-medium text-gray-700">Content *</label>
                     <div id="page-content-editor" class="bg-white"></div>
-                    <textarea id="content-input" name="content" class="hidden" required>{{ old('content', $page->content) }}</textarea>
+                    <input type="hidden" id="content-input" name="content" value="{{ old('content') ?: $page->content }}">
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -423,17 +422,26 @@
 
         <!-- Submit Buttons -->
         <div class="flex justify-end space-x-3">
-            <x-admin.button variant="secondary" type="button" onclick="window.history.back()">
+            <button type="button" onclick="window.history.back()" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500">
                 Cancel
-            </x-admin.button>
-            <x-admin.button type="submit">
+            </button>
+            <button type="submit" onclick="syncPageContent()" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500">
                 Update Page
-            </x-admin.button>
+            </button>
         </div>
     </form>
 </div>
 
 <script>
+function syncPageContent() {
+    var qlEditor = document.querySelector('#page-content-editor .ql-editor');
+    var input = document.getElementById('content-input');
+    if (qlEditor && input) {
+        var html = qlEditor.innerHTML.trim();
+        input.value = (html === '<p><br></p>' || html === '') ? '' : html;
+    }
+}
+
 // Tab functionality
 function showTab(tabName) {
     // Hide all tab contents
@@ -491,10 +499,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-@push('scripts')
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
-const pageContentQuill = new Quill('#page-content-editor', {
+var _pageQuill = new Quill('#page-content-editor', {
     theme: 'snow',
     modules: {
         toolbar: [
@@ -507,12 +514,7 @@ const pageContentQuill = new Quill('#page-content-editor', {
     }
 });
 
-const pageContentInitial = document.getElementById('content-input').value;
-if (pageContentInitial) pageContentQuill.clipboard.dangerouslyPasteHTML(pageContentInitial);
-
-pageContentQuill.on('text-change', function () {
-    document.getElementById('content-input').value = pageContentQuill.root.innerHTML === '<p><br></p>' ? '' : pageContentQuill.root.innerHTML;
-});
+var _pageContentInitial = document.getElementById('content-input').value;
+if (_pageContentInitial) _pageQuill.clipboard.dangerouslyPasteHTML(_pageContentInitial);
 </script>
-@endpush
 @endsection
