@@ -20,13 +20,13 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - name: Clean Install Dependencies
-        run: npm ci --legacy-peer-deps
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Build Assets
         run: npm run build
 
-      - name: Verify Vite Build
+      - name: Verify Build
         run: test -f public/build/manifest.json
 
       - name: Upload Build Artifact
@@ -45,7 +45,7 @@ jobs:
           name: vite-build
           path: build-output
 
-      - name: Upload Build Assets to Server
+      - name: Upload Build to Server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.MAIN_SSH_HOST }}
@@ -77,7 +77,7 @@ jobs:
 
             cd "$APP_DIR"
 
-            # First-time initialization
+            # First-time Git setup
             if [ ! -d ".git" ]; then
               echo "🛠 First time setup - initializing git..."
               [ -f .env ] && cp .env "$BACKUP_DIR/.env"
@@ -89,22 +89,18 @@ jobs:
               [ -f "$BACKUP_DIR/.env" ] && cp "$BACKUP_DIR/.env" .env
             fi
 
-            # Backup current .env
             cp .env "$BACKUP_DIR/.env" 2>/dev/null || true
 
             git config --global --add safe.directory "$APP_DIR" || true
             PREVIOUS_SHA=$(git rev-parse HEAD 2>/dev/null || echo "none")
 
-            # Update code from GitHub
             git fetch origin "$BRANCH"
             git reset --hard "origin/$BRANCH"
             git clean -fd -e .env -e storage -e bootstrap/cache -e _incoming_build -e public/build
 
-            # Create necessary directories
             mkdir -p storage/framework/{cache,sessions,views,testing} storage/logs bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
-            # Rollback function
             rollback() {
               echo "↩️ Rolling back deployment..."
               git reset --hard "$PREVIOUS_SHA" 2>/dev/null || true
@@ -117,15 +113,12 @@ jobs:
 
             php artisan down --retry=60 || true
 
-            # Install Composer dependencies
             composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader --no-progress
 
-            # Swap new frontend build
             [ -d "$BUILD_TARGET" ] && mv "$BUILD_TARGET" "$BACKUP_DIR/build.old"
             mv "$INCOMING" "$BUILD_TARGET"
             [ -f "$BUILD_TARGET/manifest.json" ] || { echo "❌ manifest.json missing"; exit 1; }
 
-            # Laravel optimization commands
             php artisan migrate --force --no-interaction
             php artisan storage:link --force || true
             php artisan config:cache
@@ -138,12 +131,11 @@ jobs:
 
             trap - ERR
 
-            # Fix ownership
             chown -R poshivo:poshivo "$APP_DIR" || true
 
-            # Cleanup old backups (keep last 5)
+            # Keep only last 5 backups
             cd /home/poshivo/backups
             ls -1dt deploy_* 2>/dev/null | tail -n +6 | xargs -r rm -rf
 
             echo "✅ Deployment Successful!"
-            echo "Previous: $PREVIOUS_SHA → Current: $(git rev-parse HEAD)"
+            echo "Previous SHA: $PREVIOUS_SHA → Current: $(git rev-parse HEAD)"
