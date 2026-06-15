@@ -1,123 +1,142 @@
 @extends('admin.layouts.admin')
+
 @section('title', 'New Purchase Order')
+
 @section('content')
-<div class="max-w-4xl space-y-6">
-    <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">New Purchase Order</h1>
-        <x-admin.button href="{{ route('admin.accounting.purchases.index') }}" variant="outline">← Back</x-admin.button>
+
+<div class="page-head">
+    <div>
+        <h2 class="display">New Purchase Order</h2>
+        <div class="sub">Add a new order from a supplier</div>
     </div>
+    <a href="{{ route('admin.accounting.purchases.index') }}" class="btn btn-outline">
+        <span class="ico" data-ico="arrowLeft" style="width:16px;height:16px"></span>Back
+    </a>
+</div>
 
-    <form method="POST" action="{{ route('admin.accounting.purchases.store') }}" x-data="purchaseForm()">
-        @csrf
+<form method="POST" action="{{ route('admin.accounting.purchases.store') }}" x-data="purchaseForm()" style="max-width:900px">
+    @csrf
 
-        <x-admin.card class="mb-4">
-            <h3 class="text-sm font-semibold text-gray-700 mb-4">Order Details</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Supplier Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="supplier_name" value="{{ old('supplier_name') }}" required
-                        class="w-full rounded-lg border border-gray-300 text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" />
-                    @error('supplier_name')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+    <div class="col-gap" style="--gap:18px">
+
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-info"><span class="ico" data-ico="doc" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Order Details</h3></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
+                <div class="field">
+                    <span class="lbl">Supplier Name <span style="color:var(--danger)">*</span></span>
+                    <input class="input" type="text" name="supplier_name" value="{{ old('supplier_name') }}" required>
+                    @error('supplier_name')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Order Date <span class="text-red-500">*</span></label>
-                    <input type="date" name="order_date" value="{{ old('order_date', date('Y-m-d')) }}" required
-                        class="w-full rounded-lg border border-gray-300 text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500" />
+                <div class="field">
+                    <span class="lbl">Order Date <span style="color:var(--danger)">*</span></span>
+                    <input class="input" type="date" name="order_date" value="{{ old('order_date', date('Y-m-d')) }}" required>
                 </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Notes</label>
-                    <textarea name="notes" rows="2" class="w-full rounded-lg border border-gray-300 text-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">{{ old('notes') }}</textarea>
+                <div class="field" style="grid-column:1/-1">
+                    <span class="lbl">Notes</span>
+                    <textarea class="input" name="notes" rows="2">{{ old('notes') }}</textarea>
                 </div>
             </div>
-        </x-admin.card>
+        </div>
 
-        <x-admin.card class="mb-4">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-700">Items</h3>
-                <button type="button" @click="addItem()" class="text-xs text-blue-600 hover:underline font-semibold">+ Add Item</button>
+        <div class="card pad">
+            <div class="between" style="margin-bottom:16px">
+                <div class="card-head" style="margin:0">
+                    <span class="tile sm t-accent"><span class="ico" data-ico="package" style="width:18px;height:18px"></span></span>
+                    <div class="ct"><h3>Items</h3></div>
+                </div>
+                <button type="button" @click="addItem()" class="btn btn-sm btn-outline">
+                    <span class="ico" data-ico="plus" style="width:15px;height:15px"></span>Add Item
+                </button>
             </div>
-            @error('items')<p class="text-xs text-red-500 mb-2">{{ $message }}</p>@enderror
+            @error('items')<p class="hint" style="color:var(--danger);margin-bottom:10px">{{ $message }}</p>@enderror
 
             <template x-for="(item, idx) in items" :key="idx">
-                <div class="grid grid-cols-12 gap-2 mb-3 items-start">
-                    <div class="col-span-5">
-                        <label class="block text-xs text-gray-500 mb-1">Product</label>
-                        <select :name="`items[${idx}][product_id]`" x-model="item.product_id" @change="loadVariants(item)" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 focus:border-blue-500 focus:ring-blue-500">
+                <div style="display:grid;grid-template-columns:2fr 1.2fr 80px 120px 40px;gap:10px;margin-bottom:12px;align-items:start">
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Product</span>
+                        <select class="input" :name="`items[${idx}][product_id]`" x-model="item.product_id" @change="loadVariants(item)" required>
                             <option value="">Select product</option>
                             @foreach($products as $p)
-                            <option value="{{ $p->id }}" data-variants="{{ json_encode($p->variants->map(fn($v)=>['id'=>$v->id,'label'=>$v->label()])->values()) }}">{{ $p->name }}</option>
+                            <option value="{{ $p->id }}"
+                                    data-variants="{{ json_encode($p->variants->map(fn($v)=>['id'=>$v->id,'label'=>$v->label()])->values()) }}">
+                                {{ $p->name }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-span-3">
-                        <label class="block text-xs text-gray-500 mb-1">Variant</label>
-                        <select :name="`items[${idx}][variant_id]`" x-model="item.variant_id"
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Variant</span>
+                        <select class="input" :name="`items[${idx}][variant_id]`" x-model="item.variant_id">
                             <option value="">No variant</option>
                             <template x-for="v in item.variants" :key="v.id">
                                 <option :value="v.id" x-text="v.label"></option>
                             </template>
                         </select>
                     </div>
-                    <div class="col-span-1">
-                        <label class="block text-xs text-gray-500 mb-1">Qty</label>
-                        <input type="number" :name="`items[${idx}][quantity]`" x-model.number="item.quantity" min="1" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 focus:border-blue-500 focus:ring-blue-500" />
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Qty</span>
+                        <input class="input" type="number" :name="`items[${idx}][quantity]`" x-model.number="item.quantity" min="1" required>
                     </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs text-gray-500 mb-1">Unit Cost (৳)</label>
-                        <input type="number" :name="`items[${idx}][unit_cost]`" x-model.number="item.unit_cost" min="0" step="0.01" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2 focus:border-blue-500 focus:ring-blue-500" />
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Unit Cost (৳)</span>
+                        <input class="input" type="number" :name="`items[${idx}][unit_cost]`" x-model.number="item.unit_cost" min="0" step="0.01" required>
                     </div>
-                    <div class="col-span-1 pt-6">
-                        <button type="button" @click="items.splice(idx,1)" class="text-red-400 hover:text-red-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <div style="padding-top:26px">
+                        <button type="button" @click="items.splice(idx,1)" class="icon-btn">
+                            <span class="ico" data-ico="x" style="width:16px;height:16px"></span>
                         </button>
                     </div>
                 </div>
             </template>
-        </x-admin.card>
-
-        <x-admin.card class="mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-700">Shipment / Import Costs</h3>
-                <button type="button" @click="addShipment()" class="text-xs text-blue-600 hover:underline font-semibold">+ Add Cost</button>
-            </div>
-            <template x-for="(s, idx) in shipments" :key="idx">
-                <div class="grid grid-cols-12 gap-2 mb-3 items-end">
-                    <div class="col-span-5">
-                        <label class="block text-xs text-gray-500 mb-1">Description</label>
-                        <input type="text" :name="`shipments[${idx}][description]`" x-model="s.description" placeholder="e.g. Air freight" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2" />
-                    </div>
-                    <div class="col-span-3">
-                        <label class="block text-xs text-gray-500 mb-1">Amount (৳)</label>
-                        <input type="number" :name="`shipments[${idx}][amount]`" x-model.number="s.amount" min="0" step="0.01" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2" />
-                    </div>
-                    <div class="col-span-3">
-                        <label class="block text-xs text-gray-500 mb-1">Date</label>
-                        <input type="date" :name="`shipments[${idx}][shipment_date]`" x-model="s.shipment_date" required
-                            class="w-full rounded-lg border border-gray-300 text-sm px-2 py-2" />
-                    </div>
-                    <div class="col-span-1">
-                        <button type="button" @click="shipments.splice(idx,1)" class="text-red-400 hover:text-red-600 mb-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
-                </div>
-            </template>
-            <p x-show="shipments.length === 0" class="text-xs text-gray-400">No shipment costs added.</p>
-        </x-admin.card>
-
-        <div class="flex gap-3">
-            <x-admin.button type="submit">Save Purchase Order</x-admin.button>
-            <x-admin.button href="{{ route('admin.accounting.purchases.index') }}" variant="outline">Cancel</x-admin.button>
         </div>
-    </form>
-</div>
 
+        <div class="card pad">
+            <div class="between" style="margin-bottom:16px">
+                <div class="card-head" style="margin:0">
+                    <span class="tile sm t-violet"><span class="ico" data-ico="truck" style="width:18px;height:18px"></span></span>
+                    <div class="ct"><h3>Shipment / Import Costs</h3></div>
+                </div>
+                <button type="button" @click="addShipment()" class="btn btn-sm btn-outline">
+                    <span class="ico" data-ico="plus" style="width:15px;height:15px"></span>Add Cost
+                </button>
+            </div>
+
+            <template x-for="(s, idx) in shipments" :key="idx">
+                <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 40px;gap:10px;margin-bottom:12px;align-items:start">
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Description</span>
+                        <input class="input" type="text" :name="`shipments[${idx}][description]`" x-model="s.description" placeholder="e.g. Air freight" required>
+                    </div>
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Amount (৳)</span>
+                        <input class="input" type="number" :name="`shipments[${idx}][amount]`" x-model.number="s.amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="field" style="margin:0">
+                        <span class="lbl">Date</span>
+                        <input class="input" type="date" :name="`shipments[${idx}][shipment_date]`" x-model="s.shipment_date" required>
+                    </div>
+                    <div style="padding-top:26px">
+                        <button type="button" @click="shipments.splice(idx,1)" class="icon-btn">
+                            <span class="ico" data-ico="x" style="width:16px;height:16px"></span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            <p x-show="shipments.length === 0" class="faint" style="font-size:13px">No shipment costs added.</p>
+        </div>
+
+        <div class="row" style="gap:10px">
+            <button type="submit" class="btn btn-primary">Save Purchase Order</button>
+            <a href="{{ route('admin.accounting.purchases.index') }}" class="btn btn-outline">Cancel</a>
+        </div>
+
+    </div>
+</form>
+
+@push('scripts')
 <script>
 function purchaseForm() {
     return {
@@ -133,4 +152,6 @@ function purchaseForm() {
     };
 }
 </script>
+@endpush
+
 @endsection

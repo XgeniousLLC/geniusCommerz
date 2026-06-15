@@ -1,57 +1,56 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Menus')
-
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">Menus</li>
-</ol>
-@endsection
-
-@section('page-header')
-<div class="flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Navigation Menus</h1>
-        <p class="text-gray-600 mt-1">Manage your site's navigation structure</p>
-    </div>
-    <x-admin.button href="{{ route('admin.menus.create') }}">+ New Menu</x-admin.button>
-</div>
-@endsection
-
 @section('content')
-<x-admin.card>
-    @if($menus->isEmpty())
-        <div class="text-center py-12">
-            <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
-            </svg>
-            <p class="text-gray-500 mb-4">No menus created yet.</p>
-            <x-admin.button href="{{ route('admin.menus.create') }}">Create your first menu</x-admin.button>
-        </div>
-    @else
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach($menus as $menu)
-            @php $locations = \App\Models\Menu::LOCATIONS; @endphp
-            <div class="border border-gray-200 rounded-xl p-4 hover:border-blue-200 transition-colors">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h3 class="font-semibold text-gray-900">{{ $menu->name }}</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">{{ $locations[$menu->location] ?? $menu->location }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $menu->items_count }} items</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.menus.edit', $menu) }}" class="text-xs text-blue-600 hover:underline">Edit</a>
-                        <form method="POST" action="{{ route('admin.menus.destroy', $menu) }}" onsubmit="return confirm('Delete this menu?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-500 hover:underline">Delete</button>
-                        </form>
-                    </div>
-                </div>
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Navigation Menus</h2>
+        <div class="sub">Manage your site's navigation structure</div>
+    </div>
+    <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>New Menu
+    </a>
+</div>
+
+@if($menus->isEmpty())
+<div class="card pad" style="text-align:center;padding:60px 20px">
+    <span class="tile t-info" style="width:52px;height:52px;border-radius:16px;margin:0 auto 14px">
+        <span class="ico" data-ico="list" style="width:24px;height:24px"></span>
+    </span>
+    <div style="font-weight:700;font-size:14px;margin-bottom:6px">No menus yet</div>
+    <div class="faint" style="font-size:13px;margin-bottom:16px">Create navigation menus to control your storefront's header and footer links.</div>
+    <a href="{{ route('admin.menus.create') }}" class="btn btn-primary" style="display:inline-flex">Create first menu</a>
+</div>
+@else
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+    @foreach($menus as $menu)
+    @php $locations = \App\Models\Menu::LOCATIONS; @endphp
+    <div class="card pad hoverable">
+        <div class="between">
+            <div>
+                <div style="font-weight:700;font-size:14px">{{ $menu->name }}</div>
+                <div class="faint" style="font-size:12.5px;margin-top:2px">{{ $locations[$menu->location] ?? $menu->location }}</div>
+                <div class="faint" style="font-size:12px;margin-top:4px">{{ $menu->items_count }} items</div>
             </div>
-            @endforeach
+            <div class="row" style="gap:6px">
+                <a href="{{ route('admin.menus.edit', $menu) }}" class="icon-btn" title="Edit">
+                    <span class="ico" data-ico="edit" style="width:15px;height:15px"></span>
+                </a>
+                <form method="POST" action="{{ route('admin.menus.destroy', $menu) }}"
+                      onsubmit="return confirm('Delete this menu?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="icon-btn">
+                        <span class="ico" data-ico="trash" style="width:15px;height:15px"></span>
+                    </button>
+                </form>
+            </div>
         </div>
-    @endif
-</x-admin.card>
+        <div style="margin-top:12px">
+            <a href="{{ route('admin.menus.edit', $menu) }}" class="btn btn-sm btn-outline" style="width:100%;justify-content:center">Edit Menu Items</a>
+        </div>
+    </div>
+    @endforeach
+</div>
+@endif
+
 @endsection

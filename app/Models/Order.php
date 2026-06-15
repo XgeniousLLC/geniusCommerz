@@ -43,7 +43,7 @@ class Order extends Model
         'is_preorder'      => 'boolean',
     ];
 
-    public const STATUSES         = ['pending','processing','shipped','delivered','cancelled','refunded'];
+    public const STATUSES         = ['pending','confirmed','processing','shipped','delivered','cancelled','refunded'];
     public const PAYMENT_STATUSES = ['unpaid','paid','partially_refunded','refunded'];
 
     public static function generateOrderNumber(): string
@@ -148,6 +148,7 @@ class Order extends Model
     {
         return match($this->status) {
             'pending'    => 'bg-yellow-100 text-yellow-800',
+            'confirmed'  => 'bg-teal-100 text-teal-800',
             'processing' => 'bg-blue-100 text-blue-800',
             'shipped'    => 'bg-indigo-100 text-indigo-800',
             'delivered'  => 'bg-green-100 text-green-800',
@@ -164,6 +165,42 @@ class Order extends Model
             'partially_refunded' => 'bg-orange-100 text-orange-700',
             'refunded'           => 'bg-gray-100 text-gray-600',
             default              => 'bg-red-100 text-red-700',
+        };
+    }
+
+    public function statusPillClass(): string
+    {
+        return match($this->status) {
+            'pending'    => 'warning',
+            'confirmed'  => 'teal',
+            'processing' => 'info',
+            'shipped'    => 'violet',
+            'delivered'  => 'success',
+            'cancelled'  => 'danger',
+            default      => '',
+        };
+    }
+
+    public function paymentPillClass(): string
+    {
+        return match($this->payment_status) {
+            'paid'               => 'success',
+            'partially_refunded' => 'warning',
+            'refunded'           => '',
+            default              => 'warning',
+        };
+    }
+
+    public function sourcePillClass(): string
+    {
+        return match($this->source) {
+            'website'   => 'info',
+            'whatsapp'  => 'success',
+            'phone'     => 'teal',
+            'facebook'  => 'violet',
+            'instagram' => 'pop',
+            'walk_in'   => 'warning',
+            default     => '',
         };
     }
 }

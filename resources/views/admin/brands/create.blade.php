@@ -2,87 +2,91 @@
 
 @section('title', 'Add Brand')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.brands.index') }}" class="hover:text-gray-700">Brands</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Add</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Add Brand</h1>
-@endsection
-
 @section('content')
-<div class="max-w-2xl">
-    <x-admin.card>
-        <form method="POST" action="{{ route('admin.brands.store') }}"
-              x-data="{ slug: '{{ old('slug') }}' }">
-            @csrf
+<form method="POST" action="{{ route('admin.brands.store') }}"
+      x-data="{ slug: '{{ old('slug') }}' }">
+@csrf
 
-            <h3 class="text-base font-semibold text-gray-900 mb-5">Brand Info</h3>
-            <div class="space-y-4">
-
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
-                    <input type="text" name="name" required
-                        value="{{ old('name') }}"
-                        x-on:input="slug = $event.target.value.toLowerCase().trim().replace(/[^a-z0-9\s\-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')"
-                        x-on:paste="$nextTick(() => { slug = $el.value.toLowerCase().trim().replace(/[^a-z0-9\s\-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-') })"
-                        x-on:change="slug = $event.target.value.toLowerCase().trim().replace(/[^a-z0-9\s\-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')"
-                        class="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" />
-                    @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
-
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Slug</label>
-                    <input type="text" name="slug" autocomplete="off"
-                        x-model="slug"
-                        placeholder="auto-generated from name"
-                        class="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" />
-                    <p class="text-xs text-gray-400 mt-1">Auto-filled from name.</p>
-                    @error('slug')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
-
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea name="description" rows="3"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('description') }}</textarea>
-                </x-admin.form-group>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Logo</label>
-                        <x-admin.media-picker name="logo_media_id" accept="image" label="Add Logo"
-                            :value="old('logo_media_id')" />
-                        @error('logo_media_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </x-admin.form-group>
-
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Website</label>
-                        <x-admin.input type="url" name="website" value="{{ old('website') }}" placeholder="https://…" />
-                        @error('website')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </x-admin.form-group>
-                </div>
-
-                <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" name="is_active" value="1"
-                            {{ old('is_active', '1') ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                        <span class="text-sm font-medium text-gray-700">Active</span>
-                    </label>
-                    <div class="flex items-center space-x-3">
-                        <x-admin.button href="{{ route('admin.brands.index') }}" variant="outline">Cancel</x-admin.button>
-                        <x-admin.button type="submit">Save Brand</x-admin.button>
-                    </div>
-                </div>
-
-            </div>
-        </form>
-    </x-admin.card>
+<div class="row" style="gap:14px;margin-bottom:22px;flex-wrap:wrap">
+    <a class="icon-btn" href="{{ route('admin.brands.index') }}" style="width:40px;height:40px">
+        <span class="ico" data-ico="chevLeft"></span>
+    </a>
+    <div class="grow" style="min-width:180px">
+        <div class="breadcrumb"><a href="{{ route('admin.brands.index') }}">Brands</a> / Add</div>
+        <h2 class="display" style="font-size:24px;letter-spacing:-0.03em">Add Brand</h2>
+    </div>
+    <div class="row" style="gap:10px">
+        <a href="{{ route('admin.brands.index') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <span class="ico" data-ico="check" style="width:18px;height:18px"></span>Save brand
+        </button>
+    </div>
 </div>
+
+<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px;align-items:start" class="grid-2">
+
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-accent"><span class="ico" data-ico="bookmark" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Brand Info</h3></div>
+        </div>
+
+        <div class="field" style="margin-bottom:14px">
+            <span class="lbl">Name <span class="req">*</span></span>
+            <input class="input" type="text" name="name" value="{{ old('name') }}" required
+                @input="slug = $event.target.value.toLowerCase().trim().replace(/[^a-z0-9\s\-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')">
+            @error('name')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" class="grid-2">
+            <div class="field">
+                <span class="lbl">Slug</span>
+                <input class="input mono" type="text" name="slug" x-model="slug" placeholder="auto-generated">
+                @error('slug')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+            </div>
+            <div class="field">
+                <span class="lbl">Website</span>
+                <div class="input-prefix">
+                    <span style="font-size:11px">https://</span>
+                    <input class="input" type="text" name="website" value="{{ old('website') }}" placeholder="brand.com" style="padding-left:52px">
+                </div>
+                @error('website')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+            </div>
+        </div>
+
+        <div class="field">
+            <span class="lbl">Description</span>
+            <textarea class="textarea" name="description" rows="3">{{ old('description') }}</textarea>
+        </div>
+    </div>
+</div>
+
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-info"><span class="ico" data-ico="image" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Logo</h3></div>
+        </div>
+        <x-admin.media-picker name="logo_media_id" accept="image" label="Add Logo" :value="old('logo_media_id')" />
+    </div>
+
+    <div class="card pad">
+        <div class="card-head"><div class="ct"><h3>Visibility</h3></div></div>
+        <label class="between" style="cursor:pointer" x-data="{ on: {{ old('is_active', '1') ? 'true' : 'false' }} }">
+            <div>
+                <div style="font-weight:700;font-size:13.5px">Active</div>
+                <div class="faint" style="font-size:12px">Show in brand filters and pages</div>
+            </div>
+            <input type="hidden" name="is_active" value="0">
+            <input type="checkbox" name="is_active" value="1" style="display:none" :checked="on" {{ old('is_active', '1') ? 'checked' : '' }}>
+            <button type="button" @click="on = !on" :class="on ? 'toggle on' : 'toggle'" style="flex-shrink:0">
+                <span class="knob"></span>
+            </button>
+        </label>
+    </div>
+</div>
+
+</div>
+</form>
 @endsection

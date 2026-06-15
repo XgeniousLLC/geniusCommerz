@@ -18,7 +18,13 @@ class BrandController extends Controller
     {
         $brands = Brand::with('logoMedia')->withCount('products')->orderBy('name')->paginate(50);
 
-        return view('admin.brands.index', compact('brands'));
+        $stats = [
+            'total'    => Brand::count(),
+            'active'   => Brand::where('is_active', true)->count(),
+            'products' => Brand::withCount('products')->get()->sum('products_count'),
+        ];
+
+        return view('admin.brands.index', compact('brands', 'stats'));
     }
 
     public function create(): View

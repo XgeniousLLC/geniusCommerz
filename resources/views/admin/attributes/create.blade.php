@@ -2,66 +2,72 @@
 
 @section('title', 'Add Attribute')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.attributes.index') }}" class="hover:text-gray-700">Attributes</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Add</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Add Attribute</h1>
-@endsection
-
 @section('content')
 <form method="POST" action="{{ route('admin.attributes.store') }}">
-    @csrf
-    <div class="space-y-6">
-        <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-4">Attribute</h3>
-            <div class="space-y-4">
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
-                    <x-admin.input type="text" name="name" value="{{ old('name') }}" placeholder="e.g. Size, Color" required />
-                    @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
+@csrf
 
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Sort Order</label>
-                    <x-admin.input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0" class="w-24" />
-                </x-admin.form-group>
-            </div>
-        </x-admin.card>
+<div class="row" style="gap:14px;margin-bottom:22px;flex-wrap:wrap">
+    <a class="icon-btn" href="{{ route('admin.attributes.index') }}" style="width:40px;height:40px">
+        <span class="ico" data-ico="chevLeft"></span>
+    </a>
+    <div class="grow" style="min-width:180px">
+        <div class="breadcrumb"><a href="{{ route('admin.attributes.index') }}">Attributes</a> / Add</div>
+        <h2 class="display" style="font-size:24px;letter-spacing:-0.03em">Add Attribute</h2>
+    </div>
+    <div class="row" style="gap:10px">
+        <a href="{{ route('admin.attributes.index') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <span class="ico" data-ico="check" style="width:18px;height:18px"></span>Save
+        </button>
+    </div>
+</div>
 
-        <x-admin.card>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-semibold text-gray-900">Values</h3>
-                <button type="button" id="add-value"
-                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Add value</button>
-            </div>
-            <div id="values-list" class="space-y-2">
-                @foreach(old('values', ['']) as $i => $val)
-                <div class="flex items-center space-x-2 value-row">
-                    <x-admin.input type="text" name="values[]" value="{{ $val }}" placeholder="e.g. Small" class="flex-1" />
-                    <button type="button" class="remove-value text-gray-400 hover:text-red-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                @endforeach
-            </div>
-            @error('values.*')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-        </x-admin.card>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px;align-items:start" class="grid-2">
 
-        <div class="flex space-x-3">
-            <x-admin.button type="submit" class="justify-center">Save</x-admin.button>
-            <x-admin.button href="{{ route('admin.attributes.index') }}" variant="outline">Cancel</x-admin.button>
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-violet"><span class="ico" data-ico="sliders" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Values</h3><div class="sub">One per row — e.g. S, M, L, XL</div></div>
+            <button type="button" id="add-value" class="link-btn head-action">
+                <span class="ico" data-ico="plus" style="width:14px;height:14px"></span>Add value
+            </button>
+        </div>
+        <div id="values-list" class="stack" style="gap:8px">
+            @foreach(old('values', ['']) as $val)
+            <div class="row value-row">
+                <input class="input" type="text" name="values[]" value="{{ $val }}" placeholder="e.g. Small" style="flex:1">
+                <button type="button" class="icon-btn danger remove-value">
+                    <span class="ico" data-ico="x" style="width:15px;height:15px"></span>
+                </button>
+            </div>
+            @endforeach
+        </div>
+        @error('values.*')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+    </div>
+</div>
+
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-accent"><span class="ico" data-ico="gear" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Settings</h3></div>
+        </div>
+
+        <div class="field" style="margin-bottom:14px">
+            <span class="lbl">Name <span class="req">*</span></span>
+            <input class="input" type="text" name="name" value="{{ old('name') }}" placeholder="e.g. Size, Color, Material" required>
+            @error('name')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+        </div>
+
+        <div class="field">
+            <span class="lbl">Sort order</span>
+            <input class="input" type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0" style="max-width:100px">
         </div>
     </div>
+</div>
+
+</div>
 </form>
 
 @push('scripts')
@@ -70,16 +76,13 @@ const list = document.getElementById('values-list');
 
 document.getElementById('add-value').addEventListener('click', function () {
     const row = document.createElement('div');
-    row.className = 'flex items-center space-x-2 value-row';
-    row.innerHTML = `
-        <input type="text" name="values[]" placeholder="e.g. Small"
-            class="flex-1 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm h-10 px-3" />
-        <button type="button" class="remove-value text-gray-400 hover:text-red-500">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+    row.className = 'row value-row';
+    row.innerHTML = `<input class="input" type="text" name="values[]" placeholder="e.g. Small" style="flex:1">
+        <button type="button" class="icon-btn danger remove-value">
+            <span class="ico" data-ico="x" style="width:15px;height:15px"></span>
         </button>`;
     list.appendChild(row);
+    if (window.Icons) Icons.render(row);
     row.querySelector('input').focus();
 });
 
@@ -89,4 +92,5 @@ list.addEventListener('click', function (e) {
 });
 </script>
 @endpush
+
 @endsection

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderStatusChanged;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\SmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,14 @@ class OrderController extends Controller
 
         $orders = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        $stats = [
+            'pending'    => Order::where('status', 'pending')->count(),
+            'processing' => Order::whereIn('status', ['confirmed', 'processing'])->count(),
+            'shipped'    => Order::where('status', 'shipped')->count(),
+            'delivered'  => Order::where('status', 'delivered')->count(),
+        ];
+
+        return view('admin.orders.index', compact('orders', 'stats'));
     }
 
     public function create(): View
@@ -284,6 +292,35 @@ class OrderController extends Controller
                 'email' => $order->customer_email,
             ]);
             try { $notifiable->notify(new OrderStatusChanged($order->fresh(), $data['status'])); } catch (\Throwable) {}
+        }
+
+        // Send SMS on confirmed / delivered status transitions
+        if (isset($data['status']) && $data['status'] !== $previousStatus && $order->customer_phone) {
+            $smsToggleKey = match($data['status']) {
+                'confirmed' => 'notifications.sms_on_confirmed',
+                'delivered' => 'notifications.sms_on_delivered',
+                default     => null,
+            };
+            if ($smsToggleKey && SiteSetting::get($smsToggleKey, '1') === '1') {
+                try {
+                    $sms = app(SmsService::class);
+                    if ($sms->hasDefault()) {
+                        $fresh    = $order->fresh();
+                        $defaults = [
+                            'confirmed' => "Your order #{{order_id}} has been confirmed by KlixBD.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you for shopping with us!",
+                            'delivered' => "Your order #{{order_id}} has been delivered. Thank you for shopping with us!",
+                        ];
+                        $templateKey = 'notifications.sms_template_' . $data['status'];
+                        $template    = SiteSetting::get($templateKey, $defaults[$data['status']]);
+                        $message     = SmsService::renderTemplate($template, [
+                            'order_id'      => $fresh->order_number,
+                            'amount'        => $fresh->total,
+                            'customer_name' => $fresh->customer_name,
+                        ]);
+                        $sms->send($fresh->customer_phone, $message);
+                    }
+                } catch (\Throwable) {}
+            }
         }
 
         return back()->with('success', 'Order updated.');

@@ -2,95 +2,142 @@
 
 @section('title', 'Integrations')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Integrations</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Integrations</h1>
-    <p class="text-gray-600 mt-1">API credentials for payment gateways, couriers, and services</p>
-@endsection
-
 @section('content')
+<style>
+.intg-card{padding:18px;display:flex;flex-direction:column;gap:13px}
+.intg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+</style>
+
 @php
-    $groups = [
-        'AI Providers' => ['openai', 'gemini', 'claude', 'deepseek'],
-        'Payments'     => ['bkash', 'nagad', 'sslcommerz'],
-        'Couriers'     => ['pathao', 'steadfast', 'redx'],
-        'SMS Gateways' => ['bulksmsbd', 'smsbd', 'twilio'],
-        'Services'     => ['fraudbd'],
-    ];
-    $courierProviders = \App\Models\Integration::COURIER_PROVIDERS;
-    $smsProviders     = \App\Models\Integration::SMS_PROVIDERS;
-    $aiProviders      = \App\Models\Integration::AI_PROVIDERS;
+$groups = [
+    'AI Providers' => [
+        'providers' => ['openai', 'gemini', 'claude', 'deepseek'],
+        'icon' => 'spark', 'color' => 't-violet',
+        'hint' => 'Only one AI provider can be the default',
+    ],
+    'Payments' => [
+        'providers' => ['bkash', 'nagad', 'sslcommerz'],
+        'icon' => 'card', 'color' => 't-teal',
+        'hint' => null,
+    ],
+    'Couriers' => [
+        'providers' => ['pathao', 'steadfast', 'redx'],
+        'icon' => 'truck', 'color' => 't-warning',
+        'hint' => 'Only one courier can be the default',
+    ],
+    'SMS Gateways' => [
+        'providers' => ['bulksmsbd', 'smsbd', 'twilio'],
+        'icon' => 'message', 'color' => 't-pop',
+        'hint' => 'Only one gateway can be the default',
+    ],
+    'Services' => [
+        'providers' => ['fraudbd'],
+        'icon' => 'shield', 'color' => 't-info',
+        'hint' => null,
+    ],
+];
+$courierProviders = \App\Models\Integration::COURIER_PROVIDERS;
+$smsProviders     = \App\Models\Integration::SMS_PROVIDERS;
+$aiProviders      = \App\Models\Integration::AI_PROVIDERS;
+$activeCount = $integrations->where('is_active', true)->count();
 @endphp
 
-@foreach($groups as $groupName => $providers)
-    @php $groupIntegrations = $integrations->whereIn('provider', $providers); @endphp
+<div class="page-head">
+    <div>
+        <h2 class="display">Integrations</h2>
+        <div class="sub">Connect payment, shipping, messaging &amp; other services</div>
+    </div>
+    <div style="text-align:right">
+        <div class="display tnum" style="font-size:20px;font-weight:700">
+            {{ $activeCount }} <span class="faint" style="font-size:14px;font-weight:600">/ {{ $integrations->count() }}</span>
+        </div>
+        <div class="faint" style="font-size:12px;font-weight:600">active</div>
+    </div>
+</div>
+
+<div class="col-gap" style="--gap:28px">
+    @foreach($groups as $groupName => $groupCfg)
+    @php $groupIntegrations = $integrations->whereIn('provider', $groupCfg['providers']); @endphp
     @if($groupIntegrations->isNotEmpty())
-        <div class="flex items-center justify-between mb-3 mt-6 first:mt-0">
-            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">{{ $groupName }}</h2>
-            @if($groupName === 'AI Providers')
-                <span class="text-xs text-gray-400">Only one AI provider can be the default</span>
-            @elseif($groupName === 'Couriers')
-                <span class="text-xs text-gray-400">Only one courier can be the default</span>
-            @elseif($groupName === 'SMS Gateways')
-                <span class="text-xs text-gray-400">Only one gateway can be the default</span>
+    <div>
+        <div class="between" style="margin-bottom:13px">
+            <h3 class="section-label">{{ $groupName }}</h3>
+            @if($groupCfg['hint'])
+            <span class="faint" style="font-size:12.5px;font-weight:600">
+                <span class="ico" data-ico="shield" style="width:13px;height:13px;vertical-align:-2px"></span>
+                {{ $groupCfg['hint'] }}
+            </span>
             @endif
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        <div class="intg-grid">
             @foreach($groupIntegrations as $integration)
-                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow
-                    {{ $integration->is_default ? 'ring-2 ring-blue-500' : '' }}">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center flex-wrap gap-1.5">
-                                <span class="text-sm font-semibold text-gray-900">{{ $integration->label }}</span>
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium
-                                    {{ $integration->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                    {{ $integration->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                                @if($integration->is_default)
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
-                                        Default
-                                    </span>
-                                @endif
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">
-                                {{ ucfirst($integration->environment) }} mode ·
-                                {{ count($integration->credentials ?? []) }} credential(s) saved
-                            </p>
-                        </div>
-                        <a href="{{ route('admin.integrations.edit', $integration) }}"
-                           class="ml-3 text-blue-600 hover:text-blue-800 text-xs font-medium shrink-0">
-                            Configure
-                        </a>
-                    </div>
-
-                    @if(in_array($integration->provider, $courierProviders) || in_array($integration->provider, $smsProviders) || in_array($integration->provider, $aiProviders))
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            @if($integration->is_default)
-                                <span class="text-xs text-blue-600 font-medium">✓ Currently default</span>
-                            @elseif($integration->is_active)
-                                <form method="POST" action="{{ route('admin.integrations.set-default', $integration) }}" class="inline">
-                                    @csrf
-                                    <button type="submit"
-                                        class="text-xs text-gray-600 hover:text-blue-700 font-medium underline underline-offset-2">
-                                        Set as default
-                                    </button>
-                                </form>
-                            @else
-                                <span class="text-xs text-gray-400">Activate to set as default</span>
+            @php
+            $isDefault     = $integration->is_default;
+            $canSetDefault = in_array($integration->provider, $courierProviders)
+                          || in_array($integration->provider, $smsProviders)
+                          || in_array($integration->provider, $aiProviders);
+            $credCount     = count($integration->credentials ?? []);
+            $tileClass     = $isDefault ? $groupCfg['color'] : 'muted';
+            $envDot        = $integration->environment === 'live' ? 'var(--success)' : 'var(--warning)';
+            $envLabel      = ucfirst($integration->environment ?? 'sandbox') . ' mode';
+            @endphp
+            <div class="card intg-card"
+                 style="{{ $isDefault ? 'border:1.5px solid var(--accent);background:var(--accent-soft)' : '' }}">
+                <div class="row top" style="gap:12px">
+                    <span class="tile {{ $tileClass }}">
+                        <span class="ico" data-ico="{{ $groupCfg['icon'] }}" style="width:22px;height:22px"></span>
+                    </span>
+                    <div class="grow">
+                        <div class="row wrap" style="gap:7px">
+                            <span style="font-weight:700;font-size:14.5px">{{ $integration->label }}</span>
+                            <span class="pill sm {{ $integration->is_active ? 'success' : '' }}">
+                                <span class="dot"></span>{{ $integration->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                            @if($isDefault)
+                            <span class="pill sm accent">Default</span>
                             @endif
                         </div>
-                    @endif
+                        <div class="faint" style="font-size:12px;margin-top:3px">
+                            {{ ucfirst($integration->provider) }}
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.integrations.edit', $integration) }}" class="link-btn">
+                        <span class="ico" data-ico="gear" style="width:15px;height:15px"></span>Configure
+                    </a>
                 </div>
+
+                <div class="faint" style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--border)">
+                    <span class="row" style="gap:5px">
+                        <span style="width:6px;height:6px;border-radius:99px;background:{{ $envDot }}"></span>
+                        {{ $envLabel }}
+                    </span>
+                    <span style="color:var(--border-strong)">·</span>
+                    <span>{{ $credCount }} {{ $credCount === 1 ? 'credential' : 'credentials' }} saved</span>
+                </div>
+
+                @if($canSetDefault)
+                @if($isDefault)
+                <span style="color:var(--accent);font-weight:700;font-size:13px">
+                    <span class="ico" data-ico="check" style="width:15px;height:15px;vertical-align:-3px"></span>
+                    Currently default
+                </span>
+                @elseif($integration->is_active)
+                <form method="POST" action="{{ route('admin.integrations.set-default', $integration) }}">
+                    @csrf
+                    <button type="submit" class="link-btn" style="font-size:13px;font-weight:600">
+                        Set as default
+                    </button>
+                </form>
+                @else
+                <span class="faint" style="font-size:13px;font-weight:600">Activate to set as default</span>
+                @endif
+                @endif
+            </div>
             @endforeach
         </div>
+    </div>
     @endif
-@endforeach
+    @endforeach
+</div>
+
 @endsection

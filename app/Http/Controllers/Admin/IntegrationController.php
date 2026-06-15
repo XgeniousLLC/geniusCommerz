@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Integration;
+use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -56,6 +57,32 @@ class IntegrationController extends Controller
 
         return redirect($redirect)
             ->with('success', "{$integration->label} credentials saved.");
+    }
+
+    public function testSms(Request $request, Integration $integration): RedirectResponse
+    {
+        $request->validate([
+            'phone'   => ['required', 'string'],
+            'message' => ['required', 'string', 'max:160'],
+        ]);
+
+        if (! in_array($integration->provider, Integration::SMS_PROVIDERS)) {
+            return back()->with('error', 'Not an SMS provider.');
+        }
+
+        try {
+            $sent = app(SmsService::class)->driver($integration->provider)->send(
+                $request->input('phone'),
+                $request->input('message'),
+            );
+
+            return back()->with(
+                $sent ? 'success' : 'error',
+                $sent ? 'Test SMS sent.' : 'Gateway returned failure — check credentials.',
+            );
+        } catch (\Throwable $e) {
+            return back()->with('error', 'SMS failed: ' . $e->getMessage());
+        }
     }
 
     public function setDefault(Integration $integration): RedirectResponse

@@ -28,9 +28,20 @@ class UserController extends Controller
             $query->where('is_active', $isActive);
         }
 
-        $users = $query->latest()->paginate(10);
+        $users = $query->withCount('orders')
+            ->withSum('orders as orders_total', 'total')
+            ->latest()
+            ->paginate(20);
 
-        return view('admin.users.index', compact('users'));
+        $thisMonth = now()->startOfMonth();
+        $stats = [
+            'total'      => User::count(),
+            'vip'        => User::has('orders', '>=', 5)->count(),
+            'returning'  => User::has('orders', '>=', 2)->count(),
+            'new'        => User::where('created_at', '>=', $thisMonth)->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'stats'));
     }
 
     public function create()

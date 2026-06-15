@@ -1,60 +1,73 @@
 @extends('admin.layouts.admin')
-@section('title', 'Purchase Order ' . $purchase->reference)
+
+@section('title', 'PO ' . $purchase->reference)
+
 @section('content')
-<div class="max-w-4xl space-y-6">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-gray-900">{{ $purchase->reference }}</h1>
-            <p class="text-sm text-gray-500">{{ $purchase->supplier_name }} · {{ $purchase->order_date->format('d M Y') }}</p>
-        </div>
-        <div class="flex gap-2 items-center">
-            <span class="px-3 py-1 rounded-full text-sm font-semibold
-                {{ ['draft'=>'bg-gray-100 text-gray-600','ordered'=>'bg-blue-100 text-blue-700','partial'=>'bg-yellow-100 text-yellow-700','received'=>'bg-green-100 text-green-700'][$purchase->status] }}">
-                {{ ucfirst($purchase->status) }}
-            </span>
-            <x-admin.button href="{{ route('admin.accounting.purchases.index') }}" variant="outline">← Back</x-admin.button>
-        </div>
-    </div>
+@php
+$statusColors = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'=>'success'];
+@endphp
 
-    <div class="grid grid-cols-3 gap-4">
-        <x-admin.card class="p-4 text-center">
-            <div class="text-xs text-gray-500 mb-1">Product Cost</div>
-            <div class="text-xl font-bold text-gray-900">৳{{ number_format($purchase->totalCost(), 0) }}</div>
-        </x-admin.card>
-        <x-admin.card class="p-4 text-center">
-            <div class="text-xs text-gray-500 mb-1">Shipment Cost</div>
-            <div class="text-xl font-bold text-purple-700">৳{{ number_format($purchase->totalShipment(), 0) }}</div>
-        </x-admin.card>
-        <x-admin.card class="p-4 text-center">
-            <div class="text-xs text-gray-500 mb-1">Total Landed Cost</div>
-            <div class="text-xl font-bold text-blue-700">৳{{ number_format($purchase->landedCost(), 0) }}</div>
-        </x-admin.card>
+<div class="page-head">
+    <div>
+        <h2 class="display mono">{{ $purchase->reference }}</h2>
+        <div class="sub">{{ $purchase->supplier_name }} · {{ $purchase->order_date->format('d M Y') }}</div>
     </div>
+    <div class="row" style="gap:10px">
+        <span class="pill {{ $statusColors[$purchase->status] ?? '' }}">
+            <span class="dot"></span>{{ ucfirst($purchase->status) }}
+        </span>
+        <a href="{{ route('admin.accounting.purchases.index') }}" class="btn btn-outline">
+            <span class="ico" data-ico="arrowLeft" style="width:16px;height:16px"></span>Back
+        </a>
+    </div>
+</div>
 
-    <x-admin.card>
-        <div class="px-5 py-4 border-b border-gray-200 font-semibold text-gray-900 text-sm">Items</div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm divide-y divide-gray-100">
-                <thead class="bg-gray-50">
+<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="package"></span></span>
+        <div><div class="num">৳{{ number_format($purchase->totalCost(), 0) }}</div><div class="lbl">Product Cost</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-violet"><span class="ico" data-ico="truck"></span></span>
+        <div><div class="num">৳{{ number_format($purchase->totalShipment(), 0) }}</div><div class="lbl">Shipment Cost</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-accent"><span class="ico" data-ico="wallet"></span></span>
+        <div><div class="num">৳{{ number_format($purchase->landedCost(), 0) }}</div><div class="lbl">Landed Cost</div></div>
+    </div>
+</div>
+
+<div class="col-gap" style="max-width:900px">
+
+    <div class="card flush">
+        <div class="between" style="padding:18px 20px 14px">
+            <div class="card-head" style="margin:0">
+                <span class="tile sm t-accent"><span class="ico" data-ico="package" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Items</h3></div>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
                     <tr>
-                        <th class="px-4 py-2 text-left font-medium text-gray-600">Product</th>
-                        <th class="px-4 py-2 text-left font-medium text-gray-600">Variant</th>
-                        <th class="px-4 py-2 text-right font-medium text-gray-600">Ordered</th>
-                        <th class="px-4 py-2 text-right font-medium text-gray-600">Unit Cost</th>
-                        <th class="px-4 py-2 text-right font-medium text-gray-600">Line Total</th>
-                        <th class="px-4 py-2 text-right font-medium text-gray-600">Received</th>
+                        <th>Product</th>
+                        <th>Variant</th>
+                        <th style="text-align:right">Ordered</th>
+                        <th style="text-align:right">Unit Cost</th>
+                        <th style="text-align:right">Line Total</th>
+                        <th style="text-align:right">Received</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($purchase->items as $item)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2 font-medium text-gray-900">{{ $item->product?->name ?? 'Deleted' }}</td>
-                        <td class="px-4 py-2 text-gray-500">{{ $item->variant?->label() ?? '—' }}</td>
-                        <td class="px-4 py-2 text-right">{{ $item->quantity }}</td>
-                        <td class="px-4 py-2 text-right">৳{{ number_format($item->unit_cost, 2) }}</td>
-                        <td class="px-4 py-2 text-right font-semibold">৳{{ number_format($item->lineTotal(), 0) }}</td>
-                        <td class="px-4 py-2 text-right">
-                            <span class="{{ $item->received_qty >= $item->quantity ? 'text-green-600' : 'text-yellow-600' }} font-semibold">
+                    <tr>
+                        <td style="font-weight:600;font-size:13.5px">{{ $item->product?->name ?? 'Deleted' }}</td>
+                        <td class="muted" style="font-size:13px">{{ $item->variant?->label() ?? '—' }}</td>
+                        <td style="text-align:right" class="tnum">{{ $item->quantity }}</td>
+                        <td style="text-align:right" class="tnum">৳{{ number_format($item->unit_cost, 2) }}</td>
+                        <td style="text-align:right" class="tnum"><b>৳{{ number_format($item->lineTotal(), 0) }}</b></td>
+                        <td style="text-align:right">
+                            <span style="font-weight:700;font-size:13px;color:{{ $item->received_qty >= $item->quantity ? 'var(--success)' : 'var(--warning)' }}">
                                 {{ $item->received_qty }} / {{ $item->quantity }}
                             </span>
                         </td>
@@ -63,50 +76,68 @@
                 </tbody>
             </table>
         </div>
-    </x-admin.card>
+    </div>
 
     @if($purchase->shipments->isNotEmpty())
-    <x-admin.card>
-        <div class="px-5 py-4 border-b border-gray-200 font-semibold text-gray-900 text-sm">Shipment Costs</div>
-        <div class="divide-y divide-gray-100">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-violet"><span class="ico" data-ico="truck" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Shipment Costs</h3></div>
+        </div>
+        <div class="col-gap" style="--gap:0;margin-top:14px">
             @foreach($purchase->shipments as $s)
-            <div class="flex items-center justify-between px-5 py-3">
+            <div class="between" style="padding:12px 0;border-bottom:1px solid var(--border)">
                 <div>
-                    <div class="font-medium text-gray-800">{{ $s->description }}</div>
-                    <div class="text-xs text-gray-500">{{ $s->shipment_date->format('d M Y') }}</div>
+                    <div style="font-weight:600;font-size:13.5px">{{ $s->description }}</div>
+                    <div class="faint" style="font-size:12px">{{ $s->shipment_date->format('d M Y') }}</div>
                 </div>
-                <div class="font-bold text-purple-700">৳{{ number_format($s->amount, 0) }}</div>
+                <div style="font-weight:700;font-size:15px;color:var(--violet)">৳{{ number_format($s->amount, 0) }}</div>
             </div>
             @endforeach
         </div>
-    </x-admin.card>
+    </div>
     @endif
 
     @if($purchase->status !== 'received')
-    <x-admin.card>
-        <div class="px-5 py-4 border-b border-gray-200 font-semibold text-gray-900 text-sm">Update Received Quantities</div>
-        <form method="POST" action="{{ route('admin.accounting.purchases.receive', $purchase) }}" class="p-5 space-y-3">
+    <div class="card pad">
+        <div class="card-head" style="margin-bottom:16px">
+            <span class="tile sm t-success"><span class="ico" data-ico="check" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Update Received Quantities</h3></div>
+        </div>
+        <form method="POST" action="{{ route('admin.accounting.purchases.receive', $purchase) }}" class="col-gap" style="--gap:12px">
             @csrf @method('PATCH')
             @foreach($purchase->items as $item)
-            <div class="flex items-center gap-4">
+            <div class="between" style="gap:14px">
                 <input type="hidden" name="items[{{ $loop->index }}][id]" value="{{ $item->id }}">
-                <div class="flex-1 text-sm text-gray-800">
-                    {{ $item->product?->name }} {{ $item->variant?->label() ? '· '.$item->variant->label() : '' }}
-                    <span class="text-xs text-gray-400 ml-1">(ordered: {{ $item->quantity }})</span>
+                <div style="font-size:13.5px;color:var(--text)">
+                    {{ $item->product?->name }}
+                    @if($item->variant?->label())
+                    <span class="muted"> · {{ $item->variant->label() }}</span>
+                    @endif
+                    <span class="faint" style="font-size:12px;margin-left:6px">(ordered: {{ $item->quantity }})</span>
                 </div>
-                <input type="number" name="items[{{ $loop->index }}][received_qty]" value="{{ $item->received_qty }}"
-                    min="0" max="{{ $item->quantity }}"
-                    class="w-24 rounded-lg border-gray-300 text-sm px-2 py-1.5 text-right" />
+                <input class="input" type="number" name="items[{{ $loop->index }}][received_qty]"
+                       value="{{ $item->received_qty }}" min="0" max="{{ $item->quantity }}"
+                       style="width:100px;text-align:right">
             </div>
             @endforeach
-            <x-admin.button type="submit" class="mt-2">Update Receiving</x-admin.button>
+            <div style="padding-top:6px">
+                <button type="submit" class="btn btn-primary">Update Receiving</button>
+            </div>
         </form>
-    </x-admin.card>
+    </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.accounting.purchases.destroy', $purchase) }}" onsubmit="return confirm('Delete this purchase order?')">
-        @csrf @method('DELETE')
-        <x-admin.button type="submit" variant="outline" class="text-red-600 border-red-200 hover:bg-red-50">Delete Order</x-admin.button>
-    </form>
+    <div style="padding-top:4px">
+        <form method="POST" action="{{ route('admin.accounting.purchases.destroy', $purchase) }}"
+              onsubmit="return confirm('Delete this purchase order?')">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn btn-outline"
+                    style="color:var(--danger);border-color:var(--danger)">
+                <span class="ico" data-ico="trash" style="width:16px;height:16px"></span>Delete Order
+            </button>
+        </form>
+    </div>
+
 </div>
 @endsection

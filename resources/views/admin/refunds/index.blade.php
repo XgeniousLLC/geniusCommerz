@@ -1,100 +1,96 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Refunds')
-
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">Refunds</li>
-</ol>
-@endsection
-
-@section('page-header')
-<div>
-    <h1 class="text-2xl font-bold text-gray-900">Refunds</h1>
-    <p class="text-gray-600 mt-1">{{ $refunds->total() }} total requests</p>
-</div>
-@endsection
-
 @section('content')
-<x-admin.card class="mb-6">
-    <form method="GET" class="flex flex-wrap gap-4 items-end">
-        <div class="w-40">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select name="status" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">All Statuses</option>
-                @foreach(['pending','approved','rejected','processed'] as $s)
-                    <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
-                @endforeach
-            </select>
-        </div>
-        <x-admin.button type="submit" variant="secondary">Filter</x-admin.button>
-        @if(request('status'))
-            <a href="{{ route('admin.refunds.index') }}" class="text-sm text-gray-500 hover:text-gray-700 self-end pb-2">Clear</a>
-        @endif
-    </form>
-</x-admin.card>
+@php
+$pending  = \App\Models\Refund::where('status','pending')->count();
+$approved = \App\Models\Refund::where('status','approved')->count();
+$rejected = \App\Models\Refund::where('status','rejected')->count();
+$statusColors = ['pending'=>'warning','approved'=>'success','rejected'=>'danger','processed'=>'info'];
+$reasons = \App\Models\Refund::REASONS;
+@endphp
 
-<x-admin.card>
-    @if($refunds->isEmpty())
-        <p class="text-center text-gray-500 py-10">No refund requests found.</p>
-    @else
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-gray-100 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        <th class="pb-3 pr-4">Order</th>
-                        <th class="pb-3 pr-4">Customer</th>
-                        <th class="pb-3 pr-4">Reason</th>
-                        <th class="pb-3 pr-4">Amount</th>
-                        <th class="pb-3 pr-4">Status</th>
-                        <th class="pb-3 pr-4">Requested</th>
-                        <th class="pb-3"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @foreach($refunds as $refund)
-                    @php
-                        $badgeClass = match($refund->status) {
-                            'approved'  => 'bg-green-100 text-green-800',
-                            'processed' => 'bg-blue-100 text-blue-800',
-                            'rejected'  => 'bg-red-100 text-red-700',
-                            default     => 'bg-yellow-100 text-yellow-800',
-                        };
-                        $reasons = \App\Models\Refund::REASONS;
-                    @endphp
-                    <tr class="hover:bg-gray-50">
-                        <td class="py-3 pr-4">
-                            <a href="{{ route('admin.refunds.show', $refund) }}" class="font-mono font-semibold text-blue-600 hover:underline">
-                                #{{ $refund->order->order_number }}
-                            </a>
-                        </td>
-                        <td class="py-3 pr-4 text-gray-700">{{ $refund->user->name }}</td>
-                        <td class="py-3 pr-4 text-gray-600 capitalize">{{ $reasons[$refund->reason] ?? $refund->reason }}</td>
-                        <td class="py-3 pr-4 font-semibold text-gray-900">
-                            @if($refund->amount) ৳{{ number_format($refund->amount, 0) }} @else — @endif
-                        </td>
-                        <td class="py-3 pr-4">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold capitalize {{ $badgeClass }}">
-                                {{ $refund->status }}
-                            </span>
-                        </td>
-                        <td class="py-3 pr-4 text-gray-500">{{ $refund->created_at->format('M d, Y') }}</td>
-                        <td class="py-3">
-                            <a href="{{ route('admin.refunds.show', $refund) }}" class="text-blue-600 hover:underline text-xs">Review</a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+<div class="page-head">
+    <div>
+        <h2 class="display">Refunds</h2>
+        <div class="sub">{{ $refunds->total() }} total requests</div>
+    </div>
+</div>
 
-        @if($refunds->hasPages())
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                {{ $refunds->withQueryString()->links() }}
-            </div>
-        @endif
+<div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="card lift stat">
+        <span class="tile t-warning"><span class="ico" data-ico="clock"></span></span>
+        <div><div class="num">{{ $pending }}</div><div class="lbl">Pending</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-success"><span class="ico" data-ico="check"></span></span>
+        <div><div class="num">{{ $approved }}</div><div class="lbl">Approved</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-danger"><span class="ico" data-ico="x"></span></span>
+        <div><div class="num">{{ $rejected }}</div><div class="lbl">Rejected</div></div>
+    </div>
+</div>
+
+@php $filter = request('status',''); @endphp
+<style>.ref-seg a{display:inline-flex;align-items:center;padding:0 14px;height:32px;font-size:13px;font-weight:600;border:none;background:none;color:var(--text-muted);cursor:pointer;border-radius:8px;text-decoration:none}.ref-seg a.active,.ref-seg a:hover{background:var(--surface-2);color:var(--text)}</style>
+<div class="seg sm ref-seg" style="margin-bottom:16px">
+    @foreach(['' => 'All','pending'=>'Pending','approved'=>'Approved','rejected'=>'Rejected','processed'=>'Processed'] as $val => $label)
+    <a href="{{ route('admin.refunds.index', $val ? ['status'=>$val] : []) }}"
+       class="{{ $filter === $val ? 'active' : '' }}">{{ $label }}</a>
+    @endforeach
+</div>
+
+<div class="card flush">
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Reason</th>
+                    <th style="text-align:right">Amount</th>
+                    <th>Status</th>
+                    <th>Requested</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($refunds as $refund)
+                <tr class="hoverable">
+                    <td>
+                        <a href="{{ route('admin.refunds.show', $refund) }}"
+                           class="mono" style="font-weight:700;font-size:13px;color:var(--accent);text-decoration:none">
+                            #{{ $refund->order->order_number }}
+                        </a>
+                    </td>
+                    <td style="font-weight:600;font-size:13.5px">{{ $refund->user->name }}</td>
+                    <td class="muted" style="font-size:13px">{{ $reasons[$refund->reason] ?? $refund->reason }}</td>
+                    <td style="text-align:right;font-weight:700" class="tnum">
+                        @if($refund->amount) ৳{{ number_format($refund->amount, 0) }} @else — @endif
+                    </td>
+                    <td>
+                        <span class="pill sm {{ $statusColors[$refund->status] ?? '' }}">
+                            <span class="dot"></span>{{ ucfirst($refund->status) }}
+                        </span>
+                    </td>
+                    <td class="faint" style="font-size:13px">{{ $refund->created_at->format('d M Y') }}</td>
+                    <td style="text-align:right">
+                        <a href="{{ route('admin.refunds.show', $refund) }}" class="btn btn-sm btn-outline">Review</a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:48px 20px">
+                        <div class="faint" style="font-size:13.5px">No refund requests found.</div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($refunds->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $refunds->withQueryString()->links() }}</div>
     @endif
-</x-admin.card>
+</div>
+
 @endsection

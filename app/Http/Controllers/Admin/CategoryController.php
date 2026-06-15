@@ -16,12 +16,23 @@ class CategoryController extends Controller
 {
     public function index(): View
     {
-        $categories = Category::with('parent', 'imageMedia')
+        $categories = Category::with([
+                'imageMedia',
+                'children' => fn ($q) => $q->withCount('products')->with('imageMedia')->orderBy('sort_order')->orderBy('name'),
+            ])
+            ->withCount('products')
+            ->whereNull('parent_id')
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->paginate(50);
+            ->paginate(30);
 
-        return view('admin.categories.index', compact('categories'));
+        $stats = [
+            'total'     => Category::count(),
+            'top_level' => Category::whereNull('parent_id')->count(),
+            'active'    => Category::where('is_active', true)->count(),
+        ];
+
+        return view('admin.categories.index', compact('categories', 'stats'));
     }
 
     public function create(): View

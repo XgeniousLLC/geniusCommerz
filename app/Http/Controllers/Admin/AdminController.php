@@ -32,9 +32,14 @@ class AdminController extends Controller
             $query->where('role', $request->role);
         }
 
-        $admins = $query->latest()->paginate(10);
+        $admins = $query->with('role')->latest()->paginate(20);
 
-        return view('admin.admins.index', compact('admins'));
+        $stats = [
+            'total'  => \App\Models\Admin::count(),
+            'active' => \App\Models\Admin::where('is_active', true)->count(),
+        ];
+
+        return view('admin.admins.index', compact('admins', 'stats'));
     }
 
     public function create()

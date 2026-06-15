@@ -1,142 +1,128 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Currencies')
-
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Currencies</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Currencies</h1>
-        <p class="text-gray-600 mt-1">Manage currencies and exchange rates. Prices are stored in your base currency and converted at display time.</p>
-    </div>
-@endsection
-
 @section('content')
-<div class="space-y-6">
 
-    {{-- Add currency --}}
-    <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <h2 class="text-sm font-semibold text-gray-700 mb-4">Add Currency</h2>
-        <form method="POST" action="{{ route('admin.currencies.store') }}" class="flex flex-wrap gap-3 items-end">
+<div class="page-head">
+    <div>
+        <h2 class="display">Currencies</h2>
+        <div class="sub">Manage currencies and exchange rates</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start">
+
+    <div class="card pad">
+        <div class="card-head" style="margin-bottom:16px">
+            <span class="tile sm t-teal"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Add Currency</h3></div>
+        </div>
+        <form method="POST" action="{{ route('admin.currencies.store') }}" class="col-gap" style="--gap:14px">
             @csrf
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Code</label>
-                <input type="text" name="code" placeholder="USD" value="{{ old('code') }}"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-24 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-                @error('code')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+            <div style="display:grid;grid-template-columns:1fr 80px;gap:10px">
+                <div class="field" style="margin:0">
+                    <span class="lbl">Name <span style="color:var(--danger)">*</span></span>
+                    <input class="input" type="text" name="name" placeholder="US Dollar" value="{{ old('name') }}" required>
+                </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl">Symbol</span>
+                    <input class="input" type="text" name="symbol" placeholder="$" value="{{ old('symbol') }}" required>
+                </div>
             </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Symbol</label>
-                <input type="text" name="symbol" placeholder="$" value="{{ old('symbol') }}"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:10px">
+                <div class="field" style="margin:0">
+                    <span class="lbl">Code</span>
+                    <input class="input" type="text" name="code" placeholder="USD" value="{{ old('code') }}" required style="text-transform:uppercase">
+                    @error('code')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
+                </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl">Rate (1 base = ?)</span>
+                    <input class="input" type="number" name="rate" placeholder="0.0094" value="{{ old('rate') }}" step="0.000001" min="0.000001" required>
+                    @error('rate')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
+                </div>
             </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
-                <input type="text" name="name" placeholder="US Dollar" value="{{ old('name') }}"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Rate (1 base = ?)</label>
-                <input type="number" name="rate" placeholder="0.0094" value="{{ old('rate') }}"
-                    step="0.000001" min="0.000001"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-            </div>
-            <button type="submit"
-                class="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Add Currency
-            </button>
+            <button type="submit" class="btn btn-primary">Add Currency</button>
         </form>
     </div>
 
-    {{-- Currency list --}}
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Code</th>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Symbol</th>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Name</th>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Rate</th>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Status</th>
-                    <th class="px-5 py-3 text-left font-semibold text-gray-600">Default</th>
-                    <th class="px-5 py-3 text-right font-semibold text-gray-600">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse($currencies as $currency)
-                <tr x-data="{ editing: false }" class="hover:bg-gray-50">
-                    <td class="px-5 py-3 font-mono font-semibold text-gray-900">{{ $currency->code }}</td>
-                    <td class="px-5 py-3 text-gray-700">{{ $currency->symbol }}</td>
-                    <td class="px-5 py-3">
-                        <span x-show="!editing">{{ $currency->name }}</span>
-                        <form x-show="editing" method="POST" action="{{ route('admin.currencies.update', $currency) }}" class="flex flex-wrap gap-2 items-center">
-                            @csrf @method('PUT')
-                            <input type="text" name="symbol" value="{{ $currency->symbol }}"
-                                class="border border-gray-300 rounded px-2 py-1 text-sm w-16" required>
-                            <input type="text" name="name" value="{{ $currency->name }}"
-                                class="border border-gray-300 rounded px-2 py-1 text-sm w-32" required>
-                            <input type="number" name="rate" value="{{ $currency->rate }}"
-                                step="0.000001" min="0.000001"
-                                class="border border-gray-300 rounded px-2 py-1 text-sm w-28" required>
-                            <label class="flex items-center gap-1 text-xs">
-                                <input type="checkbox" name="is_active" value="1" {{ $currency->is_active ? 'checked' : '' }}>
-                                Active
-                            </label>
-                            <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Save</button>
-                            <button type="button" @click="editing=false" class="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
-                        </form>
-                    </td>
-                    <td class="px-5 py-3 font-mono text-gray-600">{{ $currency->rate }}</td>
-                    <td class="px-5 py-3">
-                        @if($currency->is_active)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                        @else
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Inactive</span>
-                        @endif
-                    </td>
-                    <td class="px-5 py-3">
-                        @if($currency->is_default)
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Default</span>
-                        @else
-                            <form method="POST" action="{{ route('admin.currencies.set-default', $currency) }}" class="inline">
-                                @csrf
-                                <button type="submit" class="text-xs text-blue-600 hover:underline">Set Default</button>
+    <div class="card flush">
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name / Symbol</th>
+                        <th>Rate</th>
+                        <th>Status</th>
+                        <th>Default</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($currencies as $currency)
+                    <tr class="hoverable" x-data="{ editing: false }">
+                        <td><span class="mono" style="font-weight:700;font-size:13.5px">{{ $currency->code }}</span></td>
+                        <td>
+                            <span x-show="!editing" style="font-size:13.5px">{{ $currency->symbol }} · {{ $currency->name }}</span>
+                            <form x-show="editing" method="POST" action="{{ route('admin.currencies.update', $currency) }}"
+                                  class="row" style="gap:8px">
+                                @csrf @method('PUT')
+                                <input class="input" type="text" name="symbol" value="{{ $currency->symbol }}" style="width:60px;height:34px;font-size:13px">
+                                <input class="input" type="text" name="name" value="{{ $currency->name }}" style="width:130px;height:34px;font-size:13px">
+                                <input class="input" type="number" name="rate" value="{{ $currency->rate }}" step="0.000001" min="0.000001" style="width:100px;height:34px;font-size:13px">
+                                <label class="row" style="gap:5px;font-size:12.5px;cursor:pointer">
+                                    <input type="checkbox" name="is_active" value="1" {{ $currency->is_active ? 'checked' : '' }}>Active
+                                </label>
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                <button type="button" @click="editing=false" class="btn btn-sm btn-outline">Cancel</button>
                             </form>
-                        @endif
-                    </td>
-                    <td class="px-5 py-3 text-right space-x-3">
-                        <button type="button" @click="editing=!editing" class="text-sm text-blue-600 hover:underline">Edit</button>
-                        @unless($currency->is_default)
-                        <form method="POST" action="{{ route('admin.currencies.destroy', $currency) }}" class="inline"
-                            onsubmit="return confirm('Delete {{ $currency->code }}?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-sm text-red-600 hover:underline">Delete</button>
-                        </form>
-                        @endunless
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-5 py-8 text-center text-gray-400">No currencies added yet.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                        </td>
+                        <td class="mono faint" style="font-size:13px">{{ $currency->rate }}</td>
+                        <td>
+                            <span class="pill sm {{ $currency->is_active ? 'success' : '' }}">
+                                <span class="dot"></span>{{ $currency->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($currency->is_default)
+                            <span class="pill sm accent">Default</span>
+                            @else
+                            <form method="POST" action="{{ route('admin.currencies.set-default', $currency) }}" style="display:inline">
+                                @csrf
+                                <button type="submit" class="link-btn" style="font-size:13px">Set default</button>
+                            </form>
+                            @endif
+                        </td>
+                        <td style="text-align:right">
+                            <div class="row" style="gap:6px;justify-content:flex-end">
+                                <button type="button" @click="editing=!editing" class="icon-btn">
+                                    <span class="ico" data-ico="edit" style="width:15px;height:15px"></span>
+                                </button>
+                                @unless($currency->is_default)
+                                <form method="POST" action="{{ route('admin.currencies.destroy', $currency) }}"
+                                      onsubmit="return confirm('Delete {{ $currency->code }}?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="icon-btn">
+                                        <span class="ico" data-ico="trash" style="width:15px;height:15px"></span>
+                                    </button>
+                                </form>
+                                @endunless
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center;padding:40px 20px">
+                            <div class="faint" style="font-size:13.5px">No currencies added yet.</div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid var(--border)">
+            <p class="faint" style="font-size:12px">Base currency is your store default. Set exchange rates relative to 1 unit of the base currency. Rates applied at display time — orders stored in base currency.</p>
+        </div>
     </div>
 
-    <p class="text-xs text-gray-400">
-        The base currency is your store's default. Set exchange rates relative to 1 unit of the base currency.
-        Rates are applied at display time — orders are always stored in the base currency.
-    </p>
 </div>
 @endsection

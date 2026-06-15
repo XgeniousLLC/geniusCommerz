@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderConfirmed;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -229,9 +230,31 @@ class CheckoutController extends Controller
             try { $notifiable->notify(new OrderConfirmed($order)); } catch (\Throwable) {}
         }
 
+        // Send SMS on order placement
+        if ($order->customer_phone && SiteSetting::get('notifications.sms_on_order', '0') === '1') {
+            try {
+                $sms = app(SmsService::class);
+                if ($sms->hasDefault()) {
+                    $default  = "Thank you for your order at KlixBD!\nYour order #{{order_id}} has been placed successfully.\nTotal: {{amount}} BDT.";
+                    $template = SiteSetting::get('notifications.sms_template_placed', $default);
+                    $message  = SmsService::renderTemplate($template, [
+                        'order_id'      => $order->order_number,
+                        'amount'        => $order->total,
+                        'customer_name' => $order->customer_name,
+                    ]);
+                    $sms->send($order->customer_phone, $message);
+                }
+            } catch (\Throwable) {}
+        }
+
         // Server-side tracking
         $order->load('items');
         $this->trackPurchase($order, $request);
+
+        if ($request->filled('lp_slug')) {
+            return redirect()->route('lp.show', ['product' => $request->input('lp_slug')])
+                ->with('lp_confirmed_order', $order->order_number);
+        }
 
         return redirect()->route('order.confirm', $order->order_number)
             ->with('order_placed', true);

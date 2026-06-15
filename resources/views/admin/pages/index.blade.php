@@ -1,162 +1,99 @@
 @extends('admin.layouts.admin')
-
-@section('title', 'Pages Management')
-
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2">
-        <li><a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a></li>
-        <li class="text-gray-500">/</li>
-        <li class="text-gray-900 font-medium">Pages</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div class="flex justify-between items-center">
-        <h2 class="text-3xl font-bold text-gray-900">Pages Management</h2>
-        <x-admin.button href="{{ route('admin.pages.create') }}" variant="primary">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Create New Page
-        </x-admin.button>
-    </div>
-@endsection
-
+@section('title', 'Pages')
 @section('content')
-    <x-admin.card>
-        <!-- Filters -->
-        <div class="mb-6">
-            <form method="GET" class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-                <div class="flex-1 min-w-0">
-                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                    <x-admin.input 
-                        type="text" 
-                        id="search"
-                        name="search" 
-                        placeholder="Search pages..."
-                        value="{{ request('search') }}"
-                    />
-                </div>
-                
-                <div class="w-full sm:w-auto sm:min-w-[120px]">
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <x-admin.select id="status" name="status">
-                        <option value="">All Status</option>
-                        <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published</option>
-                    </x-admin.select>
-                </div>
-                
-                <div class="flex gap-2 w-full sm:w-auto">
-                    <x-admin.button type="submit" class="flex-1 sm:flex-none">Filter</x-admin.button>
-                    @if(request()->hasAny(['search', 'status']))
-                        <a href="{{ route('admin.pages.index') }}" class="flex-1 sm:flex-none">
-                            <x-admin.button variant="secondary" class="w-full">Clear</x-admin.button>
-                        </a>
-                    @endif
-                </div>
-            </form>
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Pages</h2>
+        <div class="sub">Manage static CMS pages</div>
+    </div>
+    <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>Create Page
+    </a>
+</div>
+
+<div class="card flush" style="margin-bottom:14px">
+    <form method="GET" style="padding:14px 18px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border)">
+        <div class="search-field" style="flex:1;max-width:320px">
+            <span class="ico" data-ico="search" style="width:15px;height:15px"></span>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search pages…" class="input" style="border:none;background:none;box-shadow:none;padding:0">
         </div>
-
-        @if($pages->count() > 0)
-            <!-- Pages Table -->
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEO</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($pages as $page)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $page->title }}</div>
-                                        <div class="text-sm text-gray-500">/{{ $page->slug }}</div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {{ $page->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ ucfirst($page->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($page->metaInformation)
-                                        <div class="flex items-center">
-                                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                            <span class="text-xs text-gray-500">Optimized</span>
-                                        </div>
-                                    @else
-                                        <div class="flex items-center">
-                                            <div class="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
-                                            <span class="text-xs text-gray-500">Basic</span>
-                                        </div>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-900">{{ $page->creator->name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $page->created_at->format('M d, Y') }}</td>
-                                <td class="px-6 py-4 text-right text-sm font-medium">
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <x-admin.button href="{{ route('admin.pages.show', $page) }}" variant="outline" size="sm">
-                                            View
-                                        </x-admin.button>
-                                        <x-admin.button href="{{ route('admin.pages.edit', $page) }}" variant="primary" size="sm">
-                                            Edit
-                                        </x-admin.button>
-                                        <form method="POST" action="{{ route('admin.pages.destroy', $page) }}" class="inline" 
-                                              onsubmit="return confirm('Are you sure you want to delete this page?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-admin.button type="submit" variant="danger" size="sm">
-                                                Delete
-                                            </x-admin.button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            @if($pages->hasPages())
-                <div class="mt-6">
-                    {{ $pages->links() }}
-                </div>
-            @endif
-        @else
-            <!-- Empty State -->
-            <div class="text-center py-12">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No pages found</h3>
-                <p class="mt-1 text-sm text-gray-500">
-                    @if(request()->hasAny(['search', 'status']))
-                        Try adjusting your search criteria or <a href="{{ route('admin.pages.index') }}" class="text-blue-600 hover:text-blue-500">clear filters</a>.
-                    @else
-                        Get started by creating your first page.
-                    @endif
-                </p>
-                @if(!request()->hasAny(['search', 'status']))
-                    <div class="mt-6">
-                        <x-admin.button href="{{ route('admin.pages.create') }}" variant="primary">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Create Your First Page
-                        </x-admin.button>
-                    </div>
-                @endif
-            </div>
+        <select class="input" name="status" style="width:140px">
+            <option value="">All Status</option>
+            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+            <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Published</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-outline">Filter</button>
+        @if(request()->hasAny(['search','status']))
+        <a href="{{ route('admin.pages.index') }}" class="btn btn-sm">Clear</a>
         @endif
-    </x-admin.card>
+    </form>
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Page</th>
+                    <th>Status</th>
+                    <th>SEO</th>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($pages as $page)
+                <tr class="hoverable">
+                    <td>
+                        <div style="font-weight:700;font-size:13.5px">{{ $page->title }}</div>
+                        <div class="faint mono" style="font-size:12px;margin-top:2px">/{{ $page->slug }}</div>
+                    </td>
+                    <td>
+                        <span class="pill sm {{ $page->status === 'published' ? 'success' : 'warning' }}">
+                            <span class="dot"></span>{{ ucfirst($page->status) }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($page->metaInformation)
+                        <span class="pill sm success">Optimized</span>
+                        @else
+                        <span class="pill sm">Basic</span>
+                        @endif
+                    </td>
+                    <td class="muted" style="font-size:13px">{{ $page->creator->name }}</td>
+                    <td class="faint" style="font-size:13px">{{ $page->created_at->format('d M Y') }}</td>
+                    <td style="text-align:right">
+                        <div class="row" style="gap:6px;justify-content:flex-end">
+                            <a href="{{ route('page.show', $page) }}" target="_blank" class="btn btn-sm btn-outline">View</a>
+                            <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <form method="POST" action="{{ route('admin.pages.destroy', $page) }}"
+                                  onsubmit="return confirm('Delete this page?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="icon-btn">
+                                    <span class="ico" data-ico="trash" style="width:15px;height:15px"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:48px 20px">
+                        <div class="faint" style="font-size:13.5px">
+                            @if(request()->hasAny(['search','status']))
+                                No pages match your filters. <a href="{{ route('admin.pages.index') }}" class="link-btn">Clear filters</a>
+                            @else
+                                No pages yet. <a href="{{ route('admin.pages.create') }}" class="link-btn">Create the first one</a>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($pages->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $pages->links() }}</div>
+    @endif
+</div>
+
 @endsection

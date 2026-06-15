@@ -51,7 +51,17 @@ class ProductController extends Controller
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
         $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
-        return view('admin.products.index', compact('products', 'brands', 'categories'));
+        $simpleStock  = Product::where('has_variants', false)->whereNotNull('stock_qty')->sum('stock_qty');
+        $variantStock = \App\Models\ProductVariant::where('is_active', true)->whereNotNull('stock_qty')->sum('stock_qty');
+        $productStats = [
+            'total'    => Product::count(),
+            'active'   => Product::where('status', 'active')->count(),
+            'draft'    => Product::where('status', 'draft')->count(),
+            'low'      => Product::where('has_variants', false)->where('stock_qty', '<=', 10)->count(),
+            'stock'    => (int) $simpleStock + (int) $variantStock,
+        ];
+
+        return view('admin.products.index', compact('products', 'brands', 'categories', 'productStats'));
     }
 
     public function create(): View
@@ -222,9 +232,35 @@ class ProductController extends Controller
                         'stock_qty'        => isset($row['stock_qty']) && $row['stock_qty'] !== '' ? (int) $row['stock_qty'] : null,
                         'is_active'        => isset($row['is_active']) ? (bool) $row['is_active'] : true,
                         'sort_order'       => $i,
+                        'image_media_id'   => isset($row['image_media_id']) && $row['image_media_id'] !== '' ? (int) $row['image_media_id'] : null,
                     ]);
                     $incoming[] = $variant->id;
                 }
+            } else {
+                $variant = ProductVariant::create([
+                    'product_id'       => $product->id,
+                    'sku'              => $row['sku'] ?? null,
+                    'price'            => $row['price'],
+                    'compare_at_price' => $row['compare_at_price'] ?? null,
+                    'cost_price'       => $row['cost_price'] ?? null,
+                    'weight'           => $row['weight'] ?? null,
+                    'stock_qty'        => isset($row['stock_qty']) && $row['stock_qty'] !== '' ? (int) $row['stock_qty'] : null,
+                    'is_active'        => true,
+                    'sort_order'       => $i,
+                ]);
+
+                foreach ($row['attribute_value_ids'] ?? [] as $valueId) {
+                    $value = AttributeValue::find($valueId);
+                    if ($value) {
+                        ProductVariantValue::create([
+                            'variant_id'         => $variant->id,
+                            'attribute_id'       => $value->attribute_id,
+                            'attribute_value_id' => $value->id,
+                        ]);
+                    }
+                }
+
+                $incoming[] = $variant->id;
             }
         }
 

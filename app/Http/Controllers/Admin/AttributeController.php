@@ -14,9 +14,14 @@ class AttributeController extends Controller
 {
     public function index(): View
     {
-        $attributes = Attribute::withCount('values')->orderBy('sort_order')->orderBy('name')->get();
+        $attributes = Attribute::with('values')->withCount('values')->orderBy('sort_order')->orderBy('name')->get();
 
-        return view('admin.attributes.index', compact('attributes'));
+        $stats = [
+            'total'  => $attributes->count(),
+            'values' => $attributes->sum('values_count'),
+        ];
+
+        return view('admin.attributes.index', compact('attributes', 'stats'));
     }
 
     public function create(): View
@@ -91,5 +96,30 @@ class AttributeController extends Controller
         $attribute->delete();
 
         return redirect()->route('admin.attributes.index')->with('success', 'Attribute deleted.');
+    }
+
+    public function quickAddValue(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'attribute_id' => 'required|exists:attributes,id',
+            'value'        => 'required|string|max:191',
+        ]);
+
+        $attribute = Attribute::findOrFail($request->integer('attribute_id'));
+
+        $existing = $attribute->values()->where('value', $request->input('value'))->first();
+        if ($existing) {
+            return response()->json(['id' => $existing->id, 'value' => $existing->value]);
+        }
+
+        $maxSort = $attribute->values()->max('sort_order') ?? -1;
+
+        $attrValue = AttributeValue::create([
+            'attribute_id' => $attribute->id,
+            'value'        => $request->input('value'),
+            'sort_order'   => $maxSort + 1,
+        ]);
+
+        return response()->json(['id' => $attrValue->id, 'value' => $attrValue->value], 201);
     }
 }

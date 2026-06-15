@@ -76,13 +76,20 @@ Route::get('/loyalty', [\App\Http\Controllers\LoyaltyPageController::class, 'sho
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/order/confirmed/{orderNumber}', function (string $orderNumber) {
-    $order = \App\Models\Order::where('order_number', $orderNumber)->firstOrFail();
+    $order = \App\Models\Order::with('items')->where('order_number', $orderNumber)->firstOrFail();
     return inertia('OrderConfirmed', ['order' => [
         'order_number'   => $order->order_number,
         'customer_name'  => $order->customer_name,
         'total'          => $order->total,
         'payment_method' => $order->payment_method,
         'status'         => $order->status,
+        'items'          => $order->items->map(fn($i) => [
+            'product_name'  => $i->product_name,
+            'variant_label' => $i->variant_label,
+            'quantity'      => $i->quantity,
+            'unit_price'    => $i->unit_price,
+            'total'         => $i->total,
+        ]),
     ]]);
 })->name('order.confirm');
 

@@ -1,6 +1,7 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../layouts/Layout';
+import { usePrice } from '../usePrice';
 import type { Order } from '../types';
 
 interface Props {
@@ -10,15 +11,32 @@ interface Props {
   phone: string;
 }
 
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  pending:    { bg: '#FFF7ED', color: '#C2410C' },
-  processing: { bg: '#EFF6FF', color: '#1D4ED8' },
-  shipped:    { bg: '#F0FDF4', color: '#15803D' },
-  delivered:  { bg: '#F0FDF4', color: '#15803D' },
-  cancelled:  { bg: '#FEF2F2', color: '#DC2626' },
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Pending', confirmed: 'Confirmed', processing: 'Processing',
+  shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled',
 };
 
+const STATUS_COLOR: Record<string, string> = {
+  pending: '#b07020', confirmed: 'var(--av-cognac)', processing: 'var(--av-cognac)',
+  shipped: '#2a6b3c', delivered: '#2a6b3c', cancelled: '#a33030',
+};
+
+const S = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' } as React.SVGProps<SVGSVGElement>;
+
+function InpFlat({ value, onChange, placeholder, type = 'text', required }: {
+  value: string; onChange: (v: string) => void;
+  placeholder?: string; type?: string; required?: boolean;
+}) {
+  const [f, setF] = useState(false);
+  return (
+    <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} required={required}
+      style={{ display: 'block', width: '100%', height: 46, padding: 0, border: 'none', borderBottom: `1px solid ${f ? 'var(--av-ink)' : 'var(--av-line)'}`, fontSize: 14, outline: 'none', color: 'var(--av-ink)', background: 'transparent', boxSizing: 'border-box', fontFamily: 'var(--av-sans)', transition: 'border-color .15s' }}
+      onFocus={() => setF(true)} onBlur={() => setF(false)} />
+  );
+}
+
 export default function Track({ order, searched, orderNumber, phone }: Props) {
+  const fmt = usePrice();
   const [form, setForm] = useState({ order_number: orderNumber ?? '', phone: phone ?? '' });
 
   function submit(e: React.FormEvent) {
@@ -26,144 +44,168 @@ export default function Track({ order, searched, orderNumber, phone }: Props) {
     router.get('/track', form);
   }
 
-  const st = order ? (STATUS_STYLES[order.status] ?? { bg: '#f1f5f9', color: '#475569' }) : null;
+  const statusLabel = order ? (STATUS_LABEL[order.status] ?? order.status) : '';
+  const statusColor = order ? (STATUS_COLOR[order.status] ?? 'var(--av-muted)') : '';
 
   return (
     <Layout>
-      <Head title="Track Your Order" />
-      <div className="max-w-2xl mx-auto px-4 py-10 lg:py-14">
+      <Head title="Track Order" />
 
-        <nav className="text-xs mb-6 flex items-center gap-1.5" style={{ color: 'var(--kb-ink-soft)' }}>
-          <a href="/" className="hover:text-slate-900">Home</a>
-          <span>›</span>
-          <span style={{ color: 'var(--kb-ink)' }}>Track Order</span>
-        </nav>
-
-        {/* Search card */}
-        <div className="kb-card p-6 md:p-8 mb-6">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--kb-primary-50)' }}>
-              <svg className="w-5 h-5" style={{ color: 'var(--kb-primary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold" style={{ color: 'var(--kb-ink)' }}>Track Your Order</h1>
-              <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>Enter your order number for live status updates.</p>
-            </div>
-          </div>
-
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--kb-ink)' }}>Order Number</label>
-              <input type="text" value={form.order_number} onChange={(e) => setForm({ ...form, order_number: e.target.value })}
-                placeholder="e.g. ORD-A1B2C3D4" required autoComplete="off" className="kb-input" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--kb-ink)' }}>
-                Phone Number <span className="font-normal" style={{ color: 'var(--kb-ink-soft)' }}>(optional)</span>
-              </label>
-              <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="+880 1xxx-xxxxxx" autoComplete="off" className="kb-input" />
-            </div>
-            <button type="submit" className="kb-btn kb-btn-primary kb-btn-lg w-full" style={{ borderRadius: 12 }}>
-              Track Order
-            </button>
-          </form>
+      {/* Hero band */}
+      <div style={{ background: 'var(--av-paper)', borderBottom: '1px solid var(--av-line)', padding: '20px var(--av-gutter)' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          <nav style={{ display: 'flex', gap: 8, fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 8 }}>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
+            <span>/</span>
+            <span style={{ color: 'var(--av-ink)' }}>Track order</span>
+          </nav>
+          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(22px,3vw,36px)', fontWeight: 400, color: 'var(--av-ink)', margin: 0, letterSpacing: '-0.012em' }}>Track your order</h1>
         </div>
+      </div>
+
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '48px var(--av-gutter) 80px' }}>
+
+        {/* Search form */}
+        <form onSubmit={submit} style={{ marginBottom: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 10.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 8, fontFamily: 'var(--av-sans)' }}>
+                Order number <span style={{ color: 'var(--av-cognac)' }}>*</span>
+              </label>
+              <InpFlat value={form.order_number} onChange={v => setForm(f => ({ ...f, order_number: v }))} placeholder="ORD-XXXXXXXX" required />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 10.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 8, fontFamily: 'var(--av-sans)' }}>
+                Phone <span style={{ color: 'var(--av-muted)', fontWeight: 400, textTransform: 'none', letterSpacing: 0, fontSize: 10 }}>optional</span>
+              </label>
+              <InpFlat value={form.phone} onChange={v => setForm(f => ({ ...f, phone: v }))} placeholder="01XXXXXXXXX" />
+            </div>
+            <button type="submit"
+              style={{ width: '100%', height: 52, background: 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontSize: 12, fontWeight: 500, letterSpacing: '0.24em', textTransform: 'uppercase' }}>
+              Track order
+            </button>
+          </div>
+        </form>
 
         {/* Not found */}
         {searched && !order && (
-          <div className="kb-card p-6 text-center">
-            <svg className="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div style={{ padding: '32px 24px', border: '1px solid var(--av-line)', textAlign: 'center', background: 'var(--av-paper)' }}>
+            <svg viewBox="0 0 24 24" width="32" height="32" {...S} style={{ color: 'var(--av-line)', marginBottom: 12, display: 'block', margin: '0 auto 12px' }}>
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35M11 8v6M11 16h.01"/>
             </svg>
-            <p className="font-semibold" style={{ color: 'var(--kb-ink)' }}>Order not found</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Check your order number and try again.</p>
+            <p style={{ fontSize: 16, fontFamily: 'var(--av-display)', fontWeight: 400, color: 'var(--av-ink)', marginBottom: 6 }}>Order not found</p>
+            <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0 }}>Check the order number and try again.</p>
           </div>
         )}
 
-        {/* Order details */}
-        {order && st && (
-          <div className="space-y-4">
-            <div className="kb-card p-6">
-              <div className="flex items-start justify-between gap-4 mb-4">
+        {/* Results */}
+        {order && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+            {/* Status header */}
+            <div style={{ border: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: '24px 28px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--kb-ink-soft)' }}>Order</p>
-                  <p className="text-2xl font-extrabold" style={{ color: 'var(--kb-ink)' }}>{order.order_number}</p>
+                  <div style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>Order</div>
+                  <div style={{ fontFamily: 'var(--av-display)', fontSize: 26, fontWeight: 400, color: 'var(--av-ink)', letterSpacing: '-0.01em', lineHeight: 1 }}>{order.order_number}</div>
                 </div>
-                <span className="kb-chip text-xs px-3 py-1" style={{ background: st.bg, color: st.color }}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--av-sans)', color: statusColor, border: `1px solid ${statusColor}`, padding: '5px 10px', flexShrink: 0 }}>
+                  {statusLabel}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px' }}>
                 <div>
-                  <p className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Customer</p>
-                  <p className="font-semibold" style={{ color: 'var(--kb-ink)' }}>{order.customer_name}</p>
-                  <p style={{ color: 'var(--kb-ink-muted)' }}>{order.customer_phone}</p>
+                  <div style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 4 }}>Customer</div>
+                  <div style={{ fontSize: 14, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{order.customer_name}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{order.customer_phone}</div>
                 </div>
                 <div>
-                  <p className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Placed on</p>
-                  <p className="font-semibold" style={{ color: 'var(--kb-ink)' }}>{order.created_at}</p>
+                  <div style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 4 }}>Placed</div>
+                  <div style={{ fontSize: 14, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{order.created_at}</div>
                 </div>
                 {order.tracking_number && (
-                  <div className="col-span-2">
-                    <p className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Tracking #</p>
-                    <p className="font-mono font-semibold" style={{ color: 'var(--kb-primary)' }}>{order.tracking_number}</p>
+                  <div style={{ gridColumn: '1/-1' }}>
+                    <div style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 4 }}>Tracking #</div>
+                    <div style={{ fontSize: 13, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, letterSpacing: '0.06em' }}>{order.tracking_number}</div>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Items */}
             {order.items.length > 0 && (
-              <div className="kb-card p-6">
-                <h3 className="font-semibold mb-4" style={{ color: 'var(--kb-ink)' }}>Items</h3>
-                <div className="space-y-3">
-                  {order.items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between text-sm">
-                      <span style={{ color: 'var(--kb-ink)' }}>{item.product_name} × {item.quantity}</span>
-                      <span className="font-semibold" style={{ color: 'var(--kb-ink)' }}>৳{item.total_price}</span>
+              <div style={{ border: '1px solid var(--av-line)', background: 'var(--av-paper)' }}>
+                <div style={{ padding: '16px 28px', borderBottom: '1px solid var(--av-line-soft)', fontSize: 10.5, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)' }}>
+                  Items
+                </div>
+                <div style={{ padding: '0 28px' }}>
+                  {order.items.map((item, i) => (
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: i < order.items.length - 1 ? '1px solid var(--av-line-soft)' : 'none' }}>
+                      <div>
+                        <div style={{ fontSize: 14, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>
+                          {item.product_name}
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 2 }}>
+                          Qty: {item.quantity}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{fmt(item.total_price)}</span>
                     </div>
                   ))}
                 </div>
-                <div className="border-t mt-4 pt-4 space-y-1 text-sm" style={{ borderColor: 'var(--kb-border)' }}>
-                  <div className="flex justify-between" style={{ color: 'var(--kb-ink-muted)' }}>
-                    <span>Subtotal</span><span>৳{order.subtotal}</span>
-                  </div>
-                  <div className="flex justify-between" style={{ color: 'var(--kb-ink-muted)' }}>
-                    <span>Shipping</span><span>৳{order.shipping_charge}</span>
-                  </div>
-                  {order.discount > 0 && (
-                    <div className="flex justify-between" style={{ color: 'var(--kb-success)' }}>
-                      <span>Discount</span><span>-৳{order.discount}</span>
+                <div style={{ padding: '16px 28px', borderTop: '1px solid var(--av-line-soft)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    ['Subtotal', fmt(order.subtotal), 'var(--av-muted)'],
+                    ['Shipping', fmt(order.shipping_charge), 'var(--av-muted)'],
+                    ...(order.discount > 0 ? [['Discount', `−${fmt(order.discount)}`, 'var(--av-cognac)']] : []),
+                  ].map(([label, value, color], i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontFamily: 'var(--av-sans)', color: 'var(--av-muted)' }}>
+                      <span>{label}</span><span style={{ color }}>{value}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between font-bold text-base pt-1" style={{ color: 'var(--kb-ink)' }}>
-                    <span>Total</span><span>৳{order.total}</span>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 2, borderTop: '1px solid var(--av-line-soft)' }}>
+                    <span style={{ fontSize: 15, fontFamily: 'var(--av-sans)', fontWeight: 500, color: 'var(--av-ink)' }}>Total</span>
+                    <span style={{ fontSize: 16, fontFamily: 'var(--av-sans)', fontWeight: 600, color: 'var(--av-ink)' }}>{fmt(order.total)}</span>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Activity timeline */}
             {order.activities.length > 0 && (
-              <div className="kb-card p-6">
-                <h3 className="font-semibold mb-4" style={{ color: 'var(--kb-ink)' }}>Activity</h3>
-                <div className="space-y-4">
-                  {order.activities.map((act, i) => (
-                    <div key={act.id} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className="w-2.5 h-2.5 rounded-full mt-1" style={{ background: i === 0 ? 'var(--kb-primary)' : 'var(--kb-border)' }} />
-                        {i < order.activities.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: 'var(--kb-border)' }} />}
+              <div style={{ border: '1px solid var(--av-line)', background: 'var(--av-paper)' }}>
+                <div style={{ padding: '16px 28px', borderBottom: '1px solid var(--av-line-soft)', fontSize: 10.5, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)' }}>
+                  Timeline
+                </div>
+                <div style={{ padding: '20px 28px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {order.activities.map((act, i) => {
+                    const isFirst = i === 0;
+                    const isLast  = i === order.activities.length - 1;
+                    return (
+                      <div key={act.id} style={{ display: 'flex', gap: 16, position: 'relative' }}>
+                        {/* Spine */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: 16 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: '50%', background: isFirst ? 'var(--av-ink)' : 'var(--av-line)', flexShrink: 0, marginTop: 3, border: isFirst ? 'none' : '1px solid var(--av-line)' }} />
+                          {!isLast && <div style={{ width: 1, flex: 1, background: 'var(--av-line-soft)', marginTop: 4 }} />}
+                        </div>
+                        {/* Content */}
+                        <div style={{ paddingBottom: isLast ? 0 : 20, flex: 1 }}>
+                          <p style={{ margin: 0, fontSize: 14, fontFamily: 'var(--av-sans)', color: isFirst ? 'var(--av-ink)' : 'var(--av-muted)', fontWeight: isFirst ? 500 : 400 }}>{act.description}</p>
+                          <p style={{ margin: '3px 0 0', fontSize: 11.5, fontFamily: 'var(--av-sans)', color: 'var(--av-muted)' }}>{act.created_at}</p>
+                        </div>
                       </div>
-                      <div className="pb-4">
-                        <p className="text-sm font-medium" style={{ color: 'var(--kb-ink)' }}>{act.description}</p>
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{act.created_at}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
+
+            {/* Support link */}
+            <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', textAlign: 'center' }}>
+              Need help?{' '}
+              <Link href="/page/contact" style={{ color: 'var(--av-ink)', textDecoration: 'underline', textDecorationColor: 'var(--av-line)' }}>Contact us</Link>
+            </p>
           </div>
         )}
       </div>

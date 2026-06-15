@@ -1,98 +1,77 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Edit Language – ' . $language->name)
-
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.languages.index') }}" class="hover:text-gray-700">Languages</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">{{ $language->name }}</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div class="flex items-center justify-between flex-wrap gap-3">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ $language->name }} <span class="text-gray-400 font-mono text-base">({{ $language->code }})</span></h1>
-            <p class="text-gray-600 mt-1">Manage translations for this language</p>
-        </div>
-        <button type="button" id="aiTranslateBtn"
-            onclick="translateWithAi()"
-            class="inline-flex items-center gap-2 bg-purple-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            <span id="aiTranslateBtnLabel">Translate All with AI</span>
-        </button>
-    </div>
-@endsection
-
 @section('content')
-<div id="aiMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm"></div>
 
-<form method="POST" action="{{ route('admin.languages.update', $language) }}">
+<div class="page-head">
+    <div>
+        <h2 class="display">{{ $language->name }} <span class="mono faint" style="font-size:14px">({{ $language->code }})</span></h2>
+        <div class="sub">Manage translations for this language</div>
+    </div>
+    <button type="button" id="aiTranslateBtn" onclick="translateWithAi()"
+        class="btn btn-primary" style="background:var(--violet,#7c3aed);border-color:var(--violet,#7c3aed)">
+        <span class="ico" data-ico="bolt" style="width:16px;height:16px"></span>
+        <span id="aiTranslateBtnLabel">Translate All with AI</span>
+    </button>
+</div>
+
+<div id="aiMsg" style="display:none;margin-bottom:14px;padding:10px 14px;border-radius:10px;font-size:13px"></div>
+
+<form method="POST" action="{{ route('admin.languages.update', $language) }}" class="col-gap" style="--gap:18px">
     @csrf @method('PUT')
 
-    {{-- Settings card --}}
-    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
-        <h2 class="text-sm font-semibold text-gray-700 mb-4">Language Settings</h2>
-        <div class="flex flex-wrap gap-6 items-center">
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Display Name</label>
-                <input type="text" name="name" value="{{ old('name', $language->name) }}"
-                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-52 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
+    <div class="card pad">
+        <div class="card-head" style="margin-bottom:16px">
+            <span class="tile sm t-accent"><span class="ico" data-ico="settings" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Language Settings</h3></div>
+        </div>
+        <div class="row" style="gap:20px;flex-wrap:wrap;align-items:flex-end">
+            <div class="field" style="margin:0;min-width:200px">
+                <span class="lbl">Display Name</span>
+                <input class="input" type="text" name="name" value="{{ old('name', $language->name) }}" required>
             </div>
-            <div class="flex items-center gap-6 mt-4">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="is_active" value="1" {{ $language->is_active ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600">
-                    <span class="text-sm text-gray-700">Active</span>
+            <div class="row" style="gap:20px;padding-bottom:2px">
+                <label class="row" style="gap:8px;cursor:pointer;font-size:13.5px">
+                    <input type="hidden" name="is_active" value="0">
+                    <input type="checkbox" name="is_active" value="1" {{ $language->is_active ? 'checked' : '' }}>
+                    Active
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="is_default" value="1" {{ $language->is_default ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600">
-                    <span class="text-sm text-gray-700">Set as Default</span>
+                <label class="row" style="gap:8px;cursor:pointer;font-size:13.5px">
+                    <input type="hidden" name="is_default" value="0">
+                    <input type="checkbox" name="is_default" value="1" {{ $language->is_default ? 'checked' : '' }}>
+                    Set as Default
                 </label>
             </div>
         </div>
     </div>
 
-    {{-- Translations card --}}
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden mb-5">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">String Translations</h2>
-            <span class="text-xs text-gray-400">{{ count($strings) }} strings</span>
+    <div class="card flush">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700;font-size:14px">String Translations</div>
+            <div class="faint" style="font-size:12px">{{ count($strings) }} strings</div>
         </div>
-        <div class="divide-y divide-gray-100">
+        <div>
             @foreach($strings as $key => $default)
-            <div class="px-5 py-3 grid grid-cols-2 gap-4 items-center">
+            <div style="padding:10px 18px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center">
                 <div>
-                    <p class="text-xs font-mono text-gray-400 mb-0.5">{{ $key }}</p>
-                    <p class="text-sm text-gray-700">{{ $default }}</p>
+                    <div class="mono faint" style="font-size:11px;margin-bottom:2px">{{ $key }}</div>
+                    <div style="font-size:13px">{{ $default }}</div>
                 </div>
                 <div>
-                    <input type="text"
+                    <input class="input" type="text"
                         id="str_{{ $key }}"
                         name="strings[{{ $key }}]"
                         value="{{ old('strings.' . $key, $translations[$key] ?? '') }}"
                         placeholder="{{ $default }}"
-                        class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        style="font-size:13px">
                 </div>
             </div>
             @endforeach
         </div>
     </div>
 
-    <div class="flex items-center gap-3">
-        <button type="submit"
-            class="bg-blue-600 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Save Translations
-        </button>
-        <a href="{{ route('admin.languages.index') }}"
-            class="text-sm text-gray-500 hover:text-gray-700">Cancel</a>
+    <div class="row" style="gap:12px">
+        <button type="submit" class="btn btn-primary">Save Translations</button>
+        <a href="{{ route('admin.languages.index') }}" class="btn btn-outline">Cancel</a>
     </div>
 </form>
 
@@ -104,7 +83,7 @@ async function translateWithAi() {
 
     btn.disabled = true;
     label.textContent = 'Translating...';
-    msg.className = 'hidden mb-4 px-4 py-3 rounded-lg text-sm';
+    msg.style.display = 'none';
 
     try {
         const res  = await fetch('{{ route('admin.languages.translate-ai', $language) }}', {
@@ -118,18 +97,15 @@ async function translateWithAi() {
 
         if (data.error) {
             msg.textContent = data.error;
-            msg.className   = 'mb-4 px-4 py-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-700';
+            msg.style.cssText = 'display:block;padding:10px 14px;border-radius:10px;font-size:13px;background:color-mix(in srgb,var(--danger) 10%,transparent);border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)';
         } else {
-            // Populate fields from the saved translations via a fresh fetch
-            const keys = @json(array_keys($strings));
-            // Reload page to show updated translations
             msg.textContent = `Successfully translated ${data.count} strings. Reloading...`;
-            msg.className   = 'mb-4 px-4 py-3 rounded-lg text-sm bg-green-50 border border-green-200 text-green-800';
+            msg.style.cssText = 'display:block;padding:10px 14px;border-radius:10px;font-size:13px;background:color-mix(in srgb,var(--success) 10%,transparent);border:1px solid color-mix(in srgb,var(--success) 30%,transparent);color:var(--success)';
             setTimeout(() => window.location.reload(), 1200);
         }
     } catch (e) {
         msg.textContent = 'Request failed: ' + e.message;
-        msg.className   = 'mb-4 px-4 py-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-700';
+        msg.style.cssText = 'display:block;padding:10px 14px;border-radius:10px;font-size:13px;background:color-mix(in srgb,var(--danger) 10%,transparent);border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)';
     } finally {
         btn.disabled = false;
         label.textContent = 'Translate All with AI';

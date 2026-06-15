@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\{Media, MediaFolder};
+use App\Services\CloudStorageService;
 use App\Services\MediaService;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\View\View;
@@ -79,7 +80,7 @@ class MediaController extends Controller
                 total: $total,
                 originalName: $request->input('name'),
                 mimeType: $request->input('mime', 'application/octet-stream'),
-                disk: $request->input('disk', 'public'),
+                disk: CloudStorageService::activeDisk(),
                 folderId: $request->integer('folder_id') ?: null,
             );
 

@@ -31,4 +31,12 @@ class SmsService
     {
         return Integration::defaultSms() !== null;
     }
+
+    public static function renderTemplate(string $template, array $vars): string
+    {
+        foreach ($vars as $key => $value) {
+            $template = str_replace('{{' . $key . '}}', (string) $value, $template);
+        }
+        return $template;
+    }
 }

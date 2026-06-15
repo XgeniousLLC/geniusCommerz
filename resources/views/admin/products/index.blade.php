@@ -2,151 +2,216 @@
 
 @section('title', 'Products')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Products</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Products</h1>
-            <p class="text-gray-600 mt-1">{{ $products->total() }} total</p>
-        </div>
-        <x-admin.button href="{{ route('admin.products.create') }}">Add Product</x-admin.button>
-    </div>
-@endsection
-
 @section('content')
-{{-- Filters --}}
-<x-admin.card class="mb-6">
-    <form method="GET" class="flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-48">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <x-admin.input type="text" name="search" value="{{ request('search') }}" placeholder="Name or SKU…" />
-        </div>
-        <div class="w-36">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <x-admin.select name="status">
-                <option value="">All statuses</option>
-                @foreach(['draft' => 'Draft', 'active' => 'Active', 'archived' => 'Archived'] as $v => $l)
-                    <option value="{{ $v }}" {{ request('status') === $v ? 'selected' : '' }}>{{ $l }}</option>
-                @endforeach
-            </x-admin.select>
-        </div>
-        <div class="w-44">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-            <x-admin.select name="brand_id">
-                <option value="">All brands</option>
-                @foreach($brands as $brand)
-                    <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                @endforeach
-            </x-admin.select>
-        </div>
-        <div class="w-44">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <x-admin.select name="category_id">
-                <option value="">All categories</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                    @foreach($cat->children as $child)
-                        <option value="{{ $child->id }}" {{ request('category_id') == $child->id ? 'selected' : '' }}>
-                            &nbsp;&nbsp;— {{ $child->name }}
-                        </option>
-                    @endforeach
-                @endforeach
-            </x-admin.select>
-        </div>
-        <x-admin.button type="submit">Filter</x-admin.button>
-        @if(request()->anyFilled(['search','status','brand_id','category_id','featured']))
-            <a href="{{ route('admin.products.index') }}" class="text-sm text-gray-500 hover:text-gray-700 self-center">Clear</a>
-        @endif
-    </form>
-</x-admin.card>
 
-<x-admin.card>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
+<div class="page-head">
+    <div>
+        <h2 class="display">Products</h2>
+        <div class="sub">
+            <b style="color:var(--text)">{{ number_format($productStats['total']) }}</b> products ·
+            <b style="color:var(--text)">{{ number_format($productStats['stock']) }}</b> units in stock
+        </div>
+    </div>
+    <a class="btn btn-primary" href="{{ route('admin.products.create') }}">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>Add product
+    </a>
+</div>
+
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="package"></span></span>
+        <div><div class="num">{{ $productStats['total'] }}</div><div class="lbl">Total products</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-success"><span class="ico" data-ico="check"></span></span>
+        <div><div class="num">{{ $productStats['active'] }}</div><div class="lbl">Active</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-warning"><span class="ico" data-ico="clock"></span></span>
+        <div><div class="num">{{ $productStats['draft'] }}</div><div class="lbl">Drafts</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-pop"><span class="ico" data-ico="bell"></span></span>
+        <div><div class="num">{{ $productStats['low'] }}</div><div class="lbl">Low / out of stock</div></div>
+    </div>
+</div>
+
+<form method="GET">
+    <div class="between wrap" style="margin-bottom:16px;gap:12px">
+        <div class="search-field grow" style="max-width:360px">
+            <span class="ico" data-ico="search"></span>
+            <input class="input" name="search" value="{{ request('search') }}" placeholder="Search products or SKU…">
+        </div>
+        <div class="row" style="gap:10px">
+            <div class="seg sm">
+                <button type="button" onclick="location.href='{{ route('admin.products.index', request()->except('status')) }}'"
+                        class="{{ !request('status') ? 'active' : '' }}">All</button>
+                <button type="button" onclick="location.href='{{ route('admin.products.index', array_merge(request()->except('status'), ['status'=>'active'])) }}'"
+                        class="{{ request('status') === 'active' ? 'active' : '' }}">Active</button>
+                <button type="button" onclick="location.href='{{ route('admin.products.index', array_merge(request()->except('status'), ['status'=>'draft'])) }}'"
+                        class="{{ request('status') === 'draft' ? 'active' : '' }}">Draft</button>
+                <button type="button" onclick="location.href='{{ route('admin.products.index', array_merge(request()->except('status'), ['status'=>'archived'])) }}'"
+                        class="{{ request('status') === 'archived' ? 'active' : '' }}">Archived</button>
+            </div>
+            <div class="select-wrap" style="min-width:150px">
+                <select class="select" name="brand_id" onchange="this.form.submit()">
+                    <option value="">All brands</option>
+                    @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="select-wrap" style="min-width:160px">
+                <select class="select" name="category_id" onchange="this.form.submit()">
+                    <option value="">All categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @foreach($cat->children as $child)
+                            <option value="{{ $child->id }}" {{ request('category_id') == $child->id ? 'selected' : '' }}>
+                                &nbsp;&nbsp;— {{ $child->name }}
+                            </option>
+                        @endforeach
+                    @endforeach
+                </select>
+            </div>
+            @if(request()->anyFilled(['search','status','brand_id','category_id']))
+                <a href="{{ route('admin.products.index') }}" class="btn btn-soft btn-sm">Clear</a>
+            @endif
+        </div>
+    </div>
+</form>
+
+<div class="card flush">
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">SKU / Variants</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th style="width:34px"></th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th style="text-align:right">Price</th>
+                    <th style="text-align:right">Stock</th>
+                    <th>Status</th>
+                    <th></th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
+            <tbody>
                 @forelse($products as $product)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-3">
-                            @php $thumb = $product->images->first(); @endphp
+                @php
+                    $thumb = $product->images->first();
+                    $stockQty = $product->has_variants
+                        ? $product->variants->sum('stock_qty')
+                        : $product->stock_qty;
+                    $stockColor = $stockQty === 0 ? 'var(--danger)' : ($stockQty <= 10 ? 'var(--warning)' : '');
+                    $statusPill = match($product->status) {
+                        'active'   => 'success',
+                        'archived' => 'danger',
+                        default    => '',
+                    };
+                    $statusLabel = $product->status === 'draft' ? 'Draft' : ucfirst($product->status);
+                @endphp
+                <tr class="hoverable" onclick="location.href='{{ route('admin.products.edit', $product) }}'">
+                    <td><input class="check" type="checkbox" onclick="event.stopPropagation()"></td>
+                    <td>
+                        <div class="row" style="gap:11px">
                             @if($thumb)
-                                <img src="{{ $thumb->getUrl('thumb') }}" alt="{{ $thumb->alt ?: $product->name }}"
-                                     class="w-10 h-10 rounded-lg object-cover border border-gray-200 shrink-0">
+                                <img class="thumb" style="width:42px;height:42px"
+                                     src="{{ $thumb->getUrl('thumb') }}" alt="{{ $thumb->alt ?: $product->name }}">
                             @else
-                                <div class="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
-                                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
+                                <span class="tile muted" style="width:42px;height:42px;border-radius:10px;flex-shrink:0">
+                                    <span class="ico" data-ico="image" style="width:20px;height:20px"></span>
+                                </span>
                             @endif
                             <div>
-                                <div class="font-medium text-gray-900">{{ $product->name }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">
-                                    {{ $product->brand?->name }}
-                                    @if($product->categories->isNotEmpty())
-                                        · {{ $product->categories->pluck('name')->join(', ') }}
+                                <div style="font-weight:700;font-size:13.5px">
+                                    {{ $product->name }}
+                                    @if($product->is_featured)
+                                        <span class="ico" data-ico="star" data-stroke="0"
+                                              style="width:13px;height:13px;color:var(--pop);vertical-align:-2px"></span>
                                     @endif
+                                </div>
+                                <div class="mono faint" style="font-size:11.5px">
+                                    {{ $product->has_variants ? $product->variants_count.' variant(s)' : ($product->sku ?? '—') }}
                                 </div>
                             </div>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-gray-500 font-mono text-xs">
-                        @if($product->has_variants)
-                            <span class="text-purple-600">{{ $product->variants_count }} variant(s)</span>
-                        @else
-                            {{ $product->sku ?? '—' }}
-                        @endif
+                    <td class="muted" style="font-size:13.5px">
+                        {{ $product->categories->pluck('name')->join(', ') ?: '—' }}
                     </td>
-                    <td class="px-4 py-3 text-gray-700">{{ $product->displayPrice() }}</td>
-                    <td class="px-4 py-3">
-                        @php
-                            $badge = match($product->status) {
-                                'active'   => 'bg-green-100 text-green-800',
-                                'archived' => 'bg-red-100 text-red-700',
-                                default    => 'bg-gray-100 text-gray-600',
-                            };
-                        @endphp
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $badge }}">
-                            {{ ucfirst($product->status) }}
+                    <td class="muted" style="font-size:13.5px">{{ $product->brand?->name ?? '—' }}</td>
+                    <td style="text-align:right" class="tnum"><b>{{ $product->displayPrice() }}</b></td>
+                    <td style="text-align:right" class="tnum">
+                        <b @if($stockColor) style="color:{{ $stockColor }}" @endif>
+                            {{ $stockQty !== null ? number_format((int)$stockQty) : '—' }}
+                        </b>
+                    </td>
+                    <td>
+                        <span class="pill sm {{ $statusPill }}">
+                            <span class="dot"></span>{{ $statusLabel }}
                         </span>
-                        @if($product->is_featured)
-                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Featured</span>
-                        @endif
                     </td>
-                    <td class="px-4 py-3 text-right space-x-3">
-                        <a href="{{ route('admin.products.edit', $product) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</a>
-                        <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="inline"
-                              onsubmit="return confirm('Delete {{ addslashes($product->name) }}?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium">Delete</button>
-                        </form>
+                    <td style="text-align:right">
+                        <div class="row" style="gap:4px;justify-content:flex-end" onclick="event.stopPropagation()">
+                            <a class="icon-btn" href="{{ route('admin.products.edit', $product) }}" title="Edit">
+                                <span class="ico" data-ico="edit" style="width:17px;height:17px"></span>
+                            </a>
+                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}"
+                                  onsubmit="return confirm('Delete {{ addslashes($product->name) }}?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="icon-btn danger" title="Delete">
+                                    <span class="ico" data-ico="trash" style="width:17px;height:17px"></span>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No products found.</td></tr>
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:40px;color:var(--text-faint)">No products found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
     @if($products->hasPages())
-        <div class="mt-4 px-4">{{ $products->links() }}</div>
+    <div class="between" style="padding:16px 22px;border-top:1px solid var(--border)">
+        <span class="faint" style="font-size:13px">
+            Showing {{ $products->firstItem() }}–{{ $products->lastItem() }} of {{ $products->total() }}
+        </span>
+        <div class="row" style="gap:6px">
+            @if($products->onFirstPage())
+                <button class="icon-btn" disabled>
+                    <span class="ico" data-ico="chevLeft" style="width:18px;height:18px"></span>
+                </button>
+            @else
+                <a class="icon-btn" href="{{ $products->previousPageUrl() }}">
+                    <span class="ico" data-ico="chevLeft" style="width:18px;height:18px"></span>
+                </a>
+            @endif
+
+            @foreach($products->getUrlRange(max(1,$products->currentPage()-2), min($products->lastPage(),$products->currentPage()+2)) as $page => $url)
+                @if($page == $products->currentPage())
+                    <button class="btn btn-sm" style="background:var(--accent);color:#fff;width:34px;padding:0;height:34px">{{ $page }}</button>
+                @else
+                    <a class="icon-btn" href="{{ $url }}" style="width:34px;height:34px">{{ $page }}</a>
+                @endif
+            @endforeach
+
+            @if($products->hasMorePages())
+                <a class="icon-btn" href="{{ $products->nextPageUrl() }}">
+                    <span class="ico" data-ico="chevRight" style="width:18px;height:18px"></span>
+                </a>
+            @else
+                <button class="icon-btn" disabled>
+                    <span class="ico" data-ico="chevRight" style="width:18px;height:18px"></span>
+                </button>
+            @endif
+        </div>
+    </div>
     @endif
-</x-admin.card>
+</div>
+
 @endsection

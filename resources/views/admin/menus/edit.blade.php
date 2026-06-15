@@ -1,30 +1,14 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Edit Menu — ' . $menu->name)
 
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li><a href="{{ route('admin.menus.index') }}" class="hover:text-gray-700">Menus</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">{{ $menu->name }}</li>
-</ol>
-@endsection
-
-@section('page-header')
-<div class="flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">{{ $menu->name }}</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Drag items to reorder. Drag <strong>into</strong> a parent to nest as a dropdown.</p>
-    </div>
-    @if($menu->location)
-    <span class="text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full">
-        {{ \App\Models\Menu::LOCATIONS[$menu->location] ?? $menu->location }}
-    </span>
-    @endif
-</div>
-@endsection
+@push('styles')
+<style>
+[x-cloak] { display: none !important; }
+.sortable-ghost  { opacity: 0.35; background: color-mix(in srgb, var(--info) 8%, transparent) !important; border-color: color-mix(in srgb, var(--info) 40%, transparent) !important; border-radius: 8px; }
+.sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+.sortable-drag   { opacity: 1 !important; }
+</style>
+@endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -49,17 +33,15 @@ function saveOrder() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
         body: JSON.stringify({ items: getTree(root) })
-    }).then(r => {
-        if (r.ok) showSaved();
-    });
+    }).then(r => { if (r.ok) showSaved(); });
 }
 
 function showSaved() {
     const el = document.getElementById('save-indicator');
     if (!el) return;
-    el.classList.remove('opacity-0');
+    el.style.opacity = '1';
     clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.add('opacity-0'), 1800);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, 1800);
 }
 
 function initSortable(el) {
@@ -75,18 +57,15 @@ function initSortable(el) {
         swapThreshold: 0.65,
         filter: '.drop-placeholder',
         onEnd(evt) {
-            // Hide drop placeholder in non-empty lists after drop
             document.querySelectorAll('.children-list').forEach(list => {
                 const ph = list.querySelector('.drop-placeholder');
                 if (ph) {
-                    const hasRealItems = list.querySelectorAll('.menu-item-row').length > 0;
-                    ph.style.display = hasRealItems ? 'none' : '';
+                    ph.style.display = list.querySelectorAll('.menu-item-row').length > 0 ? 'none' : '';
                 }
             });
             saveOrder();
         },
     });
-    // Recurse into children lists
     el.querySelectorAll('.children-list').forEach(child => initSortable(child));
 }
 
@@ -95,171 +74,169 @@ document.addEventListener('DOMContentLoaded', () => {
     if (root) initSortable(root);
 });
 
-// Called from _item.blade.php "add sub-item" button
 function setSubItemParent(id, label) {
     document.querySelectorAll('select[name="parent_id"]').forEach(sel => {
         const opt = [...sel.options].find(o => parseInt(o.value) === id);
         if (opt) sel.value = id;
     });
-    // Scroll to and focus the custom link form
     const form = document.getElementById('add-custom-form');
     if (form) {
         form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         form.querySelector('input[name="label"]')?.focus();
     }
-    // Update the parent hint
     const hint = document.getElementById('parent-hint');
-    if (hint) hint.textContent = 'Sub-item of: ' + label;
+    if (hint) { hint.textContent = 'Sub-item of: ' + label; hint.style.display = 'block'; }
 }
 </script>
-
-<style>
-.sortable-ghost  { opacity: 0.35; background: #EFF6FF !important; border-color: #93C5FD !important; border-radius: 8px; }
-.sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,.12); }
-.sortable-drag   { opacity: 1 !important; }
-</style>
 @endpush
 
 @section('content')
-<div id="save-indicator" class="fixed top-4 right-6 z-50 opacity-0 transition-opacity duration-300 bg-green-600 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-none">
-    ✓ Order saved
+<div id="save-indicator" style="position:fixed;top:16px;right:24px;z-index:50;opacity:0;transition:opacity .3s;background:var(--success);color:#fff;font-size:12px;font-weight:700;padding:6px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.18);pointer-events:none">
+    Saved
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+<div class="page-head">
+    <div>
+        <h2 class="display">{{ $menu->name }}</h2>
+        <div class="faint" style="font-size:13px;margin-top:2px">Drag items to reorder. Drag <strong>into</strong> a parent to nest as dropdown.</div>
+    </div>
+    <div class="row" style="gap:8px">
+        @if($menu->location)
+        <span class="pill info">{{ \App\Models\Menu::LOCATIONS[$menu->location] ?? $menu->location }}</span>
+        @endif
+        <a href="{{ route('admin.menus.index') }}" class="btn btn-outline">
+            <span class="ico" data-ico="arrowLeft" style="width:16px;height:16px"></span>Back
+        </a>
+    </div>
+</div>
 
-    {{-- Left: current tree --}}
-    <div class="lg:col-span-2">
-        <x-admin.card>
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-semibold text-gray-900">Menu Structure</h2>
-                <div class="flex items-center gap-3 text-xs text-gray-400">
-                    <span class="flex items-center gap-1">
-                        <span class="inline-block w-2 h-2 rounded-full bg-blue-300"></span> Dropdown group
+<div style="display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start">
+
+    {{-- Left: tree --}}
+    <div class="col-gap" style="--gap:14px">
+        <div class="card pad">
+            <div class="between" style="margin-bottom:16px">
+                <h3 style="font-weight:700;font-size:14px">Menu Structure</h3>
+                <div class="row" style="gap:12px;font-size:11.5px;color:var(--text-muted)">
+                    <span class="row" style="gap:4px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:var(--info);display:inline-block"></span>Dropdown
                     </span>
-                    <span class="flex items-center gap-1">
-                        <span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span> Link
+                    <span class="row" style="gap:4px">
+                        <span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block"></span>Link
                     </span>
                     <span>Drag to reorder / nest</span>
                 </div>
             </div>
 
             @if(empty($tree))
-                <div class="flex flex-col items-center justify-center py-16 text-center">
-                    <svg class="w-12 h-12 text-gray-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h10M4 14h6M4 18h8"/>
-                    </svg>
-                    <p class="text-sm font-medium text-gray-400">No items yet</p>
-                    <p class="text-xs text-gray-300 mt-1">Add items from the panel on the right →</p>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
+                    <span class="tile t-info" style="width:52px;height:52px;margin:0 auto 12px">
+                        <span class="ico" data-ico="list" style="width:24px;height:24px"></span>
+                    </span>
+                    <div style="font-size:13.5px;font-weight:600;color:var(--text-muted)">No items yet</div>
+                    <div class="faint" style="font-size:12px;margin-top:4px">Add items from the panel on the right</div>
                 </div>
             @else
-                <ul id="menu-tree-root" class="space-y-1">
+                <ul id="menu-tree-root" style="display:flex;flex-direction:column;gap:4px">
                     @foreach($tree as $item)
                         @include('admin.menus._item', ['item' => $item, 'depth' => 0])
                     @endforeach
                 </ul>
             @endif
-        </x-admin.card>
+        </div>
 
-        {{-- How dropdown nesting works --}}
-        <div class="mt-4 p-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 text-xs text-gray-500 space-y-1.5">
-            <p class="font-semibold text-gray-600 mb-2">How nested dropdowns work</p>
-            <p>① Add a <strong>Dropdown Group</strong> (label only, no URL) — this becomes the parent button in the navbar.</p>
-            <p>② <strong>Drag</strong> existing items into it, <em>or</em> use the "Under" selector when adding new items.</p>
-            <p>③ Click <strong>＋</strong> on any item to quickly add a sub-item under it.</p>
-            <p>④ Assign this menu to <em>Main Navigation</em> in Menu Settings to see it live.</p>
+        <div style="padding:14px 16px;border-radius:10px;border:1px dashed var(--border);background:var(--surface-2);font-size:12.5px;color:var(--text-muted)" class="col-gap" style="--gap:6px">
+            <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:6px">How nested dropdowns work</div>
+            <div>① Add a <strong>Dropdown Group</strong> — label only, no URL. This becomes the parent button in the navbar.</div>
+            <div>② <strong>Drag</strong> existing items into it, or use the "Under" selector when adding new items.</div>
+            <div>③ Click <strong>+</strong> on any item to quickly add a sub-item under it.</div>
+            <div>④ Assign this menu to <em>Main Navigation</em> in Menu Settings to see it live.</div>
         </div>
     </div>
 
     {{-- Right: panels --}}
-    <div class="space-y-4" id="add-panels">
+    <div id="add-panels" class="col-gap" style="--gap:14px">
 
-        {{-- Add Dropdown Group --}}
-        <x-admin.card class="border-blue-100 bg-blue-50/30">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100">
-                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"/>
-                    </svg>
-                </span>
-                <h3 class="text-sm font-semibold text-blue-900">Add Dropdown Group</h3>
+        {{-- Dropdown Group --}}
+        <div class="card pad" style="background:color-mix(in srgb,var(--info) 4%,transparent);border-color:color-mix(in srgb,var(--info) 20%,transparent)">
+            <div class="row" style="gap:8px;margin-bottom:10px">
+                <span class="tile sm t-info"><span class="ico" data-ico="list" style="width:16px;height:16px"></span></span>
+                <h3 style="font-weight:700;font-size:13.5px;color:var(--info)">Add Dropdown Group</h3>
             </div>
-            <p class="text-xs text-blue-600/70 mb-3">A label-only parent that opens a dropdown in the navbar. Add links under it after.</p>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="space-y-2">
+            <div class="faint" style="font-size:12px;margin-bottom:10px">Label-only parent that opens a dropdown in the navbar.</div>
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
                 @csrf
                 <input type="hidden" name="type" value="custom">
                 <input type="hidden" name="url" value="">
                 <input type="hidden" name="target" value="_self">
-                <x-admin.input name="label" placeholder="e.g. Collections, Services…" required />
-                <x-admin.button type="submit" class="w-full justify-center text-sm bg-blue-600 hover:bg-blue-700">Create Dropdown Group</x-admin.button>
+                <input class="input" type="text" name="label" placeholder="e.g. Collections, Services…" required style="height:36px">
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;background:var(--info);border-color:var(--info)">Create Dropdown Group</button>
             </form>
-        </x-admin.card>
+        </div>
 
         {{-- Storefront Pages --}}
-        <x-admin.card x-data="{ open: false }">
-            <button type="button" @click="open = !open" class="w-full flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-gray-900">Storefront Pages</h3>
-                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
+        <div class="card pad" x-data="{ open: false }">
+            <button type="button" @click="open = !open" class="between" style="width:100%;background:none;border:none;cursor:pointer">
+                <h3 style="font-weight:700;font-size:13.5px">Storefront Pages</h3>
+                <span class="ico" data-ico="chevronDown" style="width:15px;height:15px;color:var(--text-muted);transition:transform .2s" :style="open ? 'transform:rotate(180deg)' : ''"></span>
             </button>
-            <div x-show="open" x-collapse class="mt-3 space-y-1">
+            <div x-show="open" style="margin-top:12px" class="col-gap" style="--gap:6px">
                 @php
-                    $staticPages = [
-                        ['label' => 'Home',        'url' => '/'],
-                        ['label' => 'Shop',        'url' => '/shop'],
-                        ['label' => 'Blog',        'url' => '/blog'],
-                        ['label' => 'Track Order', 'url' => '/track'],
-                        ['label' => 'Wishlist',    'url' => '/wishlist'],
-                        ['label' => 'Loyalty',     'url' => '/loyalty'],
-                        ['label' => 'My Account',  'url' => '/account'],
-                        ['label' => 'My Orders',   'url' => '/account/orders'],
-                        ['label' => 'Contact Us',  'url' => '/contact'],
-                    ];
+                $staticPages = [
+                    ['label' => 'Home',        'url' => '/'],
+                    ['label' => 'Shop',        'url' => '/shop'],
+                    ['label' => 'Blog',        'url' => '/blog'],
+                    ['label' => 'Track Order', 'url' => '/track'],
+                    ['label' => 'Wishlist',    'url' => '/wishlist'],
+                    ['label' => 'Loyalty',     'url' => '/loyalty'],
+                    ['label' => 'My Account',  'url' => '/account'],
+                    ['label' => 'My Orders',   'url' => '/account/orders'],
+                    ['label' => 'Contact Us',  'url' => '/contact'],
+                ];
                 @endphp
                 @foreach($staticPages as $sp)
-                <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="flex items-center gap-2">
+                <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" style="display:flex;align-items:center;gap:8px">
                     @csrf
                     <input type="hidden" name="type" value="custom">
                     <input type="hidden" name="label" value="{{ $sp['label'] }}">
                     <input type="hidden" name="url" value="{{ $sp['url'] }}">
                     <input type="hidden" name="target" value="_self">
                     <input type="hidden" name="parent_id" class="static-page-parent" value="">
-                    <div class="flex-1 flex items-center gap-2 px-2 py-1.5 rounded bg-gray-50 border border-gray-100">
-                        <span class="text-sm text-gray-700 flex-1">{{ $sp['label'] }}</span>
-                        <span class="text-xs text-gray-400 font-mono">{{ $sp['url'] }}</span>
+                    <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2)">
+                        <span style="font-size:13px">{{ $sp['label'] }}</span>
+                        <span class="faint mono" style="font-size:11px">{{ $sp['url'] }}</span>
                     </div>
-                    <button type="submit" class="text-xs text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap px-2 py-1.5 rounded border border-blue-200 hover:bg-blue-50 transition-colors">+ Add</button>
+                    <button type="submit" class="btn btn-sm btn-outline" style="font-size:11.5px;white-space:nowrap">+ Add</button>
                 </form>
                 @endforeach
             </div>
-        </x-admin.card>
+        </div>
 
-        {{-- Add Custom Link --}}
-        <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">Add Custom Link</h3>
-            <form id="add-custom-form" method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="space-y-2">
+        {{-- Custom Link --}}
+        <div class="card pad">
+            <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Custom Link</h3>
+            <form id="add-custom-form" method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
                 @csrf
                 <input type="hidden" name="type" value="custom">
-                <div>
-                    <label class="text-xs text-gray-500 block mb-0.5">Label</label>
-                    <x-admin.input name="label" placeholder="e.g. About Us" required />
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">Label</span>
+                    <input class="input" type="text" name="label" placeholder="e.g. About Us" required style="height:34px">
                 </div>
-                <div>
-                    <label class="text-xs text-gray-500 block mb-0.5">URL <span class="text-gray-300">(leave blank for dropdown group)</span></label>
-                    <x-admin.input name="url" placeholder="e.g. /about or https://…" />
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">URL <span class="faint">(blank = dropdown group)</span></span>
+                    <input class="input" type="text" name="url" placeholder="e.g. /about or https://…" style="height:34px">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs text-gray-500 block mb-0.5">Open in</label>
-                        <select name="target" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="field" style="margin:0">
+                        <span class="lbl" style="font-size:11px">Open in</span>
+                        <select class="input" name="target" style="height:34px">
                             <option value="_self">Same tab</option>
                             <option value="_blank">New tab</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="text-xs text-gray-500 block mb-0.5">Under (dropdown)</label>
-                        <select name="parent_id" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                    <div class="field" style="margin:0">
+                        <span class="lbl" style="font-size:11px">Under (dropdown)</span>
+                        <select class="input" name="parent_id" style="height:34px">
                             <option value="">Top level</option>
                             @foreach($menu->items->whereNull('parent_id') as $parent)
                                 <option value="{{ $parent->id }}">{{ $parent->label }}</option>
@@ -267,87 +244,87 @@ function setSubItemParent(id, label) {
                         </select>
                     </div>
                 </div>
-                <p id="parent-hint" class="text-xs text-blue-600 hidden-empty"></p>
-                <x-admin.button type="submit" class="w-full justify-center text-sm">Add to Menu</x-admin.button>
+                <p id="parent-hint" class="faint" style="font-size:11.5px;display:none;color:var(--info)"></p>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Add to Menu</button>
             </form>
-        </x-admin.card>
+        </div>
 
         {{-- Add Page --}}
         @if($pages->isNotEmpty())
-        <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">Add Page</h3>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="space-y-2">
+        <div class="card pad">
+            <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Page</h3>
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
                 @csrf
                 <input type="hidden" name="type" value="page">
                 <input type="hidden" name="target" value="_self">
-                <select name="item_id" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm" required
-                        onchange="this.form.label.value = this.options[this.selectedIndex].text">
+                <select class="input" name="item_id" required style="height:34px"
+                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
                     <option value="">Select a page…</option>
                     @foreach($pages as $page)
                         <option value="{{ $page->id }}">{{ $page->title }}</option>
                     @endforeach
                 </select>
-                <x-admin.input name="label" placeholder="Label (auto-filled)" />
-                <select name="parent_id" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                <input class="input" type="text" name="label" placeholder="Label (auto-filled)" style="height:34px">
+                <select class="input" name="parent_id" style="height:34px">
                     <option value="">Top level</option>
                     @foreach($menu->items->whereNull('parent_id') as $parent)
                         <option value="{{ $parent->id }}">{{ $parent->label }}</option>
                     @endforeach
                 </select>
-                <x-admin.button type="submit" class="w-full justify-center text-sm">Add Page</x-admin.button>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Add Page</button>
             </form>
-        </x-admin.card>
+        </div>
         @endif
 
         {{-- Add Category --}}
         @if($categories->isNotEmpty())
-        <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">Add Category</h3>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="space-y-2">
+        <div class="card pad">
+            <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Category</h3>
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
                 @csrf
                 <input type="hidden" name="type" value="category">
                 <input type="hidden" name="target" value="_self">
-                <select name="item_id" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm" required
-                        onchange="this.form.label.value = this.options[this.selectedIndex].text">
+                <select class="input" name="item_id" required style="height:34px"
+                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
                     <option value="">Select a category…</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                     @endforeach
                 </select>
-                <x-admin.input name="label" placeholder="Label (auto-filled)" />
-                <select name="parent_id" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                <input class="input" type="text" name="label" placeholder="Label (auto-filled)" style="height:34px">
+                <select class="input" name="parent_id" style="height:34px">
                     <option value="">Top level</option>
                     @foreach($menu->items->whereNull('parent_id') as $parent)
                         <option value="{{ $parent->id }}">{{ $parent->label }}</option>
                     @endforeach
                 </select>
-                <x-admin.button type="submit" class="w-full justify-center text-sm">Add Category</x-admin.button>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Add Category</button>
             </form>
-        </x-admin.card>
+        </div>
         @endif
 
         {{-- Menu Settings --}}
-        <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">Menu Settings</h3>
-            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" class="space-y-3">
+        <div class="card pad">
+            <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Menu Settings</h3>
+            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" class="col-gap" style="--gap:8px">
                 @csrf @method('PUT')
-                <div>
-                    <label class="text-xs text-gray-500 block mb-0.5">Menu Name</label>
-                    <x-admin.input name="name" value="{{ $menu->name }}" required />
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">Menu Name</span>
+                    <input class="input" type="text" name="name" value="{{ $menu->name }}" required style="height:34px">
                 </div>
-                <div>
-                    <label class="text-xs text-gray-500 block mb-0.5">Display Location</label>
-                    <select name="location" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm">
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">Display Location</span>
+                    <select class="input" name="location" style="height:34px">
                         <option value="">— None —</option>
                         @foreach(\App\Models\Menu::LOCATIONS as $slug => $label)
                             <option value="{{ $slug }}" {{ $menu->location === $slug ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-400 mt-1">Set to <em>Main Navigation</em> to display in the storefront header.</p>
+                    <p class="hint">Set to <em>Main Navigation</em> to display in the storefront header.</p>
                 </div>
-                <x-admin.button type="submit" variant="secondary" class="w-full justify-center text-sm">Save Settings</x-admin.button>
+                <button type="submit" class="btn btn-outline" style="width:100%;justify-content:center">Save Settings</button>
             </form>
-        </x-admin.card>
+        </div>
 
     </div>
 </div>

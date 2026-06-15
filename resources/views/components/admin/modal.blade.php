@@ -1,47 +1,24 @@
-@props(['id', 'title' => '', 'maxWidth' => 'md'])
+@props(['id', 'title' => '', 'size' => 'md'])
 
 @php
-    $maxWidthClasses = [
-        'sm' => 'max-w-sm',
-        'md' => 'max-w-md',
-        'lg' => 'max-w-lg',
-        'xl' => 'max-w-xl',
-        '2xl' => 'max-w-2xl',
-    ];
-    
-    $maxWidthClass = $maxWidthClasses[$maxWidth] ?? $maxWidthClasses['md'];
+$maxWidth = match($size) {
+    'sm'  => '480px',
+    'lg'  => '720px',
+    'xl'  => '900px',
+    default => '580px',
+};
 @endphp
 
-<div id="{{ $id }}" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="document.getElementById('{{ $id }}').classList.add('hidden')"></div>
-
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle {{ $maxWidthClass }} sm:w-full sm:p-6">
-            <div class="sm:flex sm:items-start">
-                <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                    @if($title)
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
-                            {{ $title }}
-                        </h3>
-                    @endif
-                    
-                    <div class="mt-2">
-                        {{ $slot }}
-                    </div>
-                </div>
+<div id="{{ $id }}" class="modal-scrim" hidden>
+    <div class="modal" style="max-width:{{ $maxWidth }}">
+        @if($title)
+            <div class="between" style="margin-bottom:20px">
+                <h3 style="font-size:16px;font-weight:700">{{ $title }}</h3>
+                <button class="icon-btn focusable" data-close-modal title="Close">
+                    <span class="ico" data-ico="x" style="width:18px;height:18px"></span>
+                </button>
             </div>
-        </div>
+        @endif
+        {{ $slot }}
     </div>
 </div>
-
-<script>
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-    }
-    
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-    }
-</script>

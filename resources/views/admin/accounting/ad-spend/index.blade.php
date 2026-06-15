@@ -1,128 +1,165 @@
 @extends('admin.layouts.admin')
+
 @section('title', 'Ad Spend')
+
 @section('content')
-<div class="space-y-6">
+@php
+$platformMeta = [
+    'meta'    => ['label' => 'Meta Ads',     'icon' => 'users',  'color' => 't-violet'],
+    'google'  => ['label' => 'Google Ads',   'icon' => 'globe',  'color' => 't-info'],
+    'tiktok'  => ['label' => 'TikTok Ads',   'icon' => 'bolt',   'color' => 't-pop'],
+    'youtube' => ['label' => 'YouTube Ads',  'icon' => 'play',   'color' => 't-danger'],
+    'other'   => ['label' => 'Other',        'icon' => 'chart',  'color' => 'muted'],
+];
+@endphp
 
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-bold text-gray-900">Ad Spend</h1>
-            <p class="text-sm text-gray-500">Track advertising costs across platforms</p>
-        </div>
-        <x-admin.button href="{{ route('admin.accounting.index') }}" variant="outline">← Accounting</x-admin.button>
+<div class="page-head">
+    <div>
+        <h2 class="display">Ad Spend</h2>
+        <div class="sub">Marketing spend across every channel</div>
     </div>
-
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <x-admin.card class="p-4">
-            <div class="text-xs text-gray-500 mb-1">This Month</div>
-            <div class="text-xl font-bold text-pink-600">৳{{ number_format($monthTotal, 0) }}</div>
-        </x-admin.card>
-        <x-admin.card class="p-4">
-            <div class="text-xs text-gray-500 mb-1">All Time</div>
-            <div class="text-xl font-bold text-gray-800">৳{{ number_format($allTotal, 0) }}</div>
-        </x-admin.card>
-        @foreach(\App\Models\AdSpend::$platforms as $key => $label)
-            @if(isset($byPlatform[$key]))
-            <x-admin.card class="p-4">
-                <div class="text-xs text-gray-500 mb-1">{{ $label }}</div>
-                <div class="text-lg font-bold text-gray-700">৳{{ number_format($byPlatform[$key], 0) }}</div>
-            </x-admin.card>
-            @endif
-        @endforeach
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <x-admin.card class="lg:col-span-1">
-            <div class="px-5 py-4 border-b border-gray-200">
-                <h3 class="font-semibold text-gray-900 text-sm">Record Ad Spend</h3>
-            </div>
-            <form method="POST" action="{{ route('admin.accounting.ad-spend.store') }}" class="p-5 space-y-3">
-                @csrf
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Platform <span class="text-red-500">*</span></label>
-                    <select name="platform" required class="w-full rounded-lg border-gray-300 text-sm px-2 py-2">
-                        @foreach(\App\Models\AdSpend::$platforms as $key => $label)
-                        <option value="{{ $key }}" {{ old('platform') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('platform')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Campaign Name</label>
-                    <input type="text" name="campaign_name" value="{{ old('campaign_name') }}" placeholder="Optional"
-                        class="w-full rounded-lg border-gray-300 text-sm px-2 py-2" />
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Amount (৳) <span class="text-red-500">*</span></label>
-                    <input type="number" name="amount" value="{{ old('amount') }}" min="0" step="0.01" required
-                        class="w-full rounded-lg border-gray-300 text-sm px-2 py-2" />
-                    @error('amount')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Date <span class="text-red-500">*</span></label>
-                    <input type="date" name="spend_date" value="{{ old('spend_date', date('Y-m-d')) }}" required
-                        class="w-full rounded-lg border-gray-300 text-sm px-2 py-2" />
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Product (optional)</label>
-                    <select name="product_id" class="w-full rounded-lg border-gray-300 text-sm px-2 py-2">
-                        <option value="">All products</option>
-                        @foreach($products as $p)
-                        <option value="{{ $p->id }}" {{ old('product_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Notes</label>
-                    <textarea name="notes" rows="2" class="w-full rounded-lg border-gray-300 text-sm px-2 py-2">{{ old('notes') }}</textarea>
-                </div>
-                <x-admin.button type="submit" class="w-full justify-center">Save Record</x-admin.button>
-            </form>
-        </x-admin.card>
-
-        <x-admin.card class="lg:col-span-2">
-            <div class="px-5 py-4 border-b border-gray-200">
-                <h3 class="font-semibold text-gray-900 text-sm">Records</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm divide-y divide-gray-100">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Date</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Platform</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Campaign</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Product</th>
-                            <th class="px-4 py-2 text-right font-medium text-gray-600">Amount</th>
-                            <th class="px-4 py-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($spends as $s)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 text-gray-500">{{ $s->spend_date->format('d M Y') }}</td>
-                            <td class="px-4 py-2 font-medium text-gray-800">{{ \App\Models\AdSpend::$platforms[$s->platform] }}</td>
-                            <td class="px-4 py-2 text-gray-600">{{ $s->campaign_name ?? '—' }}</td>
-                            <td class="px-4 py-2 text-gray-500">{{ $s->product?->name ?? 'All' }}</td>
-                            <td class="px-4 py-2 text-right font-bold text-pink-600">৳{{ number_format($s->amount, 0) }}</td>
-                            <td class="px-4 py-2 text-right">
-                                <form method="POST" action="{{ route('admin.accounting.ad-spend.destroy', $s) }}" onsubmit="return confirm('Delete?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="6" class="px-4 py-10 text-center text-gray-400">No records yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            @if($spends->hasPages())
-            <div class="px-4 py-3 border-t border-gray-200">{{ $spends->links() }}</div>
-            @endif
-        </x-admin.card>
-    </div>
-
+    <button class="btn btn-primary" onclick="document.getElementById('addSpendModal').style.display='flex'">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>Record Spend
+    </button>
 </div>
+
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div class="card lift stat">
+        <span class="tile t-warning"><span class="ico" data-ico="wallet"></span></span>
+        <div><div class="num">৳{{ number_format($monthTotal, 0) }}</div><div class="lbl">This Month</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="chart"></span></span>
+        <div><div class="num">৳{{ number_format($allTotal, 0) }}</div><div class="lbl">All Time</div></div>
+    </div>
+    @foreach($byPlatform as $platform => $total)
+    @php $pm = $platformMeta[$platform] ?? $platformMeta['other']; @endphp
+    <div class="card lift stat">
+        <span class="tile {{ $pm['color'] }}"><span class="ico" data-ico="{{ $pm['icon'] }}"></span></span>
+        <div><div class="num">৳{{ number_format($total, 0) }}</div><div class="lbl">{{ $pm['label'] }}</div></div>
+    </div>
+    @endforeach
+</div>
+
+<div class="card flush">
+    <div class="between" style="padding:20px 22px 14px;flex-wrap:wrap;gap:12px">
+        <div class="card-head" style="margin:0">
+            <span class="tile sm t-pop"><span class="ico" data-ico="bolt" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Records</h3><div class="sub">All ad spend entries</div></div>
+        </div>
+    </div>
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Platform</th>
+                    <th>Campaign</th>
+                    <th>Product</th>
+                    <th style="text-align:right">Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($spends as $s)
+                @php $pm = $platformMeta[$s->platform] ?? $platformMeta['other']; @endphp
+                <tr>
+                    <td style="font-size:13px;font-weight:600">{{ $s->spend_date->format('d M Y') }}</td>
+                    <td>
+                        <div class="row" style="gap:8px">
+                            <span class="tile" style="width:22px;height:22px;border-radius:7px" data-color="{{ $s->platform }}">
+                                <span class="ico" data-ico="{{ $pm['icon'] }}" style="width:13px;height:13px"></span>
+                            </span>
+                            <span style="font-weight:600;font-size:13px">{{ $pm['label'] }}</span>
+                        </div>
+                    </td>
+                    <td class="muted" style="font-size:13px">{{ $s->campaign_name ?? '—' }}</td>
+                    <td class="faint" style="font-size:13px">{{ $s->product?->name ?? 'All' }}</td>
+                    <td style="text-align:right;font-weight:700;font-size:14px;color:var(--warning)">
+                        ৳{{ number_format($s->amount, 0) }}
+                    </td>
+                    <td style="text-align:right">
+                        <form method="POST" action="{{ route('admin.accounting.ad-spend.destroy', $s) }}"
+                              onsubmit="return confirm('Delete?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="icon-btn">
+                                <span class="ico" data-ico="trash" style="width:16px;height:16px"></span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:48px 20px">
+                        <div class="faint" style="font-size:13.5px">No ad spend records yet.</div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($spends->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $spends->links() }}</div>
+    @endif
+</div>
+
+{{-- Add Spend Modal --}}
+<div id="addSpendModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:24px">
+    <div class="card pad" style="width:100%;max-width:480px;position:relative">
+        <div class="card-head" style="margin-bottom:20px">
+            <span class="tile sm t-pop"><span class="ico" data-ico="bolt" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Record Ad Spend</h3></div>
+            <button class="icon-btn" style="margin-left:auto" onclick="document.getElementById('addSpendModal').style.display='none'">
+                <span class="ico" data-ico="x" style="width:18px;height:18px"></span>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('admin.accounting.ad-spend.store') }}" class="col-gap" style="--gap:14px">
+            @csrf
+            <div class="field">
+                <span class="lbl">Platform <span style="color:var(--danger)">*</span></span>
+                <select class="input" name="platform" required>
+                    @foreach(\App\Models\AdSpend::$platforms as $key => $label)
+                    <option value="{{ $key }}" {{ old('platform') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="field">
+                <span class="lbl">Campaign Name</span>
+                <input class="input" type="text" name="campaign_name" value="{{ old('campaign_name') }}" placeholder="Optional">
+            </div>
+            <div class="row" style="gap:12px">
+                <div class="field grow">
+                    <span class="lbl">Amount (৳) <span style="color:var(--danger)">*</span></span>
+                    <input class="input" type="number" name="amount" value="{{ old('amount') }}" min="0" step="0.01" required>
+                </div>
+                <div class="field grow">
+                    <span class="lbl">Date <span style="color:var(--danger)">*</span></span>
+                    <input class="input" type="date" name="spend_date" value="{{ old('spend_date', date('Y-m-d')) }}" required>
+                </div>
+            </div>
+            <div class="field">
+                <span class="lbl">Product (optional)</span>
+                <select class="input" name="product_id">
+                    <option value="">All products</option>
+                    @foreach($products as $p)
+                    <option value="{{ $p->id }}" {{ old('product_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="field">
+                <span class="lbl">Notes</span>
+                <textarea class="input" name="notes" rows="2">{{ old('notes') }}</textarea>
+            </div>
+            <div class="row" style="gap:10px;padding-top:4px">
+                <button type="submit" class="btn btn-primary">Save Record</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addSpendModal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if($errors->any())
+<script>document.getElementById('addSpendModal').style.display='flex';</script>
+@endif
+
 @endsection

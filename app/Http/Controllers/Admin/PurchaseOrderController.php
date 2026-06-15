@@ -14,9 +14,13 @@ use Illuminate\View\View;
 
 class PurchaseOrderController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $orders = PurchaseOrder::withCount('items')->orderByDesc('order_date')->paginate(20);
+        $query = PurchaseOrder::withCount('items')->orderByDesc('order_date');
+        if ($request->filled('status') && in_array($request->status, ['draft','ordered','partial','received'])) {
+            $query->where('status', $request->status);
+        }
+        $orders = $query->paginate(20);
         return view('admin.accounting.purchases.index', compact('orders'));
     }
 

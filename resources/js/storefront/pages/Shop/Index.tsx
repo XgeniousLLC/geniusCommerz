@@ -7,15 +7,9 @@ import { usePrice } from '../../usePrice';
 import type { Brand, Paginated, ProductCard, SharedProps, ShopCategory } from '../../types';
 
 interface Filters {
-  q?: string;
-  min_price?: string;
-  max_price?: string;
-  sort?: string;
-  in_stock?: string;
-  on_sale?: string;
-  min_rating?: string;
+  q?: string; min_price?: string; max_price?: string;
+  sort?: string; in_stock?: string; on_sale?: string; min_rating?: string;
 }
-
 interface Props {
   products: Paginated<ProductCard>;
   categories: ShopCategory[];
@@ -27,35 +21,30 @@ interface Props {
   activeBrandName?: string | null;
 }
 
+const S = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' } as React.SVGProps<SVGSVGElement>;
+
 function Stars({ rating }: { rating: number }) {
   return (
-    <span style={{ color: '#E8A317', fontSize: 12, letterSpacing: 1 }}>
-      {[1,2,3,4,5].map(i => {
-        if (rating >= i) return '★';
-        if (rating >= i - 0.5) return '½';
-        return '☆';
-      }).join('')}
+    <span style={{ color: 'var(--av-gold)', fontSize: 11, letterSpacing: 1.5 }}>
+      {[1,2,3,4,5].map(i => rating >= i ? '★' : rating >= i - 0.5 ? '½' : '☆').join('')}
     </span>
   );
 }
 
-function ProductCardItem({ product, view }: { product: ProductCard; view: 'grid' | 'list' }) {
+function AvProductCard({ product }: { product: ProductCard }) {
   const fmt = usePrice();
-  const addItem = useCartStore(s => s.addItem);
+  const [hovered, setHovered] = useState(false);
+  const addItem  = useCartStore(s => s.addItem);
+  const openCart = useCartStore(s => s.openCart);
   const { has, toggle } = useWishlistStore();
   const wished = has(product.id);
-
-  const discount = product.compare_at_price
-    ? Math.round((1 - product.price / product.compare_at_price) * 100)
-    : null;
+  const discount = product.compare_at_price ? Math.round((1 - product.price / product.compare_at_price) * 100) : null;
 
   function addToCart(e: React.MouseEvent) {
     e.preventDefault();
-    if (!product.in_stock || product.has_variants) {
-      router.visit(`/shop/${product.slug}`);
-      return;
-    }
+    if (!product.in_stock || product.has_variants) { router.visit(`/shop/${product.slug}`); return; }
     addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: false });
+    openCart();
   }
 
   function toggleWish(e: React.MouseEvent) {
@@ -63,140 +52,133 @@ function ProductCardItem({ product, view }: { product: ProductCard; view: 'grid'
     toggle({ id: product.id, slug: product.slug, name: product.name, price: product.price, compare_at_price: product.compare_at_price, image_url: product.image_url, category: product.category_name });
   }
 
-  if (view === 'list') {
-    return (
-      <Link href={`/shop/${product.slug}`} style={{ textDecoration: 'none' }}>
-        <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden', display: 'flex', gap: 0, transition: 'box-shadow .15s' }} className="hover:shadow-md group">
-          <div className="w-[110px] sm:w-[200px]" style={{ flexShrink: 0, position: 'relative', overflow: 'hidden', background: 'var(--kb-surface-2)' }}>
-            {product.image_url
-              ? <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }} className="group-hover:scale-105" />
-              : <div style={{ width: '100%', height: '100%', minHeight: 110, display: 'grid', placeItems: 'center', color: 'var(--kb-border)' }}>
-                  <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={1.5}/><circle cx="8.5" cy="8.5" r="1.5" strokeWidth={1.5}/><path strokeWidth={1.5} d="M21 15l-5-5L5 21"/></svg>
-                </div>
-            }
-            {discount !== null && discount > 0 && (
-              <span style={{ position: 'absolute', top: 8, left: 8, background: '#EF4444', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>-{discount}%</span>
-            )}
-          </div>
-          <div className="p-3 sm:p-[16px_20px]" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {product.category_name && <div style={{ fontSize: 11, color: 'var(--kb-ink-soft)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>{product.category_name}</div>}
-            <div className="text-[14px] sm:text-[16px]" style={{ fontWeight: 700, color: 'var(--kb-ink)', lineHeight: 1.3 }}>{product.name}</div>
-            {product.avg_rating !== null && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Stars rating={product.avg_rating} />
-                <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)' }}>({product.reviews_count})</span>
-              </div>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-              <span className="text-[15px] sm:text-[18px]" style={{ fontWeight: 800, color: 'var(--kb-ink)' }}>{fmt(product.price)}</span>
-              {product.compare_at_price && <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)', textDecoration: 'line-through' }}>{fmt(product.compare_at_price)}</span>}
+  return (
+    <Link href={`/shop/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <div style={{ aspectRatio: '4/5', position: 'relative', overflow: 'hidden', background: 'var(--av-paper-2)', marginBottom: 12 }}>
+        {product.image_url
+          ? <img src={product.image_url} alt={product.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .55s cubic-bezier(.2,.7,.3,1)', transform: hovered ? 'scale(1.04)' : 'scale(1)' }} />
+          : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--av-line)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
             </div>
-            {!product.in_stock && <span style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>Out of stock</span>}
+        }
+        {discount && discount > 0 && (
+          <span style={{ position: 'absolute', top: 10, left: 10, background: 'var(--av-cognac)', color: '#fff', fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '4px 9px', fontFamily: 'var(--av-sans)' }}>−{discount}%</span>
+        )}
+        {!product.in_stock && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(244,239,229,.7)', display: 'grid', placeItems: 'center' }}>
+            <span style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>Sold out</span>
           </div>
+        )}
+        <button onClick={toggleWish} title="Wishlist"
+          style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: '50%', background: 'rgba(251,248,241,.88)', border: '1px solid var(--av-line)', color: wished ? 'var(--av-cognac)' : 'var(--av-ink)', display: 'grid', placeItems: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', opacity: hovered ? 1 : 0, transition: 'opacity .2s' }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </button>
+        {product.in_stock && (
+          <button onClick={addToCart}
+            style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--av-ink)', color: 'var(--av-paper)', padding: '13px 16px', fontSize: 10.5, letterSpacing: '0.2em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontWeight: 500, opacity: hovered ? 1 : 0, transform: hovered ? 'translateY(0)' : 'translateY(12px)', transition: 'opacity .22s, transform .22s' }}>
+            {product.has_variants ? 'Select Options' : 'Quick Add'}
+          </button>
+        )}
+      </div>
+      {product.category_name && (
+        <div style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 4, fontFamily: 'var(--av-sans)' }}>{product.category_name}</div>
+      )}
+      <div style={{ fontFamily: 'var(--av-display)', fontSize: 15, fontWeight: 400, lineHeight: 1.2, color: 'var(--av-ink)', marginBottom: 5, letterSpacing: '-0.01em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</div>
+      {product.avg_rating !== null && product.avg_rating > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+          <Stars rating={product.avg_rating} />
+          <span style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>({product.reviews_count})</span>
         </div>
-      </Link>
-    );
+      )}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 13.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{fmt(product.price)}</span>
+        {product.compare_at_price && <span style={{ fontSize: 12, color: 'var(--av-muted)', textDecoration: 'line-through', fontFamily: 'var(--av-sans)' }}>{fmt(product.compare_at_price)}</span>}
+      </div>
+    </Link>
+  );
+}
+
+function AvListCard({ product }: { product: ProductCard }) {
+  const fmt = usePrice();
+  const addItem  = useCartStore(s => s.addItem);
+  const openCart = useCartStore(s => s.openCart);
+  const { has, toggle } = useWishlistStore();
+  const wished = has(product.id);
+  const discount = product.compare_at_price ? Math.round((1 - product.price / product.compare_at_price) * 100) : null;
+
+  function addToCart(e: React.MouseEvent) {
+    e.preventDefault();
+    if (!product.in_stock || product.has_variants) { router.visit(`/shop/${product.slug}`); return; }
+    addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: false });
+    openCart();
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      <Link href={`/shop/${product.slug}`} style={{ textDecoration: 'none' }}>
-        <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column', transition: 'box-shadow .15s, transform .15s' }} className="hover:shadow-md hover:-translate-y-0.5 group">
-          <div style={{ aspectRatio: '1', background: 'var(--kb-surface-2)', position: 'relative', overflow: 'hidden' }}>
-            {product.image_url
-              ? <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .3s' }} className="group-hover:scale-105" loading="lazy" />
-              : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', color: 'var(--kb-border)' }}>
-                  <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={1.5}/><circle cx="8.5" cy="8.5" r="1.5" strokeWidth={1.5}/><path strokeWidth={1.5} d="M21 15l-5-5L5 21"/></svg>
-                </div>
-            }
-            {discount !== null && discount > 0 && (
-              <span style={{ position: 'absolute', top: 10, left: 10, background: '#EF4444', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>-{discount}%</span>
-            )}
-            {product.is_featured && !(discount !== null && discount > 0) && (
-              <span style={{ position: 'absolute', top: 10, left: 10, background: 'var(--kb-primary)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>Featured</span>
-            )}
-            {!product.in_stock && (
-              <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,.7)' }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', background: '#fff', padding: '3px 10px', borderRadius: 999, boxShadow: '0 1px 3px rgba(0,0,0,.1)' }}>Out of stock</span>
-              </div>
-            )}
-            {/* Wishlist */}
-            <button onClick={toggleWish}
-              style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: '50%', background: '#fff', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: wished ? '#EF4444' : 'var(--kb-ink-soft)', boxShadow: '0 1px 4px rgba(14,19,32,.12)', transition: 'color .15s' }}>
-              <svg width="16" height="16" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-              </svg>
-            </button>
-            {/* Add to cart hover */}
-            {product.in_stock && (
-              <button onClick={addToCart}
-                style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 36, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', opacity: 0, transition: 'opacity .15s' }}
-                className="group-hover:opacity-100">
-                {product.has_variants ? 'Select options' : 'Add to cart'}
-              </button>
-            )}
+    <Link href={`/shop/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: 20, paddingBottom: 20, marginBottom: 20, borderBottom: '1px solid var(--av-line-soft)' }}>
+      <div style={{ width: 120, height: 150, flexShrink: 0, background: 'var(--av-paper-2)', overflow: 'hidden' }}>
+        {product.image_url && <img src={product.image_url} alt={product.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+      </div>
+      <div style={{ flex: 1 }}>
+        {product.category_name && <div style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 6, fontFamily: 'var(--av-sans)' }}>{product.category_name}</div>}
+        <div style={{ fontFamily: 'var(--av-display)', fontSize: 18, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 8, lineHeight: 1.2 }}>{product.name}</div>
+        {product.avg_rating !== null && product.avg_rating > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+            <Stars rating={product.avg_rating} />
+            <span style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>({product.reviews_count})</span>
           </div>
-          <div style={{ padding: '12px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {product.category_name && <div style={{ fontSize: 11, color: 'var(--kb-ink-soft)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>{product.category_name}</div>}
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--kb-ink)', lineHeight: 1.35, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</div>
-            {product.avg_rating !== null && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Stars rating={product.avg_rating} />
-                <span style={{ fontSize: 11, color: 'var(--kb-ink-soft)' }}>({product.reviews_count})</span>
-              </div>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--kb-ink)' }}>{fmt(product.price)}</span>
-              {product.compare_at_price && <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)', textDecoration: 'line-through' }}>{fmt(product.compare_at_price)}</span>}
-            </div>
-          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
+          <span style={{ fontSize: 15, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{fmt(product.price)}</span>
+          {product.compare_at_price && <span style={{ fontSize: 12.5, color: 'var(--av-muted)', textDecoration: 'line-through', fontFamily: 'var(--av-sans)' }}>{fmt(product.compare_at_price)}</span>}
+          {discount && discount > 0 && <span style={{ fontSize: 11, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, letterSpacing: '0.04em' }}>−{discount}%</span>}
         </div>
-      </Link>
-    </div>
+        <button onClick={addToCart}
+          style={{ padding: '10px 22px', background: product.in_stock ? 'var(--av-ink)' : 'transparent', color: product.in_stock ? 'var(--av-paper)' : 'var(--av-muted)', border: `1px solid ${product.in_stock ? 'var(--av-ink)' : 'var(--av-line)'}`, fontFamily: 'var(--av-sans)', fontSize: 10.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', borderRadius: 2, cursor: product.in_stock ? 'pointer' : 'not-allowed' }}>
+          {product.in_stock ? (product.has_variants ? 'Select Options' : 'Add to Bag') : 'Sold Out'}
+        </button>
+      </div>
+      <button onClick={e => { e.preventDefault(); toggle({ id: product.id, slug: product.slug, name: product.name, price: product.price, compare_at_price: product.compare_at_price, image_url: product.image_url, category: product.category_name }); }}
+        style={{ alignSelf: 'flex-start', background: 'transparent', border: 'none', cursor: 'pointer', color: wished ? 'var(--av-cognac)' : 'var(--av-muted)', padding: 4 }}>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill={wished ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+      </button>
+    </Link>
   );
 }
 
 function Pagination({ data }: { data: Paginated<ProductCard> }) {
   if (data.last_page <= 1) return null;
-
   function go(url: string | null) {
     if (!url) return;
     router.get(url, {}, { preserveScroll: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-  const btnBase: React.CSSProperties = {
-    minWidth: 36, height: 36, border: '1px solid var(--kb-border)', background: '#fff',
-    borderRadius: 8, color: 'var(--kb-ink-muted)', fontWeight: 500, fontSize: 13,
-    padding: '0 12px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer',
-  };
-
+  const btn = (active: boolean): React.CSSProperties => ({
+    minWidth: 38, height: 38, border: `1px solid ${active ? 'var(--av-ink)' : 'var(--av-line)'}`,
+    background: active ? 'var(--av-ink)' : 'transparent',
+    color: active ? 'var(--av-paper)' : 'var(--av-ink)',
+    fontSize: 13, fontFamily: 'var(--av-sans)', cursor: 'pointer',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 12px',
+  });
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '32px 0' }}>
-      <button style={{ ...btnBase, opacity: !data.prev_page_url ? .4 : 1, cursor: !data.prev_page_url ? 'not-allowed' : 'pointer' }}
-        disabled={!data.prev_page_url} onClick={() => go(data.prev_page_url)}>
-        ← Previous
-      </button>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '40px 0 0' }}>
+      <button style={{ ...btn(false), opacity: !data.prev_page_url ? .35 : 1 }} disabled={!data.prev_page_url} onClick={() => go(data.prev_page_url)}>←</button>
       {data.links.filter(l => !l.label.includes('Previous') && !l.label.includes('Next')).map((link, i) => (
-        <button key={i}
-          style={{ ...btnBase, background: link.active ? 'var(--kb-primary)' : '#fff', color: link.active ? '#fff' : 'var(--kb-ink-muted)', borderColor: link.active ? 'var(--kb-primary)' : 'var(--kb-border)', cursor: link.url ? 'pointer' : 'default' }}
-          disabled={!link.url} onClick={() => go(link.url)}
+        <button key={i} style={btn(link.active)} disabled={!link.url} onClick={() => go(link.url)}
           dangerouslySetInnerHTML={{ __html: link.label }} />
       ))}
-      <button style={{ ...btnBase, opacity: !data.next_page_url ? .4 : 1, cursor: !data.next_page_url ? 'not-allowed' : 'pointer' }}
-        disabled={!data.next_page_url} onClick={() => go(data.next_page_url)}>
-        Next →
-      </button>
+      <button style={{ ...btn(false), opacity: !data.next_page_url ? .35 : 1 }} disabled={!data.next_page_url} onClick={() => go(data.next_page_url)}>→</button>
     </div>
   );
 }
 
-export default function ShopIndex({
-  products, categories, brands, filters,
-  activeCategorySlug, activeCategoryName,
-  activeBrandSlug, activeBrandName,
-}: Props) {
+export default function ShopIndex({ products, categories, brands, filters, activeCategorySlug, activeCategoryName, activeBrandSlug, activeBrandName }: Props) {
   const { site } = usePage<SharedProps>().props;
   const showFilters = site.shopShowFilters !== false;
   const defaultSort = site.shopDefaultSort ?? 'newest';
@@ -207,8 +189,7 @@ export default function ShopIndex({
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const baseUrl = activeCategorySlug ? `/shop/c/${activeCategorySlug}`
-    : activeBrandSlug ? `/shop/b/${activeBrandSlug}` : '/shop';
+  const baseUrl = activeCategorySlug ? `/shop/c/${activeCategorySlug}` : activeBrandSlug ? `/shop/b/${activeBrandSlug}` : '/shop';
 
   const applyFilters = useCallback((updated: Filters) => {
     const clean: Record<string, string> = {};
@@ -224,130 +205,100 @@ export default function ShopIndex({
 
   function applyPrice() {
     const next = { ...localFilters, min_price: priceMin, max_price: priceMax };
-    setLocalFilters(next);
-    applyFilters(next);
+    setLocalFilters(next); applyFilters(next);
   }
 
   function clearAll() {
     const reset: Filters = { sort: localFilters.sort };
-    setLocalFilters(reset);
-    setPriceMin('');
-    setPriceMax('');
+    setLocalFilters(reset); setPriceMin(''); setPriceMax('');
     router.get(baseUrl, reset.sort ? { sort: reset.sort } : {}, { preserveScroll: false });
   }
 
   const hasActiveFilters = !!(filters.q || filters.min_price || filters.max_price || filters.in_stock || filters.on_sale || filters.min_rating);
   const pageTitle = activeCategoryName ?? activeBrandName ?? 'Shop';
 
-  const activeChips: { label: string; key: keyof Filters }[] = [];
-  if (filters.q) activeChips.push({ label: `"${filters.q}"`, key: 'q' });
-  if (filters.min_price || filters.max_price) activeChips.push({ label: `৳${filters.min_price ?? 0} – ৳${filters.max_price ?? '∞'}`, key: 'min_price' });
-  if (filters.min_rating) activeChips.push({ label: `${filters.min_rating}★ & up`, key: 'min_rating' });
-  if (filters.in_stock) activeChips.push({ label: 'In stock', key: 'in_stock' });
-  if (filters.on_sale) activeChips.push({ label: 'On sale', key: 'on_sale' });
-
-  function removeChip(key: keyof Filters) {
-    const next = { ...localFilters };
-    delete next[key];
-    if (key === 'min_price') { delete next.max_price; setPriceMin(''); setPriceMax(''); }
-    setLocalFilters(next);
-    applyFilters(next);
-  }
-
-  const FilterSections = () => (
+  const FilterPanel = () => (
     <>
-      {/* Category */}
-      <div style={{ padding: 16, borderBottom: '1px solid var(--kb-border-2)' }}>
-        <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink)', margin: '0 0 12px' }}>Category</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer', padding: '4px 6px', margin: '-4px -6px', borderRadius: 6 }} className="hover:bg-[var(--kb-surface-2)]">
-            <input type="radio" name="cat" checked={!activeCategorySlug} onChange={() => router.get('/shop', localFilters.sort ? { sort: localFilters.sort } : {})}
-              style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-            All Products
-          </label>
-          {categories.map(c => (
-            <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer', padding: '4px 6px', margin: '-4px -6px', borderRadius: 6 }} className="hover:bg-[var(--kb-surface-2)]">
-              <input type="radio" name="cat" checked={activeCategorySlug === c.slug} onChange={() => router.get(`/shop/c/${c.slug}`, localFilters.sort ? { sort: localFilters.sort } : {})}
-                style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-              {c.name}
-              {c.products_count !== undefined && <span style={{ color: 'var(--kb-ink-soft)', fontSize: 12, marginLeft: 'auto' }}>{c.products_count}</span>}
-            </label>
-          ))}
+      <div style={{ padding: '0 0 20px', borderBottom: '1px solid var(--av-line-soft)', marginBottom: 20 }}>
+        <h4 style={{ fontSize: 10.5, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-cognac)', margin: '0 0 14px', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>Category</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[{ id: 0, name: 'All Products', slug: null, products_count: undefined } as ShopCategory, ...categories].map(c => {
+            const active = c.slug ? activeCategorySlug === c.slug : !activeCategorySlug;
+            return (
+              <button key={c.id}
+                onClick={() => c.slug ? router.get(`/shop/c/${c.slug}`, localFilters.sort ? { sort: localFilters.sort } : {}) : router.get('/shop', localFilters.sort ? { sort: localFilters.sort } : {})}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: active ? 'var(--av-ink)' : 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 13, fontWeight: active ? 500 : 400, textAlign: 'left', letterSpacing: '0.01em' }}>
+                <span style={{ borderBottom: active ? '1px solid var(--av-ink)' : '1px solid transparent' }}>{c.name}</span>
+                {c.products_count !== undefined && <span style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{c.products_count}</span>}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Brand */}
       {brands.length > 0 && (
-        <div style={{ padding: 16, borderBottom: '1px solid var(--kb-border-2)' }}>
-          <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink)', margin: '0 0 12px' }}>Brand</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {brands.map(b => (
-              <label key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer', padding: '4px 6px', margin: '-4px -6px', borderRadius: 6 }} className="hover:bg-[var(--kb-surface-2)]">
-                <input type="radio" name="brand" checked={activeBrandSlug === b.slug} onChange={() => router.get(`/shop/b/${b.slug}`, localFilters.sort ? { sort: localFilters.sort } : {})}
-                  style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-                {b.name}
-                {b.products_count !== undefined && <span style={{ color: 'var(--kb-ink-soft)', fontSize: 12, marginLeft: 'auto' }}>{b.products_count}</span>}
-              </label>
-            ))}
+        <div style={{ padding: '0 0 20px', borderBottom: '1px solid var(--av-line-soft)', marginBottom: 20 }}>
+          <h4 style={{ fontSize: 10.5, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-cognac)', margin: '0 0 14px', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>Brand</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {brands.map(b => {
+              const active = activeBrandSlug === b.slug;
+              return (
+                <button key={b.id}
+                  onClick={() => router.get(`/shop/b/${b.slug}`, localFilters.sort ? { sort: localFilters.sort } : {})}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: active ? 'var(--av-ink)' : 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 13, fontWeight: active ? 500 : 400, textAlign: 'left' }}>
+                  <span style={{ borderBottom: active ? '1px solid var(--av-ink)' : '1px solid transparent' }}>{b.name}</span>
+                  {b.products_count !== undefined && <span style={{ fontSize: 11, color: 'var(--av-muted)' }}>{b.products_count}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Price */}
-      <div style={{ padding: 16, borderBottom: '1px solid var(--kb-border-2)' }}>
-        <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink)', margin: '0 0 12px' }}>Price (৳)</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 6, alignItems: 'center' }}>
+      <div style={{ padding: '0 0 20px', borderBottom: '1px solid var(--av-line-soft)', marginBottom: 20 }}>
+        <h4 style={{ fontSize: 10.5, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-cognac)', margin: '0 0 14px', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>Price</h4>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center', marginBottom: 10 }}>
           <input type="number" placeholder="Min" value={priceMin} onChange={e => setPriceMin(e.target.value)}
-            style={{ width: '100%', height: 36, padding: '0 10px', border: '1px solid var(--kb-border)', borderRadius: 7, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-          <span style={{ color: 'var(--kb-ink-soft)', fontSize: 12 }}>–</span>
+            style={{ height: 36, padding: '0 10px', border: '1px solid var(--av-line)', background: 'transparent', fontSize: 13, color: 'var(--av-ink)', outline: 'none', fontFamily: 'var(--av-sans)', boxSizing: 'border-box', width: '100%' }} />
+          <span style={{ fontSize: 12, color: 'var(--av-muted)', textAlign: 'center' }}>–</span>
           <input type="number" placeholder="Max" value={priceMax} onChange={e => setPriceMax(e.target.value)}
-            style={{ width: '100%', height: 36, padding: '0 10px', border: '1px solid var(--kb-border)', borderRadius: 7, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+            style={{ height: 36, padding: '0 10px', border: '1px solid var(--av-line)', background: 'transparent', fontSize: 13, color: 'var(--av-ink)', outline: 'none', fontFamily: 'var(--av-sans)', boxSizing: 'border-box', width: '100%' }} />
         </div>
-        <button onClick={applyPrice}
-          style={{ width: '100%', height: 36, marginTop: 10, borderRadius: 7, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer' }}>
+        <button onClick={applyPrice} style={{ width: '100%', height: 34, background: 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontSize: 10.5, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 500 }}>
           Apply
         </button>
       </div>
 
-      {/* Rating */}
-      <div style={{ padding: 16, borderBottom: '1px solid var(--kb-border-2)' }}>
-        <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink)', margin: '0 0 12px' }}>Customer Rating</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {[4, 3, 2, 0].map(r => (
-            <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer', padding: '4px 6px', margin: '-4px -6px', borderRadius: 6 }} className="hover:bg-[var(--kb-surface-2)]">
-              <input type="radio" name="rating" checked={(filters.min_rating ? Number(filters.min_rating) : 0) === r}
-                onChange={() => update('min_rating', r > 0 ? String(r) : '')}
-                style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-              {r === 0 ? 'Any rating' : <><span style={{ color: '#E8A317' }}>{'★'.repeat(r)}{'☆'.repeat(5 - r)}</span> &amp; up</>}
-            </label>
-          ))}
-        </div>
+      <div style={{ padding: '0 0 20px', borderBottom: '1px solid var(--av-line-soft)', marginBottom: 20 }}>
+        <h4 style={{ fontSize: 10.5, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-cognac)', margin: '0 0 14px', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>Rating</h4>
+        {[4, 3, 2, 0].map(r => {
+          const active = (filters.min_rating ? Number(filters.min_rating) : 0) === r;
+          return (
+            <button key={r} onClick={() => update('min_rating', r > 0 ? String(r) : '')}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: active ? 'var(--av-ink)' : 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 13, width: '100%', textAlign: 'left', fontWeight: active ? 500 : 400 }}>
+              {r === 0 ? 'Any rating' : <><span style={{ color: 'var(--av-gold)', fontSize: 12, letterSpacing: 1 }}>{'★'.repeat(r)}{'☆'.repeat(5-r)}</span> & up</>}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Availability */}
-      <div style={{ padding: 16, borderBottom: '1px solid var(--kb-border-2)' }}>
-        <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink)', margin: '0 0 12px' }}>Availability</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer' }}>
-            <input type="checkbox" checked={!!filters.in_stock} onChange={e => update('in_stock', e.target.checked ? '1' : '')}
-              style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-            In stock only
+      <div style={{ marginBottom: 20 }}>
+        <h4 style={{ fontSize: 10.5, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-cognac)', margin: '0 0 14px', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>Availability</h4>
+        {[['In stock only', 'in_stock'], ['On sale', 'on_sale']].map(([label, key]) => (
+          <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', cursor: 'pointer', fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>
+            <input type="checkbox" checked={!!(filters as any)[key]} onChange={e => update(key as keyof Filters, e.target.checked ? '1' : '')}
+              style={{ width: 14, height: 14, accentColor: 'var(--av-ink)', cursor: 'pointer' }} />
+            {label}
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--kb-ink-muted)', cursor: 'pointer' }}>
-            <input type="checkbox" checked={!!filters.on_sale} onChange={e => update('on_sale', e.target.checked ? '1' : '')}
-              style={{ accentColor: 'var(--kb-primary)', width: 14, height: 14, margin: 0 }} />
-            On sale
-          </label>
-        </div>
+        ))}
       </div>
 
-      {/* Clear all */}
-      <div style={{ padding: 16 }}>
+      {hasActiveFilters && (
         <button onClick={clearAll}
-          style={{ width: '100%', height: 36, borderRadius: 7, background: 'transparent', border: '1px solid var(--kb-border)', color: 'var(--kb-ink-muted)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
-          Clear all filters
+          style={{ width: '100%', height: 34, background: 'transparent', border: '1px solid var(--av-line)', color: 'var(--av-muted)', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+          Clear all
         </button>
-      </div>
+      )}
     </>
   );
 
@@ -355,65 +306,52 @@ export default function ShopIndex({
     <Layout>
       <Head title={pageTitle} />
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+      {/* Collection banner */}
+      <div style={{ background: 'var(--av-paper)', borderBottom: '1px solid var(--av-line)', padding: 'clamp(28px,5vw,48px) var(--av-gutter)' }}>
+        <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto' }}>
+          <nav style={{ display: 'flex', gap: 8, fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 10, flexWrap: 'wrap' }}>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
+            <span>/</span>
+            {(activeCategorySlug || activeBrandSlug) ? (
+              <><Link href="/shop" style={{ color: 'inherit', textDecoration: 'none' }}>Shop</Link><span>/</span><span style={{ color: 'var(--av-ink)' }}>{pageTitle}</span></>
+            ) : <span style={{ color: 'var(--av-ink)' }}>Shop</span>}
+          </nav>
+          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(24px,3.5vw,44px)', fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 6px', letterSpacing: '-0.012em', lineHeight: 1.04 }}>
+            {pageTitle}
+          </h1>
+          <div style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{products.total} pieces</div>
+        </div>
+      </div>
 
-        {/* Breadcrumb */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', padding: '16px 0 8px' }}>
-          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Home</Link>
-          <span>/</span>
-          {activeCategorySlug || activeBrandSlug ? (
-            <><Link href="/shop" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Shop</Link><span>/</span><span style={{ color: 'var(--kb-ink)' }}>{pageTitle}</span></>
-          ) : (
-            <span style={{ color: 'var(--kb-ink)' }}>Shop</span>
-          )}
-        </nav>
+      <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: 'clamp(28px,5vw,48px) var(--av-gutter)', paddingBottom: 64 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: showFilters ? '220px 1fr' : '1fr', gap: 48, alignItems: 'start' }} className="av-shop-layout">
 
-        <div className="grid lg:grid-cols-[248px_1fr]" style={{ gap: 24, paddingBottom: 64, alignItems: 'start' }}>
-
-          {/* Sidebar desktop */}
+          {/* Desktop sidebar */}
           {showFilters && (
-            <aside className="hidden lg:block" style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden', position: 'sticky', top: 80 }}>
-              <FilterSections />
+            <aside style={{ position: 'sticky', top: 76 }} className="av-shop-sidebar">
+              <FilterPanel />
             </aside>
           )}
 
-          {/* Mobile filter drawer */}
-          {showFilters && mobileOpen && (
-            <div className="lg:hidden" style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex' }}>
-              <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)' }} onClick={() => setMobileOpen(false)} />
-              <div style={{ position: 'relative', background: '#fff', width: 300, height: '100%', overflowY: 'auto', boxShadow: '4px 0 24px rgba(0,0,0,.15)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--kb-border)' }}>
-                  <h2 style={{ fontWeight: 700, fontSize: 16, margin: 0, color: 'var(--kb-ink)' }}>Filters</h2>
-                  <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-ink-soft)', padding: 4 }}>
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-                  </button>
-                </div>
-                <FilterSections />
-              </div>
-            </div>
-          )}
-
-          {/* Results */}
+          {/* Main */}
           <section>
             {/* Toolbar */}
-            <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 28, flexWrap: 'wrap', paddingBottom: 16, borderBottom: '1px solid var(--av-line)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 {showFilters && (
-                  <button onClick={() => setMobileOpen(true)} className="lg:hidden"
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', border: '1px solid var(--kb-border)', borderRadius: 7, background: '#fff', fontSize: 13, fontWeight: 600, color: 'var(--kb-ink-muted)', cursor: 'pointer' }}>
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M10 12h4"/></svg>
+                  <button onClick={() => setMobileOpen(true)} className="av-shop-filter-btn"
+                    style={{ display: 'none', alignItems: 'center', gap: 6, padding: '8px 14px', border: '1px solid var(--av-line)', background: 'transparent', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontSize: 11.5, color: 'var(--av-ink)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <svg viewBox="0 0 24 24" width="14" height="14" {...S}><path d="M4 6h16M7 12h10M10 18h4"/></svg>
                     Filters
                   </button>
                 )}
-                <span style={{ fontSize: 13, color: 'var(--kb-ink-soft)' }}>
-                  <strong style={{ color: 'var(--kb-ink)' }}>{products.total}</strong> products
-                  {products.from && products.to && ` · showing ${products.from}–${products.to}`}
+                <span style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>
+                  {products.from && products.to ? `${products.from}–${products.to} of ${products.total}` : `${products.total} results`}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <select value={localFilters.sort ?? defaultSort} onChange={e => update('sort', e.target.value)}
-                  className="flex-1 sm:flex-none sm:w-[200px]"
-                  style={{ height: 36, padding: '0 10px', border: '1px solid var(--kb-border)', borderRadius: 7, background: '#fff', fontSize: 13, color: 'var(--kb-ink)', outline: 'none', cursor: 'pointer' }}>
+                  style={{ height: 34, padding: '0 10px', border: '1px solid var(--av-line)', background: 'transparent', fontSize: 12.5, color: 'var(--av-ink)', outline: 'none', cursor: 'pointer', fontFamily: 'var(--av-sans)', letterSpacing: '0.04em' }}>
                   <option value="newest">Newest</option>
                   <option value="featured">Featured</option>
                   <option value="price_asc">Price: Low to High</option>
@@ -421,58 +359,66 @@ export default function ShopIndex({
                   <option value="rating">Top Rated</option>
                   <option value="discount">Biggest Discount</option>
                 </select>
-                {/* Grid/List toggle */}
-                <div style={{ display: 'flex', border: '1px solid var(--kb-border)', borderRadius: 7, overflow: 'hidden' }}>
-                  <button onClick={() => setView('grid')}
-                    style={{ width: 34, height: 34, border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', background: view === 'grid' ? 'var(--kb-primary)' : '#fff', color: view === 'grid' ? '#fff' : 'var(--kb-ink-soft)' }}>
-                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="9" y="0" width="7" height="7" rx="1"/><rect x="0" y="9" width="7" height="7" rx="1"/><rect x="9" y="9" width="7" height="7" rx="1"/></svg>
-                  </button>
-                  <button onClick={() => setView('list')}
-                    style={{ width: 34, height: 34, border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', background: view === 'list' ? 'var(--kb-primary)' : '#fff', color: view === 'list' ? '#fff' : 'var(--kb-ink-soft)' }}>
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/></svg>
-                  </button>
+                <div style={{ display: 'flex', border: '1px solid var(--av-line)', overflow: 'hidden' }}>
+                  {(['grid', 'list'] as const).map(v => (
+                    <button key={v} onClick={() => setView(v)}
+                      style={{ width: 32, height: 32, border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', background: view === v ? 'var(--av-ink)' : 'transparent', color: view === v ? 'var(--av-paper)' : 'var(--av-muted)' }}>
+                      {v === 'grid'
+                        ? <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><rect x="0" y="0" width="7" height="7"/><rect x="9" y="0" width="7" height="7"/><rect x="0" y="9" width="7" height="7"/><rect x="9" y="9" width="7" height="7"/></svg>
+                        : <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                      }
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Active filter chips */}
-            {activeChips.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-                {activeChips.map(chip => (
-                  <span key={chip.key} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid var(--kb-border)', padding: '4px 8px 4px 10px', borderRadius: 999, fontSize: 12, color: 'var(--kb-ink-muted)', fontWeight: 500 }}>
-                    {chip.label}
-                    <button onClick={() => removeChip(chip.key)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, lineHeight: 0, color: 'var(--kb-ink-soft)' }} className="hover:text-red-500">
-                      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Products */}
             {products.data.length === 0 ? (
-              <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '60px 24px', textAlign: 'center' }}>
-                <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 6px', color: 'var(--kb-ink)' }}>No products match your filters</h3>
-                <p style={{ color: 'var(--kb-ink-soft)', margin: '0 0 20px', fontSize: 14 }}>Try clearing some filters or searching for something else.</p>
-                <button onClick={clearAll}
-                  style={{ height: 40, padding: '0 20px', borderRadius: 8, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer' }}>
+              <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+                <div style={{ fontFamily: 'var(--av-display)', fontSize: 28, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 12 }}>Nothing found</div>
+                <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14, marginBottom: 24 }}>Try clearing some filters or browsing the full collection.</p>
+                <button onClick={clearAll} style={{ padding: '12px 28px', background: 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', cursor: 'pointer', fontFamily: 'var(--av-sans)', fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500 }}>
                   Clear filters
                 </button>
               </div>
             ) : view === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4" style={{ gap: 16 }}>
-                {products.data.map(p => <ProductCardItem key={p.id} product={p} view="grid" />)}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28 }} className="av-shop-grid">
+                {products.data.map(p => <AvProductCard key={p.id} product={p} />)}
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {products.data.map(p => <ProductCardItem key={p.id} product={p} view="list" />)}
-              </div>
+              <div>{products.data.map(p => <AvListCard key={p.id} product={p} />)}</div>
             )}
 
             <Pagination data={products} />
           </section>
         </div>
       </div>
+
+      {/* Mobile filter drawer */}
+      {showFilters && mobileOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex' }}>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(31,26,21,.42)' }} onClick={() => setMobileOpen(false)} />
+          <div style={{ position: 'relative', background: 'var(--av-paper)', width: 300, height: '100%', overflowY: 'auto', padding: 24, boxSizing: 'border-box' }} className="av-scroll-y">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+              <span style={{ fontFamily: 'var(--av-display)', fontSize: 20, fontWeight: 400, color: 'var(--av-ink)' }}>Filters</span>
+              <button onClick={() => setMobileOpen(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', padding: 4 }}>
+                <svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <FilterPanel />
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @media(max-width:860px){
+          .av-shop-layout{grid-template-columns:1fr!important}
+          .av-shop-sidebar{display:none!important}
+          .av-shop-filter-btn{display:flex!important}
+          .av-shop-grid{grid-template-columns:repeat(2,1fr)!important;gap:16px!important}
+        }
+        @media(max-width:480px){.av-shop-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}}
+      `}</style>
     </Layout>
   );
 }

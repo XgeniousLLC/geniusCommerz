@@ -160,4 +160,30 @@ $creds = $integration->credentials ?? [];
     </x-admin.card>
 </form>
 </div>
+
+@if(in_array($integration->provider, \App\Models\Integration::SMS_PROVIDERS))
+<div class="max-w-2xl mt-6">
+    <form method="POST" action="{{ route('admin.integrations.test-sms', $integration) }}">
+        @csrf
+        <x-admin.card>
+            <h3 class="text-sm font-semibold text-gray-700 mb-4">Send Test SMS</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <x-admin.input type="text" name="phone" placeholder="+8801XXXXXXXXX" />
+                </x-admin.form-group>
+                <x-admin.form-group>
+                    <label class="block text-sm font-medium text-gray-700">Message</label>
+                    <textarea name="message" rows="2"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
+                    >Test SMS from {{ config('app.name') }}</textarea>
+                </x-admin.form-group>
+            </div>
+            <div class="flex justify-end mt-4">
+                <x-admin.button type="submit" variant="outline">Send Test SMS</x-admin.button>
+            </div>
+        </x-admin.card>
+    </form>
+</div>
+@endif
 @endsection

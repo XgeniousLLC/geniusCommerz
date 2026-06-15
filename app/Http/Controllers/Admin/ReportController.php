@@ -12,6 +12,45 @@ use Illuminate\View\View;
 
 class ReportController extends Controller
 {
+    public function index(): View
+    {
+        $start30 = now()->subDays(30)->startOfDay();
+
+        $revenue30  = (float) DB::table('orders')->where('created_at', '>=', $start30)->where('status', '!=', 'cancelled')->sum('total');
+        $orders30   = (int)   DB::table('orders')->where('created_at', '>=', $start30)->where('status', '!=', 'cancelled')->count();
+        $unitsSold  = (int)   DB::table('order_items')->join('orders','orders.id','=','order_items.order_id')->where('orders.created_at', '>=', $start30)->where('orders.status','!=','cancelled')->sum('order_items.quantity');
+        $customers30= (int)   DB::table('orders')->where('created_at', '>=', $start30)->distinct('user_id')->count('user_id');
+
+        $topProducts = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.created_at', '>=', $start30)
+            ->where('orders.status', '!=', 'cancelled')
+            ->selectRaw('order_items.product_id, order_items.product_name, SUM(order_items.total) as revenue, SUM(order_items.quantity) as qty_sold')
+            ->groupBy('order_items.product_id', 'order_items.product_name')
+            ->orderByDesc('revenue')
+            ->limit(5)
+            ->get();
+
+        $categoryRevenue = DB::table('order_items')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('category_product', 'category_product.product_id', '=', 'order_items.product_id')
+            ->join('categories', 'categories.id', '=', 'category_product.category_id')
+            ->where('orders.created_at', '>=', $start30)
+            ->where('orders.status', '!=', 'cancelled')
+            ->selectRaw('categories.name, SUM(order_items.total) as revenue')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('revenue')
+            ->limit(5)
+            ->get();
+
+        $totalCatRevenue = $categoryRevenue->sum('revenue') ?: 1;
+
+        return view('admin.reports.index', compact(
+            'revenue30', 'orders30', 'unitsSold', 'customers30',
+            'topProducts', 'categoryRevenue', 'totalCatRevenue'
+        ));
+    }
+
     public function salesOverview(Request $request): View
     {
         [$startDate, $endDate] = $this->resolveDateRange($request);

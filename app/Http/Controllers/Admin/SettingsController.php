@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Currency;
 use App\Models\Product;
 use App\Models\SiteSetting;
+use App\Services\CloudStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds', 'currencies', 'accounting'];
+    private const TABS = ['general', 'meta', 'social', 'storefront', 'payment', 'shipping', 'cart', 'legal', 'tracking', 'feeds', 'currencies', 'accounting', 'storage', 'notifications'];
 
     public function index(Request $request): View
     {
@@ -66,6 +67,11 @@ class SettingsController extends Controller
                 continue;
             }
 
+            // Don't overwrite existing secrets with blank (password field left empty)
+            if ($value === '' && in_array($key, ['storage.s3_secret', 'storage.r2_secret'])) {
+                continue;
+            }
+
             $value    = ($value === '') ? null : $value;
             $existing = SiteSetting::where('key', $key)->first();
 
@@ -82,6 +88,10 @@ class SettingsController extends Controller
                     'group' => $group,
                 ]);
             }
+        }
+
+        if ($group === 'storage') {
+            CloudStorageService::flushCache();
         }
 
         cache()->forget('site_name');
