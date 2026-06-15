@@ -67,13 +67,13 @@ $preSelectedIds = array_filter(array_map('intval', explode(',', request('selecte
                     @foreach(request()->only(['picker','accept','multiple','folder_id']) as $k => $v)
                         <input type="hidden" name="{{ $k }}" value="{{ $v }}">
                     @endforeach
-                    <div style="position:relative;flex:1;max-width:300px">
-                        <span class="ico" data-ico="search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted);pointer-events:none"></span>
+                    <div class="search-field" style="flex:1;max-width:300px">
+                        <span class="ico" data-ico="search" style="width:14px;height:14px"></span>
                         <input type="search" name="search" value="{{ request('search') }}"
                             placeholder="Search files…"
-                            class="input" style="padding-left:32px;height:36px">
+                            class="input" style="height:36px">
                     </div>
-                    <select name="type" onchange="this.form.submit()" class="input" style="height:36px;min-width:110px">
+                    <select name="type" onchange="this.form.submit()" class="input" style="height:36px;width:auto;flex-shrink:0;min-width:110px">
                         <option value="" {{ !request('type') ? 'selected' : '' }}>All types</option>
                         <option value="image"    {{ request('type') === 'image'    ? 'selected' : '' }}>Images</option>
                         <option value="document" {{ request('type') === 'document' ? 'selected' : '' }}>Documents</option>

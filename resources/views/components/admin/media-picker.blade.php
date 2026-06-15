@@ -109,9 +109,9 @@ $preItems = $ids
     </template>
 
     {{-- Modal --}}
+    <style>.mp-overlay{display:flex;background:rgba(0,0,0,.6);position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;padding:16px}[x-cloak]{display:none!important}</style>
     <template x-teleport="body">
-        <div x-show="isOpen"
-             style="display:none;background:rgba(0,0,0,0.6);position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px"
+        <div class="mp-overlay" x-show="isOpen" x-cloak
              @keydown.escape.window="close()">
             <div @click.stop
                  style="background:var(--surface);border-radius:var(--radius-card);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;width:100%;max-width:1050px;height:82vh;max-height:820px">

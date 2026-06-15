@@ -114,7 +114,7 @@ export default function Header() {
               <img
                 src={site.logoUrl}
                 alt={site.name}
-                style={{ height: scrolled ? 36 : 40, width: 'auto', transition: 'height .35s', objectFit: 'contain' }}
+                style={{ height: scrolled ? 60 : 80, width: 'auto', transition: 'height .35s', objectFit: 'contain' }}
               />
             ) : (
               <span style={{
