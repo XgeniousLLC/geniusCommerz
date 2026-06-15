@@ -7,3 +7,4 @@ Laravel 12 e-commerce platform. Admin: Blade + Alpine.js. Storefront: Inertia v3
 @.claude/tools.md
 @.claude/rules.md
 @.claude/design-progress.md
+@.claude/cobalt-sprints.md

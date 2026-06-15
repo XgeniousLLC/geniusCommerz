@@ -1,232 +1,194 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'New Blog Post')
-
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li><a href="{{ route('admin.blogs.index') }}" class="hover:text-gray-700">Blog Posts</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">New Post</li>
-</ol>
-@endsection
-
-@section('page-header')
-<h1 class="text-2xl font-bold text-gray-900">New Blog Post</h1>
-@endsection
 
 @push('styles')
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <style>
-    .ql-container { font-size: 0.875rem; border-bottom-left-radius: 0.375rem; border-bottom-right-radius: 0.375rem; }
-    .ql-toolbar { border-top-left-radius: 0.375rem; border-top-right-radius: 0.375rem; }
-    .ql-editor { min-height: 280px; }
-    @media (min-width: 1024px) {
-        #blog-grid { grid-template-columns: 70% 1fr; }
-    }
+.ql-container { font-size: 0.875rem; }
+.ql-editor { min-height: 280px; }
 </style>
 @endpush
 
 @section('content')
+<div class="page-head">
+    <div>
+        <h2 class="display">New Blog Post</h2>
+    </div>
+    <a href="{{ route('admin.blogs.index') }}" class="btn btn-outline">
+        <span class="ico" data-ico="arrowLeft" style="width:16px;height:16px"></span>Blog Posts
+    </a>
+</div>
+
 <form method="POST" action="{{ route('admin.blogs.store') }}" id="blog-form">
     @csrf
-    <div class="grid grid-cols-1 gap-6" id="blog-grid">
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start">
 
         {{-- Left: main content --}}
-        <div class="space-y-6">
+        <div class="col-gap" style="--gap:18px">
 
-            <x-admin.card>
-                <h3 class="text-base font-semibold text-gray-900 mb-4">Post Content</h3>
-                <div class="space-y-4">
+            <div class="card pad">
+                <h3 style="font-weight:700;font-size:14px;margin-bottom:16px">Post Content</h3>
+                <div class="col-gap" style="--gap:14px">
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
-                        <x-admin.input type="text" name="title" id="blog-title" value="{{ old('title') }}" required />
-                        @error('title')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </x-admin.form-group>
+                    <div class="field">
+                        <span class="lbl">Title <span style="color:var(--danger)">*</span></span>
+                        <input class="input" type="text" name="title" id="blog-title" value="{{ old('title') }}" required>
+                        @error('title')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
+                    </div>
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Slug</label>
-                        <x-admin.input type="text" name="slug" id="blog-slug" value="{{ old('slug') }}"
-                            placeholder="auto-generated from title" />
-                        @error('slug')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </x-admin.form-group>
+                    <div class="field">
+                        <span class="lbl">Slug</span>
+                        <input class="input" type="text" name="slug" id="blog-slug" value="{{ old('slug') }}" placeholder="auto-generated from title">
+                        @error('slug')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
+                    </div>
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Excerpt</label>
-                        <textarea name="excerpt" rows="2"
-                            placeholder="Short summary shown in listings (max 500 chars)"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('excerpt') }}</textarea>
-                        @error('excerpt')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </x-admin.form-group>
+                    <div class="field">
+                        <span class="lbl">Excerpt</span>
+                        <textarea class="input" name="excerpt" rows="2" style="height:auto;resize:none" placeholder="Short summary shown in listings (max 500 chars)">{{ old('excerpt') }}</textarea>
+                        @error('excerpt')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
+                    </div>
 
-                    <x-admin.form-group x-data="aiBlogGen()">
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-sm font-medium text-gray-700">Content</label>
+                    <div class="field" x-data="aiBlogGen()">
+                        <div class="between" style="margin-bottom:6px">
+                            <span class="lbl" style="margin:0">Content</span>
                             <button type="button" @click="open = !open"
-                                class="inline-flex items-center gap-1.5 text-xs font-medium text-purple-700 border border-purple-200 rounded-lg px-2.5 py-1 hover:bg-purple-50 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                Generate with AI
+                                class="btn btn-sm" style="font-size:12px;color:#7c3aed;border-color:#7c3aed">
+                                <span class="ico" data-ico="bolt" style="width:13px;height:13px"></span>Generate with AI
                             </button>
                         </div>
-                        <div x-show="open" x-transition class="mb-3 border border-purple-200 rounded-xl p-4 bg-purple-50 space-y-3">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Tone</label>
-                                    <select x-model="tone" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                        <div x-show="open" class="card pad" style="margin-bottom:10px;background:color-mix(in srgb,#7c3aed 6%,transparent);border-color:color-mix(in srgb,#7c3aed 25%,transparent)">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                                <div class="field" style="margin:0">
+                                    <span class="lbl" style="font-size:11px">Tone</span>
+                                    <select x-model="tone" class="input" style="height:34px">
                                         <option value="informative">Informative</option>
                                         <option value="professional">Professional</option>
                                         <option value="conversational">Conversational</option>
                                         <option value="persuasive">Persuasive</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Length</label>
-                                    <select x-model="length" class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                                <div class="field" style="margin:0">
+                                    <span class="lbl" style="font-size:11px">Length</span>
+                                    <select x-model="length" class="input" style="height:34px">
                                         <option value="short">Short (~300 words)</option>
                                         <option value="medium">Medium (~600 words)</option>
                                         <option value="long">Long (~1000 words)</option>
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Keywords <span class="font-normal text-gray-400">(optional, comma-separated)</span></label>
-                                <input type="text" x-model="keywords" placeholder="e.g. skincare, summer, tips"
-                                    class="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                            <div class="field" style="margin-bottom:10px">
+                                <span class="lbl" style="font-size:11px">Keywords <span class="faint">(optional, comma-separated)</span></span>
+                                <input type="text" x-model="keywords" placeholder="e.g. skincare, summer, tips" class="input" style="height:34px">
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="row" style="gap:10px">
                                 <button type="button" @click="generate()" :disabled="loading"
-                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 transition-colors">
+                                    class="btn btn-primary" style="background:#7c3aed;border-color:#7c3aed;font-size:13px">
                                     <span x-show="!loading">Generate</span>
                                     <span x-show="loading">Generating…</span>
                                 </button>
-                                <span x-show="error" x-text="error" class="text-xs text-red-600"></span>
+                                <span x-show="error" x-text="error" style="font-size:12px;color:var(--danger)"></span>
                             </div>
                         </div>
-                        <div id="content-editor" class="bg-white"></div>
-                        <textarea name="content" id="content-input" class="hidden">{{ old('content') }}</textarea>
-                    </x-admin.form-group>
+                        <div id="content-editor" style="background:#fff"></div>
+                        <textarea name="content" id="content-input" style="display:none">{{ old('content') }}</textarea>
+                    </div>
 
                 </div>
-            </x-admin.card>
+            </div>
 
             {{-- FAQ --}}
-            <x-admin.card x-data="blogFaq({{ json_encode(old('faqs', [])) }})">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-semibold text-gray-900">FAQ</h3>
-                    <button type="button" @click="add()"
-                        class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Add question
+            <div class="card pad" x-data="blogFaq({{ json_encode(old('faqs', [])) }})">
+                <div class="between" style="margin-bottom:14px">
+                    <h3 style="font-weight:700;font-size:14px">FAQ</h3>
+                    <button type="button" @click="add()" class="btn btn-sm btn-outline" style="font-size:12px">
+                        <span class="ico" data-ico="plus" style="width:13px;height:13px"></span>Add question
                     </button>
                 </div>
-                <div class="space-y-4" x-show="items.length > 0">
+                <div class="col-gap" style="--gap:12px" x-show="items.length > 0">
                     <template x-for="(item, i) in items" :key="i">
-                        <div class="border border-gray-200 rounded-lg p-3 space-y-2 relative">
+                        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;position:relative" class="col-gap" style="--gap:10px">
                             <button type="button" @click="remove(i)"
-                                class="absolute top-2 right-2 text-gray-300 hover:text-red-500 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                class="icon-btn" style="position:absolute;top:8px;right:8px;width:26px;height:26px">
+                                <span class="ico" data-ico="x" style="width:13px;height:13px"></span>
                             </button>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Question</label>
-                                <input type="text" :name="`faqs[${i}][question]`" x-model="item.question"
-                                    placeholder="Enter question"
-                                    class="w-full rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+                            <div class="field" style="margin:0">
+                                <span class="lbl" style="font-size:11px">Question</span>
+                                <input class="input" style="height:34px" type="text" :name="`faqs[${i}][question]`" x-model="item.question" placeholder="Enter question">
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Answer</label>
-                                <textarea :name="`faqs[${i}][answer]`" x-model="item.answer"
-                                    rows="3" placeholder="Enter answer"
-                                    class="w-full rounded-md border-gray-300 text-sm px-3 py-2 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"></textarea>
+                            <div class="field" style="margin:0">
+                                <span class="lbl" style="font-size:11px">Answer</span>
+                                <textarea class="input" style="height:auto;resize:none" :name="`faqs[${i}][answer]`" x-model="item.answer" rows="3" placeholder="Enter answer"></textarea>
                             </div>
                         </div>
                     </template>
                 </div>
-                <p x-show="items.length === 0" class="text-sm text-gray-400 text-center py-4">
+                <p x-show="items.length === 0" class="faint" style="font-size:13px;text-align:center;padding:20px 0">
                     No FAQ items yet. Click "Add question" to start.
                 </p>
-            </x-admin.card>
+            </div>
 
         </div>
 
         {{-- Right sidebar --}}
-        <div class="space-y-6">
+        <div class="col-gap" style="--gap:18px">
 
-            {{-- Cover Image --}}
-            <x-admin.card>
-                <h3 class="text-base font-semibold text-gray-900 mb-4">Cover Image</h3>
-                <x-admin.media-picker
-                    name="cover_media_id"
-                    accept="image"
-                    label="Upload Cover"
-                    :value="old('cover_media_id')" />
-                <p class="text-xs text-gray-400 mt-2">Recommended: 1200×630px. Shown in listings and social previews.</p>
-            </x-admin.card>
+            <div class="card pad">
+                <h3 style="font-weight:700;font-size:14px;margin-bottom:14px">Cover Image</h3>
+                <x-admin.media-picker name="cover_media_id" accept="image" label="Upload Cover" :value="old('cover_media_id')" />
+                <p class="faint" style="font-size:12px;margin-top:8px">Recommended: 1200×630px.</p>
+            </div>
 
-            {{-- SEO --}}
             @include('admin.blogs._seo', ['meta' => null, 'blog' => null])
 
-            {{-- Publish --}}
-            <x-admin.card x-data="{ status: '{{ old('status', 'draft') }}' }">
-                <h3 class="text-base font-semibold text-gray-900 mb-4">Publish</h3>
-                <div class="space-y-4">
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <x-admin.select name="status" x-model="status">
+            <div class="card pad" x-data="{ status: '{{ old('status', 'draft') }}' }">
+                <h3 style="font-weight:700;font-size:14px;margin-bottom:14px">Publish</h3>
+                <div class="col-gap" style="--gap:12px">
+                    <div class="field">
+                        <span class="lbl">Status</span>
+                        <select class="input" name="status" x-model="status">
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
-                        </x-admin.select>
-                    </x-admin.form-group>
-                    <div x-show="status === 'published'" x-collapse>
-                        <x-admin.form-group>
-                            <label class="block text-sm font-medium text-gray-700">Published At</label>
-                            <input type="datetime-local" name="published_at"
-                                value="{{ old('published_at') }}"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm h-9 px-3" />
-                            <p class="text-xs text-gray-400 mt-1">Leave blank to use current time.</p>
-                        </x-admin.form-group>
+                        </select>
+                    </div>
+                    <div x-show="status === 'published'" class="field">
+                        <span class="lbl">Published At</span>
+                        <input class="input" type="datetime-local" name="published_at" value="{{ old('published_at') }}">
+                        <p class="hint">Leave blank to use current time.</p>
                     </div>
                 </div>
-            </x-admin.card>
+            </div>
 
-            {{-- Post Settings --}}
-            <x-admin.card x-data="quickAddBlogCat()">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-semibold text-gray-900">Post Settings</h3>
+            <div class="card pad" x-data="quickAddBlogCat()">
+                <div class="between" style="margin-bottom:14px">
+                    <h3 style="font-weight:700;font-size:14px">Post Settings</h3>
                 </div>
-                <div class="space-y-4">
-                    <x-admin.form-group>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-sm font-medium text-gray-700">Category</label>
-                            <button type="button" @click="open = !open"
-                                class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                <div class="col-gap" style="--gap:12px">
+                    <div class="field">
+                        <div class="between" style="margin-bottom:4px">
+                            <span class="lbl" style="margin:0">Category</span>
+                            <button type="button" @click="open = !open" class="link-btn" style="font-size:12px"
                                 x-text="open ? 'Cancel' : '+ New category'"></button>
                         </div>
-                        <div x-show="open" x-collapse class="mb-2">
-                            <div class="flex gap-2">
-                                <input type="text" x-model="name" placeholder="Category name"
-                                    @keydown.enter.prevent="save()"
-                                    class="flex-1 rounded-md border-gray-300 text-sm h-9 px-3 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-                                <button type="button" @click="save()" :disabled="saving"
-                                    class="px-3 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50"
-                                    x-text="saving ? '...' : 'Add'"></button>
-                            </div>
-                            <p x-show="error" x-text="error" class="text-red-500 text-xs mt-1"></p>
+                        <div x-show="open" class="row" style="gap:8px;margin-bottom:8px">
+                            <input class="input" type="text" x-model="name" placeholder="Category name"
+                                @keydown.enter.prevent="save()" style="flex:1;height:34px">
+                            <button type="button" @click="save()" :disabled="saving"
+                                class="btn btn-primary btn-sm" x-text="saving ? '...' : 'Add'"></button>
                         </div>
-                        <x-admin.select name="blog_category_id" id="blog-cat-select">
+                        <p x-show="error" x-text="error" style="font-size:12px;color:var(--danger)"></p>
+                        <select class="input" name="blog_category_id" id="blog-cat-select">
                             <option value="">— No category —</option>
                             @foreach(\App\Models\BlogCategory::orderBy('name')->get() as $cat)
                                 <option value="{{ $cat->id }}" {{ old('blog_category_id') == $cat->id ? 'selected' : '' }}>
                                     {{ $cat->name }}
                                 </option>
                             @endforeach
-                        </x-admin.select>
-                    </x-admin.form-group>
+                        </select>
+                    </div>
 
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Author</label>
-                        <x-admin.select name="author_admin_id" id="author-admin-select">
+                    <div class="field">
+                        <span class="lbl">Author</span>
+                        <select class="input" name="author_admin_id" id="author-admin-select">
                             <option value="">— Custom name —</option>
                             @foreach($admins as $admin)
                                 <option value="{{ $admin->id }}"
@@ -234,35 +196,32 @@
                                     {{ $admin->name }}
                                 </option>
                             @endforeach
-                        </x-admin.select>
-                    </x-admin.form-group>
-
-                    <x-admin.form-group>
-                        <label class="block text-sm font-medium text-gray-700">Custom Author Name</label>
-                        <x-admin.input type="text" name="author_name"
-                            value="{{ old('author_name') }}"
-                            placeholder="Override name (leave blank to use selected admin's name)" />
-                        <p class="text-xs text-gray-400 mt-1">Only used if no admin is selected above.</p>
-                    </x-admin.form-group>
-
-                    <div class="flex items-center gap-2 pt-1">
-                        <input type="hidden" name="enable_toc" value="0">
-                        <input type="checkbox" name="enable_toc" id="enable-toc" value="1"
-                            {{ old('enable_toc') ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                        <label for="enable-toc" class="text-sm font-medium text-gray-700">Show Table of Contents</label>
+                        </select>
                     </div>
-                </div>
-            </x-admin.card>
 
-            <div class="flex space-x-3">
-                <x-admin.button type="submit" class="flex-1 justify-center">Publish Post</x-admin.button>
-                <x-admin.button href="{{ route('admin.blogs.index') }}" variant="outline">Cancel</x-admin.button>
+                    <div class="field">
+                        <span class="lbl">Custom Author Name</span>
+                        <input class="input" type="text" name="author_name" value="{{ old('author_name') }}" placeholder="Override name">
+                        <p class="hint">Only used if no admin is selected above.</p>
+                    </div>
+
+                    <label class="row" style="gap:8px;cursor:pointer;font-size:13.5px">
+                        <input type="hidden" name="enable_toc" value="0">
+                        <input type="checkbox" name="enable_toc" id="enable-toc" value="1" {{ old('enable_toc') ? 'checked' : '' }}>
+                        Show Table of Contents
+                    </label>
+                </div>
+            </div>
+
+            <div class="row" style="gap:10px">
+                <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center">Publish Post</button>
+                <a href="{{ route('admin.blogs.index') }}" class="btn btn-outline">Cancel</a>
             </div>
 
         </div>
     </div>
 </form>
+@endsection
 
 @push('scripts')
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
@@ -339,21 +298,16 @@ document.getElementById('blog-slug').addEventListener('input', function () {
 
 function aiBlogGen() {
     return {
-        open: false,
-        loading: false,
-        error: '',
-        tone: 'informative',
-        length: 'medium',
-        keywords: '',
+        open: false, loading: false, error: '',
+        tone: 'informative', length: 'medium', keywords: '',
         async generate() {
-            this.loading = true;
-            this.error   = '';
+            this.loading = true; this.error = '';
             const title = document.querySelector('[name="title"]')?.value || '';
             if (!title) { this.error = 'Please enter a title first.'; this.loading = false; return; }
             try {
                 const res = await fetch('{{ route('admin.ai.blog-content') }}', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf },
                     body: JSON.stringify({ title, tone: this.tone, length: this.length, keywords: this.keywords }),
                 });
                 const json = await res.json();
@@ -371,5 +325,3 @@ function aiBlogGen() {
 }
 </script>
 @endpush
-
-@endsection

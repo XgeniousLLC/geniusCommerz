@@ -3,6 +3,24 @@
 @source '../js/storefront/**/*.tsx';
 
 :root {
+    /* ── Aveline quiet luxury tokens ── */
+    --av-ink:        #1f1a15;
+    --av-ink-soft:   #3a322a;
+    --av-ivory:      #f4efe5;
+    --av-paper:      #fbf8f1;
+    --av-paper-2:    #efe9dc;
+    --av-cognac:     #95613a;
+    --av-cognac-deep:#6f4527;
+    --av-gold:       #b2904f;
+    --av-muted:      #756a59;
+    --av-line:       rgba(31,26,21,0.14);
+    --av-line-soft:  rgba(31,26,21,0.08);
+    --av-display:    "Cormorant Garamond", Georgia, serif;
+    --av-sans:       "Jost", system-ui, sans-serif;
+    --av-maxw:       1280px;
+    --av-gutter:     36px;
+
+    /* ── klixbd legacy tokens ── */
     --kb-primary:      #0B1F4F;
     --kb-primary-600:  #102B6B;
     --kb-primary-700:  #0A1A40;
@@ -32,9 +50,59 @@
 }
 
 html, body {
-    font-family: 'Inter', system-ui, sans-serif;
-    color: var(--kb-ink);
-    background: var(--kb-bg);
+    font-family: var(--av-sans);
+    color: var(--av-ink);
+    background: var(--av-ivory);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--av-cognac); color: #fff; }
+
+/* Fine paper grain — tactile luxury feel */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Aveline typography utilities */
+.av-display {
+    font-family: var(--av-display);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.012em;
+}
+.av-eyebrow {
+    font-family: var(--av-sans);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    font-size: 10.5px;
+    color: var(--av-cognac);
+}
+.av-eyebrow-muted { color: var(--av-muted); }
+.av-scroll-y { overflow-y: auto; scrollbar-width: thin; }
+
+/* Reveal animation — only transform animates (opacity stays 1, per throttled-frame rule) */
+.av-reveal {
+    opacity: 1;
+    transition: transform .85s cubic-bezier(.2,.7,.3,1);
+}
+.av-reveal-hidden { transform: translateY(18px); }
+.av-reveal-visible { transform: none; }
+
+/* Announce bar marquee */
+@keyframes av-marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Mobile gutter */
+@media (max-width: 640px) {
+    :root { --av-gutter: 18px; }
 }
 
 .bn { font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif; }

@@ -2,90 +2,104 @@
 
 @section('title', 'Add Category')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.categories.index') }}" class="hover:text-gray-700">Categories</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Add</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Add Category</h1>
-@endsection
-
 @section('content')
 <form method="POST" action="{{ route('admin.categories.store') }}">
-    @csrf
-    <div class="space-y-6">
+@csrf
 
-        <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-4">Category Info</h3>
-            <div class="space-y-4">
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
-                    <x-admin.input type="text" name="name" id="cat-name" value="{{ old('name') }}" required />
-                    @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
+<div class="row" style="gap:14px;margin-bottom:22px;flex-wrap:wrap">
+    <a class="icon-btn" href="{{ route('admin.categories.index') }}" style="width:40px;height:40px">
+        <span class="ico" data-ico="chevLeft"></span>
+    </a>
+    <div class="grow" style="min-width:180px">
+        <div class="breadcrumb"><a href="{{ route('admin.categories.index') }}">Categories</a> / Add</div>
+        <h2 class="display" style="font-size:24px;letter-spacing:-0.03em">Add Category</h2>
+    </div>
+    <div class="row" style="gap:10px">
+        <a href="{{ route('admin.categories.index') }}" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <span class="ico" data-ico="check" style="width:18px;height:18px"></span>Save
+        </button>
+    </div>
+</div>
 
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Slug <span class="text-red-500">*</span></label>
-                    <x-admin.input type="text" name="slug" id="cat-slug" value="{{ old('slug') }}" required />
-                    @error('slug')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
+<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px;align-items:start" class="grid-2">
 
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea name="description" rows="3"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ old('description') }}</textarea>
-                </x-admin.form-group>
-
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Image</label>
-                    <x-admin.media-picker name="image_media_id" accept="image" label="Add Image"
-                        :value="old('image_media_id')" />
-                    @error('image_media_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                </x-admin.form-group>
-            </div>
-        </x-admin.card>
-
-        <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-4">Options</h3>
-            <div class="space-y-4">
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Parent Category</label>
-                    <x-admin.select name="parent_id">
-                        <option value="">— None (top level) —</option>
-                        @foreach($parents as $parent)
-                            <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
-                                {{ $parent->name }}
-                            </option>
-                        @endforeach
-                    </x-admin.select>
-                </x-admin.form-group>
-
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Sort Order</label>
-                    <x-admin.input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0" />
-                </x-admin.form-group>
-
-                <label class="flex items-center space-x-2">
-                    <input type="checkbox" name="is_active" value="1"
-                        {{ old('is_active', '1') ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                    <span class="text-sm font-medium text-gray-700">Active</span>
-                </label>
-            </div>
-        </x-admin.card>
-
-        <div class="flex space-x-3">
-            <x-admin.button type="submit" class="justify-center">Save</x-admin.button>
-            <x-admin.button href="{{ route('admin.categories.index') }}" variant="outline">Cancel</x-admin.button>
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-accent"><span class="ico" data-ico="tag" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Category Info</h3></div>
         </div>
 
+        <div class="field" style="margin-bottom:14px">
+            <span class="lbl">Name <span class="req">*</span></span>
+            <input class="input" type="text" name="name" id="cat-name" value="{{ old('name') }}" required>
+            @error('name')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px" class="grid-2">
+            <div class="field">
+                <span class="lbl">URL slug <span class="req">*</span></span>
+                <div class="input-prefix">
+                    <span>/</span>
+                    <input class="input mono" type="text" name="slug" id="cat-slug" value="{{ old('slug') }}" required style="padding-left:18px">
+                </div>
+                @error('slug')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
+            </div>
+            <div class="field">
+                <span class="lbl">Sort order</span>
+                <input class="input" type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0">
+            </div>
+        </div>
+
+        <div class="field">
+            <span class="lbl">Description</span>
+            <textarea class="textarea" name="description" rows="3">{{ old('description') }}</textarea>
+        </div>
     </div>
+
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-info"><span class="ico" data-ico="image" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Image</h3></div>
+        </div>
+        <x-admin.media-picker name="image_media_id" accept="image" label="Add Image" :value="old('image_media_id')" />
+    </div>
+</div>
+
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head"><div class="ct"><h3>Organization</h3></div></div>
+
+        <div class="field" style="margin-bottom:16px">
+            <span class="lbl">Parent category</span>
+            <div class="select-wrap">
+                <select class="select" name="parent_id">
+                    <option value="">— Top level —</option>
+                    @foreach($parents as $parent)
+                        <option value="{{ $parent->id }}" {{ old('parent_id') == $parent->id ? 'selected' : '' }}>
+                            {{ $parent->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <label class="between" style="cursor:pointer" x-data="{ on: {{ old('is_active', '1') ? 'true' : 'false' }} }">
+            <div>
+                <div style="font-weight:700;font-size:13.5px">Visible on storefront</div>
+                <div class="faint" style="font-size:12px">Show in category navigation</div>
+            </div>
+            <input type="hidden" name="is_active" value="0">
+            <input type="checkbox" name="is_active" value="1" style="display:none" :checked="on" {{ old('is_active', '1') ? 'checked' : '' }}>
+            <button type="button" @click="on = !on" :class="on ? 'toggle on' : 'toggle'" style="flex-shrink:0">
+                <span class="knob"></span>
+            </button>
+        </label>
+    </div>
+</div>
+
+</div>
 </form>
 
 @push('scripts')
@@ -98,4 +112,5 @@ document.getElementById('cat-name').addEventListener('input', function () {
 });
 </script>
 @endpush
+
 @endsection

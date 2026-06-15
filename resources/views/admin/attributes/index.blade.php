@@ -2,56 +2,72 @@
 
 @section('title', 'Attributes')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Attributes</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Attributes</h1>
-            <p class="text-gray-600 mt-1">Variant axes — e.g. Size, Color, Material</p>
-        </div>
-        <x-admin.button href="{{ route('admin.attributes.create') }}">Add Attribute</x-admin.button>
-    </div>
-@endsection
-
 @section('content')
-<x-admin.card>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Values</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                    <th class="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-                @forelse($attributes as $attr)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">{{ $attr->name }}</td>
-                    <td class="px-4 py-3 text-gray-500">{{ $attr->values_count }}</td>
-                    <td class="px-4 py-3 text-gray-500">{{ $attr->sort_order }}</td>
-                    <td class="px-4 py-3 text-right space-x-3">
-                        <a href="{{ route('admin.attributes.edit', $attr) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</a>
-                        <form method="POST" action="{{ route('admin.attributes.destroy', $attr) }}" class="inline"
-                              onsubmit="return confirm('Delete {{ addslashes($attr->name) }} and all its values?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-xs font-medium">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">No attributes yet.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Attributes</h2>
+        <div class="sub">Define options like size, colour and material for product variants</div>
     </div>
-</x-admin.card>
+    <a class="btn btn-primary" href="{{ route('admin.attributes.create') }}">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>Add attribute
+    </a>
+</div>
+
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="sliders"></span></span>
+        <div><div class="num">{{ $stats['total'] }}</div><div class="lbl">Attributes</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-violet"><span class="ico" data-ico="layers"></span></span>
+        <div><div class="num">{{ $stats['values'] }}</div><div class="lbl">Total values</div></div>
+    </div>
+</div>
+
+@php
+$tileColors = ['t-info','t-violet','t-pop','t-teal','t-warning','t-accent'];
+$tileIcons  = ['sliders','layers','tag','package','list','gear'];
+@endphp
+
+<div class="card" style="padding:8px">
+    @forelse($attributes as $i => $attr)
+    @php $tc = $tileColors[$i % count($tileColors)]; $ti = $tileIcons[$i % count($tileIcons)]; @endphp
+    <div style="padding:16px 14px;@if(!$loop->last)border-bottom:1px solid var(--border);@endif">
+        <div class="row" style="gap:12px;margin-bottom:12px">
+            <span class="tile {{ $tc }}">
+                <span class="ico" data-ico="{{ $ti }}" style="width:20px;height:20px"></span>
+            </span>
+            <div class="grow">
+                <div style="font-weight:700;font-size:15.5px">{{ $attr->name }}</div>
+                <div class="faint" style="font-size:12px;font-weight:600;margin-top:2px">
+                    {{ $attr->values_count }} values · <span class="mono">/{{ $attr->slug }}</span>
+                </div>
+            </div>
+            <div class="row" style="gap:4px">
+                <a class="icon-btn" href="{{ route('admin.attributes.edit', $attr) }}" title="Edit">
+                    <span class="ico" data-ico="edit" style="width:16px;height:16px"></span>
+                </a>
+                <form method="POST" action="{{ route('admin.attributes.destroy', $attr) }}"
+                      onsubmit="return confirm('Delete {{ addslashes($attr->name) }} and all its values?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="icon-btn danger" title="Delete">
+                        <span class="ico" data-ico="trash" style="width:16px;height:16px"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        @if($attr->values->isNotEmpty())
+        <div class="row wrap" style="gap:7px;padding-top:12px;border-top:1px solid var(--border)">
+            @foreach($attr->values as $val)
+            <span class="pill" style="background:var(--surface-2);border:1px solid var(--border)">{{ $val->value }}</span>
+            @endforeach
+        </div>
+        @endif
+    </div>
+    @empty
+    <div style="padding:48px;text-align:center;color:var(--text-faint)">No attributes yet.</div>
+    @endforelse
+</div>
+
 @endsection

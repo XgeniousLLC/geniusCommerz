@@ -2,53 +2,37 @@
 
 @php
     $currentLength = is_string($current) ? strlen($current) : $current;
-    $status = 'text-gray-500';
-    $bgColor = 'bg-gray-100';
-    $progressColor = 'bg-gray-400';
-    
+
+    $color = 'var(--text-faint)';
     if ($optimal) {
-        [$optimalMin, $optimalMax] = is_array($optimal) ? $optimal : [$optimal - 10, $optimal + 10];
-        if ($currentLength >= $optimalMin && $currentLength <= $optimalMax) {
-            $status = 'text-green-600';
-            $bgColor = 'bg-green-100';
-            $progressColor = 'bg-green-500';
-        } elseif ($currentLength > 0 && $currentLength <= ($max ?? $optimalMax + 20)) {
-            $status = 'text-yellow-600';
-            $bgColor = 'bg-yellow-100';
-            $progressColor = 'bg-yellow-500';
-        } elseif ($currentLength > ($max ?? $optimalMax + 20)) {
-            $status = 'text-red-600';
-            $bgColor = 'bg-red-100';
-            $progressColor = 'bg-red-500';
+        [$optMin, $optMax] = is_array($optimal) ? $optimal : [$optimal - 10, $optimal + 10];
+        if ($currentLength >= $optMin && $currentLength <= $optMax) {
+            $color = 'var(--success)';
+        } elseif ($currentLength > 0 && $currentLength <= ($max ?? $optMax + 20)) {
+            $color = 'var(--warning)';
+        } elseif ($currentLength > ($max ?? $optMax + 20)) {
+            $color = 'var(--danger)';
         }
     }
-    
     $percentage = $max ? min(($currentLength / $max) * 100, 100) : 0;
 @endphp
 
-<div class="flex items-center space-x-2 text-sm {{ $status }}">
+<div class="row" style="gap:6px;font-size:12px;font-weight:600;color:{{ $color }}">
     <span>{{ $currentLength }}</span>
-    
+
     @if($optimal)
-        <span class="text-gray-400">/</span>
-        <span class="text-gray-500">
-            @if(is_array($optimal))
-                {{ $optimal[0] }}-{{ $optimal[1] }}
-            @else
-                {{ $optimal }}
-            @endif
+        <span class="faint">/</span>
+        <span class="faint">
+            @if(is_array($optimal)){{ $optimal[0] }}–{{ $optimal[1] }}@else{{ $optimal }}@endif
             optimal
         </span>
     @endif
-    
+
     @if($max)
-        <span class="text-gray-400">/</span>
-        <span class="text-gray-500">{{ $max }} max</span>
-        
-        <!-- Progress Bar -->
-        <div class="w-20 h-2 {{ $bgColor }} rounded-full overflow-hidden">
-            <div class="h-full {{ $progressColor }} transition-all duration-200" 
-                 style="width: {{ $percentage }}%"></div>
+        <span class="faint">/</span>
+        <span class="faint">{{ $max }} max</span>
+        <div style="width:64px;height:5px;background:var(--surface-3);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:{{ $percentage }}%;background:{{ $color }};border-radius:99px;transition:width .2s"></div>
         </div>
     @endif
 </div>

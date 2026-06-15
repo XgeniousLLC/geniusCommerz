@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountingController;
+use App\Http\Controllers\Admin\SourcingController;
 use App\Http\Controllers\Admin\AdSpendController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\AiController;
@@ -165,6 +166,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/',                 [ReportController::class, 'index'])->name('index');
             Route::get('/sales',            [ReportController::class, 'salesOverview'])->name('sales');
             Route::get('/profit',           [ReportController::class, 'profitAnalysis'])->name('profit');
             Route::get('/top-products',     [ReportController::class, 'topProducts'])->name('top-products');
@@ -180,6 +182,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/geographic',       [ReportController::class, 'geographic'])->name('geographic');
             Route::get('/export',           [ReportController::class, 'export'])->name('export');
         });
+
+        // Sourcing
+        Route::get('/sourcing',                    [SourcingController::class, 'index'])->name('sourcing.index');
+        Route::post('/sourcing',                   [SourcingController::class, 'store'])->name('sourcing.store');
+        Route::patch('/sourcing/{sourcing}',       [SourcingController::class, 'update'])->name('sourcing.update');
+        Route::delete('/sourcing/{sourcing}',      [SourcingController::class, 'destroy'])->name('sourcing.destroy');
 
         // Accounting
         Route::prefix('accounting')->name('accounting.')->group(function () {
@@ -208,6 +216,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/ai/meta-description',       [AiController::class, 'generateMetaDescription'])->name('ai.meta-description');
         Route::post('/ai/translate-content',      [AiController::class, 'translateContent'])->name('ai.translate-content');
         Route::post('/ai/save-content-translation', [AiController::class, 'saveContentTranslation'])->name('ai.save-content-translation');
+        Route::post('/ai/suggest-price',            [AiController::class, 'suggestPrice'])->name('ai.suggest-price');
 
         // Currencies
         Route::get('/currencies',                          [CurrencyController::class, 'index'])->name('currencies.index');

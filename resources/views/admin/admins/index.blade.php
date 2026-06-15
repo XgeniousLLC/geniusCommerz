@@ -1,171 +1,132 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Admin Management')
+@section('title', 'Team')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Admin Management</h1>
-            <p class="text-gray-600">Manage administrator accounts and permissions</p>
-        </div>
-        <a href="{{ route('admin.admins.create') }}">
-            <x-admin.button>
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Add Admin
-            </x-admin.button>
-        </a>
+
+@php
+$avatarColors = ['var(--violet)','var(--accent)','var(--teal)','var(--pop)','var(--info)','var(--warning)','var(--success)'];
+$roleColors   = ['super_admin'=>'var(--violet)','admin'=>'var(--accent)','manager'=>'var(--info)','staff'=>'var(--teal)'];
+@endphp
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Team</h2>
+        <div class="sub">Manage administrator accounts and access levels</div>
     </div>
+    <a class="btn btn-primary" href="{{ route('admin.admins.create') }}">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>Add member
+    </a>
+</div>
 
-    <!-- Filters -->
-    <x-admin.card>
-        <form method="GET" class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-            <div class="flex-1 min-w-0">
-                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                <x-admin.input 
-                    type="text" 
-                    id="search" 
-                    name="search" 
-                    placeholder="Name or email"
-                    value="{{ request('search') }}"
-                />
-            </div>
+<div class="stat-grid">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="team"></span></span>
+        <div><div class="num">{{ $stats['total'] }}</div><div class="lbl">Members</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-success"><span class="ico" data-ico="check"></span></span>
+        <div><div class="num">{{ $stats['active'] }}</div><div class="lbl">Active</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-violet"><span class="ico" data-ico="shield"></span></span>
+        <div><div class="num">{{ \App\Models\Admin::whereIn('role',['super_admin','admin'])->count() }}</div><div class="lbl">Admins</div></div>
+    </div>
+</div>
 
-            <div class="w-full sm:w-auto sm:min-w-[120px]">
-                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <x-admin.select id="status" name="status">
-                    <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </x-admin.select>
-            </div>
-
-            <div class="w-full sm:w-auto sm:min-w-[160px]">
-                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                <x-admin.select id="role" name="role">
-                    <option value="">All Roles</option>
-                    @foreach(\Database\Seeders\RoleSeeder::ROLES as $role)
-                        <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>
-                            {{ ucwords(str_replace('-', ' ', $role)) }}
-                        </option>
-                    @endforeach
-                </x-admin.select>
-            </div>
-
-            <div class="flex gap-2 w-full sm:w-auto">
-                <x-admin.button type="submit" class="flex-1 sm:flex-none">Filter</x-admin.button>
-                <x-admin.button variant="secondary" type="button" onclick="window.location.href='{{ route('admin.admins.index') }}'" class="flex-1 sm:flex-none">
-                    Clear
-                </x-admin.button>
-            </div>
-        </form>
-    </x-admin.card>
-
-    <!-- Admins Table -->
-    <x-admin.card>
-        <x-admin.table>
-            <x-slot name="header">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </x-slot>
-
-            @forelse($admins as $admin)
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                                    {{ strtoupper(substr($admin->name, 0, 2)) }}
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $admin->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $admin->email }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @php
-                            $roleBadge = match($admin->role) {
-                                'super-admin'       => 'bg-red-100 text-red-800',
-                                'store-manager'     => 'bg-purple-100 text-purple-800',
-                                'operations'        => 'bg-blue-100 text-blue-800',
-                                'inventory-manager' => 'bg-indigo-100 text-indigo-800',
-                                'marketing'         => 'bg-pink-100 text-pink-800',
-                                'call-agent'        => 'bg-yellow-100 text-yellow-800',
-                                'call-supervisor'   => 'bg-orange-100 text-orange-800',
-                                'accountant'        => 'bg-green-100 text-green-800',
-                                'content-editor'    => 'bg-teal-100 text-teal-800',
-                                default             => 'bg-gray-100 text-gray-800',
-                            };
-                        @endphp
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $roleBadge }}">
-                            {{ ucwords(str_replace('-', ' ', $admin->role)) }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            {{ $admin->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            {{ $admin->is_active ? 'Active' : 'Inactive' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $admin->created_at->format('M d, Y') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <a href="{{ route('admin.admins.show', $admin) }}" 
-                           class="text-blue-600 hover:text-blue-900"
-                           title="View Details">
-                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </a>
-                        <a href="{{ route('admin.admins.edit', $admin) }}" 
-                           class="text-indigo-600 hover:text-indigo-900"
-                           title="Edit Admin">
-                            <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </a>
-                        @if($admin->id !== auth('admin')->id())
-                            <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}" class="inline" 
-                                  onsubmit="return confirm('Are you sure you want to delete this admin?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        class="text-red-600 hover:text-red-900"
-                                        title="Delete Admin">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </form>
-                        @endif
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        No admins found.
-                    </td>
-                </tr>
-            @endforelse
-        </x-admin.table>
-
-        @if($admins->hasPages())
-            <div class="px-6 py-3">
-                {{ $admins->links() }}
-            </div>
+<div class="between wrap" style="margin-bottom:16px;gap:12px">
+    <form method="GET" class="row" style="gap:10px;flex:1;max-width:440px">
+        <div class="search-field grow">
+            <span class="ico" data-ico="search"></span>
+            <input class="input" name="search" value="{{ request('search') }}" placeholder="Search name or email…">
+        </div>
+        <select class="input" name="status" style="max-width:130px" onchange="this.form.submit()">
+            <option value="">All status</option>
+            <option value="active"   {{ request('status') === 'active'   ? 'selected' : '' }}>Active</option>
+            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+        </select>
+        @if(request()->anyFilled(['search','status']))
+        <a href="{{ route('admin.admins.index') }}" class="btn btn-outline" style="padding:0 12px">Clear</a>
         @endif
-    </x-admin.card>
+    </form>
+    <a href="{{ route('admin.roles.index') }}" class="btn btn-outline btn-sm">
+        <span class="ico" data-ico="shield" style="width:16px;height:16px"></span>Roles & Permissions
+    </a>
+</div>
+
+<div class="card flush">
+    <div class="table-scroll"><table class="table">
+        <thead><tr>
+            <th>Member</th>
+            <th>Role</th>
+            <th>Last active</th>
+            <th>Status</th>
+            <th></th>
+        </tr></thead>
+        <tbody>
+            @forelse($admins as $admin)
+            @php
+            $initials    = collect(explode(' ', $admin->name))->map(fn($w) => strtoupper(mb_substr($w,0,1)))->take(2)->implode('');
+            $avatarColor = $avatarColors[abs(crc32($admin->name)) % count($avatarColors)];
+            $roleLabel   = ucwords(str_replace('_', ' ', $admin->role ?? 'Admin'));
+            $roleColor   = $roleColors[$admin->role ?? ''] ?? 'var(--text-muted)';
+            @endphp
+            <tr>
+                <td>
+                    <div class="row" style="gap:11px">
+                        <span class="avatar" style="background:{{ $avatarColor }}">{{ $initials }}</span>
+                        <div>
+                            <div style="font-weight:700;font-size:13.5px">
+                                {{ $admin->name }}
+                                @if(auth('admin')->id() === $admin->id)
+                                <span class="faint" style="font-weight:600;font-size:12px"> · you</span>
+                                @endif
+                            </div>
+                            <div class="faint" style="font-size:12px">{{ $admin->email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span style="font-weight:700;font-size:13px;color:{{ $roleColor }}">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:99px;background:{{ $roleColor }};margin-right:6px"></span>{{ $roleLabel }}
+                    </span>
+                </td>
+                <td class="faint" style="font-size:13px">
+                    {{ $admin->last_login_at ? $admin->last_login_at->diffForHumans() : '—' }}
+                </td>
+                <td>
+                    <span class="pill sm {{ $admin->is_active ? 'success' : 'danger' }}">
+                        <span class="dot"></span>{{ $admin->is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                </td>
+                <td style="text-align:right">
+                    <div class="row" style="gap:4px;justify-content:flex-end">
+                        <a class="icon-btn" href="{{ route('admin.admins.edit', $admin) }}" title="Edit">
+                            <span class="ico" data-ico="edit" style="width:16px;height:16px"></span>
+                        </a>
+                        @if(auth('admin')->id() !== $admin->id)
+                        <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}"
+                              onsubmit="return confirm('Remove {{ addslashes($admin->name) }}?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="icon-btn danger">
+                                <span class="ico" data-ico="trash" style="width:16px;height:16px"></span>
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+            @empty
+            <tr><td colspan="5" style="text-align:center;padding:48px;color:var(--text-faint)">No team members found.</td></tr>
+            @endforelse
+        </tbody>
+    </table></div>
+
+    @if($admins->hasPages())
+    <div style="padding:16px 20px;border-top:1px solid var(--border)">
+        {{ $admins->links() }}
+    </div>
+    @endif
+</div>
 
 @endsection

@@ -167,4 +167,40 @@ class Order extends Model
             default              => 'bg-red-100 text-red-700',
         };
     }
+
+    public function statusPillClass(): string
+    {
+        return match($this->status) {
+            'pending'    => 'warning',
+            'confirmed'  => 'teal',
+            'processing' => 'info',
+            'shipped'    => 'violet',
+            'delivered'  => 'success',
+            'cancelled'  => 'danger',
+            default      => '',
+        };
+    }
+
+    public function paymentPillClass(): string
+    {
+        return match($this->payment_status) {
+            'paid'               => 'success',
+            'partially_refunded' => 'warning',
+            'refunded'           => '',
+            default              => 'warning',
+        };
+    }
+
+    public function sourcePillClass(): string
+    {
+        return match($this->source) {
+            'website'   => 'info',
+            'whatsapp'  => 'success',
+            'phone'     => 'teal',
+            'facebook'  => 'violet',
+            'instagram' => 'pop',
+            'walk_in'   => 'warning',
+            default     => '',
+        };
+    }
 }

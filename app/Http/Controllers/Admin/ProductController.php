@@ -51,7 +51,17 @@ class ProductController extends Controller
         $brands = Brand::where('is_active', true)->orderBy('name')->get();
         $categories = Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
-        return view('admin.products.index', compact('products', 'brands', 'categories'));
+        $simpleStock  = Product::where('has_variants', false)->whereNotNull('stock_qty')->sum('stock_qty');
+        $variantStock = \App\Models\ProductVariant::where('is_active', true)->whereNotNull('stock_qty')->sum('stock_qty');
+        $productStats = [
+            'total'    => Product::count(),
+            'active'   => Product::where('status', 'active')->count(),
+            'draft'    => Product::where('status', 'draft')->count(),
+            'low'      => Product::where('has_variants', false)->where('stock_qty', '<=', 10)->count(),
+            'stock'    => (int) $simpleStock + (int) $variantStock,
+        ];
+
+        return view('admin.products.index', compact('products', 'brands', 'categories', 'productStats'));
     }
 
     public function create(): View

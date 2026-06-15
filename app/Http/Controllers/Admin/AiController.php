@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ContentTranslation;
 use App\Models\Language;
+use App\Models\SourcingItem;
 use App\Services\AiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -168,6 +169,41 @@ PROMPT;
         );
 
         return response()->json(['success' => true, 'fields' => $decoded]);
+    }
+
+    public function suggestPrice(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'product_name' => 'required|string|max:255',
+            'cost_price'   => 'required|numeric|min:0',
+            'item_id'      => 'required|integer|exists:sourcing_items,id',
+        ]);
+
+        if (! $this->ai->hasDefault()) {
+            return response()->json(['error' => 'No AI provider configured.'], 422);
+        }
+
+        $prompt = "You are an e-commerce pricing expert. Given the product name and cost price below, "
+            . "suggest an optimal retail selling price that achieves a healthy margin (typically 50–70%) "
+            . "and is competitive in the Bangladeshi e-commerce market.\n\n"
+            . "Product: {$data['product_name']}\n"
+            . "Cost price: ৳{$data['cost_price']}\n\n"
+            . "Return ONLY a single number — the suggested sell price in BDT, no currency symbol, no text.";
+
+        try {
+            $raw = $this->ai->complete($prompt, ['max_tokens' => 20, 'temperature' => 0.3]);
+            $sellPrice = (float) preg_replace('/[^\d.]/', '', trim($raw));
+
+            if ($sellPrice <= 0) {
+                return response()->json(['error' => 'Could not parse a valid price from AI response.'], 422);
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+        SourcingItem::find($data['item_id'])?->update(['sell_price' => $sellPrice]);
+
+        return response()->json(['sell_price' => $sellPrice]);
     }
 
     public function saveContentTranslation(Request $request): JsonResponse

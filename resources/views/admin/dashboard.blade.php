@@ -2,168 +2,218 @@
 
 @section('title', 'Dashboard')
 
-@section('page-header')
-<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-@endsection
-
 @section('content')
 
-{{-- Primary stats row --}}
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-blue-600">{{ number_format($stats['total_orders']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Total Orders</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-orange-500">{{ number_format($stats['orders_24h']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Last 24 Hours</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-cyan-600">{{ number_format($stats['orders_7d']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Last 7 Days</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-yellow-600">{{ number_format($stats['pending_orders']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Pending</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-indigo-600">{{ number_format($stats['in_shipment']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">In Shipment</div>
-    </x-admin.card>
+<div class="page-head">
+    <div>
+        <h2 class="display">Good morning, {{ auth('admin')->user()->name }}</h2>
+        <div class="sub">Here's what's happening in your store today</div>
+    </div>
+    <div class="row">
+        <div class="seg sm">
+            <button type="button">7d</button>
+            <button type="button" class="active">30d</button>
+            <button type="button">90d</button>
+        </div>
+        <a href="{{ route('admin.reports.sales') }}" class="btn btn-outline btn-sm">
+            <span class="ico" data-ico="chart" style="width:16px;height:16px"></span>
+            Reports
+        </a>
+    </div>
 </div>
 
-{{-- Secondary stats row --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-green-600">৳{{ number_format($stats['total_revenue'], 0) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Revenue (Paid)</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-teal-600">{{ number_format($stats['total_stock']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Units in Stock</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-purple-600">{{ number_format($stats['total_customers']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Customers</div>
-    </x-admin.card>
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-bold text-pink-600">{{ number_format($stats['active_coupons']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">Active Coupons</div>
-    </x-admin.card>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    {{-- Recent Orders --}}
-    <div class="lg:col-span-2">
-        <x-admin.card>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-semibold text-gray-900">Recent Orders</h3>
-                <a href="{{ route('admin.orders.index') }}" class="text-sm text-blue-600 hover:text-blue-800">View all</a>
-            </div>
-            @if($recentOrders->isEmpty())
-                <p class="text-sm text-gray-500 text-center py-8">No orders yet.</p>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm divide-y divide-gray-100">
-                        <thead>
-                            <tr class="text-left text-xs text-gray-500 uppercase tracking-wide">
-                                <th class="pb-2 pr-3">Order</th>
-                                <th class="pb-2 pr-3">Customer</th>
-                                <th class="pb-2 pr-3">Items</th>
-                                <th class="pb-2 pr-3">Total</th>
-                                <th class="pb-2 pr-3">Status</th>
-                                <th class="pb-2">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            @foreach($recentOrders as $order)
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-2 pr-3 font-mono text-xs font-medium">
-                                    <a href="{{ route('admin.orders.show', $order) }}" class="text-blue-600 hover:text-blue-800">
-                                        #{{ $order->order_number }}
-                                    </a>
-                                </td>
-                                <td class="py-2 pr-3 text-gray-700 max-w-[130px] truncate">{{ $order->customer_name }}</td>
-                                <td class="py-2 pr-3 text-gray-500">{{ $order->items_count }}</td>
-                                <td class="py-2 pr-3 font-medium text-gray-900">৳{{ number_format($order->total, 0) }}</td>
-                                <td class="py-2 pr-3">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $order->statusBadgeClass() }}">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                </td>
-                                <td class="py-2 text-xs text-gray-400 whitespace-nowrap">{{ $order->created_at->format('M d, H:i') }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+{{-- KPI stat grid --}}
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="card lift stat" style="justify-content:space-between;align-items:flex-start;flex-direction:column;gap:10px;padding:20px">
+        <div class="between" style="width:100%">
+            <span class="tile t-accent"><span class="ico" data-ico="dollar"></span></span>
+            @if($stats['orders_30d'] > 0)
+                <span class="pill success"><span class="ico" data-ico="arrowUp" style="width:13px;height:13px"></span>30d</span>
             @endif
-        </x-admin.card>
+        </div>
+        <div>
+            <div class="num" style="font-size:28px">৳{{ number_format($stats['revenue_30d'], 0) }}</div>
+            <div class="lbl">Revenue · last 30 days</div>
+        </div>
     </div>
 
-    {{-- Sidebar --}}
-    <div class="space-y-4">
+    <div class="card lift stat" style="justify-content:space-between;align-items:flex-start;flex-direction:column;gap:10px;padding:20px">
+        <div class="between" style="width:100%">
+            <span class="tile t-info"><span class="ico" data-ico="cart"></span></span>
+            <span class="pill info"><span class="ico" data-ico="arrowUp" style="width:13px;height:13px"></span>30d</span>
+        </div>
+        <div>
+            <div class="num" style="font-size:28px">{{ number_format($stats['orders_30d']) }}</div>
+            <div class="lbl">Orders · last 30 days</div>
+        </div>
+    </div>
 
-        {{-- Quick Actions --}}
-        <x-admin.card>
-            <h3 class="text-base font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div class="space-y-2">
-                <a href="{{ route('admin.orders.create') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-sm font-medium text-gray-700 hover:text-blue-700">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    Create Order
-                </a>
-                <a href="{{ route('admin.products.create') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-sm font-medium text-gray-700 hover:text-indigo-700">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V7"/></svg>
-                    Add Product
-                </a>
-                <a href="{{ route('admin.coupons.create') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 hover:border-pink-300 hover:bg-pink-50 transition-colors text-sm font-medium text-gray-700 hover:text-pink-700">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    Create Coupon
-                </a>
-                <a href="{{ route('admin.settings.index') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-                    Settings
-                </a>
+    <div class="card lift stat" style="justify-content:space-between;align-items:flex-start;flex-direction:column;gap:10px;padding:20px">
+        <div class="between" style="width:100%">
+            <span class="tile t-violet"><span class="ico" data-ico="receipt"></span></span>
+        </div>
+        <div>
+            <div class="num" style="font-size:28px">৳{{ number_format($stats['aov'], 0) }}</div>
+            <div class="lbl">Average order value</div>
+        </div>
+    </div>
+
+    <div class="card lift stat" style="justify-content:space-between;align-items:flex-start;flex-direction:column;gap:10px;padding:20px">
+        <div class="between" style="width:100%">
+            <span class="tile t-teal"><span class="ico" data-ico="users"></span></span>
+            @if($stats['new_customers'] > 0)
+                <span class="pill success"><span class="ico" data-ico="arrowUp" style="width:13px;height:13px"></span>{{ $stats['new_customers'] }} new</span>
+            @endif
+        </div>
+        <div>
+            <div class="num" style="font-size:28px">{{ number_format($stats['total_customers']) }}</div>
+            <div class="lbl">Total customers</div>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px" class="grid-2">
+
+    {{-- Recent orders --}}
+    <div class="card flush">
+        <div class="card-head" style="padding:20px 22px 14px;margin:0">
+            <span class="tile sm t-accent"><span class="ico" data-ico="receipt" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Recent orders</h3><div class="sub">Latest activity across channels</div></div>
+            <a class="link-btn head-action" href="{{ route('admin.orders.index') }}">
+                View all <span class="ico" data-ico="arrowRight" style="width:14px;height:14px"></span>
+            </a>
+        </div>
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                    <tr><th>Order</th><th>Customer</th><th>Status</th><th style="text-align:right">Total</th></tr>
+                </thead>
+                <tbody>
+                    @forelse($recentOrders as $order)
+                    <tr class="hoverable">
+                        <td>
+                            <a href="{{ route('admin.orders.show', $order) }}"
+                               class="mono" style="color:var(--accent);font-weight:600;font-size:12.5px">
+                                #{{ $order->order_number }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="row" style="gap:10px">
+                                @php
+                                $colors = ['var(--accent)','var(--violet)','var(--teal)','var(--pop)','var(--info)'];
+                                $bg = $colors[$order->id % count($colors)];
+                                @endphp
+                                <span class="avatar" style="width:32px;height:32px;font-size:12px;background:{{ $bg }}">
+                                    {{ strtoupper(substr($order->customer_name ?? 'G', 0, 2)) }}
+                                </span>
+                                <div>
+                                    <div style="font-weight:700;font-size:13px">{{ $order->customer_name ?? 'Guest' }}</div>
+                                    <div class="faint" style="font-size:11.5px">{{ $order->items_count }} item{{ $order->items_count !== 1 ? 's' : '' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @php
+                            $pillClass = match($order->status) {
+                                'pending'    => 'warning',
+                                'confirmed'  => 'info',
+                                'processing' => 'info',
+                                'shipped'    => 'violet',
+                                'delivered'  => 'success',
+                                'cancelled'  => 'danger',
+                                default      => '',
+                            };
+                            @endphp
+                            <span class="pill sm {{ $pillClass }}"><span class="dot"></span>{{ ucfirst($order->status) }}</span>
+                        </td>
+                        <td style="text-align:right" class="tnum"><b>৳{{ number_format($order->total, 0) }}</b></td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-faint)">No orders yet</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Right column --}}
+    <div class="col-gap">
+
+        {{-- Orders by status --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-violet"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Orders by status</h3><div class="sub">All time</div></div>
             </div>
-        </x-admin.card>
-
-        {{-- Order breakdown --}}
-        <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-700 mb-3">Orders by Status</h3>
-            <div class="space-y-2">
-                @foreach(\App\Models\Order::STATUSES as $status)
-                @php $count = \App\Models\Order::where('status', $status)->count(); @endphp
-                <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center gap-2">
-                        @php
-                        $dot = match($status) {
-                            'pending'    => 'bg-yellow-400',
-                            'processing' => 'bg-blue-400',
-                            'shipped'    => 'bg-indigo-400',
-                            'delivered'  => 'bg-green-400',
-                            'cancelled'  => 'bg-red-400',
-                            'refunded'   => 'bg-gray-300',
-                            default      => 'bg-gray-300',
-                        };
-                        @endphp
-                        <span class="w-2 h-2 rounded-full {{ $dot }} shrink-0"></span>
-                        <span class="text-gray-600">{{ ucfirst($status) }}</span>
+            @php $maxCount = max($ordersByStatus->max(), 1); @endphp
+            <div class="stack" style="gap:12px">
+                @foreach($ordersByStatus as $status => $count)
+                @php
+                $barColor = match($status) {
+                    'pending'    => 'var(--warning)',
+                    'confirmed'  => 'var(--info)',
+                    'processing' => 'var(--accent)',
+                    'shipped'    => 'var(--violet)',
+                    'delivered'  => 'var(--success)',
+                    'cancelled'  => 'var(--danger)',
+                    'refunded'   => 'var(--text-faint)',
+                    default      => 'var(--accent)',
+                };
+                @endphp
+                <div>
+                    <div class="between" style="margin-bottom:5px">
+                        <span style="font-weight:600;font-size:13.5px">{{ ucfirst($status) }}</span>
+                        <span class="tnum faint" style="font-size:13px">{{ $count }}</span>
                     </div>
-                    <span class="font-medium text-gray-900">{{ $count }}</span>
+                    <div style="height:6px;border-radius:99px;background:var(--surface-3)">
+                        <div style="width:{{ $maxCount > 0 ? round(($count / $maxCount) * 100) : 0 }}%;height:100%;border-radius:99px;background:{{ $barColor }}"></div>
+                    </div>
                 </div>
                 @endforeach
-                @if(\App\Models\Order::count() === 0)
-                    <p class="text-xs text-gray-400">No orders yet</p>
-                @endif
             </div>
-        </x-admin.card>
+        </div>
+
+        {{-- Quick actions --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-warning"><span class="ico" data-ico="bolt" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Quick actions</h3></div>
+            </div>
+            <div class="stack" style="gap:9px">
+                <a class="btn btn-outline" style="justify-content:flex-start" href="{{ route('admin.products.create') }}">
+                    <span class="ico" data-ico="plus" style="width:17px;height:17px"></span>Add a product
+                </a>
+                <a class="btn btn-outline" style="justify-content:flex-start" href="{{ route('admin.orders.index') }}">
+                    <span class="ico" data-ico="receipt" style="width:17px;height:17px"></span>Review orders
+                </a>
+                <a class="btn btn-outline" style="justify-content:flex-start" href="{{ route('admin.coupons.create') }}">
+                    <span class="ico" data-ico="percent" style="width:17px;height:17px"></span>Create coupon
+                </a>
+                <a class="btn btn-outline" style="justify-content:flex-start" href="{{ route('admin.settings.index') }}">
+                    <span class="ico" data-ico="gear" style="width:17px;height:17px"></span>Settings
+                </a>
+            </div>
+        </div>
 
     </div>
-
 </div>
+
+{{-- Low stock alert --}}
+@if($lowStock->isNotEmpty())
+<div class="card pad" style="margin-top:18px;border-color:color-mix(in srgb,var(--warning) 40%,transparent);background:var(--warning-soft)">
+    <div class="row">
+        <span class="tile" style="background:var(--warning);color:#fff;flex-shrink:0">
+            <span class="ico" data-ico="bell"></span>
+        </span>
+        <div class="grow">
+            <div style="font-weight:700;font-size:14.5px">{{ $lowStock->count() }} product{{ $lowStock->count() !== 1 ? 's are' : ' is' }} running low on stock</div>
+            <div class="muted" style="font-size:13px;margin-top:2px">
+                {{ $lowStock->map(fn($p) => $p->name . ' (' . $p->stock_qty . ')')->implode(', ') }}
+            </div>
+        </div>
+        <a class="btn btn-soft btn-sm" href="{{ route('admin.products.index') }}">Restock now</a>
+    </div>
+</div>
+@endif
+
 @endsection

@@ -1,24 +1,17 @@
 @props(['label' => null, 'required' => false, 'error' => null, 'help' => null])
 
-<div {{ $attributes->merge(['class' => 'space-y-1']) }}>
+<div {{ $attributes->merge(['class' => 'field']) }}>
     @if($label)
-        <label class="block text-sm font-medium text-gray-700">
+        <label>
             {{ $label }}
-            @if($required)
-                <span class="text-red-500">*</span>
-            @endif
+            @if($required)<span class="req">*</span>@endif
         </label>
     @endif
-    
-    <div>
-        {{ $slot }}
-    </div>
-    
-    @if($help)
-        <p class="text-sm text-gray-500">{{ $help }}</p>
+    {{ $slot }}
+    @if($help && !$error)
+        <div class="faint" style="font-size:12px;margin-top:4px">{{ $help }}</div>
     @endif
-    
     @if($error)
-        <p class="text-sm text-red-600">{{ $error }}</p>
+        <div style="font-size:12px;font-weight:600;color:var(--danger);margin-top:4px">{{ $error }}</div>
     @endif
 </div>

@@ -1,427 +1,207 @@
-<div class="flex flex-col h-full">
-    {{-- Logo --}}
-    @php
-        $siteName  = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'klixbd'));
-        $logoUrl   = cache()->remember('site_logo_url', 300, function () {
-            $id = \App\Models\SiteSetting::get('general.logo_media_id');
-            if (!$id) return null;
-            $media = \App\Models\Media::find((int) $id);
-            return $media?->getUrl('thumb');
-        });
-    @endphp
-    <div class="flex items-center justify-center h-16 px-4 bg-blue-600 text-white flex-shrink-0">
-        @if($logoUrl)
-            <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="h-9 max-w-full object-contain">
-        @else
-            <h1 class="text-xl font-bold tracking-wide truncate">{{ $siteName }}</h1>
-        @endif
-    </div>
+@php
+    $siteName = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'klixbd'));
+    $logoUrl  = cache()->remember('site_logo_url', 300, function () {
+        $id = \App\Models\SiteSetting::get('general.logo_media_id');
+        if (!$id) return null;
+        $media = \App\Models\Media::find((int) $id);
+        return $media?->getUrl('thumb');
+    });
+@endphp
 
-    {{-- Navigation --}}
-    <nav class="flex-1 px-3 py-4 overflow-y-auto space-y-1">
-
-        {{-- Dashboard --}}
-        <x-admin.sidebar-link
-            :href="route('admin.dashboard')"
-            :active="request()->routeIs('admin.dashboard')"
-            icon="home">
-            Dashboard
-        </x-admin.sidebar-link>
-
-        {{-- Catalog --}}
-        @php $catalogOpen = request()->routeIs('admin.products.*','admin.categories.*','admin.brands.*','admin.attributes.*'); @endphp
-        <div x-data="{ open: {{ $catalogOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $catalogOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Catalog</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')" icon="shopping-bag">
-                    Products
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.categories.index')" :active="request()->routeIs('admin.categories.*')" icon="tag">
-                    Categories
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.brands.index')" :active="request()->routeIs('admin.brands.*')" icon="bookmark">
-                    Brands
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.attributes.index')" :active="request()->routeIs('admin.attributes.*')" icon="adjustments">
-                    Attributes
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Orders --}}
-        @php $ordersOpen = request()->routeIs('admin.orders.*','admin.coupons.*','admin.refunds.*'); @endphp
-        <div x-data="{ open: {{ $ordersOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $ordersOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Orders</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')" icon="shopping-bag">
-                    All Orders
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.coupons.index')" :active="request()->routeIs('admin.coupons.*')" icon="ticket">
-                    Coupons
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.refunds.index')" :active="request()->routeIs('admin.refunds.*')" icon="arrow-uturn-left">
-                    Refunds
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Customers --}}
-        @php $customersOpen = request()->routeIs('admin.users.*','admin.loyalty.*'); @endphp
-        <div x-data="{ open: {{ $customersOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $customersOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Customers</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" icon="users">
-                    All Customers
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.loyalty.settings')" :active="request()->routeIs('admin.loyalty.*')" icon="star">
-                    Loyalty Program
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Storefront --}}
-        @php $storefrontOpen = request()->routeIs('admin.storefront.*','admin.menus.*','admin.social-proof.*'); @endphp
-        <div x-data="{ open: {{ $storefrontOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $storefrontOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Storefront</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.storefront.homepage')" :active="request()->routeIs('admin.storefront.homepage')" icon="home">
-                    Homepage
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.storefront.footer')" :active="request()->routeIs('admin.storefront.footer')" icon="document-text">
-                    Footer
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.storefront.shop')" :active="request()->routeIs('admin.storefront.shop')" icon="shopping-bag">
-                    Shop Page
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.menus.index')" :active="request()->routeIs('admin.menus.*')" icon="adjustments">
-                    Navigation Menus
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.social-proof.index')" :active="request()->routeIs('admin.social-proof.*')" icon="trending-up">
-                    Social Proof
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Content --}}
-        @php $contentOpen = request()->routeIs('admin.pages.*','admin.blogs.*','admin.blog-categories.*','admin.media.*'); @endphp
-        <div x-data="{ open: {{ $contentOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $contentOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Content</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.blogs.index')" :active="request()->routeIs('admin.blogs.*')" icon="newspaper">
-                    Blog Posts
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.blog-categories.index')" :active="request()->routeIs('admin.blog-categories.*')" icon="tag">
-                    Blog Categories
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.pages.index')" :active="request()->routeIs('admin.pages.*')" icon="document-text">
-                    Pages
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.media.index')" :active="request()->routeIs('admin.media.*')" icon="photograph">
-                    Media Library
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Reports --}}
-        @php $reportsOpen = request()->routeIs('admin.reports.*'); @endphp
-        <div x-data="{ open: {{ $reportsOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $reportsOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Reports</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Sales</p>
-                <x-admin.sidebar-link :href="route('admin.reports.sales')" :active="request()->routeIs('admin.reports.sales')" icon="chart-bar">Sales Overview</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.profit')" :active="request()->routeIs('admin.reports.profit')" icon="chart-bar">Profit Analysis</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.top-products')" :active="request()->routeIs('admin.reports.top-products')" icon="chart-bar">Top Products</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.demand-trends')" :active="request()->routeIs('admin.reports.demand-trends')" icon="chart-bar">Demand Trends</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.category-revenue')" :active="request()->routeIs('admin.reports.category-revenue')" icon="chart-bar">Category & Brand</x-admin.sidebar-link>
-                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Inventory</p>
-                <x-admin.sidebar-link :href="route('admin.reports.inventory')" :active="request()->routeIs('admin.reports.inventory')" icon="chart-bar">Inventory Status</x-admin.sidebar-link>
-                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Customers</p>
-                <x-admin.sidebar-link :href="route('admin.reports.customers')" :active="request()->routeIs('admin.reports.customers')" icon="chart-bar">Customer Report</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.customer-ltv')" :active="request()->routeIs('admin.reports.customer-ltv')" icon="chart-bar">Customer LTV</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.geographic')" :active="request()->routeIs('admin.reports.geographic')" icon="chart-bar">Geographic Sales</x-admin.sidebar-link>
-                <p class="px-3 pt-2 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">Finance</p>
-                <x-admin.sidebar-link :href="route('admin.reports.orders')" :active="request()->routeIs('admin.reports.orders')" icon="chart-bar">Orders Report</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.coupon-usage')" :active="request()->routeIs('admin.reports.coupon-usage')" icon="chart-bar">Coupon Usage</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.refund-analysis')" :active="request()->routeIs('admin.reports.refund-analysis')" icon="chart-bar">Refund Analysis</x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.reports.payment-trends')" :active="request()->routeIs('admin.reports.payment-trends')" icon="chart-bar">Payment Trends</x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Finance --}}
-        @php $financeOpen = request()->routeIs('admin.accounting.*'); @endphp
-        <div x-data="{ open: {{ $financeOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $financeOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Finance</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.accounting.index')" :active="request()->routeIs('admin.accounting.index')" icon="chart-bar">
-                    Overview
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.accounting.purchases.index')" :active="request()->routeIs('admin.accounting.purchases.*')" icon="shopping-bag">
-                    Purchase Orders
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.accounting.ad-spend.index')" :active="request()->routeIs('admin.accounting.ad-spend.*')" icon="trending-up">
-                    Ad Spend
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Team --}}
-        @php $teamOpen = request()->routeIs('admin.admins.*','admin.roles.*'); @endphp
-        <div x-data="{ open: {{ $teamOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $teamOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Team</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link :href="route('admin.admins.index')" :active="request()->routeIs('admin.admins.*')" icon="shield-check">
-                    Admins
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')" icon="key">
-                    Roles & Permissions
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- Settings --}}
-        @php $settingsOpen = request()->routeIs('admin.settings.*','admin.order-settings.*'); @endphp
-        <div x-data="{ open: {{ $settingsOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $settingsOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>Settings</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'general'])"
-                    :active="request()->routeIs('admin.settings.*') && in_array(request()->get('tab', 'general'), ['general'])"
-                    icon="cog">
-                    General
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'meta'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'meta'"
-                    icon="document-text">
-                    SEO / Meta
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'social'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'social'"
-                    icon="share">
-                    Social
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'storefront'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'storefront'"
-                    icon="home">
-                    Storefront
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'payment'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'payment'"
-                    icon="credit-card">
-                    Payment
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'shipping'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'shipping'"
-                    icon="truck">
-                    Shipping
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'cart'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'cart'"
-                    icon="shopping-cart">
-                    Cart
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'legal'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'legal'"
-                    icon="shield-check">
-                    Legal
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'tracking'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'tracking'"
-                    icon="signal">
-                    Tracking
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'feeds'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'feeds'"
-                    icon="globe-alt">
-                    Product Feeds
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'currencies'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'currencies'"
-                    icon="currency-dollar">
-                    Currencies
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'accounting'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'accounting'"
-                    icon="calculator">
-                    Accounting
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'storage'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'storage'"
-                    icon="server">
-                    Storage
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.settings.index', ['tab' => 'notifications'])"
-                    :active="request()->routeIs('admin.settings.*') && request()->get('tab') === 'notifications'"
-                    icon="bell">
-                    Notifications
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.order-settings.index')"
-                    :active="request()->routeIs('admin.order-settings.*')"
-                    icon="shopping-bag">
-                    Orders
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-        {{-- System --}}
-        @php $systemOpen = request()->routeIs('admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*') || request()->is('horizon*'); @endphp
-        <div x-data="{ open: {{ $systemOpen ? 'true' : 'false' }} }">
-            <button type="button" @click="open = !open"
-                class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md
-                       {{ $systemOpen ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50' }}">
-                <span>System</span>
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div x-show="open" x-collapse class="mt-1 space-y-0.5 pl-2">
-                <x-admin.sidebar-link
-                    :href="route('admin.integrations.index')"
-                    :active="request()->routeIs('admin.integrations.*') && !request()->routeIs('admin.ai-settings.*')"
-                    icon="puzzle">
-                    Integrations
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.ai-settings.index')"
-                    :active="request()->routeIs('admin.ai-settings.*')"
-                    icon="lightning-bolt">
-                    AI Settings
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.languages.index')"
-                    :active="request()->routeIs('admin.languages.*')"
-                    icon="translate">
-                    Languages
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.sitemap.index')"
-                    :active="request()->routeIs('admin.sitemap.*')"
-                    icon="document-text">
-                    Sitemap
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.audit.index')"
-                    :active="request()->routeIs('admin.audit.*')"
-                    icon="clipboard-list">
-                    Audit Log
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    :href="route('admin.failed-jobs.index')"
-                    :active="request()->routeIs('admin.failed-jobs.*')"
-                    icon="exclamation-circle">
-                    Failed Jobs
-                </x-admin.sidebar-link>
-                <x-admin.sidebar-link
-                    href="/horizon"
-                    :active="request()->is('horizon*')"
-                    icon="chart-bar">
-                    Horizon
-                </x-admin.sidebar-link>
-            </div>
-        </div>
-
-    </nav>
-
-    {{-- User Info --}}
-    @auth('admin')
-    <div class="p-4 border-t border-gray-200 flex-shrink-0">
-        <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span class="text-white text-sm font-medium">
-                    {{ strtoupper(substr(auth('admin')->user()->name, 0, 1)) }}
-                </span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">{{ auth('admin')->user()->name }}</p>
-                <p class="text-xs text-gray-500 truncate">{{ auth('admin')->user()->email }}</p>
-            </div>
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button type="submit" title="Sign out"
-                    class="text-gray-400 hover:text-red-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                </button>
-            </form>
-        </div>
-    </div>
-    @endauth
+<div class="sidebar-logo">
+    @if($logoUrl)
+        <img src="{{ $logoUrl }}" alt="{{ $siteName }}" style="height:32px;max-width:140px;object-fit:contain">
+    @else
+        <span class="logo-mark">{{ strtoupper(substr($siteName, 0, 1)) }}</span>
+        <span class="logo-text"><b>{{ $siteName }}</b></span>
+    @endif
 </div>
+
+<nav class="nav">
+
+    <a class="nav-leaf focusable {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+        <span class="ico" data-ico="dashboard"></span>
+        <span>Dashboard</span>
+    </a>
+
+    @php $catalogActive = request()->routeIs('admin.products.*','admin.categories.*','admin.brands.*','admin.attributes.*','admin.sourcing.*'); @endphp
+    <div class="nav-group {{ $catalogActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="box"></span>
+            <span>Catalog</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.products.*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">
+                <span class="ico" data-ico="package"></span><span>Products</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}" href="{{ route('admin.categories.index') }}">
+                <span class="ico" data-ico="tag"></span><span>Categories</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}" href="{{ route('admin.brands.index') }}">
+                <span class="ico" data-ico="bookmark"></span><span>Brands</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.attributes.*') ? 'active' : '' }}" href="{{ route('admin.attributes.index') }}">
+                <span class="ico" data-ico="sliders"></span><span>Attributes</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.sourcing.*') ? 'active' : '' }}" href="{{ route('admin.sourcing.index') }}">
+                <span class="ico" data-ico="search"></span><span>Sourcing</span>
+            </a>
+        </div></div></div>
+    </div>
+
+    @php $ordersActive = request()->routeIs('admin.orders.*','admin.coupons.*','admin.refunds.*'); @endphp
+    <div class="nav-group {{ $ordersActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="cart"></span>
+            <span>Orders</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">
+                <span class="ico" data-ico="receipt"></span><span>All Orders</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}" href="{{ route('admin.coupons.index') }}">
+                <span class="ico" data-ico="percent"></span><span>Coupons</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.refunds.*') ? 'active' : '' }}" href="{{ route('admin.refunds.index') }}">
+                <span class="ico" data-ico="refresh"></span><span>Refunds</span>
+            </a>
+        </div></div></div>
+    </div>
+
+    @php $customersActive = request()->routeIs('admin.users.*','admin.loyalty.*'); @endphp
+    <div class="nav-group {{ $customersActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="users"></span>
+            <span>Customers</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                <span class="ico" data-ico="users"></span><span>All Customers</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.loyalty.*') ? 'active' : '' }}" href="{{ route('admin.loyalty.settings') }}">
+                <span class="ico" data-ico="star"></span><span>Loyalty Program</span>
+            </a>
+        </div></div></div>
+    </div>
+
+    @php $storefrontActive = request()->routeIs('admin.storefront.*','admin.menus.*','admin.pages.*','admin.blogs.*','admin.blog-categories.*','admin.media.*'); @endphp
+    <div class="nav-group {{ $storefrontActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="store"></span>
+            <span>Storefront</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.storefront.homepage') ? 'active' : '' }}" href="{{ route('admin.storefront.homepage') }}">
+                <span class="ico" data-ico="dashboard"></span><span>Homepage</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.storefront.footer') ? 'active' : '' }}" href="{{ route('admin.storefront.footer') }}">
+                <span class="ico" data-ico="doc"></span><span>Footer</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.storefront.shop') ? 'active' : '' }}" href="{{ route('admin.storefront.shop') }}">
+                <span class="ico" data-ico="package"></span><span>Shop Page</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.menus.*') ? 'active' : '' }}" href="{{ route('admin.menus.index') }}">
+                <span class="ico" data-ico="list"></span><span>Navigation</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}" href="{{ route('admin.pages.index') }}">
+                <span class="ico" data-ico="doc"></span><span>Pages</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}" href="{{ route('admin.blogs.index') }}">
+                <span class="ico" data-ico="edit"></span><span>Blog Posts</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.blog-categories.*') ? 'active' : '' }}" href="{{ route('admin.blog-categories.index') }}">
+                <span class="ico" data-ico="tag"></span><span>Blog Categories</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">
+                <span class="ico" data-ico="image"></span><span>Media Library</span>
+            </a>
+        </div></div></div>
+    </div>
+
+    <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+        <span class="ico" data-ico="chart"></span>
+        <span>Reports</span>
+    </a>
+
+    @php $financeActive = request()->routeIs('admin.accounting.*'); @endphp
+    <div class="nav-group {{ $financeActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="wallet"></span>
+            <span>Finance</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.accounting.purchases.*') ? 'active' : '' }}" href="{{ route('admin.accounting.purchases.index') }}">
+                <span class="ico" data-ico="doc"></span><span>Purchase Orders</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.accounting.ad-spend.*') ? 'active' : '' }}" href="{{ route('admin.accounting.ad-spend.index') }}">
+                <span class="ico" data-ico="bolt"></span><span>Ad Spend</span>
+            </a>
+        </div></div></div>
+    </div>
+
+    <a class="nav-leaf focusable {{ request()->routeIs('admin.admins.*','admin.roles.*') ? 'active' : '' }}" href="{{ route('admin.admins.index') }}">
+        <span class="ico" data-ico="team"></span>
+        <span>Team</span>
+    </a>
+
+    <a class="nav-leaf focusable {{ request()->routeIs('admin.settings.*','admin.order-settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
+        <span class="ico" data-ico="gear"></span>
+        <span>Settings</span>
+    </a>
+
+    @php $systemActive = request()->routeIs('admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*','admin.currencies.*'); @endphp
+    <div class="nav-group {{ $systemActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="system"></span>
+            <span>System</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.integrations.*') && !request()->routeIs('admin.ai-settings.*') ? 'active' : '' }}" href="{{ route('admin.integrations.index') }}">
+                <span class="ico" data-ico="layers"></span><span>Integrations</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.ai-settings.*') ? 'active' : '' }}" href="{{ route('admin.ai-settings.index') }}">
+                <span class="ico" data-ico="spark"></span><span>AI Settings</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.languages.*') ? 'active' : '' }}" href="{{ route('admin.languages.index') }}">
+                <span class="ico" data-ico="globe"></span><span>Languages</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.currencies.*') ? 'active' : '' }}" href="{{ route('admin.currencies.index') }}">
+                <span class="ico" data-ico="dollar"></span><span>Currencies</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.sitemap.*') ? 'active' : '' }}" href="{{ route('admin.sitemap.index') }}">
+                <span class="ico" data-ico="list"></span><span>Sitemap</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.audit.*') ? 'active' : '' }}" href="{{ route('admin.audit.index') }}">
+                <span class="ico" data-ico="doc"></span><span>Audit Log</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.failed-jobs.*') ? 'active' : '' }}" href="{{ route('admin.failed-jobs.index') }}">
+                <span class="ico" data-ico="x"></span><span>Failed Jobs</span>
+            </a>
+        </div></div></div>
+    </div>
+
+</nav>
+
+@auth('admin')
+<div class="sidebar-user">
+    <span class="avatar" style="width:36px;height:36px;background:var(--accent);font-size:12px;font-weight:700;flex-shrink:0">
+        {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
+    </span>
+    <span class="su-meta grow">
+        <b>{{ auth('admin')->user()->name }}</b>
+        <span>{{ auth('admin')->user()->email }}</span>
+    </span>
+    <form method="POST" action="{{ route('admin.logout') }}">
+        @csrf
+        <button type="submit" class="su-logout focusable" title="Sign out">
+            <span class="ico" data-ico="logout" style="width:18px;height:18px"></span>
+        </button>
+    </form>
+</div>
+@endauth

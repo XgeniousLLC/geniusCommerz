@@ -14,9 +14,14 @@ class AttributeController extends Controller
 {
     public function index(): View
     {
-        $attributes = Attribute::withCount('values')->orderBy('sort_order')->orderBy('name')->get();
+        $attributes = Attribute::with('values')->withCount('values')->orderBy('sort_order')->orderBy('name')->get();
 
-        return view('admin.attributes.index', compact('attributes'));
+        $stats = [
+            'total'  => $attributes->count(),
+            'values' => $attributes->sum('values_count'),
+        ];
+
+        return view('admin.attributes.index', compact('attributes', 'stats'));
     }
 
     public function create(): View

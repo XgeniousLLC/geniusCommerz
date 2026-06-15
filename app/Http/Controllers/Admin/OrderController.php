@@ -44,7 +44,14 @@ class OrderController extends Controller
 
         $orders = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        $stats = [
+            'pending'    => Order::where('status', 'pending')->count(),
+            'processing' => Order::whereIn('status', ['confirmed', 'processing'])->count(),
+            'shipped'    => Order::where('status', 'shipped')->count(),
+            'delivered'  => Order::where('status', 'delivered')->count(),
+        ];
+
+        return view('admin.orders.index', compact('orders', 'stats'));
     }
 
     public function create(): View

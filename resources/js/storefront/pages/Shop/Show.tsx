@@ -6,77 +6,80 @@ import Layout from '../../layouts/Layout';
 import { usePrice } from '../../usePrice';
 import type { ProductCard, ProductFull, ProductVariant, SharedProps } from '../../types';
 
+const S = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' } as React.SVGProps<SVGSVGElement>;
+
 type TabKey = 'desc' | 'specs' | 'reviews' | 'shipping';
 
-interface Props {
-  product: ProductFull;
-  related: ProductCard[];
-}
+interface Props { product: ProductFull; related: ProductCard[]; }
 
-function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
+function Stars({ rating, size = 12 }: { rating: number; size?: number }) {
   const full = Math.round(rating);
-  return (
-    <span style={{ color: '#E8A317', fontSize: size }}>
-      {'★'.repeat(full)}{'☆'.repeat(5 - full)}
-    </span>
-  );
+  return <span style={{ color: 'var(--av-gold)', fontSize: size, letterSpacing: 1.5 }}>{'★'.repeat(full)}{'☆'.repeat(5 - full)}</span>;
 }
 
 function RelatedCard({ product }: { product: ProductCard }) {
   const fmt = usePrice();
-  const discount = product.compare_at_price
-    ? Math.round((1 - product.price / product.compare_at_price) * 100)
-    : null;
+  const [hovered, setHovered] = useState(false);
+  const discount = product.compare_at_price ? Math.round((1 - product.price / product.compare_at_price) * 100) : null;
   return (
-    <Link href={`/shop/${product.slug}`} className="group block" style={{ textDecoration: 'none' }}>
-      <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 10, overflow: 'hidden', transition: 'box-shadow .15s' }} className="hover:shadow-md">
-        <div className="relative overflow-hidden" style={{ aspectRatio: '1/1', background: 'var(--kb-surface-2)' }}>
-          {product.image_url
-            ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-            : <div className="w-full h-full flex items-center justify-center">
-                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--kb-border)' }}>
-                  <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={1.5}/>
-                  <circle cx="8.5" cy="8.5" r="1.5" strokeWidth={1.5}/>
-                  <path strokeWidth={1.5} d="M21 15l-5-5L5 21"/>
-                </svg>
-              </div>
-          }
-          {discount !== null && discount > 0 && (
-            <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: '#ef4444' }}>-{discount}%</span>
-          )}
-        </div>
-        <div style={{ padding: '10px 12px 12px' }}>
-          <p className="text-xs font-medium line-clamp-2 leading-snug" style={{ color: 'var(--kb-ink)' }}>{product.name}</p>
-          <div className="mt-1.5 flex items-center gap-1.5">
-            <span className="text-sm font-bold" style={{ color: 'var(--kb-primary)' }}>{fmt(product.price)}</span>
-            {product.compare_at_price && <span className="text-xs line-through" style={{ color: 'var(--kb-ink-soft)' }}>{fmt(product.compare_at_price)}</span>}
-          </div>
-        </div>
+    <Link href={`/shop/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+      <div style={{ aspectRatio: '4/5', background: 'var(--av-paper-2)', overflow: 'hidden', marginBottom: 10, position: 'relative' }}>
+        {product.image_url
+          ? <img src={product.image_url} alt={product.name} loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .55s cubic-bezier(.2,.7,.3,1)', transform: hovered ? 'scale(1.04)' : 'scale(1)' }} />
+          : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--av-line)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+              </svg>
+            </div>
+        }
+        {discount && discount > 0 && (
+          <span style={{ position: 'absolute', top: 10, left: 10, background: 'var(--av-cognac)', color: '#fff', fontSize: 9.5, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '4px 9px' }}>−{discount}%</span>
+        )}
+      </div>
+      <div style={{ fontFamily: 'var(--av-display)', fontSize: 14.5, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 4, lineHeight: 1.2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 13, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{fmt(product.price)}</span>
+        {product.compare_at_price && <span style={{ fontSize: 12, color: 'var(--av-muted)', textDecoration: 'line-through', fontFamily: 'var(--av-sans)' }}>{fmt(product.compare_at_price)}</span>}
       </div>
     </Link>
+  );
+}
+
+function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ borderBottom: '1px solid var(--av-line)' }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontSize: 12, fontWeight: 500, letterSpacing: '0.16em', textTransform: 'uppercase', textAlign: 'left' }}>
+        {title}
+        <svg viewBox="0 0 24 24" width="14" height="14" {...S} style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
+          <path d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      {open && <div style={{ paddingBottom: 20 }}>{children}</div>}
+    </div>
   );
 }
 
 export default function ShopShow({ product, related }: Props) {
   const { site } = usePage<SharedProps>().props;
   const addItem = useCartStore(s => s.addItem);
+  const openCart = useCartStore(s => s.openCart);
   const { toggle: toggleWishlist, has: inWishlist } = useWishlistStore();
   const fmt = usePrice();
   const wishlisted = inWishlist(product.id);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.has_variants && product.variants.length > 0
-      ? (product.variants.find(v => v.in_stock) ?? product.variants[0])
-      : null
+      ? (product.variants.find(v => v.in_stock) ?? product.variants[0]) : null
   );
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabKey>('desc');
   const [visitorCount] = useState(() => {
     const { visitorCounterEnabled, visitorCounterMin, visitorCounterMax } = site;
-    return visitorCounterEnabled
-      ? Math.floor(Math.random() * (visitorCounterMax - visitorCounterMin + 1)) + visitorCounterMin
-      : 0;
+    return visitorCounterEnabled ? Math.floor(Math.random() * (visitorCounterMax - visitorCounterMin + 1)) + visitorCounterMin : 0;
   });
 
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
@@ -88,71 +91,216 @@ export default function ShopShow({ product, related }: Props) {
   const isPreorder = !isInStock && product.preorder_enabled;
   const canAdd     = isInStock || isPreorder;
 
-  const wishlistItem = {
-    id: product.id, slug: product.slug, name: product.name,
-    price: displayPrice, compare_at_price: comparePrice,
-    image_url: product.images[0]?.url ?? null,
-    category: product.categories[0]?.name ?? null,
-  };
+  const wishlistItem = { id: product.id, slug: product.slug, name: product.name, price: displayPrice, compare_at_price: comparePrice, image_url: product.images[0]?.url ?? null, category: product.categories[0]?.name ?? null };
+  const cartItem = { product_id: product.id, variant_id: selectedVariant?.id ?? null, name: product.name, variant_label: selectedVariant?.label ?? null, price: displayPrice, image_url: product.images[0]?.thumb ?? null, slug: product.slug, shipping_included: product.shipping_included };
 
-  const cartItem = {
-    product_id: product.id, variant_id: selectedVariant?.id ?? null,
-    name: product.name, variant_label: selectedVariant?.label ?? null,
-    price: displayPrice, image_url: product.images[0]?.thumb ?? null,
-    slug: product.slug, shipping_included: product.shipping_included,
-  };
-
-  const handleAddToCart = () => {
-    addItem(cartItem, qty);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
-
-  const handleBuyNow = () => {
-    addItem(cartItem, qty);
-    window.location.href = '/checkout';
-  };
+  function handleAddToCart() {
+    addItem(cartItem, qty); setAdded(true); openCart();
+    setTimeout(() => setAdded(false), 2200);
+  }
+  function handleBuyNow() { addItem(cartItem, qty); window.location.href = '/checkout'; }
 
   const whatsappUrl = site.productWhatsappNumber
-    ? `https://wa.me/${site.productWhatsappNumber}?text=${encodeURIComponent(
-        (site.productWhatsappMessage || 'Hi, I want to order: {product}').replace('{product}', product.name)
-      )}`
+    ? `https://wa.me/${site.productWhatsappNumber}?text=${encodeURIComponent((site.productWhatsappMessage || 'Hi, I want to order: {product}').replace('{product}', product.name))}`
     : null;
 
-  const groupedOptions = product.variants.length > 0
-    ? product.variants[0].options.map(o => o.attribute)
-    : [];
-
-  const getValuesForAttribute = (attr: string) =>
-    [...new Set(product.variants.map(v => v.options.find(o => o.attribute === attr)?.value).filter(Boolean))] as string[];
-
-  const selectedOptions: Record<string, string> = selectedVariant
-    ? Object.fromEntries(selectedVariant.options.map(o => [o.attribute, o.value]))
-    : {};
-
-  const handleOptionSelect = (attr: string, val: string) => {
+  const groupedOptions = product.variants.length > 0 ? product.variants[0].options.map(o => o.attribute) : [];
+  const getValuesForAttribute = (attr: string) => [...new Set(product.variants.map(v => v.options.find(o => o.attribute === attr)?.value).filter(Boolean))] as string[];
+  const selectedOptions: Record<string, string> = selectedVariant ? Object.fromEntries(selectedVariant.options.map(o => [o.attribute, o.value])) : {};
+  function handleOptionSelect(attr: string, val: string) {
     const newOpts = { ...selectedOptions, [attr]: val };
     const exact = product.variants.find(v => v.options.every(o => newOpts[o.attribute] === o.value));
     if (exact) { setSelectedVariant(exact); return; }
-    const partial = product.variants.find(v => v.in_stock && v.options.some(o => o.attribute === attr && o.value === val))
-      ?? product.variants.find(v => v.options.some(o => o.attribute === attr && o.value === val));
+    const partial = product.variants.find(v => v.in_stock && v.options.some(o => o.attribute === attr && o.value === val)) ?? product.variants.find(v => v.options.some(o => o.attribute === attr && o.value === val));
     if (partial) setSelectedVariant(partial);
-  };
+  }
 
   const pageTitle = product.meta?.meta_title ?? product.name;
   const pageDesc  = product.meta?.meta_description ?? product.short_description ?? '';
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'desc', label: 'Description' },
-    { key: 'specs', label: 'Specifications' },
-    { key: 'reviews', label: `Reviews${product.reviews_count > 0 ? ` (${product.reviews_count})` : ''}` },
-    { key: 'shipping', label: 'Shipping & Returns' },
-  ];
+  const W = { maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' };
 
-  const WishlistHeart = () => (
-    <svg width="16" height="16" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </svg>
+  const AddBtn = ({ full }: { full?: boolean }) => (
+    <button onClick={handleAddToCart} disabled={!canAdd}
+      style={{ flex: full ? undefined : 1, width: full ? '100%' : undefined, height: 50, background: added ? 'var(--av-cognac-deep)' : 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', opacity: canAdd ? 1 : 0.4, transition: 'background .2s', boxSizing: 'border-box' }}>
+      {added ? 'Added to Bag' : isPreorder ? 'Pre-order' : 'Add to Bag'}
+    </button>
+  );
+
+  const InfoPanel = () => (
+    <>
+      {/* Breadcrumb */}
+      <nav style={{ display: 'flex', gap: 8, fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 18, flexWrap: 'wrap' }}>
+        <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link><span>/</span>
+        <Link href="/shop" style={{ color: 'inherit', textDecoration: 'none' }}>Shop</Link>
+        {product.categories[0] && (<><span>/</span><Link href={`/shop/c/${product.categories[0].slug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{product.categories[0].name}</Link></>)}
+        <span>/</span><span style={{ color: 'var(--av-ink)' }}>{product.name}</span>
+      </nav>
+
+      {/* Eyebrow */}
+      {(product.brand || product.categories[0]) && (
+        <div style={{ fontSize: 10.5, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 10 }}>
+          {product.brand?.name ?? product.categories[0]?.name}
+        </div>
+      )}
+
+      {/* Name */}
+      <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(24px,3vw,38px)', fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 14px', lineHeight: 1.06, letterSpacing: '-0.012em' }}>
+        {product.name}
+      </h1>
+
+      {/* Rating */}
+      {(product.reviews_avg || product.reviews_count > 0) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, paddingBottom: 16, borderBottom: '1px solid var(--av-line-soft)' }}>
+          {product.reviews_avg && <Stars rating={product.reviews_avg} size={13} />}
+          <span style={{ fontSize: 12.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{product.reviews_count} reviews</span>
+        </div>
+      )}
+
+      {/* Price */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 20 }}>
+        <span style={{ fontFamily: 'var(--av-sans)', fontSize: 22, fontWeight: 600, color: 'var(--av-ink)' }}>{fmt(displayPrice)}</span>
+        {comparePrice && <span style={{ fontSize: 15, color: 'var(--av-muted)', textDecoration: 'line-through', fontFamily: 'var(--av-sans)' }}>{fmt(comparePrice)}</span>}
+        {discount && discount > 0 && <span style={{ fontSize: 11.5, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, letterSpacing: '0.06em' }}>−{discount}%</span>}
+      </div>
+
+      {/* Short description */}
+      {product.short_description && (
+        <p style={{ color: 'var(--av-muted)', fontSize: 14, marginBottom: 20, lineHeight: 1.7, fontFamily: 'var(--av-sans)' }}>{product.short_description}</p>
+      )}
+
+      {/* Variants */}
+      {product.has_variants && groupedOptions.map(attr => (
+        <div key={attr} style={{ marginBottom: 18 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+            <span>{attr}</span>
+            <span style={{ fontWeight: 400, color: 'var(--av-muted)' }}>{selectedOptions[attr]}</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {getValuesForAttribute(attr).map(val => {
+              const combo = product.variants.find(v => Object.entries({ ...selectedOptions, [attr]: val }).every(([a, v2]) => v.options.some(o => o.attribute === a && o.value === v2)));
+              const unavailable = !combo;
+              const outOfStock  = combo ? !combo.in_stock : false;
+              const isSelected  = selectedOptions[attr] === val;
+              const disabled    = unavailable || outOfStock;
+              return (
+                <button key={val} onClick={() => !disabled && handleOptionSelect(attr, val)} disabled={disabled}
+                  style={{ minWidth: 52, padding: '9px 14px', border: `1px solid ${isSelected ? 'var(--av-ink)' : 'var(--av-line)'}`, background: isSelected ? 'var(--av-ink)' : 'transparent', borderRadius: 2, fontSize: 13, cursor: disabled ? 'not-allowed' : 'pointer', color: isSelected ? 'var(--av-paper)' : disabled ? 'var(--av-line)' : 'var(--av-ink)', fontFamily: 'var(--av-sans)', opacity: disabled ? 0.4 : 1, transition: 'all .15s' }}>
+                  <span style={{ textDecoration: disabled ? 'line-through' : 'none' }}>{val}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Stock status */}
+      <div style={{ fontSize: 12.5, fontFamily: 'var(--av-sans)', color: isInStock ? 'var(--av-cognac)' : 'var(--av-muted)', letterSpacing: '0.06em', marginBottom: 18 }}>
+        {isInStock ? (isLowStock ? `Only ${stockQty} left` : 'In stock') : isPreorder ? 'Available to pre-order' : 'Out of stock'}
+        {site.visitorCounterEnabled && visitorCount > 0 && (
+          <span style={{ marginLeft: 14, color: 'var(--av-muted)' }}>· {visitorCount} viewing now</span>
+        )}
+      </div>
+
+      {/* Preorder notice */}
+      {isPreorder && (product.preorder_message || product.preorder_expected_date) && (
+        <div style={{ padding: '12px 14px', border: '1px solid var(--av-line)', background: 'var(--av-paper)', fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 16, lineHeight: 1.6 }}>
+          {product.preorder_message || 'Available for pre-order'}
+          {product.preorder_expected_date && <strong style={{ color: 'var(--av-ink)', marginLeft: 4 }}>· Ships {new Date(product.preorder_expected_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</strong>}
+        </div>
+      )}
+
+      {/* Qty + CTA */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--av-line)', height: 50, flexShrink: 0 }}>
+          <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 44, height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontSize: 18, display: 'grid', placeItems: 'center' }}>−</button>
+          <span style={{ width: 36, textAlign: 'center', fontSize: 14, fontFamily: 'var(--av-sans)', fontWeight: 500, color: 'var(--av-ink)' }}>{qty}</span>
+          <button onClick={() => setQty(q => q + 1)} style={{ width: 44, height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontSize: 18, display: 'grid', placeItems: 'center' }}>+</button>
+        </div>
+        <AddBtn />
+        <button onClick={() => toggleWishlist(wishlistItem)}
+          style={{ width: 50, height: 50, border: '1px solid var(--av-line)', background: 'transparent', cursor: 'pointer', color: wishlisted ? 'var(--av-cognac)' : 'var(--av-muted)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </button>
+      </div>
+
+      <button onClick={handleBuyNow} disabled={!canAdd}
+        style={{ width: '100%', height: 46, background: 'transparent', border: '1px solid var(--av-line)', color: 'var(--av-ink)', cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', opacity: canAdd ? 1 : 0.4, marginBottom: 20, boxSizing: 'border-box' }}>
+        Buy Now
+      </button>
+
+      {/* WA + Call */}
+      {(site.productWhatsappEnabled || site.productCallEnabled) && (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+          {site.productWhatsappEnabled && whatsappUrl && (
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+              style={{ flex: 1, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, border: '1px solid rgba(37,211,102,.5)', color: '#1a8a42', fontFamily: 'var(--av-sans)', fontSize: 12, fontWeight: 500, letterSpacing: '0.08em', textDecoration: 'none', background: 'rgba(37,211,102,.06)' }}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp
+            </a>
+          )}
+          {site.productCallEnabled && site.productCallNumber && (
+            <a href={`tel:${site.productCallNumber}`}
+              style={{ flex: 1, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, border: '1px solid var(--av-line)', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 12, fontWeight: 500, letterSpacing: '0.08em', textDecoration: 'none' }}>
+              <svg viewBox="0 0 24 24" width="14" height="14" {...S}><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+              Call
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Reassurance */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+        {[
+          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, 'Authentic', 'Verified quality'],
+          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>, 'Free Returns', '7-day policy'],
+          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>, 'Fast Delivery', 'Nationwide'],
+          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/></svg>, 'Secure Pay', 'SSL encrypted'],
+        ].map(([icon, title, sub], i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)' }}>
+            <span style={{ color: 'var(--av-cognac)', flexShrink: 0 }}>{icon as React.ReactNode}</span>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{title as string}</div>
+              <div style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{sub as string}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Meta chips */}
+      {((selectedVariant?.sku ?? product.sku) || product.brand) && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
+          {(selectedVariant?.sku ?? product.sku) && (
+            <span style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', letterSpacing: '0.08em' }}>
+              SKU: {selectedVariant?.sku ?? product.sku}
+            </span>
+          )}
+          {product.brand && (
+            <><span style={{ color: 'var(--av-line)' }}>·</span>
+            <Link href={`/shop/b/${product.brand.slug}`} style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', textDecoration: 'none', letterSpacing: '0.08em' }}>
+              Brand: {product.brand.name}
+            </Link></>
+          )}
+        </div>
+      )}
+
+      {(product.warranty || product.shipping_included) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {product.warranty && (
+            <div style={{ fontSize: 12.5, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', letterSpacing: '0.04em' }}>
+              Warranty: {product.warranty}
+            </div>
+          )}
+          {product.shipping_included && (
+            <div style={{ fontSize: 12.5, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', letterSpacing: '0.04em' }}>
+              Free shipping included
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 
   return (
@@ -162,472 +310,170 @@ export default function ShopShow({ product, related }: Props) {
         {pageDesc && <meta name="description" content={pageDesc} />}
       </Head>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pb-[180px] md:pb-[120px] lg:pb-10">
+      <div style={{ ...W, paddingTop: 'clamp(24px,4vw,48px)', paddingBottom: 'clamp(60px,8vw,96px)' }}>
+        {/* PDP grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 'clamp(32px,5vw,64px)', alignItems: 'start' }} className="av-pdp-grid">
 
-        {/* Breadcrumb */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', padding: '16px 0 0', flexWrap: 'wrap' }}>
-          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-700">Home</Link>
-          <span>/</span>
-          <Link href="/shop" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-700">Shop</Link>
-          {product.categories[0] && (
-            <>
-              <span>/</span>
-              <Link href={`/shop/c/${product.categories[0].slug}`} style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-700">
-                {product.categories[0].name}
-              </Link>
-            </>
-          )}
-          <span>/</span>
-          <span style={{ color: 'var(--kb-ink)', fontWeight: 500 }} className="truncate max-w-[180px]">{product.name}</span>
-        </nav>
-
-        {/* PDP Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 py-5" style={{ alignItems: 'start' }}>
-
-          {/* ── Gallery: Desktop (sticky thumbs + main) ── */}
-          <div className="hidden lg:block lg:sticky lg:top-[116px]">
-            <div style={{ display: 'grid', gridTemplateColumns: product.images.length > 1 ? '72px 1fr' : '1fr', gap: 12 }}>
-              {/* Thumbs column */}
+          {/* Gallery */}
+          <div style={{ position: 'sticky', top: 80 }} className="av-pdp-gallery">
+            <div style={{ display: 'grid', gridTemplateColumns: product.images.length > 1 ? '72px 1fr' : '1fr', gap: 14 }} className="av-gallery-inner">
+              {/* Thumbs */}
               {product.images.length > 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {product.images.map((img, i) => (
                     <button key={img.id} onClick={() => setActiveImage(i)}
-                      style={{
-                        width: 72, height: 72, borderRadius: 8, padding: 0,
-                        border: `${i === activeImage ? 2 : 1}px solid ${i === activeImage ? 'var(--kb-primary)' : 'var(--kb-border)'}`,
-                        background: 'var(--kb-surface-2)', overflow: 'hidden', cursor: 'pointer',
-                      }}>
-                      <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      style={{ width: 72, height: 88, padding: 0, border: `1px solid ${i === activeImage ? 'var(--av-ink)' : 'var(--av-line)'}`, background: 'var(--av-paper-2)', overflow: 'hidden', cursor: 'pointer', flexShrink: 0 }}>
+                      <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </button>
                   ))}
                 </div>
               )}
-
-              {/* Main image */}
-              <div style={{ aspectRatio: '1/1', background: 'var(--kb-surface-2)', borderRadius: 12, border: '1px solid var(--kb-border)', overflow: 'hidden', position: 'relative' }}>
+              {/* Main */}
+              <div style={{ aspectRatio: '4/5', background: 'var(--av-paper-2)', overflow: 'hidden', position: 'relative' }}>
                 {product.images.length > 0
-                  ? <img src={product.images[activeImage]?.url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #F2F4F9, #E9ECF3)' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        {product.brand && <div style={{ fontSize: 11, color: 'var(--kb-ink-soft)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>{product.brand.name}</div>}
-                        <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--kb-ink)', marginTop: 4 }}>{product.name}</div>
-                      </div>
+                  ? <img src={product.images[activeImage]?.url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+                  : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--av-line)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
                     </div>
                 }
                 {product.images.length > 1 && (
-                  <div style={{ position: 'absolute', right: 14, top: 14, background: 'rgba(15,22,37,.72)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '5px 9px', borderRadius: 999, letterSpacing: '0.02em' }}>
+                  <div style={{ position: 'absolute', right: 12, bottom: 12, fontSize: 10.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', letterSpacing: '0.1em', background: 'rgba(251,248,241,.88)', padding: '4px 8px', backdropFilter: 'blur(4px)' }}>
                     {activeImage + 1} / {product.images.length}
                   </div>
                 )}
-                <button onClick={() => toggleWishlist(wishlistItem)}
-                  style={{ position: 'absolute', top: 14, left: 14, width: 34, height: 34, borderRadius: '50%', background: wishlisted ? '#fff0f0' : 'rgba(255,255,255,.9)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 1px 4px rgba(14,19,32,.12)', color: wishlisted ? '#ef4444' : '#9ca3af' }}>
-                  <WishlistHeart />
-                </button>
               </div>
             </div>
           </div>
 
-          {/* ── Gallery: Mobile (main + scrollable thumbs) ── */}
-          <div className="lg:hidden">
-            <div style={{ aspectRatio: '1/1', background: 'var(--kb-surface-2)', borderRadius: 12, border: '1px solid var(--kb-border)', overflow: 'hidden', position: 'relative' }}>
-              {product.images.length > 0
-                ? <img src={product.images[activeImage]?.url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #F2F4F9, #E9ECF3)' }}>
-                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--kb-border)' }}>
-                      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={1.5}/>
-                      <circle cx="8.5" cy="8.5" r="1.5" strokeWidth={1.5}/>
-                      <path strokeWidth={1.5} d="M21 15l-5-5L5 21"/>
-                    </svg>
-                  </div>
-              }
-              <button onClick={() => toggleWishlist(wishlistItem)}
-                style={{ position: 'absolute', top: 12, right: 12, width: 34, height: 34, borderRadius: '50%', background: wishlisted ? '#fff0f0' : 'rgba(255,255,255,.9)', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', boxShadow: '0 1px 4px rgba(14,19,32,.12)', color: wishlisted ? '#ef4444' : '#9ca3af' }}>
-                <WishlistHeart />
-              </button>
-            </div>
-            {product.images.length > 1 && (
-              <div style={{ display: 'flex', gap: 8, marginTop: 10, overflowX: 'auto', paddingBottom: 4 }}>
-                {product.images.map((img, i) => (
-                  <button key={img.id} onClick={() => setActiveImage(i)}
-                    style={{ flexShrink: 0, width: 60, height: 60, borderRadius: 8, padding: 0, border: `${i === activeImage ? 2 : 1}px solid ${i === activeImage ? 'var(--kb-primary)' : 'var(--kb-border)'}`, background: 'var(--kb-surface-2)', overflow: 'hidden', cursor: 'pointer' }}>
-                    <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* ── Product Info ── */}
+          {/* Info */}
           <div>
-            {/* Brand */}
-            {product.brand && (
-              <Link href={`/shop/b/${product.brand.slug}`}
-                style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--kb-primary)', textTransform: 'uppercase', letterSpacing: '0.06em', textDecoration: 'none', marginBottom: 4 }}
-                className="hover:underline">
-                {product.brand.name}
-              </Link>
-            )}
-
-            {/* Name */}
-            <h1 className="text-[22px] sm:text-[30px]" style={{ fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.15, margin: '4px 0 8px', color: 'var(--kb-ink)' }}>
-              {product.name}
-            </h1>
-
-            {/* Rating row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13, color: 'var(--kb-ink-soft)', padding: '8px 0', borderBottom: '1px solid var(--kb-border)', marginBottom: 16, flexWrap: 'wrap' }}>
-              {product.reviews_avg ? (
-                <>
-                  <Stars rating={product.reviews_avg} />
-                  <span><strong style={{ color: 'var(--kb-ink)' }}>{Number(product.reviews_avg).toFixed(1)}</strong> · {product.reviews_count} reviews</span>
-                  <span>·</span>
-                  <a href="#reviews" onClick={e => { e.preventDefault(); setActiveTab('reviews'); }}
-                    style={{ color: 'var(--kb-primary)', textDecoration: 'none' }} className="hover:underline">
-                    Read reviews
-                  </a>
-                </>
-              ) : (
-                <span>No reviews yet</span>
-              )}
-            </div>
-
-            {/* Price block */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-              <span className="text-[22px] sm:text-[28px]" style={{ fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--kb-ink)' }}>{fmt(displayPrice)}</span>
-              {comparePrice && <span style={{ color: 'var(--kb-ink-soft)', textDecoration: 'line-through', fontSize: 16 }}>{fmt(comparePrice)}</span>}
-              {discount !== null && discount > 0 && (
-                <span style={{ background: '#FEF2F2', color: '#EF4444', padding: '3px 8px', borderRadius: 4, fontSize: 12, fontWeight: 700 }}>−{discount}% off</span>
-              )}
-            </div>
-
-            {/* Short description */}
-            {product.short_description && (
-              <p style={{ color: 'var(--kb-ink-soft)', fontSize: 14, marginBottom: 20, lineHeight: 1.65 }}>{product.short_description}</p>
-            )}
-
-            {/* Variants */}
-            {product.has_variants && groupedOptions.map(attr => (
-              <div key={attr} style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 13, fontWeight: 600, color: 'var(--kb-ink)', marginBottom: 8 }}>
-                  <span>{attr}</span>
-                  <span style={{ fontWeight: 400, color: 'var(--kb-ink-soft)' }}>{selectedOptions[attr]}</span>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {getValuesForAttribute(attr).map(val => {
-                    const combo = product.variants.find(v =>
-                      Object.entries({ ...selectedOptions, [attr]: val }).every(([a, v2]) =>
-                        v.options.some(o => o.attribute === a && o.value === v2)
-                      )
-                    );
-                    const unavailable = !combo;
-                    const outOfStock  = combo ? !combo.in_stock : false;
-                    const isSelected  = selectedOptions[attr] === val;
-                    const disabled    = unavailable || outOfStock;
-                    return (
-                      <button key={val}
-                        onClick={() => !disabled && handleOptionSelect(attr, val)}
-                        disabled={disabled}
-                        style={{
-                          minWidth: 56,
-                          padding: isSelected ? '7px 13px' : '8px 14px',
-                          border: `${isSelected ? 2 : 1}px solid ${isSelected ? 'var(--kb-primary)' : 'var(--kb-border)'}`,
-                          background: isSelected ? '#EEF2FF' : '#fff',
-                          borderRadius: 8, fontSize: 13, fontWeight: 600,
-                          cursor: disabled ? 'not-allowed' : 'pointer',
-                          color: isSelected ? 'var(--kb-primary)' : disabled ? 'var(--kb-ink-soft)' : 'var(--kb-ink)',
-                          opacity: disabled ? 0.4 : 1,
-                          transition: 'border-color .15s, color .15s, background .15s',
-                        }}>
-                        <span style={{ textDecoration: disabled ? 'line-through' : 'none' }}>{val}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* Meta strip */}
-            <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', padding: '12px 0', marginBottom: 16, borderTop: '1px solid var(--kb-border)', borderBottom: '1px solid var(--kb-border)', fontSize: 12 }}>
-              {(selectedVariant?.sku ?? product.sku) && (
-                <>
-                  <dt style={{ color: 'var(--kb-ink-soft)' }}>SKU</dt>
-                  <dd style={{ margin: 0, color: 'var(--kb-ink)', fontWeight: 600 }}>{selectedVariant?.sku ?? product.sku}</dd>
-                </>
-              )}
-              {product.categories[0] && (
-                <>
-                  <dt style={{ color: 'var(--kb-ink-soft)' }}>Category</dt>
-                  <dd style={{ margin: 0 }}>
-                    <Link href={`/shop/c/${product.categories[0].slug}`}
-                      style={{ color: 'var(--kb-primary)', fontWeight: 600, textDecoration: 'none' }} className="hover:underline">
-                      {product.categories[0].name}
-                    </Link>
-                  </dd>
-                </>
-              )}
-              <dt style={{ color: 'var(--kb-ink-soft)' }}>Availability</dt>
-              <dd style={{ margin: 0, fontWeight: 600, color: isInStock ? '#16a34a' : '#ef4444' }}>
-                {isInStock ? (isLowStock ? `Only ${stockQty} left!` : 'In stock') : 'Out of stock'}
-              </dd>
-            </dl>
-
-            {/* Urgency */}
-            {site.visitorCounterEnabled && visitorCount > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#FEF3E5', color: '#B25E09', border: '1px solid #F5DCBA', padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, marginBottom: 16 }}>
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                {visitorCount} people are viewing this item right now
-              </div>
-            )}
-
-            {/* Preorder notice */}
-            {isPreorder && (product.preorder_message || product.preorder_expected_date) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#c2410c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>
-                  {product.preorder_message || 'Available for pre-order'}
-                  {product.preorder_expected_date && (
-                    <span style={{ marginLeft: 4, fontWeight: 600 }}>
-                      · Expected: {new Date(product.preorder_expected_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                  )}
-                </span>
-              </div>
-            )}
-
-            {/* Qty + actions (desktop) */}
-            <div className="hidden lg:block">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kb-ink)' }}>Quantity</span>
-                <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--kb-border)', borderRadius: 8, overflow: 'hidden', height: 44, background: '#fff' }}>
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                    style={{ width: 38, height: '100%', background: '#fff', border: 'none', color: 'var(--kb-ink)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
-                    className="hover:bg-gray-50">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4"/></svg>
-                  </button>
-                  <span style={{ width: 50, textAlign: 'center', fontWeight: 600, fontSize: 14 }}>{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)}
-                    style={{ width: 38, height: '100%', background: '#fff', border: 'none', color: 'var(--kb-ink)', cursor: 'pointer', display: 'grid', placeItems: 'center' }}
-                    className="hover:bg-gray-50">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
-                  </button>
-                </div>
-                <button onClick={() => toggleWishlist(wishlistItem)}
-                  style={{ height: 44, padding: '0 16px', border: '1px solid var(--kb-border)', borderRadius: 8, background: wishlisted ? '#fff0f0' : '#fff', color: wishlisted ? '#ef4444' : 'var(--kb-ink)', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                  <WishlistHeart />
-                  {wishlisted ? 'Saved' : 'Save'}
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, marginBottom: 8 }}>
-                <button onClick={handleAddToCart} disabled={!canAdd}
-                  style={{ height: 48, borderRadius: 10, border: 'none', cursor: canAdd ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: added ? '#16a34a' : isPreorder ? '#f97316' : 'var(--kb-primary)', color: '#fff', opacity: canAdd ? 1 : 0.5, transition: 'background .15s' }}>
-                  {added
-                    ? <><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>Added!</>
-                    : isPreorder
-                      ? 'Pre-order Now'
-                      : <><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Add to Cart</>
-                  }
-                </button>
-                <button onClick={handleBuyNow} disabled={!canAdd}
-                  style={{ height: 48, padding: '0 24px', borderRadius: 10, border: 'none', cursor: canAdd ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 15, background: '#0f172a', color: '#fff', opacity: canAdd ? 1 : 0.5 }}>
-                  {isPreorder ? 'Pre-order & Checkout' : 'Buy Now'}
-                </button>
-              </div>
-            </div>
-
-            {/* Warranty strip */}
-            {product.warranty && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 14px', background: 'var(--kb-surface-2)', border: '1px solid var(--kb-border)', borderRadius: 8, fontSize: 13, color: 'var(--kb-ink)', marginTop: 12 }}>
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0, color: 'var(--kb-primary)' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-                <span><strong>{product.warranty}</strong></span>
-              </div>
-            )}
-
-            {/* Shipping policy strip (if free shipping) */}
-            {product.shipping_included && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#15803d', fontWeight: 600, marginTop: 8 }}>
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 13h12l1-13M10 12h4"/>
-                </svg>
-                Free Shipping Included
-              </div>
-            )}
-
-            {/* WhatsApp + Call */}
-            {(site.productWhatsappEnabled || site.productCallEnabled) && (
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                {site.productWhatsappEnabled && whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 10, background: '#25D366', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                    Order on WhatsApp
-                  </a>
-                )}
-                {site.productCallEnabled && site.productCallNumber && (
-                  <a href={`tel:${site.productCallNumber}`}
-                    style={{ flex: 1, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 10, background: '#2563eb', color: '#fff', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
-                    Call to Order
-                  </a>
-                )}
-              </div>
-            )}
+            <InfoPanel />
           </div>
         </div>
 
-        {/* ── Tabs ── */}
-        <div style={{ marginTop: 32, borderTop: '1px solid var(--kb-border)' }}>
-          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--kb-border)', overflowX: 'auto' }}>
-            {tabs.map(tab => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                style={{
-                  padding: '14px 16px', background: 'none', border: 'none',
-                  fontWeight: 600, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap',
-                  marginBottom: -1,
-                  borderBottom: `2px solid ${activeTab === tab.key ? 'var(--kb-primary)' : 'transparent'}`,
-                  color: activeTab === tab.key ? 'var(--kb-primary)' : 'var(--kb-ink-soft)',
-                  transition: 'color .15s',
-                }}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* Accordion tabs */}
+        <div style={{ marginTop: 56, borderTop: '1px solid var(--av-line)', maxWidth: 760 }}>
+          <Accordion title="Description" defaultOpen>
+            {product.description
+              ? <div className="kb-prose" style={{ color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontSize: 14, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.description }} />
+              : <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14 }}>No description available.</p>
+            }
+          </Accordion>
 
-          {activeTab === 'desc' && (
-            <div style={{ padding: '24px 0' }}>
-              {product.description
-                ? <div className="kb-prose" dangerouslySetInnerHTML={{ __html: product.description }} />
-                : <p style={{ color: 'var(--kb-ink-soft)', fontSize: 14 }}>No description available.</p>
-              }
-            </div>
+          {product.specifications && product.specifications.length > 0 && (
+            <Accordion title="Specifications">
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <tbody>
+                  {product.specifications.map((spec, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--av-line-soft)' }}>
+                      <th style={{ textAlign: 'left', padding: '10px 0 10px 0', color: 'var(--av-muted)', fontWeight: 400, width: '40%', fontFamily: 'var(--av-sans)', fontSize: 13 }}>{spec.key}</th>
+                      <td style={{ padding: '10px 0', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, fontSize: 13 }}>{spec.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Accordion>
           )}
 
-          {activeTab === 'specs' && (
-            <div style={{ padding: '24px 0' }}>
-              {product.specifications && product.specifications.length > 0
-                ? (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--kb-border)', borderRadius: 8, overflow: 'hidden', fontSize: 13 }}>
-                    <tbody>
-                      {product.specifications.map((spec, i) => (
-                        <tr key={i} style={{ background: i % 2 === 0 ? 'var(--kb-surface-2)' : '#fff' }}>
-                          <th className="w-[110px] sm:w-[200px]" style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--kb-ink-soft)', fontWeight: 500, borderRight: '1px solid var(--kb-border)' }}>{spec.key}</th>
-                          <td style={{ padding: '12px 16px', color: 'var(--kb-ink)', fontWeight: 500 }}>{spec.value}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )
-                : <p style={{ color: 'var(--kb-ink-soft)', fontSize: 14 }}>No specifications available.</p>
-              }
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div style={{ padding: '24px 0' }}>
-              {product.reviews_count > 0 && product.reviews_avg ? (
-                <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8 items-start">
-                  <div style={{ textAlign: 'center', padding: 20, background: 'var(--kb-surface-2)', borderRadius: 12 }}>
-                    <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1, color: 'var(--kb-ink)' }}>
-                      {Number(product.reviews_avg).toFixed(1)}
-                    </div>
-                    <div style={{ margin: '4px 0' }}><Stars rating={product.reviews_avg} size={18} /></div>
-                    <div style={{ fontSize: 13, color: 'var(--kb-ink-soft)' }}>Based on {product.reviews_count} reviews</div>
+          <Accordion title={`Reviews${product.reviews_count > 0 ? ` (${product.reviews_count})` : ''}`}>
+            {product.reviews_count > 0 && product.reviews_avg ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 32 }} className="av-reviews-grid">
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ fontFamily: 'var(--av-display)', fontSize: 64, fontWeight: 300, lineHeight: 1, color: 'var(--av-ink)', letterSpacing: '-0.04em' }}>
+                    {Number(product.reviews_avg).toFixed(1)}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {product.reviews.map(r => (
-                      <div key={r.id} style={{ border: '1px solid var(--kb-border)', borderRadius: 10, padding: 16 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--kb-ink)' }}>{r.user_name}</div>
-                            <Stars rating={r.rating} size={13} />
-                          </div>
-                          <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)', whiteSpace: 'nowrap' }}>{r.created_at}</span>
+                  <div style={{ margin: '6px 0' }}><Stars rating={product.reviews_avg} size={16} /></div>
+                  <div style={{ fontSize: 12, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{product.reviews_count} reviews</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {product.reviews.map(r => (
+                    <div key={r.id} style={{ paddingBottom: 16, borderBottom: '1px solid var(--av-line-soft)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', marginBottom: 3 }}>{r.user_name}</div>
+                          <Stars rating={r.rating} size={12} />
                         </div>
-                        {r.title && <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--kb-ink)', margin: '4px 0 2px' }}>{r.title}</p>}
-                        {r.body && <p style={{ fontSize: 13, color: 'var(--kb-ink-soft)', margin: 0, lineHeight: 1.6 }}>{r.body}</p>}
+                        <span style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', whiteSpace: 'nowrap' }}>{r.created_at}</span>
                       </div>
-                    ))}
-                  </div>
+                      {r.title && <p style={{ fontWeight: 500, fontSize: 13, color: 'var(--av-ink)', margin: '6px 0 3px', fontFamily: 'var(--av-sans)' }}>{r.title}</p>}
+                      {r.body && <p style={{ fontSize: 13.5, color: 'var(--av-muted)', margin: 0, lineHeight: 1.65, fontFamily: 'var(--av-sans)' }}>{r.body}</p>}
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div style={{ padding: '40px 24px', textAlign: 'center', background: 'var(--kb-surface-2)', border: '1px dashed var(--kb-border)', borderRadius: 12, color: 'var(--kb-ink-soft)' }}>
-                  <div style={{ fontSize: 28, marginBottom: 8 }}>★</div>
-                  <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--kb-ink)' }}>Be the first to write a detailed review</div>
-                  <div style={{ fontSize: 13 }}>Share your thoughts with other shoppers.</div>
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div style={{ padding: '32px 0', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--av-display)', fontSize: 22, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 8 }}>No reviews yet</div>
+                <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14 }}>Be the first to share your experience.</p>
+              </div>
+            )}
+          </Accordion>
 
-          {activeTab === 'shipping' && (
-            <div style={{ padding: '24px 0', fontSize: 14, lineHeight: 1.65, color: 'var(--kb-ink-soft)' }}>
-              {(product.return_policy || site.globalReturnPolicy) ? (
-                <div className="kb-prose" dangerouslySetInnerHTML={{ __html: product.return_policy || site.globalReturnPolicy || '' }} />
-              ) : (
-                <p>Contact us for shipping and returns information.</p>
-              )}
-            </div>
-          )}
+          <Accordion title="Shipping & Returns">
+            {(product.return_policy || site.globalReturnPolicy) ? (
+              <div className="kb-prose" style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.return_policy || site.globalReturnPolicy || '' }} />
+            ) : (
+              <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14, lineHeight: 1.7 }}>
+                Standard delivery 3–5 business days. Free returns within 7 days of receipt. Items must be unused and in original condition.
+              </p>
+            )}
+          </Accordion>
         </div>
 
-        {/* Related Products */}
+        {/* Related */}
         {related.length > 0 && (
-          <div style={{ marginTop: 48 }}>
-            <div style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--kb-ink)', margin: 0 }}>You might also like</h2>
-              <div style={{ fontSize: 14, color: 'var(--kb-ink-soft)', marginTop: 4 }}>Similar products from the same category.</div>
+          <section style={{ marginTop: 72 }}>
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 10.5, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 10 }}>You may also like</div>
+              <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 400, color: 'var(--av-ink)', margin: 0, letterSpacing: '-0.012em' }}>Complete the look</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }} className="av-related-grid">
               {related.map(p => <RelatedCard key={p.id} product={p} />)}
             </div>
-          </div>
+          </section>
         )}
       </div>
 
-      {/* ── Mobile Sticky Bottom Bar ── */}
-      <div className="lg:hidden fixed bottom-14 md:bottom-0 left-0 right-0 z-40 bg-white border-t shadow-lg" style={{ borderColor: 'var(--kb-border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px 6px' }}>
-          <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)', flexShrink: 0 }}>Qty:</span>
-          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--kb-border)', borderRadius: 8, overflow: 'hidden' }}>
-            <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 32, height: 32, background: '#fff', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--kb-ink)', fontSize: 16 }}>−</button>
-            <span style={{ width: 32, textAlign: 'center', fontSize: 13, fontWeight: 600 }}>{qty}</span>
-            <button onClick={() => setQty(q => q + 1)} style={{ width: 32, height: 32, background: '#fff', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'var(--kb-ink)', fontSize: 16 }}>+</button>
+      {/* Mobile sticky bar */}
+      <div className="av-pdp-mobile-bar" style={{ display: 'none', position: 'fixed', bottom: 56, left: 0, right: 0, zIndex: 40, background: 'var(--av-paper)', borderTop: '1px solid var(--av-line)', padding: '12px 16px', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--av-line)', height: 40 }}>
+            <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 36, height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontSize: 18, display: 'grid', placeItems: 'center' }}>−</button>
+            <span style={{ width: 30, textAlign: 'center', fontSize: 13, fontFamily: 'var(--av-sans)', fontWeight: 500 }}>{qty}</span>
+            <button onClick={() => setQty(q => q + 1)} style={{ width: 36, height: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontSize: 18, display: 'grid', placeItems: 'center' }}>+</button>
           </div>
-          {isInStock
-            ? isLowStock
-              ? <span style={{ fontSize: 12, color: '#f97316', fontWeight: 500 }}>Only {stockQty} left!</span>
-              : <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 500 }}>In Stock</span>
-            : <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 500 }}>Out of Stock</span>
-          }
-          <div style={{ flex: 1 }} />
-          <button onClick={() => toggleWishlist(wishlistItem)}
-            style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--kb-border)', background: wishlisted ? '#fff0f0' : '#fff', color: wishlisted ? '#ef4444' : '#9ca3af', cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
-            <WishlistHeart />
+          <span style={{ fontSize: 12, color: isInStock ? 'var(--av-cognac)' : 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>
+            {isInStock ? (isLowStock ? `Only ${stockQty} left` : 'In stock') : 'Out of stock'}
+          </span>
+          <button onClick={() => toggleWishlist(wishlistItem)} style={{ marginLeft: 'auto', background: 'transparent', border: 'none', cursor: 'pointer', color: wishlisted ? 'var(--av-cognac)' : 'var(--av-muted)', padding: 6 }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
           </button>
         </div>
-        <div style={{ display: 'flex', gap: 8, padding: '0 16px 16px' }}>
-          <button onClick={handleAddToCart} disabled={!canAdd}
-            style={{ flex: 1, height: 44, borderRadius: 10, border: 'none', cursor: canAdd ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: added ? '#16a34a' : 'var(--kb-primary)', color: '#fff', opacity: canAdd ? 1 : 0.5 }}>
-            {added
-              ? <><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>Added!</>
-              : <><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>Add to Cart</>
-            }
-          </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <AddBtn />
           <button onClick={handleBuyNow} disabled={!canAdd}
-            style={{ flex: 1, height: 44, borderRadius: 10, border: 'none', cursor: canAdd ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 14, background: '#0f172a', color: '#fff', opacity: canAdd ? 1 : 0.5 }}>
+            style={{ flex: 1, height: 50, background: 'transparent', border: '1px solid var(--av-line)', color: 'var(--av-ink)', cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', opacity: canAdd ? 1 : 0.4 }}>
             Buy Now
           </button>
         </div>
       </div>
+
+      <style>{`
+        @media(max-width:860px){
+          .av-pdp-grid{grid-template-columns:1fr!important}
+          .av-pdp-gallery{position:static!important}
+          .av-gallery-inner{grid-template-columns:1fr!important}
+          .av-pdp-mobile-bar{display:flex!important;flex-direction:column}
+        }
+        @media(max-width:640px){
+          .av-related-grid{grid-template-columns:1fr 1fr!important;gap:16px!important}
+          .av-reviews-grid{grid-template-columns:1fr!important}
+        }
+      `}</style>
     </Layout>
   );
 }

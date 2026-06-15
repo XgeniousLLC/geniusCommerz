@@ -1,139 +1,114 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Audit Log')
-
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Audit Log</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Audit Log</h1>
-    <p class="text-gray-600 mt-1">All create / update / delete events across audited models</p>
-@endsection
-
 @section('content')
-{{-- Filters --}}
-<x-admin.card class="mb-6">
-    <form method="GET" action="{{ route('admin.audit.index') }}" class="flex flex-wrap gap-4 items-end">
-        <div class="w-40">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Event</label>
-            <x-admin.select name="event">
+@php
+$eventColors = ['created'=>'success','updated'=>'warning','deleted'=>'danger'];
+@endphp
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Audit Log</h2>
+        <div class="sub">All create / update / delete events across audited models</div>
+    </div>
+</div>
+
+<div class="card flush" style="margin-bottom:14px">
+    <form method="GET" action="{{ route('admin.audit.index') }}"
+          style="padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border-bottom:1px solid var(--border)">
+        <div class="field" style="margin:0;min-width:140px">
+            <span class="lbl">Event</span>
+            <select class="input" name="event" style="height:36px;font-size:13px">
                 <option value="">All Events</option>
                 <option value="created"  {{ request('event') === 'created'  ? 'selected' : '' }}>Created</option>
                 <option value="updated"  {{ request('event') === 'updated'  ? 'selected' : '' }}>Updated</option>
                 <option value="deleted"  {{ request('event') === 'deleted'  ? 'selected' : '' }}>Deleted</option>
-            </x-admin.select>
+            </select>
         </div>
-
-        <div class="w-44">
-            <label class="block text-xs font-medium text-gray-500 mb-1">Model</label>
-            <x-admin.select name="model">
+        <div class="field" style="margin:0;min-width:160px">
+            <span class="lbl">Model</span>
+            <select class="input" name="model" style="height:36px;font-size:13px">
                 <option value="">All Models</option>
                 @foreach($modelTypes as $type)
-                    <option value="{{ $type }}" {{ request('model') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                <option value="{{ $type }}" {{ request('model') === $type ? 'selected' : '' }}>{{ $type }}</option>
                 @endforeach
-            </x-admin.select>
+            </select>
         </div>
-
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">From</label>
-            <x-admin.input type="date" name="from" value="{{ request('from') }}" />
+        <div class="field" style="margin:0">
+            <span class="lbl">From</span>
+            <input class="input" type="date" name="from" value="{{ request('from') }}" style="height:36px;font-size:13px">
         </div>
-
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">To</label>
-            <x-admin.input type="date" name="to" value="{{ request('to') }}" />
+        <div class="field" style="margin:0">
+            <span class="lbl">To</span>
+            <input class="input" type="date" name="to" value="{{ request('to') }}" style="height:36px;font-size:13px">
         </div>
-
-        <div class="flex gap-2">
-            <x-admin.button type="submit">Filter</x-admin.button>
-            <x-admin.button variant="secondary" type="button"
-                onclick="window.location='{{ route('admin.audit.index') }}'">
-                Clear
-            </x-admin.button>
+        <div class="row" style="gap:8px;padding-top:18px">
+            <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('admin.audit.index') }}" class="btn btn-sm btn-outline">Clear</a>
         </div>
     </form>
-</x-admin.card>
-
-{{-- Log table --}}
-<x-admin.card>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">When</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">By</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Changes</th>
+                    <th>When</th>
+                    <th>Event</th>
+                    <th>Model</th>
+                    <th>By</th>
+                    <th>Changes</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
+            <tbody>
                 @forelse($logs as $log)
-                    <tr class="hover:bg-gray-50" x-data="{ open: false }">
-                        <td class="px-4 py-3 whitespace-nowrap text-gray-500 text-xs">
-                            {{ $log->created_at->format('d M Y H:i') }}
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            @php
-                                $badge = match($log->event) {
-                                    'created' => 'bg-green-100 text-green-800',
-                                    'updated' => 'bg-yellow-100 text-yellow-800',
-                                    'deleted' => 'bg-red-100 text-red-800',
-                                    default   => 'bg-gray-100 text-gray-800',
-                                };
-                            @endphp
-                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium {{ $badge }}">
-                                {{ ucfirst($log->event) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="font-medium text-gray-900">{{ class_basename($log->auditable_type) }}</span>
-                            <span class="text-gray-400">#{{ $log->auditable_id }}</span>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-gray-600">
-                            {{ $log->user?->name ?? 'System' }}
-                        </td>
-                        <td class="px-4 py-3">
-                            @if($log->event === 'updated' && $log->old_values)
-                                <button @click="open = !open"
-                                    class="text-blue-500 hover:text-blue-700 text-xs underline">
-                                    <span x-text="open ? 'Hide diff' : 'Show diff'"></span>
-                                </button>
-                                <div x-show="open" x-cloak class="mt-2 space-y-1">
-                                    @foreach(array_keys($log->new_values ?? []) as $field)
-                                        @if(isset($log->old_values[$field]) && $log->old_values[$field] !== ($log->new_values[$field] ?? null))
-                                            <div class="text-xs">
-                                                <span class="font-medium text-gray-700">{{ $field }}:</span>
-                                                <span class="line-through text-red-500 ml-1">{{ Str::limit((string) $log->old_values[$field], 40) }}</span>
-                                                <span class="text-green-600 ml-1">→ {{ Str::limit((string) ($log->new_values[$field] ?? ''), 40) }}</span>
-                                            </div>
-                                        @endif
-                                    @endforeach
+                <tr class="hoverable" x-data="{ open: false }">
+                    <td class="faint" style="font-size:12.5px;white-space:nowrap">
+                        {{ $log->created_at->format('d M Y H:i') }}
+                    </td>
+                    <td>
+                        <span class="pill sm {{ $eventColors[$log->event] ?? '' }}">
+                            {{ ucfirst($log->event) }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-weight:600;font-size:13.5px">{{ class_basename($log->auditable_type) }}</span>
+                        <span class="faint" style="font-size:12px"> #{{ $log->auditable_id }}</span>
+                    </td>
+                    <td class="muted" style="font-size:13px">{{ $log->user?->name ?? 'System' }}</td>
+                    <td>
+                        @if($log->event === 'updated' && $log->old_values)
+                        <button @click="open=!open" class="link-btn" style="font-size:12.5px">
+                            <span x-text="open ? 'Hide diff' : 'Show diff'">Show diff</span>
+                        </button>
+                        <div x-show="open" style="margin-top:8px;display:none" x-cloak>
+                            @foreach(array_keys($log->new_values ?? []) as $field)
+                                @if(isset($log->old_values[$field]) && $log->old_values[$field] !== ($log->new_values[$field] ?? null))
+                                <div style="font-size:12px;margin-bottom:3px">
+                                    <span style="font-weight:600;color:var(--text)">{{ $field }}:</span>
+                                    <span style="text-decoration:line-through;color:var(--danger);margin-left:6px">{{ Str::limit((string) $log->old_values[$field], 40) }}</span>
+                                    <span style="color:var(--success);margin-left:4px">→ {{ Str::limit((string) ($log->new_values[$field] ?? ''), 40) }}</span>
                                 </div>
-                            @elseif($log->event === 'created')
-                                <span class="text-xs text-gray-400">New record</span>
-                            @else
-                                <span class="text-xs text-gray-400">—</span>
-                            @endif
-                        </td>
-                    </tr>
+                                @endif
+                            @endforeach
+                        </div>
+                        @elseif($log->event === 'created')
+                        <span class="faint" style="font-size:12.5px">New record</span>
+                        @else
+                        <span class="faint" style="font-size:12.5px">—</span>
+                        @endif
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-12 text-center text-gray-400">No audit events found.</td>
-                    </tr>
+                <tr>
+                    <td colspan="5" style="text-align:center;padding:48px 20px">
+                        <div class="faint" style="font-size:13.5px">No audit events found.</div>
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
     @if($logs->hasPages())
-        <div class="px-4 py-3 border-t border-gray-200">
-            {{ $logs->links() }}
-        </div>
+    <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $logs->links() }}</div>
     @endif
-</x-admin.card>
+</div>
+
 @endsection

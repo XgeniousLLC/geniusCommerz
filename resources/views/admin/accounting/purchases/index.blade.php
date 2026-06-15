@@ -1,53 +1,114 @@
 @extends('admin.layouts.admin')
-@section('title', 'Purchase Orders')
-@section('content')
-<div class="space-y-5">
-    <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">Purchase Orders</h1>
-        <x-admin.button href="{{ route('admin.accounting.purchases.create') }}">+ New Purchase Order</x-admin.button>
-    </div>
 
-    <x-admin.card>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Reference</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Supplier</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Date</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Items</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Status</th>
-                        <th class="px-4 py-3"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse($orders as $po)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-mono font-semibold text-blue-700">
-                            <a href="{{ route('admin.accounting.purchases.show', $po) }}" class="hover:underline">{{ $po->reference }}</a>
-                        </td>
-                        <td class="px-4 py-3 text-gray-800">{{ $po->supplier_name }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ $po->order_date->format('d M Y') }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">{{ $po->items_count }}</td>
-                        <td class="px-4 py-3 text-right">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
-                                {{ ['draft'=>'bg-gray-100 text-gray-600','ordered'=>'bg-blue-100 text-blue-700','partial'=>'bg-yellow-100 text-yellow-700','received'=>'bg-green-100 text-green-700'][$po->status] }}">
-                                {{ ucfirst($po->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.accounting.purchases.show', $po) }}" class="text-blue-600 hover:underline text-xs">View →</a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="6" class="px-4 py-10 text-center text-gray-400">No purchase orders yet.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($orders->hasPages())
-        <div class="px-4 py-3 border-t border-gray-200">{{ $orders->links() }}</div>
-        @endif
-    </x-admin.card>
+@section('title', 'Purchase Orders')
+
+@section('content')
+@php
+use App\Models\PurchaseOrder;
+$openCount      = PurchaseOrder::whereIn('status', ['draft','ordered','partial'])->count();
+$inTransitUnits = \App\Models\PurchaseOrderItem::whereHas('purchaseOrder', fn($q) => $q->whereIn('status',['ordered','partial']))->sum(\DB::raw('quantity - received_qty'));
+$committedSpend = PurchaseOrder::whereIn('status', ['draft','ordered','partial'])
+    ->with('items')->get()->sum(fn($o) => $o->totalCost());
+$receivedRecent = PurchaseOrder::where('status','received')
+    ->where('updated_at','>=',now()->subDays(30))
+    ->with('items')->get()->sum(fn($o) => $o->totalCost());
+$statusColors   = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'=>'success'];
+@endphp
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Purchase Orders</h2>
+        <div class="sub">Restock inventory &amp; track supplier shipments</div>
+    </div>
+    <a href="{{ route('admin.accounting.purchases.create') }}" class="btn btn-primary">
+        <span class="ico" data-ico="plus" style="width:18px;height:18px"></span>New Purchase Order
+    </a>
 </div>
+
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="doc"></span></span>
+        <div><div class="num">{{ $openCount }}</div><div class="lbl">Open orders</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-violet"><span class="ico" data-ico="truck"></span></span>
+        <div><div class="num">{{ number_format($inTransitUnits) }} units</div><div class="lbl">In transit</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-warning"><span class="ico" data-ico="wallet"></span></span>
+        <div><div class="num">৳{{ number_format($committedSpend, 0) }}</div><div class="lbl">Committed spend</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-success"><span class="ico" data-ico="package"></span></span>
+        <div><div class="num">৳{{ number_format($receivedRecent, 0) }}</div><div class="lbl">Received (30d)</div></div>
+    </div>
+</div>
+
+@php $filter = request('status', 'all'); @endphp
+<style>.po-seg a{display:inline-flex;align-items:center;padding:0 14px;height:32px;font-size:13px;font-weight:600;border:none;background:none;color:var(--text-muted);cursor:pointer;border-radius:8px;text-decoration:none}.po-seg a.active,.po-seg a:hover{background:var(--surface-2);color:var(--text)}</style>
+<div class="seg sm po-seg" style="margin-bottom:16px">
+    @foreach(['all'=>'All','draft'=>'Draft','ordered'=>'Ordered','partial'=>'Partial','received'=>'Received'] as $key => $label)
+    <a href="{{ route('admin.accounting.purchases.index', $key !== 'all' ? ['status'=>$key] : []) }}"
+       class="{{ $filter === $key ? 'active' : '' }}">{{ $label }}</a>
+    @endforeach
+</div>
+
+<div class="card flush">
+    <div class="table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Reference</th>
+                    <th>Supplier</th>
+                    <th>Date</th>
+                    <th style="text-align:right">Items</th>
+                    <th style="text-align:right">Total Cost</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($orders as $po)
+                <tr>
+                    <td>
+                        <a href="{{ route('admin.accounting.purchases.show', $po) }}"
+                           class="mono" style="font-size:13px;font-weight:700;color:var(--accent);text-decoration:none">
+                            {{ $po->reference }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="row" style="gap:9px">
+                            <span class="avatar" style="width:28px;height:28px;font-size:11px;background:var(--accent)">
+                                {{ strtoupper(substr($po->supplier_name, 0, 2)) }}
+                            </span>
+                            <span style="font-weight:600;font-size:13.5px">{{ $po->supplier_name }}</span>
+                        </div>
+                    </td>
+                    <td style="font-size:13px;font-weight:600">{{ $po->order_date->format('d M Y') }}</td>
+                    <td style="text-align:right" class="tnum">{{ $po->items_count }}</td>
+                    <td style="text-align:right" class="tnum"><b>৳{{ number_format($po->totalCost(), 2) }}</b></td>
+                    <td>
+                        <span class="pill sm {{ $statusColors[$po->status] ?? '' }}">
+                            <span class="dot"></span>{{ ucfirst($po->status) }}
+                        </span>
+                    </td>
+                    <td style="text-align:right">
+                        <a href="{{ route('admin.accounting.purchases.show', $po) }}" class="btn btn-sm btn-outline">View</a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:48px 20px">
+                        <div class="faint" style="font-size:13.5px">No purchase orders yet.</div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($orders->hasPages())
+    <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $orders->links() }}</div>
+    @endif
+</div>
+
 @endsection
