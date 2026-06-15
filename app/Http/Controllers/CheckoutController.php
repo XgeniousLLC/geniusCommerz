@@ -251,6 +251,11 @@ class CheckoutController extends Controller
         $order->load('items');
         $this->trackPurchase($order, $request);
 
+        if ($request->filled('lp_slug')) {
+            return redirect()->route('lp.show', ['product' => $request->input('lp_slug')])
+                ->with('lp_confirmed_order', $order->order_number);
+        }
+
         return redirect()->route('order.confirm', $order->order_number)
             ->with('order_placed', true);
     }

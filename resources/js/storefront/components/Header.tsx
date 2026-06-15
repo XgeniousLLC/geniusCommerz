@@ -46,7 +46,7 @@ export default function Header() {
     ? site.mainNav
     : [
         { label: 'Shop',  url: '/shop',  target: '_self', children: [] },
-        { label: 'Blog',  url: '/blog',  target: '_self', children: [] },
+
         { label: 'Track', url: '/track', target: '_self', children: [] },
       ];
 
@@ -85,11 +85,10 @@ export default function Header() {
       }}>
         <div style={{
           maxWidth: 'var(--av-maxw)', margin: '0 auto',
-          padding: '0 var(--av-gutter)',
-          height: scrolled ? 64 : 74,
+          padding: `${scrolled ? 8 : 12}px var(--av-gutter)`,
           display: 'grid', gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center', gap: 16,
-          transition: 'height .35s',
+          transition: 'padding .35s',
         }}>
 
           {/* Left: desktop nav + mobile burger */}
@@ -114,7 +113,7 @@ export default function Header() {
               <img
                 src={site.logoUrl}
                 alt={site.name}
-                style={{ height: scrolled ? 60 : 80, width: 'auto', transition: 'height .35s', objectFit: 'contain' }}
+                className={scrolled ? 'av-logo av-logo--sm' : 'av-logo'}
               />
             ) : (
               <span style={{

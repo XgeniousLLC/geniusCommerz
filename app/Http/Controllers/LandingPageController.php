@@ -10,6 +10,32 @@ use Inertia\Response;
 
 class LandingPageController extends Controller
 {
+    private function confirmedOrder(): ?array
+    {
+        $orderNumber = session('lp_confirmed_order');
+        if (! $orderNumber) return null;
+
+        $order = \App\Models\Order::with('items')
+            ->where('order_number', $orderNumber)
+            ->first();
+
+        if (! $order) return null;
+
+        return [
+            'order_number'   => $order->order_number,
+            'customer_name'  => $order->customer_name,
+            'total'          => (float) $order->total,
+            'payment_method' => $order->payment_method,
+            'items'          => $order->items->map(fn ($i) => [
+                'product_name'  => $i->product_name,
+                'variant_label' => $i->variant_label,
+                'quantity'      => $i->quantity,
+                'unit_price'    => (float) $i->unit_price,
+                'total'         => (float) $i->total,
+            ])->all(),
+        ];
+    }
+
     public function show(Product $product): Response
     {
         if ($product->status !== 'active') {
@@ -94,8 +120,9 @@ class LandingPageController extends Controller
                 ]),
                 'variants'         => $variants,
             ],
-            'paymentMethods' => $paymentMethods,
-            'prefill'        => $prefill,
+            'paymentMethods'  => $paymentMethods,
+            'prefill'         => $prefill,
+            'confirmedOrder'  => $this->confirmedOrder(),
         ]);
     }
 }

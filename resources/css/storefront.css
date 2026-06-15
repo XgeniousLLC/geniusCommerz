@@ -105,6 +105,13 @@ body::before {
     :root { --av-gutter: 18px; }
 }
 
+/* Site logo */
+.av-logo { height: 80px; width: auto; object-fit: contain; transition: height .35s; display: block; }
+.av-logo--sm { height: 60px; }
+
+/* Hero image placeholder */
+@media (max-width: 640px) { .av-hero-img-placeholder { display: none; } }
+
 .bn { font-family: 'Hind Siliguri', 'Inter', system-ui, sans-serif; }
 
 @layer components {

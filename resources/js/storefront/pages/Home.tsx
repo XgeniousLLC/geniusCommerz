@@ -285,26 +285,39 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
         )}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(20,16,12,.72) 0%, rgba(20,16,12,.04) 72%)' }} />
 
-        <div style={{ ...W, position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: '100%', paddingBottom: 'clamp(40px,8vh,80px)' }}>
-          <Eyebrow>New Collection</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(36px,6vw,80px)', fontWeight: 400, color: 'var(--av-paper)', margin: '0 0 20px', lineHeight: 1.0, letterSpacing: '-0.018em', maxWidth: 680 }}>
-            {heroTitle || 'Crafted for the\nDiscerning Few'}
-          </h1>
-          {heroSub && (
-            <p style={{ fontFamily: 'var(--av-sans)', fontSize: 'clamp(14px,1.4vw,17px)', color: 'rgba(244,239,229,.72)', margin: '0 0 32px', maxWidth: 480, lineHeight: 1.65 }}>
-              {heroSub}
-            </p>
-          )}
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <Link href="/shop"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', background: 'var(--av-paper)', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, transition: 'background .2s' }}>
-              Shop Collection
-            </Link>
-            <Link href="/shop?sort=newest"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', border: '1px solid rgba(244,239,229,.34)', color: 'var(--av-paper)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, background: 'transparent', transition: 'border-color .2s' }}>
-              New Arrivals
-            </Link>
+        <div style={{ ...W, position: 'relative', zIndex: 2, height: '100%', display: 'flex', alignItems: 'center', gap: 'clamp(32px,6vw,80px)', paddingBlock: 'clamp(40px,8vh,80px)' }}>
+
+          {/* Left: text */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Eyebrow>New Collection</Eyebrow>
+            <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(36px,5.5vw,80px)', fontWeight: 400, color: 'var(--av-paper)', margin: '0 0 20px', lineHeight: 1.0, letterSpacing: '-0.018em' }}>
+              {heroTitle || 'Crafted for the\nDiscerning Few'}
+            </h1>
+            {heroSub && (
+              <p style={{ fontFamily: 'var(--av-sans)', fontSize: 'clamp(14px,1.4vw,17px)', color: 'rgba(244,239,229,.72)', margin: '0 0 32px', maxWidth: 480, lineHeight: 1.65 }}>
+                {heroSub}
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+              <Link href="/shop"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', background: 'var(--av-paper)', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, transition: 'background .2s' }}>
+                Shop Collection
+              </Link>
+              <Link href="/shop?sort=newest"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 32px', border: '1px solid rgba(244,239,229,.34)', color: 'var(--av-paper)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, background: 'transparent', transition: 'border-color .2s' }}>
+                New Arrivals
+              </Link>
+            </div>
           </div>
+
+          {/* Right: image placeholder */}
+          <div className="av-hero-img-placeholder" style={{ flexShrink: 0, width: 'clamp(200px,32%,420px)', aspectRatio: '3/4', border: '1px dashed rgba(244,239,229,.22)', borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'rgba(244,239,229,.28)' }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+            </svg>
+            <span style={{ fontFamily: 'var(--av-sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Hero Image</span>
+          </div>
+
         </div>
       </div>
 
