@@ -409,6 +409,67 @@ class OrderController extends Controller
         return back()->with('success', 'Courier status updated: ' . $result['status']);
     }
 
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action'         => 'required|in:delete,status,payment',
+            'order_ids'      => 'required|array|min:1',
+            'order_ids.*'    => 'integer|exists:orders,id',
+            'status'         => 'required_if:action,status|nullable|in:' . implode(',', Order::STATUSES),
+            'payment_status' => 'required_if:action,payment|nullable|in:' . implode(',', Order::PAYMENT_STATUSES),
+        ]);
+
+        $orders  = Order::whereIn('id', $validated['order_ids'])->get();
+        $adminId = Auth::guard('admin')->id();
+        $count   = 0;
+
+        if ($validated['action'] === 'delete') {
+            foreach ($orders as $order) {
+                $order->delete();
+                $count++;
+            }
+            return back()->with('success', "{$count} order(s) deleted.");
+        }
+
+        if ($validated['action'] === 'status') {
+            $new     = $validated['status'];
+            $loyalty = app(LoyaltyService::class);
+            foreach ($orders as $order) {
+                if ($order->status === $new) continue;
+                $previous = $order->status;
+                $order->logActivity('status_changed',
+                    'Status changed to ' . ucfirst($new),
+                    null, ['from' => $previous, 'to' => $new], $adminId
+                );
+                $order->update(['status' => $new]);
+                if ($new === 'delivered') {
+                    $loyalty->earnPoints($order->fresh());
+                } elseif ($new === 'cancelled') {
+                    $loyalty->reverseEarnedPoints($order->fresh());
+                }
+                $count++;
+            }
+            return back()->with('success', "Status updated on {$count} order(s).");
+        }
+
+        // payment
+        $new = $validated['payment_status'];
+        foreach ($orders as $order) {
+            if ($order->payment_status === $new) continue;
+            $data = ['payment_status' => $new];
+            if ($new === 'paid' && ! $order->paid_at) {
+                $data['paid_at'] = now();
+            }
+            $order->logActivity('payment_updated',
+                'Payment status changed to ' . ucwords(str_replace('_', ' ', $new)),
+                null, ['from' => $order->payment_status, 'to' => $new], $adminId
+            );
+            $order->update($data);
+            $count++;
+        }
+        return back()->with('success', "Payment status updated on {$count} order(s).");
+    }
+
     public function destroy(Order $order): RedirectResponse
     {
         $order->delete();
