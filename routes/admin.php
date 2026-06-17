@@ -96,6 +96,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Orders
         Route::get('/orders/customers/search', [OrderController::class, 'customerSearch'])->name('orders.customers.search');
         Route::get('/orders/products/search', [OrderController::class, 'productSearch'])->name('orders.products.search');
+        Route::post('/orders/bulk', [OrderController::class, 'bulkAction'])->name('orders.bulk');
         Route::resource('orders', OrderController::class)->only(['index','create','store','show','destroy']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
         Route::patch('/orders/{order}/address', [OrderController::class, 'updateAddress'])->name('orders.update-address');

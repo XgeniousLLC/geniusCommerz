@@ -73,9 +73,52 @@ function orderAvatarColor(string $name, array $colors): string {
     </div>
 </div>
 
+<div x-data="orderBulk({{ $orders->pluck('id')->toJson() }})">
+
+<div class="card pad between wrap" x-show="selected.length" x-cloak
+     style="margin-bottom:12px;gap:12px;align-items:center">
+    <div style="font-size:13px;font-weight:600">
+        <b x-text="selected.length" style="color:var(--accent)"></b> order(s) selected
+        <button type="button" class="btn btn-ghost btn-sm" @click="clear()" style="margin-left:8px">Clear</button>
+    </div>
+    <form method="POST" action="{{ route('admin.orders.bulk') }}" class="row wrap" style="gap:10px;align-items:center"
+          @submit="if (action==='delete' && !confirm('Delete '+selected.length+' order(s)? This cannot be undone.')) $event.preventDefault()">
+        @csrf
+        <input type="hidden" name="action" :value="action">
+        <template x-for="id in selected" :key="id"><input type="hidden" name="order_ids[]" :value="id"></template>
+
+        <div class="row" style="gap:6px">
+            <select class="input" name="status" x-model="statusVal" style="max-width:160px">
+                <option value="">Change status…</option>
+                @foreach(\App\Models\Order::STATUSES as $s)
+                <option value="{{ $s }}">{{ ucfirst($s) }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn btn-outline" @click="action='status'" :disabled="!statusVal">Apply</button>
+        </div>
+
+        <div class="row" style="gap:6px">
+            <select class="input" name="payment_status" x-model="paymentVal" style="max-width:170px">
+                <option value="">Change payment…</option>
+                @foreach(\App\Models\Order::PAYMENT_STATUSES as $s)
+                <option value="{{ $s }}">{{ ucwords(str_replace('_',' ',$s)) }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn btn-outline" @click="action='payment'" :disabled="!paymentVal">Apply</button>
+        </div>
+
+        <button type="submit" class="btn btn-danger" @click="action='delete'">
+            <span class="ico" data-ico="trash" style="width:16px;height:16px"></span>Delete
+        </button>
+    </form>
+</div>
+
 <div class="card flush">
     <div class="table-scroll"><table class="table">
         <thead><tr>
+            <th style="width:36px">
+                <input type="checkbox" :checked="allChecked" @change="toggleAll($event.target.checked)">
+            </th>
             <th>Order</th>
             <th>Customer</th>
             <th>Channel</th>
@@ -95,6 +138,10 @@ function orderAvatarColor(string $name, array $colors): string {
             $sourcePill  = $order->sourcePillClass();
             @endphp
             <tr class="hoverable" onclick="location.href='{{ route('admin.orders.show', $order) }}'">
+                <td @click.stop>
+                    <input type="checkbox" :checked="selected.includes({{ $order->id }})"
+                           @change="toggle({{ $order->id }}, $event.target.checked)">
+                </td>
                 <td>
                     <span class="mono" style="color:var(--accent);font-weight:600;font-size:12.5px">
                         #{{ $order->order_number }}
@@ -122,7 +169,7 @@ function orderAvatarColor(string $name, array $colors): string {
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" style="text-align:center;padding:48px;color:var(--text-faint)">No orders found.</td></tr>
+            <tr><td colspan="9" style="text-align:center;padding:48px;color:var(--text-faint)">No orders found.</td></tr>
             @endforelse
         </tbody>
     </table></div>
@@ -134,4 +181,27 @@ function orderAvatarColor(string $name, array $colors): string {
     @endif
 </div>
 
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+function orderBulk(ids) {
+    return {
+        ids: ids,
+        selected: [],
+        statusVal: '',
+        paymentVal: '',
+        action: '',
+        get allChecked() { return this.ids.length > 0 && this.selected.length === this.ids.length; },
+        toggle(id, checked) {
+            if (checked) { if (!this.selected.includes(id)) this.selected.push(id); }
+            else { this.selected = this.selected.filter(x => x !== id); }
+        },
+        toggleAll(checked) { this.selected = checked ? [...this.ids] : []; },
+        clear() { this.selected = []; },
+    };
+}
+</script>
+@endpush
