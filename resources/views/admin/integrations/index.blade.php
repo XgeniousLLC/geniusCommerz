@@ -26,7 +26,7 @@ $groups = [
         'hint' => 'Only one courier can be the default',
     ],
     'SMS Gateways' => [
-        'providers' => ['bulksmsbd', 'smsbd', 'twilio'],
+        'providers' => ['bulksmsbd', 'smsbd', 'mram', 'twilio'],
         'icon' => 'message', 'color' => 't-pop',
         'hint' => 'Only one gateway can be the default',
     ],

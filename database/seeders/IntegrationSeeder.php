@@ -21,6 +21,7 @@ class IntegrationSeeder extends Seeder
         // SMS Gateways
         ['provider' => 'bulksmsbd',    'label' => 'BulkSMSBD'],
         ['provider' => 'smsbd',        'label' => 'SMS.BD'],
+        ['provider' => 'mram',         'label' => 'MRAM SMS'],
         ['provider' => 'twilio',       'label' => 'Twilio'],
         // AI Providers
         ['provider' => 'openai',       'label' => 'OpenAI'],
