@@ -150,6 +150,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/integrations/{integration}', [IntegrationController::class, 'update'])->name('integrations.update');
         Route::post('/integrations/{integration}/set-default', [IntegrationController::class, 'setDefault'])->name('integrations.set-default');
         Route::post('/integrations/{integration}/test-sms', [IntegrationController::class, 'testSms'])->name('integrations.test-sms');
+        Route::post('/integrations/{integration}/sms-balance', [IntegrationController::class, 'smsBalance'])->name('integrations.sms-balance');
 
         // AI Settings
         Route::get('/ai-settings', [IntegrationController::class, 'aiSettings'])->name('ai-settings.index');

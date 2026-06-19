@@ -117,6 +117,15 @@
                     </div>
                 @endif
 
+                @if(session('info'))
+                    <div class="card pad" style="background:var(--info-soft);border-color:color-mix(in srgb,var(--info) 30%,transparent);margin-bottom:18px">
+                        <div class="row" style="gap:10px">
+                            <span class="tile sm" style="background:var(--info);color:#fff;flex-shrink:0"><span class="ico" data-ico="bell" style="width:18px;height:18px"></span></span>
+                            <span style="font-weight:600;font-size:14px;color:var(--info)">{{ session('info') }}</span>
+                        </div>
+                    </div>
+                @endif
+
                 @yield('content')
 
             </div>

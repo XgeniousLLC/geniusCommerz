@@ -85,6 +85,23 @@ class IntegrationController extends Controller
         }
     }
 
+    public function smsBalance(Integration $integration): RedirectResponse
+    {
+        if (! in_array($integration->provider, Integration::SMS_PROVIDERS)) {
+            return back()->with('error', 'Not an SMS provider.');
+        }
+
+        try {
+            $balance = app(SmsService::class)->driver($integration->provider)->balance();
+
+            return $balance === null
+                ? back()->with('info', "{$integration->label} does not report a balance.")
+                : back()->with('success', "{$integration->label} balance: {$balance}");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Balance check failed: ' . $e->getMessage());
+        }
+    }
+
     public function setDefault(Integration $integration): RedirectResponse
     {
         $group = in_array($integration->provider, Integration::COURIER_PROVIDERS)
