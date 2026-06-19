@@ -17,6 +17,7 @@ class SmsService
         return match ($provider) {
             'bulksmsbd' => app(Sms\BulkSmsBdGateway::class),
             'smsbd'     => app(Sms\SmsBdGateway::class),
+            'mram'      => app(Sms\MramGateway::class),
             'twilio'    => app(Sms\TwilioGateway::class),
             default     => throw new \RuntimeException("No active default SMS gateway is configured. Go to Admin → Integrations to set one."),
         };

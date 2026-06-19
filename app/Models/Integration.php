@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Integration extends Model
 {
     public const COURIER_PROVIDERS = ['pathao', 'redx', 'steadfast'];
-    public const SMS_PROVIDERS     = ['bulksmsbd', 'smsbd', 'twilio'];
+    public const SMS_PROVIDERS     = ['bulksmsbd', 'smsbd', 'mram', 'twilio'];
     public const AI_PROVIDERS      = ['openai', 'gemini', 'claude', 'deepseek'];
 
     protected $fillable = [

@@ -69,6 +69,12 @@ $fields = match($integration->provider) {
         'sender_id'       => ['label' => 'Sender ID',         'type' => 'text'],
         'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://sms.smsbd.in/api/v2/send'],
     ],
+    'mram' => [
+        'api_key'         => ['label' => 'API Key',           'type' => 'password', 'hint' => 'From msg.mram.com.bd → Developers API'],
+        'sender_id'       => ['label' => 'Sender ID',         'type' => 'text', 'hint' => 'Approved sender ID / masking'],
+        'label'           => ['label' => 'SMS Label',         'type' => 'text', 'hint' => 'Optional — transactional or promotional'],
+        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://msg.mram.com.bd/smsapi'],
+    ],
     'twilio' => [
         'account_sid'     => ['label' => 'Account SID',       'type' => 'text'],
         'auth_token'      => ['label' => 'Auth Token',         'type' => 'password'],
@@ -166,7 +172,14 @@ $creds = $integration->credentials ?? [];
     <form method="POST" action="{{ route('admin.integrations.test-sms', $integration) }}">
         @csrf
         <x-admin.card>
-            <h3 class="text-sm font-semibold text-gray-700 mb-4">Send Test SMS</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-700">Send Test SMS</h3>
+                <button type="submit"
+                    form="sms-balance-form"
+                    class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800">
+                    Check Balance
+                </button>
+            </div>
             <div class="grid grid-cols-1 gap-4">
                 <x-admin.form-group>
                     <label class="block text-sm font-medium text-gray-700">Phone Number</label>
@@ -183,6 +196,11 @@ $creds = $integration->credentials ?? [];
                 <x-admin.button type="submit" variant="outline">Send Test SMS</x-admin.button>
             </div>
         </x-admin.card>
+    </form>
+
+    {{-- Balance check posts independently; the "Check Balance" button above targets this form via its id. --}}
+    <form method="POST" action="{{ route('admin.integrations.sms-balance', $integration) }}" id="sms-balance-form">
+        @csrf
     </form>
 </div>
 @endif
