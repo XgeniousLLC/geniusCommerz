@@ -22,9 +22,14 @@ class TikTokService
         return !empty($this->pixelId) && !empty($this->accessToken);
     }
 
-    public function sendPurchase(array $order, ?string $email = null, ?string $phone = null, ?string $ip = null, ?string $userAgent = null): void
+    /**
+     * @return array{success: bool, http_status: int|null, body: string|null, error: string|null}
+     */
+    public function sendPurchase(array $order, ?string $email = null, ?string $phone = null, ?string $ip = null, ?string $userAgent = null): array
     {
-        if (! $this->isConfigured()) return;
+        if (! $this->isConfigured()) {
+            return ['success' => false, 'http_status' => null, 'body' => null, 'error' => 'TikTok not configured'];
+        }
 
         $userData = [];
         if ($email) {
@@ -58,12 +63,22 @@ class TikTokService
         ];
 
         try {
-            Http::withToken($this->accessToken)
+            $res = Http::withToken($this->accessToken)
+                ->timeout(5)
                 ->post('https://business-api.tiktok.com/open_api/v1.3/event/track/', [
                     'data' => [$payload],
                 ]);
+
+            return [
+                'success'     => $res->successful(),
+                'http_status' => $res->status(),
+                'body'        => $res->body(),
+                'error'       => $res->successful() ? null : ($res->json('message') ?? 'HTTP ' . $res->status()),
+            ];
         } catch (\Throwable $e) {
             Log::warning('TikTok Events API error: ' . $e->getMessage());
+
+            return ['success' => false, 'http_status' => null, 'body' => null, 'error' => $e->getMessage()];
         }
     }
 }

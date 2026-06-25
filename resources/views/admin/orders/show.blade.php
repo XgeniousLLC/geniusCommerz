@@ -241,55 +241,156 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
     {{-- Fraud check --}}
     @if($order->customer_phone)
     <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}')">
-        <div class="card-head">
+        {{-- Header --}}
+        <div class="card-head" style="margin-bottom:0">
             <span class="tile sm t-warning"><span class="ico" data-ico="shield" style="width:18px;height:18px"></span></span>
-            <div class="ct"><h3>Fraud Check</h3><div class="sub">{{ $order->customer_phone }}</div></div>
-            <button @click="run" :disabled="loading" class="link-btn head-action" x-text="checked ? 'Re-check' : 'Check'"></button>
+            <div class="ct">
+                <h3>Fraud Check</h3>
+                <div class="sub">{{ $order->customer_phone }}</div>
+            </div>
+            <div class="row" style="gap:8px;align-items:center">
+                <template x-if="checked && from_cache">
+                    <span class="pill sm muted" style="font-size:10px">Cached</span>
+                </template>
+                <button @click="run(false)" :disabled="loading" class="link-btn head-action" x-show="!checked && !loading">Check</button>
+                <button @click="run(true)"  :disabled="loading" class="link-btn head-action" x-show="checked">Re-check</button>
+            </div>
         </div>
-        <template x-if="!checked && !loading && !error">
-            <p class="faint" style="font-size:12.5px">Check this number via FraudBD courier history.</p>
-        </template>
+
         <template x-if="loading">
-            <p class="faint" style="font-size:12.5px">Fetching courier data…</p>
+            <p class="faint" style="font-size:12.5px;margin-top:10px">Fetching courier data…</p>
         </template>
+
+        <template x-if="!checked && !loading && !error">
+            <p class="faint" style="font-size:12.5px;margin-top:10px">Check courier delivery history for this number.</p>
+        </template>
+
         <template x-if="error">
-            <div class="card pad" style="background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 30%,transparent);padding:10px 14px">
+            <div style="background:var(--danger-soft);border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);border-radius:8px;padding:10px 14px;margin-top:10px">
                 <span style="font-size:12.5px;color:var(--danger)" x-text="error"></span>
             </div>
         </template>
+
         <template x-if="sandbox && checked">
-            <div class="card pad" style="background:var(--warning-soft);border-color:color-mix(in srgb,var(--warning) 30%,transparent);padding:10px 14px;margin-bottom:10px">
+            <div style="background:var(--warning-soft);border:1px solid color-mix(in srgb,var(--warning) 30%,transparent);border-radius:8px;padding:10px 14px;margin-top:10px">
                 <span style="font-size:12px;color:var(--warning-fg)">Sandbox mode — dummy data. Add live key in <a href="{{ route('admin.integrations.index') }}" class="link-btn" style="font-size:12px">Integrations</a>.</span>
             </div>
         </template>
-        <template x-if="checked && couriers.length > 0">
-            <div class="stack" style="gap:8px">
-                <template x-for="c in couriers" :key="c.name">
-                    <div class="card pad" style="padding:10px 14px">
-                        <div class="between" style="margin-bottom:6px">
-                            <span style="font-weight:700;font-size:13px;text-transform:capitalize" x-text="c.name"></span>
-                            <template x-if="c.risk_level">
-                                <span class="pill sm" x-text="c.risk_level.replace('_',' ')"
-                                    :class="{'danger':c.risk_color==='red','warning':c.risk_color==='orange'||c.risk_color==='yellow','success':c.risk_color==='green'}"></span>
-                            </template>
+
+        {{-- Risk Score Banner --}}
+        <template x-if="checked && risk_level">
+            <div style="margin-top:12px">
+                {{-- Score card --}}
+                <div :class="riskBg(risk_level)" style="border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid">
+                    <div class="between" style="margin-bottom:8px">
+                        <div>
+                            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.7" x-text="riskLabel(risk_level) + ' Customer'"></div>
+                            <div style="font-size:22px;font-weight:800;line-height:1.1;margin-top:2px" x-text="riskLabel(risk_level)"></div>
                         </div>
-                        <div class="row" style="gap:14px;font-size:12px;color:var(--text-muted)">
-                            <template x-if="c.total_orders !== null">
-                                <div><div class="faint" style="font-size:11px">Orders</div><div x-text="c.total_orders"></div></div>
-                            </template>
-                            <template x-if="c.success_rate !== null">
-                                <div><div class="faint" style="font-size:11px">Success</div><div style="color:var(--success)" x-text="c.success_rate"></div></div>
-                            </template>
-                            <template x-if="c.cancel_rate !== null">
-                                <div><div class="faint" style="font-size:11px">Cancel</div><div style="color:var(--danger)" x-text="c.cancel_rate"></div></div>
+                        <div style="text-align:right">
+                            <div style="font-size:11px;font-weight:600;opacity:.7">Score</div>
+                            <div style="font-size:28px;font-weight:800;line-height:1" x-text="risk_score"></div>
+                            <div style="font-size:10px;opacity:.6">/ 100</div>
+                        </div>
+                    </div>
+                    {{-- Score bar --}}
+                    <div style="background:rgba(0,0,0,.15);border-radius:100px;height:6px;overflow:hidden">
+                        <div :style="'width:'+risk_score+'%;height:100%;background:currentColor;border-radius:100px;opacity:.8;transition:width .4s'"></div>
+                    </div>
+                    <template x-if="from_cache && cached_at">
+                        <div style="font-size:10px;opacity:.6;margin-top:6px" x-text="'Cached ' + fmtDate(cached_at)"></div>
+                    </template>
+                </div>
+
+                {{-- Fraud reports alert --}}
+                <template x-if="reports.length > 0">
+                    <div style="background:var(--danger-soft);border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);border-radius:8px;padding:10px 14px;margin-bottom:10px">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--danger);margin-bottom:6px">
+                            <span x-text="reports.length"></span> Fraud Report<span x-show="reports.length > 1">s</span> on file
+                        </div>
+                        <div class="stack" style="gap:6px">
+                            <template x-for="r in reports" :key="r.id ?? r.name">
+                                <div style="border-top:1px solid color-mix(in srgb,var(--danger) 20%,transparent);padding-top:6px">
+                                    <div class="between">
+                                        <span style="font-weight:700;font-size:12.5px;color:var(--danger-fg)" x-text="r.name"></span>
+                                        <template x-if="r.courier">
+                                            <span class="pill sm muted" style="font-size:10px" x-text="r.courier"></span>
+                                        </template>
+                                    </div>
+                                    <div style="font-size:12px;color:var(--danger-fg);opacity:.85;margin-top:2px" x-text="r.details"></div>
+                                </div>
                             </template>
                         </div>
                     </div>
                 </template>
+
+                {{-- Summary stats (BDCourier) --}}
+                <template x-if="summary && summary.total_parcel > 0">
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+                        <div style="text-align:center;background:var(--surface-2);border-radius:8px;padding:8px 4px">
+                            <div class="faint" style="font-size:10px;text-transform:uppercase;letter-spacing:.4px">Total</div>
+                            <div style="font-weight:700;font-size:16px" x-text="summary.total_parcel"></div>
+                        </div>
+                        <div style="text-align:center;background:var(--surface-2);border-radius:8px;padding:8px 4px">
+                            <div class="faint" style="font-size:10px;text-transform:uppercase;letter-spacing:.4px">Success</div>
+                            <div style="font-weight:700;font-size:16px;color:var(--success)" x-text="summary.success_parcel"></div>
+                        </div>
+                        <div style="text-align:center;background:var(--surface-2);border-radius:8px;padding:8px 4px">
+                            <div class="faint" style="font-size:10px;text-transform:uppercase;letter-spacing:.4px">Cancel</div>
+                            <div style="font-weight:700;font-size:16px;color:var(--danger)" x-text="summary.cancelled_parcel"></div>
+                        </div>
+                        <div style="text-align:center;background:var(--surface-2);border-radius:8px;padding:8px 4px">
+                            <div class="faint" style="font-size:10px;text-transform:uppercase;letter-spacing:.4px">Rate</div>
+                            <div style="font-weight:700;font-size:16px" x-text="summary.success_ratio + '%'"></div>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Per-courier rows (BDCourier) --}}
+                <template x-if="couriers.length > 0 && provider === 'bdcourier'">
+                    <div class="stack" style="gap:5px">
+                        <template x-for="c in couriers" :key="c.name">
+                            <div class="card pad" style="padding:8px 12px">
+                                <div class="between" style="margin-bottom:4px">
+                                    <div class="row" style="gap:7px;align-items:center">
+                                        <template x-if="c.logo">
+                                            <img :src="c.logo" :alt="c.name" style="height:16px;width:auto;object-fit:contain">
+                                        </template>
+                                        <span style="font-weight:700;font-size:12.5px" x-text="c.name"></span>
+                                    </div>
+                                    <span class="pill sm" :class="c.ratio_color" x-text="c.success_ratio + '%'"></span>
+                                </div>
+                                <div class="row" style="gap:14px;font-size:11.5px;color:var(--text-muted)">
+                                    <span><span class="faint">Total </span><span x-text="c.total_parcel"></span></span>
+                                    <span><span class="faint">✓ </span><span style="color:var(--success)" x-text="c.success_parcel"></span></span>
+                                    <span><span class="faint">✗ </span><span style="color:var(--danger)" x-text="c.cancelled_parcel"></span></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                {{-- Per-courier rows (FraudBD) --}}
+                <template x-if="couriers.length > 0 && provider !== 'bdcourier'">
+                    <div class="stack" style="gap:5px">
+                        <template x-for="c in couriers" :key="c.name">
+                            <div class="card pad" style="padding:8px 12px">
+                                <div class="between">
+                                    <span style="font-weight:700;font-size:12.5px;text-transform:capitalize" x-text="c.name"></span>
+                                    <template x-if="c.risk_level">
+                                        <span class="pill sm" x-text="c.risk_level.replace('_',' ')"
+                                            :class="{'danger':c.risk_color==='red','warning':c.risk_color==='orange'||c.risk_color==='yellow','success':c.risk_color==='green'}"></span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template x-if="couriers.length === 0 && (!summary || summary.total_parcel === 0)">
+                    <p class="faint" style="font-size:12px">No courier history found for this number.</p>
+                </template>
             </div>
-        </template>
-        <template x-if="checked && couriers.length === 0 && !error">
-            <p class="faint" style="font-size:12.5px">No courier history found for this number.</p>
         </template>
     </div>
     @endif
@@ -412,22 +513,46 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
 </div>{{-- /right col --}}
 </div>
 
+@push('styles')
+<style>
+.risk-safe    { background:var(--success-soft); border-color:color-mix(in srgb,var(--success) 35%,transparent); color:var(--success-fg); }
+.risk-low     { background:color-mix(in srgb,var(--info) 12%,transparent); border-color:color-mix(in srgb,var(--info) 35%,transparent); color:var(--info,#0ea5e9); }
+.risk-mid     { background:var(--warning-soft); border-color:color-mix(in srgb,var(--warning) 35%,transparent); color:var(--warning-fg); }
+.risk-high    { background:var(--danger-soft);  border-color:color-mix(in srgb,var(--danger)  35%,transparent); color:var(--danger-fg); }
+.risk-unknown { background:var(--surface-2);    border-color:var(--border); color:var(--text-muted); }
+</style>
+@endpush
+
 @push('scripts')
 <script>
 function fraudCheck(phone) {
     return {
         phone,
-        loading:  false,
-        checked:  false,
-        error:    null,
-        sandbox:  false,
-        couriers: [],
+        loading:    false,
+        checked:    false,
+        error:      null,
+        sandbox:    false,
+        provider:   null,
+        risk_level: null,
+        risk_score: 0,
+        couriers:   [],
+        summary:    null,
+        reports:    [],
+        from_cache: false,
+        cached_at:  null,
+        expires_at: null,
 
-        async run() {
+        async run(force = false) {
             this.loading  = true;
             this.error    = null;
-            this.checked  = false;
-            this.couriers = [];
+
+            if (force) {
+                this.checked    = false;
+                this.risk_level = null;
+                this.couriers   = [];
+                this.summary    = null;
+                this.reports    = [];
+            }
 
             try {
                 const res = await fetch('{{ route('admin.fraud.check') }}', {
@@ -437,7 +562,7 @@ function fraudCheck(phone) {
                         'Accept':       'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ phone: this.phone }),
+                    body: JSON.stringify({ phone: this.phone, force: force ? 1 : 0 }),
                 });
 
                 const json = await res.json();
@@ -445,16 +570,45 @@ function fraudCheck(phone) {
                 if (!json.success) {
                     this.error = json.message || 'Unexpected error.';
                 } else {
-                    this.couriers = json.data.couriers ?? [];
-                    this.sandbox  = json.data.sandbox  ?? false;
-                    this.checked  = true;
+                    const d = json.data;
+                    this.provider   = d.provider   ?? null;
+                    this.risk_level = d.risk_level  ?? null;
+                    this.risk_score = d.risk_score  ?? 0;
+                    this.couriers   = d.couriers    ?? [];
+                    this.summary    = d.summary     ?? null;
+                    this.reports    = d.reports     ?? [];
+                    this.sandbox    = d.sandbox     ?? false;
+                    this.from_cache = d.from_cache  ?? false;
+                    this.cached_at  = d.cached_at   ?? null;
+                    this.expires_at = d.expires_at  ?? null;
+                    this.checked    = true;
                 }
             } catch (e) {
-                this.error = 'Network error — could not reach FraudBD.';
+                this.error = 'Network error — could not reach fraud check service.';
             } finally {
                 this.loading = false;
             }
-        }
+        },
+
+        riskLabel(level) {
+            return { safe: 'Safe', low_risk: 'Low Risk', mid_risk: 'Mid Risk', high_risk: 'High Risk', unknown: 'Unknown' }[level] ?? 'Unknown';
+        },
+
+        riskBg(level) {
+            return {
+                safe:      'risk-safe',
+                low_risk:  'risk-low',
+                mid_risk:  'risk-mid',
+                high_risk: 'risk-high',
+                unknown:   'risk-unknown',
+            }[level] ?? 'risk-unknown';
+        },
+
+        fmtDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+        },
     };
 }
 </script>

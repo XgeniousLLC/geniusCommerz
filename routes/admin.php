@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\FraudController;
+use App\Http\Controllers\Admin\PixelEventLogController;
 use App\Http\Controllers\Admin\LoyaltyController;
 use App\Http\Controllers\Admin\SitemapController;
 use App\Http\Controllers\Admin\ReportController;
@@ -154,6 +155,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // AI Settings
         Route::get('/ai-settings', [IntegrationController::class, 'aiSettings'])->name('ai-settings.index');
+
+        // Pixel event log
+        Route::get('/pixel-logs', [PixelEventLogController::class, 'index'])->name('pixel-logs.index');
+        Route::delete('/pixel-logs', [PixelEventLogController::class, 'destroy'])->name('pixel-logs.destroy');
 
         // Audit log
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit.index');

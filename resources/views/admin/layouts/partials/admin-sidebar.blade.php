@@ -154,7 +154,7 @@
         <span>Settings</span>
     </a>
 
-    @php $systemActive = request()->routeIs('admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*','admin.currencies.*'); @endphp
+    @php $systemActive = request()->routeIs('admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*','admin.currencies.*','admin.pixel-logs.*'); @endphp
     <div class="nav-group {{ $systemActive ? 'open' : '' }}">
         <button class="nav-grouphead focusable" type="button" data-group-toggle>
             <span class="ico" data-ico="system"></span>
@@ -176,6 +176,9 @@
             </a>
             <a class="nav-leaf focusable {{ request()->routeIs('admin.sitemap.*') ? 'active' : '' }}" href="{{ route('admin.sitemap.index') }}">
                 <span class="ico" data-ico="list"></span><span>Sitemap</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.pixel-logs.*') ? 'active' : '' }}" href="{{ route('admin.pixel-logs.index') }}">
+                <span class="ico" data-ico="chart"></span><span>Pixel Event Log</span>
             </a>
             <a class="nav-leaf focusable {{ request()->routeIs('admin.audit.*') ? 'active' : '' }}" href="{{ route('admin.audit.index') }}">
                 <span class="ico" data-ico="doc"></span><span>Audit Log</span>

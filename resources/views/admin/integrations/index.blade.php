@@ -31,7 +31,7 @@ $groups = [
         'hint' => 'Only one gateway can be the default',
     ],
     'Services' => [
-        'providers' => ['fraudbd'],
+        'providers' => ['fraudbd', 'bdcourier'],
         'icon' => 'shield', 'color' => 't-info',
         'hint' => null,
     ],

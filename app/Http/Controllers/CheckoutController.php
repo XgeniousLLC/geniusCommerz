@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderConfirmed;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\PixelLogger;
 use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -274,6 +275,47 @@ class CheckoutController extends Controller
             'price'      => (float) $i->unit_price,
         ])->all();
 
+        // Fraud gate: skip pixel events if BDCourier flags this number
+        if ($order->customer_phone) {
+            try {
+                $fraudService = app(\App\Services\BdCourierFraudService::class);
+
+                if ($fraudService->isConfigured()) {
+                    $fraudResult = $fraudService->check($order->customer_phone);
+
+                    if (! empty($fraudResult['reports'])) {
+                        PixelLogger::record(
+                            platform:    'meta',
+                            event:       'Purchase',
+                            success:     false,
+                            orderId:     $order->id,
+                            orderNumber: $order->order_number,
+                            error:       'Blocked — BDCourier flagged ' . count($fraudResult['reports']) . ' fraud report(s) for this phone.',
+                        );
+                        PixelLogger::record(
+                            platform:    'tiktok',
+                            event:       'Purchase',
+                            success:     false,
+                            orderId:     $order->id,
+                            orderNumber: $order->order_number,
+                            error:       'Blocked — BDCourier fraud gate.',
+                        );
+                        PixelLogger::record(
+                            platform:    'ga4',
+                            event:       'purchase',
+                            success:     false,
+                            orderId:     $order->id,
+                            orderNumber: $order->order_number,
+                            error:       'Blocked — BDCourier fraud gate.',
+                        );
+                        return;
+                    }
+                }
+            } catch (\Throwable) {
+                // Fail open: if fraud check errors, still fire pixels
+            }
+        }
+
         // Meta CAPI — Purchase event
         if ($pixelId && $capiToken) {
             try {
@@ -285,7 +327,7 @@ class CheckoutController extends Controller
                     $userData['ph'] = [hash('sha256', preg_replace('/\D/', '', $order->customer_phone))];
                 }
 
-                Http::timeout(5)->post(
+                $metaRes = Http::timeout(5)->post(
                     "https://graph.facebook.com/v18.0/{$pixelId}/events?access_token={$capiToken}",
                     [
                         'data' => [[
@@ -308,11 +350,31 @@ class CheckoutController extends Controller
                         ]],
                     ]
                 );
-            } catch (\Throwable) {}
+
+                PixelLogger::record(
+                    platform:     'meta',
+                    event:        'Purchase',
+                    success:      $metaRes->successful(),
+                    orderId:      $order->id,
+                    orderNumber:  $order->order_number,
+                    httpStatus:   $metaRes->status(),
+                    responseBody: $metaRes->body(),
+                    error:        $metaRes->successful() ? null : ($metaRes->json('error.message') ?? 'HTTP ' . $metaRes->status()),
+                );
+            } catch (\Throwable $e) {
+                PixelLogger::record(
+                    platform:    'meta',
+                    event:       'Purchase',
+                    success:     false,
+                    orderId:     $order->id,
+                    orderNumber: $order->order_number,
+                    error:       $e->getMessage(),
+                );
+            }
         }
 
         // TikTok Events API — Purchase event
-        (new \App\Services\TikTokService())->sendPurchase(
+        $ttResult = (new \App\Services\TikTokService())->sendPurchase(
             [
                 'id'       => $order->id,
                 'total'    => $order->total,
@@ -330,10 +392,23 @@ class CheckoutController extends Controller
             userAgent: $request->userAgent(),
         );
 
+        if (($ttResult['error'] ?? null) !== 'TikTok not configured') {
+            PixelLogger::record(
+                platform:     'tiktok',
+                event:        'Purchase',
+                success:      $ttResult['success'],
+                orderId:      $order->id,
+                orderNumber:  $order->order_number,
+                httpStatus:   $ttResult['http_status'] ?? null,
+                responseBody: $ttResult['body'] ?? null,
+                error:        $ttResult['success'] ? null : ($ttResult['error'] ?? null),
+            );
+        }
+
         // GA4 Measurement Protocol — purchase event
         if ($ga4MId && $ga4Secret) {
             try {
-                Http::timeout(5)->post(
+                $ga4Res = Http::timeout(5)->post(
                     "https://www.google-analytics.com/mp/collect?measurement_id={$ga4MId}&api_secret={$ga4Secret}",
                     [
                         'client_id' => $request->cookie('_ga') ?? Str::uuid()->toString(),
@@ -356,7 +431,27 @@ class CheckoutController extends Controller
                         ]],
                     ]
                 );
-            } catch (\Throwable) {}
+
+                PixelLogger::record(
+                    platform:     'ga4',
+                    event:        'purchase',
+                    success:      $ga4Res->successful(),
+                    orderId:      $order->id,
+                    orderNumber:  $order->order_number,
+                    httpStatus:   $ga4Res->status(),
+                    responseBody: $ga4Res->body(),
+                    error:        $ga4Res->successful() ? null : 'HTTP ' . $ga4Res->status(),
+                );
+            } catch (\Throwable $e) {
+                PixelLogger::record(
+                    platform:    'ga4',
+                    event:       'purchase',
+                    success:     false,
+                    orderId:     $order->id,
+                    orderNumber: $order->order_number,
+                    error:       $e->getMessage(),
+                );
+            }
         }
     }
 
