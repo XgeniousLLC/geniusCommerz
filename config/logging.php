@@ -127,6 +127,13 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'pixel_events' => [
+            'driver'   => 'single',
+            'path'     => storage_path('logs/pixel_events.log'),
+            'level'    => 'info',
+            'replace_placeholders' => false,
+        ],
+
     ],
 
 ];

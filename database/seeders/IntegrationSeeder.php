@@ -18,6 +18,7 @@ class IntegrationSeeder extends Seeder
         ['provider' => 'redx',         'label' => 'RedX Courier'],
         // Fraud screening
         ['provider' => 'fraudbd',      'label' => 'FraudBD'],
+        ['provider' => 'bdcourier',    'label' => 'BDCourier'],
         // SMS Gateways
         ['provider' => 'bulksmsbd',    'label' => 'BulkSMSBD'],
         ['provider' => 'smsbd',        'label' => 'SMS.BD'],

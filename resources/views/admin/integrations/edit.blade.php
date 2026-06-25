@@ -59,6 +59,9 @@ $fields = match($integration->provider) {
         'api_key'         => ['label' => 'API Key',           'type' => 'text'],
         'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
     ],
+    'bdcourier' => [
+        'api_key'         => ['label' => 'API Key',           'type' => 'password', 'hint' => 'Bearer token from api.bdcourier.com'],
+    ],
     'bulksmsbd' => [
         'api_key'         => ['label' => 'API Key',           'type' => 'password'],
         'sender_id'       => ['label' => 'Sender ID',         'type' => 'text', 'hint' => 'Approved sender name or number'],
