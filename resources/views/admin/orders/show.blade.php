@@ -240,7 +240,20 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
 
     {{-- Fraud check --}}
     @if($order->customer_phone)
-    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}', @json($fraudCache ? ['risk_level' => $fraudCache->risk_level, 'risk_score' => $fraudCache->risk_score, 'couriers' => $fraudCache->couriers ?? [], 'summary' => $fraudCache->summary ?? null, 'reports' => $fraudCache->reports ?? [], 'provider' => $fraudCache->provider, 'from_cache' => true, 'cached_at' => $fraudCache->updated_at->toIso8601String(), 'expires_at' => $fraudCache->expires_at->toIso8601String()] : null))">
+    @php
+    $fraudSeed = $fraudCache ? [
+        'risk_level' => $fraudCache->risk_level,
+        'risk_score' => $fraudCache->risk_score,
+        'couriers'   => $fraudCache->couriers ?? [],
+        'summary'    => $fraudCache->summary  ?? null,
+        'reports'    => $fraudCache->reports  ?? [],
+        'provider'   => $fraudCache->provider,
+        'from_cache' => true,
+        'cached_at'  => $fraudCache->updated_at->toIso8601String(),
+        'expires_at' => $fraudCache->expires_at->toIso8601String(),
+    ] : null;
+    @endphp
+    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}', @json($fraudSeed))">
         {{-- Header --}}
         <div class="card-head" style="margin-bottom:0">
             <span class="tile sm t-warning"><span class="ico" data-ico="shield" style="width:18px;height:18px"></span></span>
