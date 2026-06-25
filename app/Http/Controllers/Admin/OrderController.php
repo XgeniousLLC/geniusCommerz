@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FraudCheckCache;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -197,7 +198,12 @@ class OrderController extends Controller
     public function show(Order $order): View
     {
         $order->load(['items.product', 'user', 'coupon', 'activities.admin']);
-        return view('admin.orders.show', compact('order'));
+
+        $fraudCache = $order->customer_phone
+            ? FraudCheckCache::where('phone', $order->customer_phone)->first()
+            : null;
+
+        return view('admin.orders.show', compact('order', 'fraudCache'));
     }
 
     public function printSlip(Order $order): View

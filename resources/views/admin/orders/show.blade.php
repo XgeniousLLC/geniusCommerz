@@ -240,7 +240,7 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
 
     {{-- Fraud check --}}
     @if($order->customer_phone)
-    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}')">
+    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}', @json($fraudCache ? ['risk_level' => $fraudCache->risk_level, 'risk_score' => $fraudCache->risk_score, 'couriers' => $fraudCache->couriers ?? [], 'summary' => $fraudCache->summary ?? null, 'reports' => $fraudCache->reports ?? [], 'provider' => $fraudCache->provider, 'from_cache' => true, 'cached_at' => $fraudCache->updated_at->toIso8601String(), 'expires_at' => $fraudCache->expires_at->toIso8601String()] : null))">
         {{-- Header --}}
         <div class="card-head" style="margin-bottom:0">
             <span class="tile sm t-warning"><span class="ico" data-ico="shield" style="width:18px;height:18px"></span></span>
@@ -525,22 +525,22 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
 
 @push('scripts')
 <script>
-function fraudCheck(phone) {
+function fraudCheck(phone, seed = null) {
     return {
         phone,
         loading:    false,
-        checked:    false,
+        checked:    seed !== null,
         error:      null,
         sandbox:    false,
-        provider:   null,
-        risk_level: null,
-        risk_score: 0,
-        couriers:   [],
-        summary:    null,
-        reports:    [],
-        from_cache: false,
-        cached_at:  null,
-        expires_at: null,
+        provider:   seed?.provider   ?? null,
+        risk_level: seed?.risk_level ?? null,
+        risk_score: seed?.risk_score ?? 0,
+        couriers:   seed?.couriers   ?? [],
+        summary:    seed?.summary    ?? null,
+        reports:    seed?.reports    ?? [],
+        from_cache: seed?.from_cache ?? false,
+        cached_at:  seed?.cached_at  ?? null,
+        expires_at: seed?.expires_at ?? null,
 
         async run(force = false) {
             this.loading  = true;
