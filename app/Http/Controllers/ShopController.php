@@ -61,7 +61,7 @@ class ShopController extends Controller
             abort(404);
         }
 
-        $product->load(['images', 'variants.variantValues.attributeValue.attribute', 'categories', 'brand', 'meta']);
+        $product->load(['images', 'videos', 'variants.variantValues.attributeValue.attribute', 'categories', 'brand', 'meta']);
 
         $related = Product::with(['images', 'variants'])
             ->where('status', 'active')
@@ -292,6 +292,12 @@ class ShopController extends Controller
             'preorder_enabled'       => (bool) $p->preorder_enabled,
             'preorder_message'       => $p->preorder_message,
             'preorder_expected_date' => $p->preorder_expected_date?->toDateString(),
+            'videos' => $p->videos->map(fn ($m) => [
+                'id'  => $m->id,
+                'url' => $m->getUrl(),
+            ]),
+            'faqs'         => $p->faqs ?? [],
+            'trust_badges' => $p->trust_badges ?? null,
             'meta' => $p->meta ? [
                 'meta_title'       => $p->meta->meta_title,
                 'meta_description' => $p->meta->meta_description,

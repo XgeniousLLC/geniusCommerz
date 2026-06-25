@@ -81,16 +81,34 @@ $preItems = $ids
         <div>
             <template x-if="items.length > 0">
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,80px);gap:8px;margin-bottom:8px">
-                    <template x-for="item in items" :key="item.id">
-                        <div style="position:relative;width:80px;height:80px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)">
+                    <template x-for="(item, index) in items" :key="item.id">
+                        <div
+                            draggable="true"
+                            @dragstart="dragStart(index)"
+                            @dragover.prevent="dragOver(index)"
+                            @dragend="dragEnd()"
+                            :style="`position:relative;width:80px;height:80px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);cursor:grab;opacity:${dragIndex === index ? 0.4 : 1};transition:opacity .15s`">
                             <template x-if="item.type === 'image'">
                                 <img :src="item.thumb_url || item.url" :alt="item.alt || ''"
-                                     style="width:100%;height:100%;object-fit:cover">
+                                     style="width:100%;height:100%;object-fit:cover;pointer-events:none">
                             </template>
                             <template x-if="item.type !== 'image'">
                                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px"
                                      x-text="item.type === 'video' ? '🎬' : '📄'"></div>
                             </template>
+                            {{-- Featured badge on first image --}}
+                            <template x-if="index === 0">
+                                <span style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;font-size:9px;letter-spacing:.06em;text-align:center;padding:2px 0;line-height:1.4;pointer-events:none">FEATURED</span>
+                            </template>
+                            {{-- Drag handle dots --}}
+                            <span style="position:absolute;top:4px;left:4px;display:grid;grid-template-columns:repeat(2,4px);gap:2px;pointer-events:none;opacity:.7">
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                                <span style="width:3px;height:3px;border-radius:50%;background:#fff"></span>
+                            </span>
                             <button type="button" @click.stop="removeItem(item.id)"
                                 style="position:absolute;top:4px;right:4px;width:18px;height:18px;background:var(--danger);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;padding:0">
                                 <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">

@@ -37,6 +37,8 @@ class UpdateProductRequest extends FormRequest
             'warranty'          => 'nullable|string|max:255',
             'return_policy'     => 'nullable|string',
             'specifications'    => 'nullable|string',
+            'faqs'              => 'nullable|string',
+            'trust_badges'      => 'nullable|string',
             // variant matrix rows
             'variants'                   => 'nullable|array',
             'variants.*.id'              => 'nullable|exists:product_variants,id',

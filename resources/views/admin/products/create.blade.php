@@ -161,6 +161,63 @@
         <input type="hidden" name="specifications" :value="JSON.stringify(rows.filter(r => r.key.trim()))">
     </div>
 
+    {{-- FAQ --}}
+    <div class="card pad" x-data="faqEditor([])">
+        <div class="card-head">
+            <span class="tile sm t-info"><span class="ico" data-ico="help-circle" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>FAQ</h3><div class="sub">Shown on product page with schema markup</div></div>
+            <button type="button" @click="add()" class="link-btn head-action">
+                <span class="ico" data-ico="plus" style="width:14px;height:14px"></span>Add question
+            </button>
+        </div>
+        <div class="stack" style="gap:10px">
+            <template x-for="(row, i) in rows" :key="i">
+                <div style="display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-card)">
+                    <div class="between">
+                        <span class="lbl" style="margin:0">Question</span>
+                        <button type="button" @click="remove(i)" class="icon-btn danger" style="width:24px;height:24px">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <input type="text" class="input" x-model="row.question" placeholder="e.g. What material is this made of?">
+                    <span class="lbl">Answer</span>
+                    <textarea class="input" x-model="row.answer" rows="2" style="resize:vertical" placeholder="Your answer..."></textarea>
+                </div>
+            </template>
+            <p x-show="rows.length === 0" style="text-align:center;padding:16px;color:var(--text-faint);font-size:13.5px;border:1.5px dashed var(--border-strong);border-radius:var(--radius-card)">
+                No FAQs added yet.
+            </p>
+        </div>
+        <input type="hidden" name="faqs" :value="JSON.stringify(rows.filter(r => r.question.trim()))">
+    </div>
+
+    {{-- Trust Badges (per-product override) --}}
+    <div class="card pad" x-data="trustBadgeEditor([])">
+        <div class="card-head">
+            <span class="tile sm t-success"><span class="ico" data-ico="check" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Trust Badges</h3><div class="sub">Override global badges for this product. Leave empty to use global defaults.</div></div>
+            <button type="button" @click="add()" class="link-btn head-action" x-show="rows.length < 4">
+                <span class="ico" data-ico="plus" style="width:14px;height:14px"></span>Add badge
+            </button>
+        </div>
+        <div class="stack" style="gap:8px">
+            <template x-for="(row, i) in rows" :key="i">
+                <div class="row" style="gap:8px;align-items:center">
+                    <span class="faint" style="font-size:11px;width:18px;text-align:center" x-text="i+1"></span>
+                    <input class="input" type="text" x-model="row.title" placeholder="Title e.g. Authentic" style="flex:1">
+                    <input class="input" type="text" x-model="row.sub" placeholder="Subtitle e.g. Verified quality" style="flex:1">
+                    <button type="button" @click="remove(i)" class="icon-btn danger" style="width:28px;height:28px;flex-shrink:0">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </template>
+            <p x-show="rows.length === 0" style="text-align:center;padding:12px;color:var(--text-faint);font-size:13px;border:1.5px dashed var(--border-strong);border-radius:var(--radius-card)">
+                Using global trust badges. Add rows to override for this product.
+            </p>
+        </div>
+        <input type="hidden" name="trust_badges" :value="rows.length ? JSON.stringify(rows.filter(r => r.title.trim())) : ''">
+    </div>
+
     {{-- Pricing / Variants --}}
     <div class="card pad" x-data="variantBuilder()" x-init="init()">
         <div class="card-head">
@@ -554,6 +611,22 @@ function specEditor(initial) {
     return {
         rows: Array.isArray(initial) && initial.length ? initial : [],
         add()  { this.rows.push({ key: '', value: '' }); },
+        remove(i) { this.rows.splice(i, 1); },
+    };
+}
+
+function faqEditor(initial) {
+    return {
+        rows: Array.isArray(initial) && initial.length ? initial : [],
+        add()  { this.rows.push({ question: '', answer: '' }); },
+        remove(i) { this.rows.splice(i, 1); },
+    };
+}
+
+function trustBadgeEditor(initial) {
+    return {
+        rows: Array.isArray(initial) && initial.length ? initial : [],
+        add()  { if (this.rows.length < 4) this.rows.push({ title: '', sub: '' }); },
         remove(i) { this.rows.splice(i, 1); },
     };
 }

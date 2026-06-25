@@ -82,6 +82,8 @@ class ProductController extends Controller
         }
 
         $data['specifications'] = $this->decodeSpecifications($data['specifications'] ?? null);
+        $data['faqs']         = json_decode($data['faqs'] ?? 'null', true) ?: null;
+        $data['trust_badges'] = json_decode($data['trust_badges'] ?? 'null', true) ?: null;
 
         $product = Product::create(array_merge($data, [
             'is_featured'            => $request->boolean('is_featured'),
@@ -120,6 +122,8 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $data['specifications'] = $this->decodeSpecifications($data['specifications'] ?? null);
+        $data['faqs']         = json_decode($data['faqs'] ?? 'null', true) ?: null;
+        $data['trust_badges'] = json_decode($data['trust_badges'] ?? 'null', true) ?: null;
 
         $product->update(array_merge($data, [
             'is_featured'            => $request->boolean('is_featured'),

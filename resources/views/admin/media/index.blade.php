@@ -7,10 +7,10 @@
 @section('content')
 @php
 $uploadAccept = match($accept) {
-    'image'    => 'image/*,.svg',
-    'video'    => 'video/*',
+    'image'    => '.jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.bmp,.tiff,.tif,.ico,.heic,.heif',
+    'video'    => '.mp4,.mov,.avi,.mkv,.webm,.m4v,.wmv,.flv,.3gp,.ogv',
     'document' => '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar',
-    default    => 'image/*,.svg,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip',
+    default    => '.jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.mp4,.mov,.avi,.mkv,.webm,.m4v,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip',
 };
 $preSelectedIds = array_filter(array_map('intval', explode(',', request('selected_ids', ''))));
 @endphp

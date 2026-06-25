@@ -21,6 +21,8 @@ class Product extends Model
         'compare_at_price', 'cost_price', 'weight', 'shipping_included', 'warranty', 'return_policy',
         'specifications', 'stock_qty', 'sort_order', 'created_by', 'updated_by',
         'preorder_enabled', 'preorder_message', 'preorder_expected_date',
+        'faqs',
+        'trust_badges',
     ];
 
     /** @var array<string, string> */
@@ -35,6 +37,8 @@ class Product extends Model
         'cost_price' => 'decimal:2',
         'weight' => 'decimal:3',
         'specifications' => 'array',
+        'faqs'           => 'array',
+        'trust_badges'   => 'array',
     ];
 
     /** @return BelongsTo<Brand, $this> */
