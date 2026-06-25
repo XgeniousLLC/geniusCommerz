@@ -35,6 +35,8 @@ class StoreProductRequest extends FormRequest
             'warranty'          => 'nullable|string|max:255',
             'return_policy'     => 'nullable|string',
             'specifications'    => 'nullable|string',
+            'faqs'              => 'nullable|string',
+            'trust_badges'      => 'nullable|string',
             // variants
             'variants'                        => 'nullable|array',
             'variants.*.attribute_value_ids'  => 'required_with:variants|array',

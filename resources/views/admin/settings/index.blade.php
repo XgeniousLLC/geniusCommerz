@@ -442,6 +442,26 @@ $sidebarTabs = [
             </div>
         </div>
 
+        {{-- Trust Badges --}}
+        <div class="card pad" x-data="{
+            badges: {{ $settings->get('storefront.trust_badges') ? $settings->get('storefront.trust_badges')->value : json_encode([['title'=>'Authentic','sub'=>'Verified quality'],['title'=>'Free Returns','sub'=>'7-day policy'],['title'=>'Fast Delivery','sub'=>'Nationwide'],['title'=>'Secure Pay','sub'=>'SSL encrypted']]) }}
+        }">
+            <div class="card-head">
+                <span class="tile sm t-info"><span class="ico" data-ico="check" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Trust Badges</h3><div class="sub">4 reassurance tiles shown on every product page</div></div>
+            </div>
+            <div class="stack" style="gap:10px">
+                <template x-for="(b, i) in badges" :key="i">
+                    <div class="row" style="gap:8px;align-items:center">
+                        <span class="faint" style="font-size:11px;width:18px;text-align:center" x-text="i+1"></span>
+                        <input class="input" type="text" x-model="b.title" placeholder="Title" style="flex:1">
+                        <input class="input" type="text" x-model="b.sub" placeholder="Subtitle" style="flex:1">
+                    </div>
+                </template>
+            </div>
+            <input type="hidden" name="settings[storefront.trust_badges]" :value="JSON.stringify(badges)">
+        </div>
+
         <div class="card pad">
             <div class="card-head">
                 <span class="tile sm t-success"><span class="ico" data-ico="message" style="width:18px;height:18px"></span></span>

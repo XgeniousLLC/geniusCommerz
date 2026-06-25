@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
 import Layout from '../../layouts/Layout';
@@ -71,6 +71,13 @@ export default function ShopShow({ product, related }: Props) {
   const fmt = usePrice();
   const wishlisted = inWishlist(product.id);
   const [activeImage, setActiveImage] = useState(0);
+  const [mediaTab, setMediaTab] = useState<'images' | 'video'>('images');
+  const THUMB_VISIBLE = 5;
+  const [thumbStart, setThumbStart] = useState(0);
+  useEffect(() => {
+    if (activeImage < thumbStart) setThumbStart(activeImage);
+    else if (activeImage >= thumbStart + THUMB_VISIBLE) setThumbStart(activeImage - THUMB_VISIBLE + 1);
+  }, [activeImage]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.has_variants && product.variants.length > 0
       ? (product.variants.find(v => v.in_stock) ?? product.variants[0]) : null
@@ -251,23 +258,22 @@ export default function ShopShow({ product, related }: Props) {
         </div>
       )}
 
-      {/* Reassurance */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-        {[
-          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, 'Authentic', 'Verified quality'],
-          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>, 'Free Returns', '7-day policy'],
-          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8zM5.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>, 'Fast Delivery', 'Nationwide'],
-          [<svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/></svg>, 'Secure Pay', 'SSL encrypted'],
-        ].map(([icon, title, sub], i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)' }}>
-            <span style={{ color: 'var(--av-cognac)', flexShrink: 0 }}>{icon as React.ReactNode}</span>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{title as string}</div>
-              <div style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{sub as string}</div>
+      {/* Reassurance — product-level override or site-level default */}
+      {((product.trust_badges ?? site.trustBadges).length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+          {(product.trust_badges ?? site.trustBadges).map((badge, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)' }}>
+              <span style={{ color: 'var(--av-cognac)', flexShrink: 0 }}>
+                <svg viewBox="0 0 24 24" width="16" height="16" {...S}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{badge.title}</div>
+                <div style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{badge.sub}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Meta chips */}
       {((selectedVariant?.sku ?? product.sku) || product.brand) && (
@@ -316,20 +322,63 @@ export default function ShopShow({ product, related }: Props) {
 
           {/* Gallery */}
           <div style={{ position: 'sticky', top: 80 }} className="av-pdp-gallery">
-            <div style={{ display: 'grid', gridTemplateColumns: product.images.length > 1 ? '72px 1fr' : '1fr', gap: 14 }} className="av-gallery-inner">
+            {/* Image / Video tab switcher */}
+            {product.videos.length > 0 && product.images.length > 0 && (
+              <div style={{ display: 'flex', gap: 0, marginBottom: 12, border: '1px solid var(--av-line)', width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
+                {(['images', 'video'] as const).map(tab => (
+                  <button key={tab} onClick={() => setMediaTab(tab)}
+                    style={{ padding: '6px 18px', fontSize: 11, fontFamily: 'var(--av-sans)', fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', background: mediaTab === tab ? 'var(--av-ink)' : 'transparent', color: mediaTab === tab ? '#fff' : 'var(--av-muted)', transition: 'background .15s,color .15s' }}>
+                    {tab === 'images' ? 'Photos' : 'Video'}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: (mediaTab === 'images' && product.images.length > 1) ? '72px 1fr' : '1fr', gap: 14 }} className="av-gallery-inner">
+              {/* Video player */}
+              {mediaTab === 'video' && product.videos.length > 0 && (
+                <video controls style={{ width: '100%', aspectRatio: '4/5', background: '#000', display: 'block', objectFit: 'contain' }}>
+                  <source src={product.videos[0].url} />
+                </video>
+              )}
               {/* Thumbs */}
-              {product.images.length > 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {product.images.map((img, i) => (
-                    <button key={img.id} onClick={() => setActiveImage(i)}
-                      style={{ width: 72, height: 88, padding: 0, border: `1px solid ${i === activeImage ? 'var(--av-ink)' : 'var(--av-line)'}`, background: 'var(--av-paper-2)', overflow: 'hidden', cursor: 'pointer', flexShrink: 0 }}>
-                      <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                    </button>
-                  ))}
+              {mediaTab === 'images' && product.images.length > 1 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  {/* Up arrow */}
+                  <button
+                    onClick={() => setThumbStart(s => Math.max(0, s - 1))}
+                    disabled={thumbStart === 0}
+                    style={{ width: 72, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--av-line)', cursor: thumbStart === 0 ? 'default' : 'pointer', opacity: thumbStart === 0 ? 0.3 : 1, flexShrink: 0, transition: 'opacity .15s' }}
+                    aria-label="Scroll thumbnails up"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 15l-6-6-6 6"/>
+                    </svg>
+                  </button>
+                  {/* Visible thumbs */}
+                  {product.images.slice(thumbStart, thumbStart + THUMB_VISIBLE).map((img, j) => {
+                    const i = thumbStart + j;
+                    return (
+                      <button key={img.id} onClick={() => setActiveImage(i)}
+                        style={{ width: 72, height: 88, padding: 0, border: `1px solid ${i === activeImage ? 'var(--av-ink)' : 'var(--av-line)'}`, background: 'var(--av-paper-2)', overflow: 'hidden', cursor: 'pointer', flexShrink: 0 }}>
+                        <img src={img.thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      </button>
+                    );
+                  })}
+                  {/* Down arrow */}
+                  <button
+                    onClick={() => setThumbStart(s => Math.min(product.images.length - THUMB_VISIBLE, s + 1))}
+                    disabled={thumbStart + THUMB_VISIBLE >= product.images.length}
+                    style={{ width: 72, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--av-line)', cursor: thumbStart + THUMB_VISIBLE >= product.images.length ? 'default' : 'pointer', opacity: thumbStart + THUMB_VISIBLE >= product.images.length ? 0.3 : 1, flexShrink: 0, transition: 'opacity .15s' }}
+                    aria-label="Scroll thumbnails down"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </button>
                 </div>
               )}
-              {/* Main */}
-              <div style={{ aspectRatio: '4/5', background: 'var(--av-paper-2)', overflow: 'hidden', position: 'relative' }}>
+              {/* Main image */}
+              {mediaTab === 'images' && <div style={{ aspectRatio: '4/5', background: 'var(--av-paper-2)', overflow: 'hidden', position: 'relative' }}>
                 {product.images.length > 0
                   ? <img src={product.images[activeImage]?.url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
@@ -343,7 +392,7 @@ export default function ShopShow({ product, related }: Props) {
                     {activeImage + 1} / {product.images.length}
                   </div>
                 )}
-              </div>
+              </div>}
             </div>
           </div>
 
@@ -377,8 +426,8 @@ export default function ShopShow({ product, related }: Props) {
             </Accordion>
           )}
 
-          <Accordion title={`Reviews${product.reviews_count > 0 ? ` (${product.reviews_count})` : ''}`}>
-            {product.reviews_count > 0 && product.reviews_avg ? (
+          {product.reviews_count > 0 && <Accordion title={`Reviews (${product.reviews_count})`}>
+            {product.reviews_avg ? (
               <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 32 }} className="av-reviews-grid">
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
                   <div style={{ fontFamily: 'var(--av-display)', fontSize: 64, fontWeight: 300, lineHeight: 1, color: 'var(--av-ink)', letterSpacing: '-0.04em' }}>
@@ -403,24 +452,41 @@ export default function ShopShow({ product, related }: Props) {
                   ))}
                 </div>
               </div>
-            ) : (
-              <div style={{ padding: '32px 0', textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--av-display)', fontSize: 22, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 8 }}>No reviews yet</div>
-                <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14 }}>Be the first to share your experience.</p>
-              </div>
-            )}
-          </Accordion>
+            ) : null}
+          </Accordion>}
 
-          <Accordion title="Shipping & Returns">
-            {(product.return_policy || site.globalReturnPolicy) ? (
+          {(product.return_policy || site.globalReturnPolicy) && (
+            <Accordion title="Shipping & Returns">
               <div className="kb-prose" style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.return_policy || site.globalReturnPolicy || '' }} />
-            ) : (
-              <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14, lineHeight: 1.7 }}>
-                Standard delivery 3–5 business days. Free returns within 7 days of receipt. Items must be unused and in original condition.
-              </p>
-            )}
-          </Accordion>
+            </Accordion>
+          )}
+
+          {product.faqs && product.faqs.length > 0 && (
+            <Accordion title="FAQ">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {product.faqs.map((faq, i) => (
+                  <div key={i} style={{ paddingBottom: 16, borderBottom: i < product.faqs.length - 1 ? '1px solid var(--av-line-soft)' : 'none' }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>{faq.question}</div>
+                    <div style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', lineHeight: 1.65 }}>{faq.answer}</div>
+                  </div>
+                ))}
+              </div>
+            </Accordion>
+          )}
         </div>
+
+        {/* FAQ JSON-LD schema */}
+        {product.faqs && product.faqs.length > 0 && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: product.faqs.map(faq => ({
+              '@type': 'Question',
+              name: faq.question,
+              acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+            })),
+          })}} />
+        )}
 
         {/* Related */}
         {related.length > 0 && (

@@ -79,6 +79,18 @@
             },
 
             removeItem(id) { this.items = this.items.filter(i => i.id !== id); },
+
+            dragIndex: null,
+            dragStart(index) { this.dragIndex = index; },
+            dragOver(overIndex) {
+                if (this.dragIndex === null || this.dragIndex === overIndex) return;
+                const arr = [...this.items];
+                const [moved] = arr.splice(this.dragIndex, 1);
+                arr.splice(overIndex, 0, moved);
+                this.items = arr;
+                this.dragIndex = overIndex;
+            },
+            dragEnd() { this.dragIndex = null; },
         }));
     });
     </script>

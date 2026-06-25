@@ -14,6 +14,7 @@ export interface SiteSettings {
   productCallEnabled: boolean;
   productCallNumber: string;
   globalReturnPolicy: string;
+  trustBadges: Array<{ title: string; sub: string }>;
   shippingCost: number;
   freeShippingAbove: number;
   cartGoals: CartGoal[];
@@ -182,6 +183,9 @@ export interface ProductFull {
   preorder_enabled: boolean;
   preorder_message: string | null;
   preorder_expected_date: string | null;
+  videos: Array<{ id: number; url: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  trust_badges: Array<{ title: string; sub: string }> | null;
 }
 
 export interface Brand {
