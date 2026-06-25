@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class FraudController extends Controller
 {
-    private const TTL_HOURS = 24;
+    private const TTL_DAYS = 7;
 
     public function check(Request $request, BdCourierFraudService $bdCourier, FraudBdService $fraudBd): JsonResponse
     {
@@ -64,7 +64,7 @@ class FraudController extends Controller
                 'summary'            => $result['summary']  ?? null,
                 'couriers'           => $result['couriers'] ?? [],
                 'reports'            => $result['reports']  ?? [],
-                'expires_at'         => now()->addHours(self::TTL_HOURS),
+                'expires_at'         => now()->addDays(self::TTL_DAYS),
             ]
         );
 

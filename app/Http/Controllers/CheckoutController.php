@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\OrderConfirmed;
 use App\Services\CourierService;
 use App\Services\LoyaltyService;
+use App\Services\MetaCapiService;
 use App\Services\PixelLogger;
 use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
@@ -22,8 +23,22 @@ use Inertia\Response;
 
 class CheckoutController extends Controller
 {
-    public function show(): Response
+    public function show(Request $request, MetaCapiService $capi): Response
     {
+        // InitiateCheckout CAPI — fire async (no cart data on server, just user signal)
+        if ($capi->isConfigured()) {
+            $userData = $capi->buildUserData($request, ['user_id' => auth()->id()]);
+            $result   = $capi->send('InitiateCheckout', [], $userData, $request->url());
+            PixelLogger::record(
+                platform:     'meta',
+                event:        'InitiateCheckout',
+                success:      $result['success'],
+                httpStatus:   $result['status'] ?? null,
+                responseBody: $result['body']   ?? null,
+                error:        $result['success'] ? null : ($result['error'] ?? null),
+            );
+        }
+
         $shippingCost = (float) SiteSetting::get('shipping.flat_rate', 60);
         $freeAbove    = (float) SiteSetting::get('shipping.free_above', 0);
 
@@ -263,8 +278,6 @@ class CheckoutController extends Controller
 
     private function trackPurchase(Order $order, Request $request): void
     {
-        $pixelId   = SiteSetting::get('tracking.meta_pixel_id');
-        $capiToken = SiteSetting::get('tracking.meta_capi_token');
         $ga4MId    = SiteSetting::get('tracking.ga4_measurement_id');
         $ga4Secret = SiteSetting::get('tracking.ga4_api_secret');
 
@@ -317,60 +330,46 @@ class CheckoutController extends Controller
         }
 
         // Meta CAPI — Purchase event
-        if ($pixelId && $capiToken) {
-            try {
-                $userData = [];
-                if ($order->customer_email) {
-                    $userData['em'] = [hash('sha256', strtolower(trim($order->customer_email)))];
-                }
-                if ($order->customer_phone) {
-                    $userData['ph'] = [hash('sha256', preg_replace('/\D/', '', $order->customer_phone))];
-                }
+        $capi = app(MetaCapiService::class);
+        if ($capi->isConfigured()) {
+            $addr     = $order->shipping_address ?? [];
+            $userData = $capi->buildUserData($request, [
+                'email'   => $order->customer_email,
+                'phone'   => $order->customer_phone,
+                'name'    => $order->customer_name,
+                'city'    => $addr['city'] ?? null,
+                'zip'     => $addr['postcode'] ?? null,
+                'user_id' => $order->user_id,
+            ]);
 
-                $metaRes = Http::timeout(5)->post(
-                    "https://graph.facebook.com/v18.0/{$pixelId}/events?access_token={$capiToken}",
-                    [
-                        'data' => [[
-                            'event_name'       => 'Purchase',
-                            'event_time'       => time(),
-                            'event_source_url' => $request->header('referer', config('app.url')),
-                            'action_source'    => 'website',
-                            'user_data'        => $userData,
-                            'custom_data'      => [
-                                'currency'    => 'BDT',
-                                'value'       => (float) $order->total,
-                                'order_id'    => $order->order_number,
-                                'contents'    => array_map(fn($i) => [
-                                    'id'         => $i['id'],
-                                    'quantity'   => $i['quantity'],
-                                    'item_price' => $i['price'],
-                                ], $orderItems),
-                                'content_type' => 'product',
-                            ],
-                        ]],
-                    ]
-                );
+            $result = $capi->send(
+                'Purchase',
+                [
+                    'currency'     => 'BDT',
+                    'value'        => (float) $order->total,
+                    'order_id'     => $order->order_number,
+                    'content_type' => 'product',
+                    'contents'     => array_map(fn ($i) => [
+                        'id'         => $i['id'],
+                        'quantity'   => $i['quantity'],
+                        'item_price' => $i['price'],
+                    ], $orderItems),
+                ],
+                $userData,
+                $request->header('referer', config('app.url')),
+                'purchase_' . $order->order_number,
+            );
 
-                PixelLogger::record(
-                    platform:     'meta',
-                    event:        'Purchase',
-                    success:      $metaRes->successful(),
-                    orderId:      $order->id,
-                    orderNumber:  $order->order_number,
-                    httpStatus:   $metaRes->status(),
-                    responseBody: $metaRes->body(),
-                    error:        $metaRes->successful() ? null : ($metaRes->json('error.message') ?? 'HTTP ' . $metaRes->status()),
-                );
-            } catch (\Throwable $e) {
-                PixelLogger::record(
-                    platform:    'meta',
-                    event:       'Purchase',
-                    success:     false,
-                    orderId:     $order->id,
-                    orderNumber: $order->order_number,
-                    error:       $e->getMessage(),
-                );
-            }
+            PixelLogger::record(
+                platform:     'meta',
+                event:        'Purchase',
+                success:      $result['success'],
+                orderId:      $order->id,
+                orderNumber:  $order->order_number,
+                httpStatus:   $result['status'] ?? null,
+                responseBody: $result['body']   ?? null,
+                error:        $result['success'] ? null : ($result['error'] ?? null),
+            );
         }
 
         // TikTok Events API — Purchase event
