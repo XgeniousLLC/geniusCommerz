@@ -253,7 +253,9 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
         'expires_at' => $fraudCache->expires_at->toIso8601String(),
     ] : null;
     @endphp
-    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}', @json($fraudSeed))">
+    {{-- Seed in <script> so JSON double-quotes don't break the HTML attribute --}}
+    <script>window.__fraudSeed = @json($fraudSeed);</script>
+    <div class="card pad" x-data="fraudCheck('{{ $order->customer_phone }}', window.__fraudSeed)">
         {{-- Header --}}
         <div class="card-head" style="margin-bottom:0">
             <span class="tile sm t-warning"><span class="ico" data-ico="shield" style="width:18px;height:18px"></span></span>
