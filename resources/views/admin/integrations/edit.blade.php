@@ -2,209 +2,202 @@
 
 @section('title', 'Configure — ' . $integration->label)
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.integrations.index') }}" class="hover:text-gray-700">Integrations</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">{{ $integration->label }}</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Configure: {{ $integration->label }}</h1>
-    <p class="text-gray-600 mt-1">Credentials are encrypted at rest</p>
-@endsection
-
 @section('content')
 @php
 $fields = match($integration->provider) {
     'bkash' => [
-        'app_key'         => ['label' => 'App Key',         'type' => 'text'],
-        'app_secret'      => ['label' => 'App Secret',      'type' => 'password'],
-        'username'        => ['label' => 'Username',         'type' => 'text'],
-        'password'        => ['label' => 'Password',         'type' => 'password'],
-        'base_url'        => ['label' => 'Base URL',         'type' => 'text', 'hint' => 'e.g. https://tokenized.sandbox.bka.sh/v1.2.0-beta'],
-    ],
-    'nagad' => [
-        'merchant_id'     => ['label' => 'Merchant ID',     'type' => 'text'],
-        'merchant_number' => ['label' => 'Merchant Number', 'type' => 'text'],
-        'public_key'      => ['label' => 'Public Key (PEM)','type' => 'textarea'],
-        'private_key'     => ['label' => 'Private Key (PEM)','type' => 'textarea'],
-        'base_url'        => ['label' => 'Base URL',         'type' => 'text'],
-    ],
-    'sslcommerz' => [
-        'store_id'        => ['label' => 'Store ID',         'type' => 'text'],
-        'store_password'  => ['label' => 'Store Password',   'type' => 'password'],
-        'base_url'        => ['label' => 'Base URL',         'type' => 'text', 'hint' => 'https://sandbox.sslcommerz.com or https://securepay.sslcommerz.com'],
-    ],
-    'pathao' => [
-        'client_id'       => ['label' => 'Client ID',        'type' => 'text'],
-        'client_secret'   => ['label' => 'Client Secret',    'type' => 'password'],
+        'app_key'         => ['label' => 'App Key',          'type' => 'text'],
+        'app_secret'      => ['label' => 'App Secret',       'type' => 'password'],
         'username'        => ['label' => 'Username',          'type' => 'text'],
         'password'        => ['label' => 'Password',          'type' => 'password'],
+        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'e.g. https://tokenized.sandbox.bka.sh/v1.2.0-beta'],
+    ],
+    'nagad' => [
+        'merchant_id'     => ['label' => 'Merchant ID',      'type' => 'text'],
+        'merchant_number' => ['label' => 'Merchant Number',  'type' => 'text'],
+        'public_key'      => ['label' => 'Public Key (PEM)', 'type' => 'textarea'],
+        'private_key'     => ['label' => 'Private Key (PEM)','type' => 'textarea'],
         'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
+    ],
+    'sslcommerz' => [
+        'store_id'        => ['label' => 'Store ID',          'type' => 'text'],
+        'store_password'  => ['label' => 'Store Password',    'type' => 'password'],
+        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://sandbox.sslcommerz.com or https://securepay.sslcommerz.com'],
+    ],
+    'pathao' => [
+        'client_id'       => ['label' => 'Client ID',         'type' => 'text'],
+        'client_secret'   => ['label' => 'Client Secret',     'type' => 'password'],
+        'username'        => ['label' => 'Username',           'type' => 'text'],
+        'password'        => ['label' => 'Password',           'type' => 'password'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text'],
     ],
     'steadfast' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'text'],
-        'secret_key'      => ['label' => 'Secret Key',        'type' => 'password'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'text'],
+        'secret_key'      => ['label' => 'Secret Key',         'type' => 'password'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text'],
     ],
     'redx' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'text'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'text'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text'],
     ],
     'fraudbd' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'text'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'text'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text'],
     ],
     'bdcourier' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'password', 'hint' => 'Bearer token from api.bdcourier.com'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'Bearer token from api.bdcourier.com'],
     ],
     'bulksmsbd' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'password'],
-        'sender_id'       => ['label' => 'Sender ID',         'type' => 'text', 'hint' => 'Approved sender name or number'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://bulksmsbd.net/api/smsapi'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'password'],
+        'sender_id'       => ['label' => 'Sender ID',          'type' => 'text',     'hint' => 'Approved sender name or number'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text',     'hint' => 'https://bulksmsbd.net/api/smsapi'],
     ],
     'smsbd' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'password'],
-        'sender_id'       => ['label' => 'Sender ID',         'type' => 'text'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://sms.smsbd.in/api/v2/send'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'password'],
+        'sender_id'       => ['label' => 'Sender ID',          'type' => 'text'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text',     'hint' => 'https://sms.smsbd.in/api/v2/send'],
     ],
     'mram' => [
-        'api_key'         => ['label' => 'API Key',           'type' => 'password', 'hint' => 'From msg.mram.com.bd → Developers API'],
-        'sender_id'       => ['label' => 'Sender ID',         'type' => 'text', 'hint' => 'Approved sender ID / masking'],
-        'label'           => ['label' => 'SMS Label',         'type' => 'text', 'hint' => 'Optional — transactional or promotional'],
-        'base_url'        => ['label' => 'Base URL',          'type' => 'text', 'hint' => 'https://msg.mram.com.bd/smsapi'],
+        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'From msg.mram.com.bd → Developers API'],
+        'sender_id'       => ['label' => 'Sender ID',          'type' => 'text',     'hint' => 'Approved sender ID / masking'],
+        'label'           => ['label' => 'SMS Label',          'type' => 'text',     'hint' => 'Optional — transactional or promotional'],
+        'base_url'        => ['label' => 'Base URL',           'type' => 'text',     'hint' => 'https://msg.mram.com.bd/smsapi'],
     ],
     'twilio' => [
-        'account_sid'     => ['label' => 'Account SID',       'type' => 'text'],
-        'auth_token'      => ['label' => 'Auth Token',         'type' => 'password'],
-        'from_number'     => ['label' => 'From Number',        'type' => 'text', 'hint' => 'e.g. +15551234567'],
+        'account_sid'     => ['label' => 'Account SID',        'type' => 'text'],
+        'auth_token'      => ['label' => 'Auth Token',          'type' => 'password'],
+        'from_number'     => ['label' => 'From Number',         'type' => 'text',    'hint' => 'e.g. +15551234567'],
     ],
     'openai' => [
-        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'Starts with sk-…'],
-        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. gpt-4o, gpt-4o-mini, gpt-3.5-turbo'],
+        'api_key'         => ['label' => 'API Key',             'type' => 'password', 'hint' => 'Starts with sk-…'],
+        'model'           => ['label' => 'Model',               'type' => 'text',     'hint' => 'e.g. gpt-4o, gpt-4o-mini'],
     ],
     'gemini' => [
-        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'From Google AI Studio'],
-        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. gemini-1.5-flash, gemini-1.5-pro'],
+        'api_key'         => ['label' => 'API Key',             'type' => 'password', 'hint' => 'From Google AI Studio'],
+        'model'           => ['label' => 'Model',               'type' => 'text',     'hint' => 'e.g. gemini-1.5-flash, gemini-1.5-pro'],
     ],
     'claude' => [
-        'api_key'         => ['label' => 'API Key',            'type' => 'password', 'hint' => 'Starts with sk-ant-…'],
-        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. claude-haiku-4-5-20251001, claude-sonnet-4-6'],
+        'api_key'         => ['label' => 'API Key',             'type' => 'password', 'hint' => 'Starts with sk-ant-…'],
+        'model'           => ['label' => 'Model',               'type' => 'text',     'hint' => 'e.g. claude-haiku-4-5-20251001, claude-sonnet-4-6'],
     ],
     'deepseek' => [
-        'api_key'         => ['label' => 'API Key',            'type' => 'password'],
-        'model'           => ['label' => 'Model',              'type' => 'text', 'hint' => 'e.g. deepseek-chat, deepseek-reasoner'],
+        'api_key'         => ['label' => 'API Key',             'type' => 'password'],
+        'model'           => ['label' => 'Model',               'type' => 'text',     'hint' => 'e.g. deepseek-chat, deepseek-reasoner'],
     ],
     default => [],
 };
-$creds = $integration->credentials ?? [];
+
+$creds          = $integration->credentials ?? [];
+$isFraud        = in_array($integration->provider, \App\Models\Integration::FRAUD_PROVIDERS);
+$showEnvironment = ! $isFraud;
 @endphp
 
-<div class="max-w-2xl">
+<div class="page-head">
+    <div>
+        <h2 class="display">{{ $integration->label }}</h2>
+        <div class="sub">Credentials are encrypted at rest</div>
+    </div>
+    <a href="{{ route('admin.integrations.index') }}" class="btn btn-ghost">
+        <span class="ico" data-ico="arrowLeft" style="width:16px;height:16px"></span>
+        Integrations
+    </a>
+</div>
+
+<div style="max-width:680px">
 <form method="POST" action="{{ route('admin.integrations.update', $integration) }}">
     @csrf
     @method('PUT')
 
-    <x-admin.card>
-        <div class="grid grid-cols-1 gap-5">
+    <div class="card pad" style="margin-bottom:16px">
 
-            @foreach($fields as $key => $field)
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">{{ $field['label'] }}</label>
-                    @if(($field['type'] ?? 'text') === 'textarea')
-                        <textarea name="credentials[{{ $key }}]" rows="4"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm font-mono">{{ $creds[$key] ?? '' }}</textarea>
-                    @else
-                        <x-admin.input
-                            type="{{ $field['type'] }}"
-                            name="credentials[{{ $key }}]"
-                            value="{{ $field['type'] === 'password' ? '' : ($creds[$key] ?? '') }}"
-                            :placeholder="$field['type'] === 'password' && isset($creds[$key]) ? '••••••••  (leave blank to keep)' : ''"
-                        />
-                    @endif
-                    @if(!empty($field['hint']))
-                        <p class="text-xs text-gray-400 mt-1">{{ $field['hint'] }}</p>
-                    @endif
-                </x-admin.form-group>
-            @endforeach
+        {{-- Credential fields --}}
+        @foreach($fields as $key => $field)
+        <div class="field" style="margin-bottom:16px">
+            <span class="lbl">{{ $field['label'] }}</span>
+            @if(($field['type'] ?? 'text') === 'textarea')
+                <textarea class="input" name="credentials[{{ $key }}]" rows="4"
+                    style="height:auto;resize:vertical;font-family:monospace;font-size:13px">{{ $creds[$key] ?? '' }}</textarea>
+            @else
+                <input
+                    class="input"
+                    type="{{ $field['type'] }}"
+                    name="credentials[{{ $key }}]"
+                    value="{{ $field['type'] === 'password' ? '' : ($creds[$key] ?? '') }}"
+                    placeholder="{{ $field['type'] === 'password' && isset($creds[$key]) && $creds[$key] !== '' ? '••••••••  (leave blank to keep)' : ($field['hint'] ?? '') }}"
+                >
+            @endif
+            @if(!empty($field['hint']) && $field['type'] !== 'password')
+                <div class="faint" style="font-size:12px;margin-top:4px">{{ $field['hint'] }}</div>
+            @endif
+        </div>
+        @endforeach
 
-            <hr class="border-gray-200">
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+            <div style="display:grid;grid-template-columns:{{ $showEnvironment ? '1fr 1fr' : '1fr' }};gap:14px;margin-bottom:14px">
 
-            <div class="grid grid-cols-2 gap-4">
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Environment</label>
-                    <x-admin.select name="environment">
+                @if($showEnvironment)
+                <div class="field" style="margin:0">
+                    <span class="lbl">Environment</span>
+                    <select class="input" name="environment">
                         <option value="sandbox" {{ $integration->environment === 'sandbox' ? 'selected' : '' }}>Sandbox</option>
                         <option value="live"    {{ $integration->environment === 'live'    ? 'selected' : '' }}>Live</option>
-                    </x-admin.select>
-                </x-admin.form-group>
+                    </select>
+                </div>
+                @else
+                    {{-- Fraud providers are always live --}}
+                    <input type="hidden" name="environment" value="live">
+                @endif
 
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <label class="flex items-center space-x-2 mt-2">
+                <div class="field" style="margin:0">
+                    <span class="lbl">Status</span>
+                    <label class="row" style="gap:8px;margin-top:6px;cursor:pointer">
+                        <input type="hidden" name="is_active" value="0">
                         <input type="checkbox" name="is_active" value="1"
                             {{ $integration->is_active ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                        <span class="text-sm text-gray-700">Active</span>
+                            style="width:16px;height:16px;accent-color:var(--accent)">
+                        <span style="font-size:13.5px">Active</span>
                     </label>
-                </x-admin.form-group>
+                </div>
             </div>
 
-            <x-admin.form-group>
-                <label class="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea name="notes" rows="2"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ $integration->notes }}</textarea>
-            </x-admin.form-group>
-
+            <div class="field" style="margin-bottom:0">
+                <span class="lbl">Notes <span class="faint" style="font-weight:400">(internal only)</span></span>
+                <textarea class="input" name="notes" rows="2" style="height:auto;resize:vertical">{{ $integration->notes }}</textarea>
+            </div>
         </div>
+    </div>
 
-        <div class="flex justify-end space-x-3 mt-6">
-            <x-admin.button variant="secondary" type="button" onclick="window.history.back()">Cancel</x-admin.button>
-            <x-admin.button type="submit">Save Credentials</x-admin.button>
-        </div>
-    </x-admin.card>
+    <div class="row" style="gap:10px;justify-content:flex-end">
+        <a href="{{ route('admin.integrations.index') }}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Credentials</button>
+    </div>
 </form>
-</div>
 
+{{-- SMS test panel --}}
 @if(in_array($integration->provider, \App\Models\Integration::SMS_PROVIDERS))
-<div class="max-w-2xl mt-6">
+<div class="card pad" style="margin-top:20px">
+    <div class="card-head" style="margin-bottom:12px">
+        <span class="tile sm t-pop"><span class="ico" data-ico="message" style="width:17px;height:17px"></span></span>
+        <div class="ct"><h3>Send Test SMS</h3></div>
+        <form method="POST" action="{{ route('admin.integrations.sms-balance', $integration) }}" style="margin:0">
+            @csrf
+            <button type="submit" class="link-btn head-action" style="font-size:12.5px">Check Balance</button>
+        </form>
+    </div>
     <form method="POST" action="{{ route('admin.integrations.test-sms', $integration) }}">
         @csrf
-        <x-admin.card>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-700">Send Test SMS</h3>
-                <button type="submit"
-                    form="sms-balance-form"
-                    class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800">
-                    Check Balance
-                </button>
-            </div>
-            <div class="grid grid-cols-1 gap-4">
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
-                    <x-admin.input type="text" name="phone" placeholder="+8801XXXXXXXXX" />
-                </x-admin.form-group>
-                <x-admin.form-group>
-                    <label class="block text-sm font-medium text-gray-700">Message</label>
-                    <textarea name="message" rows="2"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm"
-                    >Test SMS from {{ config('app.name') }}</textarea>
-                </x-admin.form-group>
-            </div>
-            <div class="flex justify-end mt-4">
-                <x-admin.button type="submit" variant="outline">Send Test SMS</x-admin.button>
-            </div>
-        </x-admin.card>
-    </form>
-
-    {{-- Balance check posts independently; the "Check Balance" button above targets this form via its id. --}}
-    <form method="POST" action="{{ route('admin.integrations.sms-balance', $integration) }}" id="sms-balance-form">
-        @csrf
+        <div class="field" style="margin-bottom:12px">
+            <span class="lbl">Phone Number</span>
+            <input class="input" type="text" name="phone" placeholder="+8801XXXXXXXXX">
+        </div>
+        <div class="field" style="margin-bottom:14px">
+            <span class="lbl">Message</span>
+            <textarea class="input" name="message" rows="2" style="height:auto;resize:vertical">Test SMS from {{ config('app.name') }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Send Test SMS</button>
     </form>
 </div>
 @endif
+
+</div>
 @endsection

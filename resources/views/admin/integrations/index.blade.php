@@ -33,12 +33,13 @@ $groups = [
     'Services' => [
         'providers' => ['fraudbd', 'bdcourier'],
         'icon' => 'shield', 'color' => 't-info',
-        'hint' => null,
+        'hint' => 'Only one fraud checker can be the default',
     ],
 ];
 $courierProviders = \App\Models\Integration::COURIER_PROVIDERS;
 $smsProviders     = \App\Models\Integration::SMS_PROVIDERS;
 $aiProviders      = \App\Models\Integration::AI_PROVIDERS;
+$fraudProviders   = \App\Models\Integration::FRAUD_PROVIDERS;
 $activeCount = $integrations->where('is_active', true)->count();
 @endphp
 
@@ -75,7 +76,8 @@ $activeCount = $integrations->where('is_active', true)->count();
             $isDefault     = $integration->is_default;
             $canSetDefault = in_array($integration->provider, $courierProviders)
                           || in_array($integration->provider, $smsProviders)
-                          || in_array($integration->provider, $aiProviders);
+                          || in_array($integration->provider, $aiProviders)
+                          || in_array($integration->provider, $fraudProviders);
             $credCount     = count($integration->credentials ?? []);
             $tileClass     = $isDefault ? $groupCfg['color'] : 'muted';
             $envDot        = $integration->environment === 'live' ? 'var(--success)' : 'var(--warning)';
