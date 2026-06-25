@@ -57,6 +57,27 @@ export const useCartStore = create<CartStore>()(
             : [...state.items, { ...item, key, quantity: qty }];
           return { items, isOpen: true };
         });
+
+        // Meta CAPI — AddToCart (fire and forget)
+        fetch('/capi/event', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+          },
+          body: JSON.stringify({
+            event_name:   'AddToCart',
+            currency:     'BDT',
+            value:        item.price * qty,
+            content_ids:  [String(item.product_id)],
+            content_name: item.name,
+            content_type: 'product',
+            num_items:    qty,
+            contents:     [{ id: String(item.product_id), quantity: qty, item_price: item.price }],
+            source_url:   window.location.href,
+          }),
+        }).catch(() => {});
       },
 
       removeItem: (key) => set(state => ({ items: state.items.filter(i => i.key !== key) })),

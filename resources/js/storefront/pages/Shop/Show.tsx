@@ -78,6 +78,30 @@ export default function ShopShow({ product, related }: Props) {
     if (activeImage < thumbStart) setThumbStart(activeImage);
     else if (activeImage >= thumbStart + THUMB_VISIBLE) setThumbStart(activeImage - THUMB_VISIBLE + 1);
   }, [activeImage]);
+
+  // Meta CAPI — ViewContent (fire once on mount, non-blocking)
+  useEffect(() => {
+    const price = product.has_variants && product.variants.length > 0
+      ? (product.variants[0]?.price ?? 0)
+      : (product.price ?? 0);
+    fetch('/capi/event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+      },
+      body: JSON.stringify({
+        event_name:   'ViewContent',
+        currency:     'BDT',
+        value:        price,
+        content_ids:  [String(product.id)],
+        content_name: product.name,
+        content_type: 'product',
+        source_url:   window.location.href,
+      }),
+    }).catch(() => {});
+  }, [product.id]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.has_variants && product.variants.length > 0
       ? (product.variants.find(v => v.in_stock) ?? product.variants[0]) : null

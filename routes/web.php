@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CapiController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\CourierLocationController;
 use App\Http\Controllers\CheckoutController;
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/coupon/validate', [CouponValidationController::class, 'validate'])->name('coupon.validate');
+Route::post('/capi/event', [CapiController::class, 'event'])->name('capi.event');
 
 // Courier location + charge (public, throttled)
 Route::middleware('throttle:60,1')->group(function () {
