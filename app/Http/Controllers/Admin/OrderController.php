@@ -45,6 +45,11 @@ class OrderController extends Controller
 
         $orders = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
+        $phones     = $orders->pluck('customer_phone')->filter()->unique()->values();
+        $fraudMap   = FraudCheckCache::whereIn('phone', $phones)
+            ->get(['phone','risk_level','risk_score'])
+            ->keyBy('phone');
+
         $stats = [
             'pending'    => Order::where('status', 'pending')->count(),
             'processing' => Order::whereIn('status', ['confirmed', 'processing'])->count(),
@@ -52,7 +57,7 @@ class OrderController extends Controller
             'delivered'  => Order::where('status', 'delivered')->count(),
         ];
 
-        return view('admin.orders.index', compact('orders', 'stats'));
+        return view('admin.orders.index', compact('orders', 'stats', 'fraudMap'));
     }
 
     public function create(): View

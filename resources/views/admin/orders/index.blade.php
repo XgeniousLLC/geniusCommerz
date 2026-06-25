@@ -124,6 +124,7 @@ function orderAvatarColor(string $name, array $colors): string {
             <th>Channel</th>
             <th>Payment</th>
             <th>Status</th>
+            <th>Fraud</th>
             <th>Date</th>
             <th style="text-align:right">Total</th>
             <th></th>
@@ -136,6 +137,14 @@ function orderAvatarColor(string $name, array $colors): string {
             $statusPill  = $order->statusPillClass();
             $paymentPill = $order->paymentPillClass();
             $sourcePill  = $order->sourcePillClass();
+            $fc          = $order->customer_phone ? ($fraudMap[$order->customer_phone] ?? null) : null;
+            $fraudPill   = match($fc?->risk_level) {
+                'safe'      => 'success',
+                'low_risk'  => 'info',
+                'mid_risk'  => 'warning',
+                'high_risk' => 'danger',
+                default     => '',
+            };
             @endphp
             <tr class="hoverable" onclick="location.href='{{ route('admin.orders.show', $order) }}'">
                 <td @click.stop>
@@ -162,6 +171,16 @@ function orderAvatarColor(string $name, array $colors): string {
                 <td>
                     <span class="pill sm {{ $statusPill }}"><span class="dot"></span>{{ ucfirst($order->status) }}</span>
                 </td>
+                <td>
+                    @if($fc)
+                    <span class="pill sm {{ $fraudPill }}" title="Score: {{ $fc->risk_score }}/100">
+                        {{ ucwords(str_replace('_', ' ', $fc->risk_level)) }}
+                        <span style="opacity:.7;margin-left:3px">{{ $fc->risk_score }}</span>
+                    </span>
+                    @else
+                    <span class="faint" style="font-size:12px">—</span>
+                    @endif
+                </td>
                 <td class="faint" style="font-size:13px">{{ $order->created_at->format('M j, H:i') }}</td>
                 <td style="text-align:right" class="tnum"><b>৳{{ number_format($order->total, 0) }}</b></td>
                 <td style="text-align:right">
@@ -169,7 +188,7 @@ function orderAvatarColor(string $name, array $colors): string {
                 </td>
             </tr>
             @empty
-            <tr><td colspan="9" style="text-align:center;padding:48px;color:var(--text-faint)">No orders found.</td></tr>
+            <tr><td colspan="10" style="text-align:center;padding:48px;color:var(--text-faint)">No orders found.</td></tr>
             @endforelse
         </tbody>
     </table></div>
