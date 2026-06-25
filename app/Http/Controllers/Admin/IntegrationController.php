@@ -35,14 +35,14 @@ class IntegrationController extends Controller
 
     public function update(Request $request, Integration $integration): RedirectResponse
     {
-        $credentials = $request->input('credentials', []);
-
-        // Strip blanks — don't overwrite a saved value with an empty string
-        $existing = $integration->credentials ?? [];
-        $merged = array_filter(
-            array_merge($existing, $credentials),
+        // Strip blanks BEFORE merging — blank password fields must not wipe existing saved values
+        $credentials = array_filter(
+            $request->input('credentials', []),
             fn ($v) => $v !== null && $v !== '',
         );
+
+        $existing = $integration->credentials ?? [];
+        $merged   = array_merge($existing, $credentials);
 
         $integration->update([
             'credentials' => $merged,
