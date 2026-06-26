@@ -70,23 +70,29 @@ class LoyaltyController extends Controller
         }
 
         $transactions = $query->paginate(30)->withQueryString();
+        $users = \App\Models\User::orderBy('name')->select('id','name','email')->get();
 
-        return view('admin.loyalty.index', compact('transactions'));
+        return view('admin.loyalty.index', compact('transactions', 'users'));
     }
 
     public function adjust(Request $request): RedirectResponse
     {
         $request->validate([
             'user_id'     => 'required|exists:users,id',
-            'points'      => 'required|integer|not_in:0',
+            'points'      => 'required|integer|min:1',
+            'action'      => 'required|in:add,deduct',
             'description' => 'required|string|max:255',
         ]);
 
-        $user = User::findOrFail($request->input('user_id'));
+        $user   = User::findOrFail($request->input('user_id'));
+        $points = (int) $request->input('points');
+        if ($request->input('action') === 'deduct') {
+            $points = -$points;
+        }
 
         app(LoyaltyService::class)->adjust(
             $user,
-            (int) $request->input('points'),
+            $points,
             $request->input('description')
         );
 

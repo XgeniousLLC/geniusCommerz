@@ -94,16 +94,38 @@
             <span class="tile sm t-accent"><span class="ico" data-ico="edit" style="width:18px;height:18px"></span></span>
             <div class="ct"><h3>Manual Adjustment</h3></div>
         </div>
-        <form method="POST" action="{{ route('admin.loyalty.adjust') }}">
+        <form method="POST" action="{{ route('admin.loyalty.adjust') }}"
+              x-data="{ action: 'add' }">
             @csrf
+            <input type="hidden" name="action" x-bind:value="action">
+
             <div class="field" style="margin-bottom:12px">
-                <span class="lbl">User ID</span>
-                <input class="input" type="number" name="user_id" placeholder="User ID" required>
+                <span class="lbl">Customer</span>
+                <select class="input" name="user_id" required>
+                    <option value="">— select customer —</option>
+                    @foreach($users as $u)
+                    <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->email }})</option>
+                    @endforeach
+                </select>
             </div>
+
             <div class="field" style="margin-bottom:12px">
-                <span class="lbl">Points (use - to deduct)</span>
-                <input class="input" type="number" name="points" placeholder="e.g. 500 or -200" required>
+                <span class="lbl">Action</span>
+                <div class="seg" style="width:100%">
+                    <button type="button" style="flex:1;justify-content:center"
+                        :class="action==='add' ? 'active' : ''"
+                        @click="action='add'">+ Add</button>
+                    <button type="button" style="flex:1;justify-content:center"
+                        :class="action==='deduct' ? 'active' : ''"
+                        @click="action='deduct'">− Deduct</button>
+                </div>
             </div>
+
+            <div class="field" style="margin-bottom:12px">
+                <span class="lbl">Points</span>
+                <input class="input" type="number" name="points" min="1" placeholder="e.g. 500" required>
+            </div>
+
             <div class="field" style="margin-bottom:16px">
                 <span class="lbl">Reason</span>
                 <input class="input" name="description" placeholder="e.g. Goodwill bonus" required>

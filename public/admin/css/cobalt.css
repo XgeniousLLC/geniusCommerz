@@ -274,6 +274,7 @@ h1,h2,h3,h4 { margin: 0; }
 .select-wrap { position: relative; }
 .select-wrap .ico { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-faint); width: 16px; height: 16px; }
 .select { appearance: none; padding-right: 36px; cursor: pointer; }
+select.input { padding-top: 0; padding-bottom: 0; height: 42px; cursor: pointer; }
 .input-prefix { position: relative; }
 .input-prefix > span { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-weight: 600; font-size: 13px; pointer-events: none; }
 

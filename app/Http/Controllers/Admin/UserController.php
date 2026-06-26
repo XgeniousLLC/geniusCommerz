@@ -121,7 +121,28 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $orders        = $user->orders()->with('items')->latest()->get();
+        $totalSpent    = $orders->whereIn('status', ['processing','shipped','delivered'])->sum('total');
+        $refunds       = $user->refunds()->with('order')->latest()->get();
+        $loyaltyBalance = $user->loyaltyBalance();
+        $loyaltyPoints = $user->loyaltyPoints()->latest()->take(20)->get();
+
+        // Build unified timeline (orders + refunds + loyalty)
+        $timeline = collect();
+        foreach ($orders as $o) {
+            $timeline->push(['type'=>'order','date'=>$o->created_at,'data'=>$o]);
+        }
+        foreach ($refunds as $r) {
+            $timeline->push(['type'=>'refund','date'=>$r->created_at,'data'=>$r]);
+        }
+        foreach ($loyaltyPoints as $lp) {
+            $timeline->push(['type'=>'loyalty','date'=>$lp->created_at,'data'=>$lp]);
+        }
+        $timeline = $timeline->sortByDesc('date')->values();
+
+        return view('admin.users.edit', compact(
+            'user','orders','refunds','loyaltyBalance','loyaltyPoints','timeline','totalSpent'
+        ));
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -132,8 +153,9 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User updated successfully.');
+        return redirect()->route('admin.users.edit', $user)
+            ->with('success', 'User updated successfully.')
+            ->with('_tab', 'info');
     }
 
     public function destroy(User $user)
@@ -150,7 +172,8 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Password changed successfully.');
+        return redirect()->route('admin.users.edit', $user)
+            ->with('success', 'Password changed successfully.')
+            ->with('_tab', 'password');
     }
 }

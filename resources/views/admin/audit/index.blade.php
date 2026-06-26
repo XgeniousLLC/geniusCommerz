@@ -83,8 +83,8 @@ $eventColors = ['created'=>'success','updated'=>'warning','deleted'=>'danger'];
                                 @if(isset($log->old_values[$field]) && $log->old_values[$field] !== ($log->new_values[$field] ?? null))
                                 <div style="font-size:12px;margin-bottom:3px">
                                     <span style="font-weight:600;color:var(--text)">{{ $field }}:</span>
-                                    <span style="text-decoration:line-through;color:var(--danger);margin-left:6px">{{ Str::limit((string) $log->old_values[$field], 40) }}</span>
-                                    <span style="color:var(--success);margin-left:4px">→ {{ Str::limit((string) ($log->new_values[$field] ?? ''), 40) }}</span>
+                                    <span style="text-decoration:line-through;color:var(--danger);margin-left:6px">{{ Str::limit(is_array($log->old_values[$field]) ? json_encode($log->old_values[$field]) : (string) $log->old_values[$field], 40) }}</span>
+                                    <span style="color:var(--success);margin-left:4px">→ {{ Str::limit(is_array($log->new_values[$field] ?? '') ? json_encode($log->new_values[$field]) : (string) ($log->new_values[$field] ?? ''), 40) }}</span>
                                 </div>
                                 @endif
                             @endforeach
@@ -106,9 +106,7 @@ $eventColors = ['created'=>'success','updated'=>'warning','deleted'=>'danger'];
             </tbody>
         </table>
     </div>
-    @if($logs->hasPages())
     <div style="padding:14px 20px;border-top:1px solid var(--border)">{{ $logs->links() }}</div>
-    @endif
 </div>
 
 @endsection

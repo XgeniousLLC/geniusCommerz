@@ -1,118 +1,76 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Create Role')
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.roles.index') }}" class="hover:text-gray-700">Roles & Permissions</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">Create Role</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <h1 class="text-2xl font-bold text-gray-900">Create Role</h1>
-    <p class="text-gray-600 mt-1">Define a new role and assign permissions to it</p>
-@endsection
-
 @section('content')
+
+<div class="page-head">
+    <div>
+        <h2 class="display">Create Role</h2>
+        <div class="sub">Define a new role and assign permissions</div>
+    </div>
+</div>
+
 <form method="POST" action="{{ route('admin.roles.store') }}">
     @csrf
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start">
 
         {{-- Role name --}}
-        <div class="lg:col-span-1">
-            <x-admin.card>
-                <h3 class="text-base font-semibold text-gray-900 mb-4">Role Details</h3>
+        <div class="card pad" style="display:flex;flex-direction:column;gap:16px">
+            <div class="card-head" style="padding:0"><div class="ct"><h3>Role Details</h3></div></div>
 
-                <x-admin.form-group>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Role Name *</label>
-                    <x-admin.input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        placeholder="e.g. warehouse-staff"
-                        value="{{ old('name') }}"
-                    />
-                    <p class="mt-1 text-xs text-gray-500">Use lowercase kebab-case (e.g. store-manager)</p>
-                    @error('name')
-                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </x-admin.form-group>
+            <div class="field">
+                <label class="lbl">Role Name *</label>
+                <input type="text" name="name" class="input" placeholder="e.g. warehouse-staff" value="{{ old('name') }}" required>
+                <div class="lbl" style="margin-top:4px;font-weight:400">Use lowercase kebab-case (e.g. store-manager)</div>
+                @error('name')<div style="color:var(--danger);font-size:12px;margin-top:4px">{{ $message }}</div>@enderror
+            </div>
 
-                <div class="mt-6 flex justify-end space-x-3">
-                    <x-admin.button variant="secondary" type="button" onclick="window.history.back()">
-                        Cancel
-                    </x-admin.button>
-                    <x-admin.button type="submit">
-                        Create Role
-                    </x-admin.button>
-                </div>
-            </x-admin.card>
+            <div style="display:flex;gap:8px;padding-top:8px;border-top:1px solid var(--border)">
+                <button type="button" class="btn btn-outline" onclick="window.history.back()">Cancel</button>
+                <button type="submit" class="btn">Create Role</button>
+            </div>
         </div>
 
-        {{-- Permission matrix --}}
-        <div class="lg:col-span-2">
-            <x-admin.card>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-semibold text-gray-900">Permissions</h3>
-                    <button type="button" id="toggle-all"
-                            class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                        Select all
-                    </button>
-                </div>
+        {{-- Permissions --}}
+        <div class="card pad">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <h3 style="font-size:14px;font-weight:700;color:var(--text)">Permissions</h3>
+                <button type="button" id="toggle-all" class="btn btn-outline btn-sm">Select all</button>
+            </div>
 
-                @error('permissions')
-                    <div class="text-red-500 text-sm mb-4">{{ $message }}</div>
-                @enderror
+            @error('permissions')
+                <div style="color:var(--danger);font-size:12px;margin-bottom:12px">{{ $message }}</div>
+            @enderror
 
-                <div class="space-y-6">
-                    @foreach($permissionGroups as $module => $permissions)
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                                    {{ ucfirst($module) }}
-                                </h4>
-                                <button type="button"
-                                        class="toggle-group text-xs text-gray-400 hover:text-blue-600"
-                                        data-group="{{ $module }}">
-                                    Select all
-                                </button>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-gray-50 rounded-lg">
-                                @foreach($permissions as $permission)
-                                    <label class="flex items-center space-x-2 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
-                                            name="permissions[]"
-                                            value="{{ $permission->name }}"
-                                            data-group="{{ $module }}"
-                                            {{ in_array($permission->name, old('permissions', [])) ? 'checked' : '' }}
-                                            class="perm-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
-                                        >
-                                        <span class="text-sm text-gray-700 group-hover:text-gray-900">
-                                            {{ ucfirst(explode(' ', $permission->name)[0]) }}
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endforeach
+            <div style="display:flex;flex-direction:column;gap:20px">
+                @foreach($permissionGroups as $module => $permissions)
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">{{ ucfirst($module) }}</span>
+                        <button type="button" class="toggle-group" data-group="{{ $module }}"
+                                style="font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;padding:0">Select all</button>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:var(--surface-2);border-radius:8px">
+                        @foreach($permissions as $permission)
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
+                            <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                   data-group="{{ $module }}" class="perm-checkbox"
+                                   {{ in_array($permission->name, old('permissions', [])) ? 'checked' : '' }}>
+                            {{ ucfirst(explode(' ', $permission->name)[0]) }}
+                        </label>
+                        @endforeach
+                    </div>
                 </div>
-            </x-admin.card>
+                @endforeach
+            </div>
         </div>
+
     </div>
 </form>
-@endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Per-group toggle
     document.querySelectorAll('.toggle-group').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const group = this.dataset.group;
@@ -123,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Global toggle
     const toggleAll = document.getElementById('toggle-all');
     toggleAll.addEventListener('click', function () {
         const boxes = document.querySelectorAll('.perm-checkbox');
@@ -134,3 +91,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
+@endsection

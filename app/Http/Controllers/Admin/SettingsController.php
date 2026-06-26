@@ -21,8 +21,9 @@ class SettingsController extends Controller
         $settings = SiteSetting::group($tab)->get()->keyBy('key');
         $currencies = $tab === 'currencies' ? Currency::orderByDesc('is_default')->orderBy('code')->get() : collect();
         $products   = $tab === 'storefront' ? Product::where('status', 'active')->orderBy('name')->get(['id', 'name']) : collect();
+        $pages      = $tab === 'legal' ? \App\Models\Page::orderBy('title')->get(['id', 'title', 'slug']) : collect();
 
-        return view('admin.settings.index', compact('tab', 'settings', 'currencies', 'products'));
+        return view('admin.settings.index', compact('tab', 'settings', 'currencies', 'products', 'pages'));
     }
 
     public function update(Request $request, string $group): RedirectResponse

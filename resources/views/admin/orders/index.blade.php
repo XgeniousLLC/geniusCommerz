@@ -90,9 +90,9 @@ $dateTabs = [
 <div style="margin-bottom:16px">
     <div class="seg">
         @foreach($statusTabs as $val => $label)
-        <a href="{{ route('admin.orders.index', array_merge(request()->except('status','page'), $val ? ['status'=>$val] : [])) }}"
-           class="{{ request('status','') === $val ? 'active' : '' }}"
-           style="text-decoration:none">{{ $label }}</a>
+        <button type="button"
+           onclick="window.location='{{ route('admin.orders.index', array_merge(request()->except('status','page'), $val ? ['status'=>$val] : [])) }}'"
+           class="{{ request('status','') === $val ? 'active' : '' }}">{{ $label }}</button>
         @endforeach
     </div>
 </div>

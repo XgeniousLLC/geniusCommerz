@@ -110,15 +110,16 @@
         @if($site['tagline'])
             <div class="brand-tagline">{{ $site['tagline'] }}</div>
         @endif
-        @if($site['phone'] || $site['email'] || $site['address'])
+        @if($site['phone'] || $site['email'] || $site['address'] || $site['tax_number'])
         <div class="brand-contact">
             @if($site['phone'])<div>Tel: {{ $site['phone'] }}</div>@endif
             @if($site['email'])<div>{{ $site['email'] }}</div>@endif
             @if($site['address'])<div>{{ $site['address'] }}</div>@endif
+            @if($site['tax_number'])<div>VAT/Tax: {{ $site['tax_number'] }}</div>@endif
         </div>
         @endif
         <div class="order-meta">
-            <strong>Order #{{ $order->order_number }}</strong><br>
+            <strong>{{ $site['invoice_prefix'] ? 'Invoice #' . $site['invoice_prefix'] . $order->order_number : 'Order #' . $order->order_number }}</strong><br>
             {{ $order->created_at->format('d M Y, g:i A') }}
         </div>
     </div>
@@ -196,6 +197,18 @@
                 <td>-{{ $site['currency_symbol'] }}{{ number_format($order->discount_amount, 2) }}</td>
             </tr>
             @endif
+            @if($site['tax_rate'] > 0)
+            @php
+                $taxBase = $site['prices_include_tax']
+                    ? $order->subtotal / (1 + $site['tax_rate'] / 100)
+                    : $order->subtotal;
+                $taxAmt  = $taxBase * $site['tax_rate'] / 100;
+            @endphp
+            <tr>
+                <td style="color:#555">Tax ({{ $site['tax_rate'] }}%{{ $site['prices_include_tax'] ? ' incl.' : '' }})</td>
+                <td>{{ $site['currency_symbol'] }}{{ number_format($taxAmt, 2) }}</td>
+            </tr>
+            @endif
             <tr class="grand-total">
                 <td>Total</td>
                 <td>{{ $site['currency_symbol'] }}{{ number_format($order->total, 2) }}</td>
@@ -216,6 +229,14 @@
     <div class="section">
         <div class="section-title">Note</div>
         <div class="note-box">{{ $site['invoice_note'] }}</div>
+    </div>
+    @endif
+
+    {{-- ── Invoice footer (from Accounting settings) ── --}}
+    @if($site['invoice_footer'])
+    <div class="section">
+        <div class="section-title">Terms</div>
+        <div class="note-box">{{ $site['invoice_footer'] }}</div>
     </div>
     @endif
 
