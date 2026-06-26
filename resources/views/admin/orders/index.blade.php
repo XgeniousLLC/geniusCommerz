@@ -42,36 +42,61 @@ function orderAvatarColor(string $name, array $colors): string {
     </div>
 </div>
 
-<div class="between wrap" style="margin-bottom:16px;gap:12px">
-    <form method="GET" class="row" style="gap:10px;flex:1;max-width:480px">
-        <div class="search-field grow" style="max-width:340px">
-            <span class="ico" data-ico="search"></span>
-            <input class="input" name="search" value="{{ request('search') }}" placeholder="Search by order # or customer…">
-        </div>
-        <select class="input" name="payment_status" style="max-width:160px" onchange="this.form.submit()">
-            <option value="">All payments</option>
-            @foreach(\App\Models\Order::PAYMENT_STATUSES as $s)
-            <option value="{{ $s }}" {{ request('payment_status') === $s ? 'selected' : '' }}>{{ ucwords(str_replace('_',' ',$s)) }}</option>
-            @endforeach
-        </select>
-        @if(request()->anyFilled(['search','status','payment_status']))
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline" style="padding:0 12px">Clear</a>
-        @endif
-    </form>
+@php
+$statusTabs = [
+    ''          => 'All',
+    'pending'   => 'Pending',
+    'processing'=> 'Processing',
+    'shipped'   => 'Shipped',
+    'delivered' => 'Delivered',
+];
+$dateTabs = [
+    ''       => 'All time',
+    'today'  => 'Today',
+    'yesterday'=> 'Yesterday',
+    'last7'  => 'Last 7 days',
+    'last30' => 'Last 30 days',
+];
+@endphp
 
-    <div class="seg sm">
-        <a href="{{ route('admin.orders.index', request()->except('status','page')) }}"
-           class="{{ !request('status') ? 'active' : '' }}" style="text-decoration:none">All</a>
-        <a href="{{ route('admin.orders.index', array_merge(request()->except('page'), ['status'=>'pending'])) }}"
-           class="{{ request('status')==='pending' ? 'active' : '' }}" style="text-decoration:none">Pending</a>
-        <a href="{{ route('admin.orders.index', array_merge(request()->except('page'), ['status'=>'processing'])) }}"
-           class="{{ request('status')==='processing' ? 'active' : '' }}" style="text-decoration:none">Processing</a>
-        <a href="{{ route('admin.orders.index', array_merge(request()->except('page'), ['status'=>'shipped'])) }}"
-           class="{{ request('status')==='shipped' ? 'active' : '' }}" style="text-decoration:none">Shipped</a>
-        <a href="{{ route('admin.orders.index', array_merge(request()->except('page'), ['status'=>'delivered'])) }}"
-           class="{{ request('status')==='delivered' ? 'active' : '' }}" style="text-decoration:none">Delivered</a>
+{{-- Row 1: search + selects --}}
+<form method="GET" id="orders-filter-form">
+<div class="row wrap" style="gap:10px;margin-bottom:12px">
+    <div class="search-field" style="flex:1;min-width:200px;max-width:340px">
+        <span class="ico" data-ico="search"></span>
+        <input class="input" name="search" value="{{ request('search') }}" placeholder="Search by order # or customer…">
+    </div>
+    <select class="input" name="payment_status" style="max-width:160px" onchange="this.form.submit()">
+        <option value="">All payments</option>
+        @foreach(\App\Models\Order::PAYMENT_STATUSES as $s)
+        <option value="{{ $s }}" {{ request('payment_status') === $s ? 'selected' : '' }}>{{ ucwords(str_replace('_',' ',$s)) }}</option>
+        @endforeach
+    </select>
+    <select class="input" name="date" style="max-width:150px" onchange="this.form.submit()">
+        @foreach($dateTabs as $val => $label)
+        <option value="{{ $val }}" {{ request('date') === $val ? 'selected' : '' }}>{{ $label }}</option>
+        @endforeach
+    </select>
+    {{-- preserve status tab value --}}
+    @if(request('status'))
+    <input type="hidden" name="status" value="{{ request('status') }}">
+    @endif
+    @if(request()->anyFilled(['search','status','payment_status','date']))
+    <a href="{{ route('admin.orders.index') }}" class="btn btn-ghost">Clear</a>
+    @endif
+</div>
+
+{{-- Row 2: status tabs --}}
+<div style="margin-bottom:16px">
+    <div class="seg">
+        @foreach($statusTabs as $val => $label)
+        <a href="{{ route('admin.orders.index', array_merge(request()->except('status','page'), $val ? ['status'=>$val] : [])) }}"
+           class="{{ request('status','') === $val ? 'active' : '' }}"
+           style="text-decoration:none">{{ $label }}</a>
+        @endforeach
     </div>
 </div>
+</form>
 
 <div x-data="orderBulk({{ $orders->pluck('id')->toJson() }})">
 

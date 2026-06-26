@@ -43,6 +43,14 @@ class OrderController extends Controller
             $query->where('payment_status', $request->input('payment_status'));
         }
 
+        match ($request->input('date')) {
+            'today'     => $query->whereDate('created_at', today()),
+            'yesterday' => $query->whereDate('created_at', today()->subDay()),
+            'last7'     => $query->where('created_at', '>=', now()->subDays(7)->startOfDay()),
+            'last30'    => $query->where('created_at', '>=', now()->subDays(30)->startOfDay()),
+            default     => null,
+        };
+
         $orders = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
         $phones     = $orders->pluck('customer_phone')->filter()->unique()->values();
