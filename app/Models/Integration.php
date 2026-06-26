@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class Integration extends Model
 {
@@ -22,10 +23,27 @@ class Integration extends Model
     ];
 
     protected $casts = [
-        'credentials' => 'encrypted:array',
-        'is_active'   => 'boolean',
-        'is_default'  => 'boolean',
+        'is_active'  => 'boolean',
+        'is_default' => 'boolean',
     ];
+
+    public function getCredentialsAttribute(): array
+    {
+        $raw = $this->attributes['credentials'] ?? null;
+        if ($raw === null) return [];
+        try {
+            return json_decode(Crypt::decryptString($raw), true) ?? [];
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    public function setCredentialsAttribute(mixed $value): void
+    {
+        $this->attributes['credentials'] = $value !== null
+            ? Crypt::encryptString(json_encode((array) $value))
+            : null;
+    }
 
     protected $hidden = ['credentials'];
 

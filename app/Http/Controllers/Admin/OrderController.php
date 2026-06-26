@@ -223,13 +223,18 @@ class OrderController extends Controller
     {
         $order->load(['items.product.images', 'user']);
         $site = [
-            'name'            => SiteSetting::get('general.site_name', config('app.name')),
-            'tagline'         => SiteSetting::get('general.site_tagline', ''),
-            'phone'           => SiteSetting::get('general.phone', ''),
-            'email'           => SiteSetting::get('general.admin_email', ''),
-            'address'         => SiteSetting::get('general.address', ''),
-            'currency_symbol' => SiteSetting::get('general.currency_symbol', '৳'),
-            'invoice_note'    => SiteSetting::get('order.invoice_note', ''),
+            'name'               => SiteSetting::get('general.site_name', config('app.name')),
+            'tagline'            => SiteSetting::get('general.site_tagline', ''),
+            'phone'              => SiteSetting::get('general.phone', ''),
+            'email'              => SiteSetting::get('general.admin_email', ''),
+            'address'            => SiteSetting::get('general.address', ''),
+            'currency_symbol'    => SiteSetting::get('general.currency_symbol', '৳'),
+            'invoice_note'       => SiteSetting::get('order.invoice_note', ''),
+            'invoice_prefix'     => SiteSetting::get('accounting.invoice_prefix', ''),
+            'invoice_footer'     => SiteSetting::get('accounting.invoice_footer', ''),
+            'tax_number'         => SiteSetting::get('accounting.tax_number', ''),
+            'tax_rate'           => (float) SiteSetting::get('accounting.default_tax_rate', 0),
+            'prices_include_tax' => SiteSetting::get('accounting.prices_include_tax', '0') === '1',
         ];
         return view('admin.orders.print', compact('order', 'site'));
     }

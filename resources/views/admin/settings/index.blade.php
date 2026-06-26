@@ -855,21 +855,38 @@ function cartGoals() {
                 <span class="tile sm t-violet"><span class="ico" data-ico="file" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Legal Page URLs</h3><div class="sub">Links used in checkout and footer for legal documentation</div></div>
             </div>
+            @php
+                $privacyVal = old('legal.privacy_policy_url', $settings->get('legal.privacy_policy_url')?->value ?? '');
+                $termsVal   = old('legal.terms_url', $settings->get('legal.terms_url')?->value ?? '');
+                $refundVal  = old('legal.refund_policy_url', $settings->get('legal.refund_policy_url')?->value ?? '');
+            @endphp
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
                 <div class="field">
-                    <span class="lbl">Privacy Policy URL</span>
-                    <input class="input" type="text" name="settings[legal.privacy_policy_url]"
-                        value="{{ old('legal.privacy_policy_url', $settings->get('legal.privacy_policy_url')?->value ?? '/privacy') }}">
+                    <span class="lbl">Privacy Policy Page</span>
+                    <select class="select" name="settings[legal.privacy_policy_url]">
+                        <option value="">— None —</option>
+                        @foreach($pages as $page)
+                            <option value="/{{ $page->slug }}" {{ $privacyVal === '/'.$page->slug ? 'selected' : '' }}>{{ $page->title }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="field">
-                    <span class="lbl">Terms &amp; Conditions URL</span>
-                    <input class="input" type="text" name="settings[legal.terms_url]"
-                        value="{{ old('legal.terms_url', $settings->get('legal.terms_url')?->value ?? '/terms') }}">
+                    <span class="lbl">Terms &amp; Conditions Page</span>
+                    <select class="select" name="settings[legal.terms_url]">
+                        <option value="">— None —</option>
+                        @foreach($pages as $page)
+                            <option value="/{{ $page->slug }}" {{ $termsVal === '/'.$page->slug ? 'selected' : '' }}>{{ $page->title }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="field">
-                    <span class="lbl">Refund Policy URL</span>
-                    <input class="input" type="text" name="settings[legal.refund_policy_url]"
-                        value="{{ old('legal.refund_policy_url', $settings->get('legal.refund_policy_url')?->value ?? '/refund-policy') }}">
+                    <span class="lbl">Refund Policy Page</span>
+                    <select class="select" name="settings[legal.refund_policy_url]">
+                        <option value="">— None —</option>
+                        @foreach($pages as $page)
+                            <option value="/{{ $page->slug }}" {{ $refundVal === '/'.$page->slug ? 'selected' : '' }}>{{ $page->title }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
         </div>
@@ -892,12 +909,17 @@ $infoBox   = 'margin-top:.75rem;padding:.75rem 1rem;background:var(--accent-soft
     @csrf
     <div class="col-gap">
 
-        <div class="card pad">
+        {{-- GTM --}}
+        <div class="card pad" x-data="{ open: false }">
             <div class="card-head">
-                <span class="tile sm t-info"><span class="ico" data-ico="activity" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-info"><span class="ico" data-ico="bolt" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Google Tag Manager (GTM)</h3><div class="sub">Manage all tracking scripts from one place — no code changes needed</div></div>
+                <button type="button" @click="open=!open" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
+            <div x-show="open" x-collapse style="{{ $infoBox }}">
                 <strong style="display:block;margin-bottom:6px">How to get your GTM Container ID</strong>
                 <ol style="padding-left:4px">
                     <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span>Go to <strong>tagmanager.google.com</strong> and sign in.</span></li>
@@ -914,26 +936,33 @@ $infoBox   = 'margin-top:.75rem;padding:.75rem 1rem;background:var(--accent-soft
             </div>
         </div>
 
-        <div class="card pad">
+        {{-- Meta Pixel --}}
+        <div class="card pad" x-data="{ open: false }">
             <div class="card-head">
-                <span class="tile sm t-pop"><span class="ico" data-ico="activity" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-pop"><span class="ico" data-ico="users" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Meta (Facebook) Pixel</h3><div class="sub">Track visitors for ad optimisation and retargeting</div></div>
+                <button type="button" @click="open=!open" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
-                <strong style="display:block;margin-bottom:6px">How to get your Pixel ID</strong>
-                <ol style="padding-left:4px">
-                    <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span><strong>business.facebook.com</strong> → Events Manager.</span></li>
-                    <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">2</span><span>Select your Pixel (or create one via Connect Data Sources → Web).</span></li>
-                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the <strong>Pixel ID</strong> — 15–16 digit number at the top.</span></li>
-                </ol>
-            </div>
-            <div style="{{ $infoBox }};margin-top:8px">
-                <strong style="display:block;margin-bottom:6px">How to get your CAPI Access Token</strong>
-                <ol style="padding-left:4px">
-                    <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span>Events Manager → your Pixel → <strong>Settings</strong> tab.</span></li>
-                    <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">2</span><span>Scroll to <strong>Conversions API</strong> → click <strong>Generate Access Token</strong>.</span></li>
-                    <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the token starting with <strong>EAAx…</strong></span></li>
-                </ol>
+            <div x-show="open" x-collapse>
+                <div style="{{ $infoBox }};margin-top:.75rem">
+                    <strong style="display:block;margin-bottom:6px">How to get your Pixel ID</strong>
+                    <ol style="padding-left:4px">
+                        <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span><strong>business.facebook.com</strong> → Events Manager.</span></li>
+                        <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">2</span><span>Select your Pixel (or create one via Connect Data Sources → Web).</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the <strong>Pixel ID</strong> — 15–16 digit number at the top.</span></li>
+                    </ol>
+                </div>
+                <div style="{{ $infoBox }};margin-top:8px">
+                    <strong style="display:block;margin-bottom:6px">How to get your CAPI Access Token</strong>
+                    <ol style="padding-left:4px">
+                        <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span>Events Manager → your Pixel → <strong>Settings</strong> tab.</span></li>
+                        <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">2</span><span>Scroll to <strong>Conversions API</strong> → click <strong>Generate Access Token</strong>.</span></li>
+                        <li style="display:flex;gap:.5rem"><span style="{{ $stepStyle }}">3</span><span>Copy the token starting with <strong>EAAx…</strong></span></li>
+                    </ol>
+                </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
                 <div class="field">
@@ -953,12 +982,17 @@ $infoBox   = 'margin-top:.75rem;padding:.75rem 1rem;background:var(--accent-soft
             </div>
         </div>
 
-        <div class="card pad">
+        {{-- GA4 --}}
+        <div class="card pad" x-data="{ open: false }">
             <div class="card-head">
-                <span class="tile sm t-accent"><span class="ico" data-ico="activity" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-accent"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Google Analytics 4 (GA4)</h3><div class="sub">Track traffic, user behaviour, and revenue</div></div>
+                <button type="button" @click="open=!open" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
+            <div x-show="open" x-collapse style="{{ $infoBox }};margin-top:.75rem">
                 <strong style="display:block;margin-bottom:6px">How to get your Measurement ID</strong>
                 <ol style="padding-left:4px">
                     <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span><strong>analytics.google.com</strong> → Admin → Data Streams → your web stream.</span></li>
@@ -982,12 +1016,17 @@ $infoBox   = 'margin-top:.75rem;padding:.75rem 1rem;background:var(--accent-soft
             </div>
         </div>
 
-        <div class="card pad">
+        {{-- TikTok --}}
+        <div class="card pad" x-data="{ open: false }">
             <div class="card-head">
-                <span class="tile sm t-violet"><span class="ico" data-ico="activity" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-violet"><span class="ico" data-ico="spark" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>TikTok Pixel</h3><div class="sub">Track visitor actions and send conversions to TikTok Ads Manager</div></div>
+                <button type="button" @click="open=!open" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
+            <div x-show="open" x-collapse style="{{ $infoBox }};margin-top:.75rem">
                 <strong style="display:block;margin-bottom:6px">How to get your TikTok Pixel ID</strong>
                 <ol style="padding-left:4px">
                     <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span><strong>ads.tiktok.com</strong> → Assets → Events → Manage Web Events.</span></li>
@@ -1042,7 +1081,7 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
             </p>
         </div>
 
-        <div class="card flush">
+        <div class="card flush" x-data="{ open: false }">
             <div style="padding:16px 20px">
                 <div style="font-weight:700;font-size:15px;margin-bottom:4px">Google Merchant Center (Google Shopping)</div>
                 <div class="faint" style="font-size:13px;margin-bottom:14px">Once enabled, Google can fetch your product list and show it in Shopping results, Images, and Search. Free to list.</div>
@@ -1051,14 +1090,18 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
                  x-data="{on: {{ old('feeds.google_merchant_enabled', $settings->get('feeds.google_merchant_enabled')?->value) ? 'true' : 'false' }}}">
                 <span :class="on ? 'toggle on' : 'toggle'" @click="on=!on"><span class="knob"></span></span>
                 <input type="hidden" name="settings[feeds.google_merchant_enabled]" :value="on ? '1' : '0'">
-                <div>
+                <div style="flex:1">
                     <div style="font-weight:700;font-size:14px">Enable Google Merchant Center Feed</div>
                     <div class="faint" style="font-size:12.5px;margin-top:3px">
                         Feed URL: <code style="background:var(--surface-2);padding:1px 6px;border-radius:5px">{{ url('feeds/google-merchant.xml') }}</code>
                     </div>
                 </div>
+                <button type="button" @click="open=!open" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;flex-shrink:0">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
+            <div x-show="open" x-collapse style="{{ $infoBox }}">
                 <strong style="display:block;margin-bottom:8px">How to connect to Google Merchant Center</strong>
                 <ol style="padding-left:4px">
                     <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and save settings.</span></li>
@@ -1070,7 +1113,7 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
             </div>
         </div>
 
-        <div class="card flush">
+        <div class="card flush" x-data="{ open: false }">
             <div style="padding:16px 20px">
                 <div style="font-weight:700;font-size:15px;margin-bottom:4px">Facebook &amp; Instagram Shop (Commerce Manager)</div>
                 <div class="faint" style="font-size:13px;margin-bottom:14px">Facebook reads your product list and syncs it to your Facebook/Instagram Shop and Dynamic Product Ads.</div>
@@ -1079,14 +1122,18 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
                  x-data="{on: {{ old('feeds.facebook_catalog_enabled', $settings->get('feeds.facebook_catalog_enabled')?->value) ? 'true' : 'false' }}}">
                 <span :class="on ? 'toggle on' : 'toggle'" @click="on=!on"><span class="knob"></span></span>
                 <input type="hidden" name="settings[feeds.facebook_catalog_enabled]" :value="on ? '1' : '0'">
-                <div>
+                <div style="flex:1">
                     <div style="font-weight:700;font-size:14px">Enable Facebook &amp; Instagram Catalog Feed</div>
                     <div class="faint" style="font-size:12.5px;margin-top:3px">
                         Feed URL: <code style="background:var(--surface-2);padding:1px 6px;border-radius:5px">{{ url('feeds/facebook-catalog.json') }}</code>
                     </div>
                 </div>
+                <button type="button" @click="open=!open" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;flex-shrink:0">
+                    <span x-text="open ? 'Hide guide' : 'How to set up'"></span>
+                    <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:14px;height:14px"></span>
+                </button>
             </div>
-            <div style="{{ $infoBox }}">
+            <div x-show="open" x-collapse style="{{ $infoBox }}">
                 <strong style="display:block;margin-bottom:8px">How to connect to Facebook Commerce Manager</strong>
                 <ol style="padding-left:4px">
                     <li style="display:flex;gap:.5rem;margin-bottom:4px"><span style="{{ $stepStyle }}">1</span><span>Enable the feed above and save settings.</span></li>
@@ -1188,6 +1235,97 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
 </form>
 @endif
 
+{{-- ═══════════════════ ACCOUNTING ═══════════════════ --}}
+@if($tab === 'accounting')
+<form method="POST" action="{{ route('admin.settings.update', 'accounting') }}">
+    @csrf
+    <div class="col-gap">
+
+        {{-- Invoice --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-info"><span class="ico" data-ico="receipt" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Invoice Settings</h3><div class="sub">Prefix, numbering and footer text printed on invoices</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field">
+                    <span class="lbl">Invoice Prefix</span>
+                    <input class="input" type="text" name="settings[accounting.invoice_prefix]"
+                        value="{{ old('accounting.invoice_prefix', $settings->get('accounting.invoice_prefix')?->value ?? 'INV-') }}"
+                        placeholder="INV-">
+                    <p class="hint">Prepended to every invoice number (e.g. INV-0001).</p>
+                </div>
+                <div class="field">
+                    <span class="lbl">Starting Invoice Number</span>
+                    <input class="input" type="number" min="1" name="settings[accounting.invoice_start]"
+                        value="{{ old('accounting.invoice_start', $settings->get('accounting.invoice_start')?->value ?? '1') }}"
+                        placeholder="1">
+                    <p class="hint">Only applies to new invoices when no prior number exists.</p>
+                </div>
+                <div class="field" style="grid-column:1/-1">
+                    <span class="lbl">Invoice Footer Note</span>
+                    <textarea class="input" name="settings[accounting.invoice_footer]" rows="2"
+                        placeholder="e.g. Thank you for your business. All payments are non-refundable after 7 days.">{{ old('accounting.invoice_footer', $settings->get('accounting.invoice_footer')?->value ?? '') }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tax / VAT --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-warning"><span class="ico" data-ico="percent" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Tax &amp; VAT</h3><div class="sub">Business tax registration and default rates</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field">
+                    <span class="lbl">Tax / VAT Number</span>
+                    <input class="input" type="text" name="settings[accounting.tax_number]"
+                        value="{{ old('accounting.tax_number', $settings->get('accounting.tax_number')?->value ?? '') }}"
+                        placeholder="e.g. VAT-123456789">
+                    <p class="hint">Printed on invoices and receipts.</p>
+                </div>
+                <div class="field">
+                    <span class="lbl">Default Tax Rate (%)</span>
+                    <input class="input" type="number" min="0" max="100" step="0.01" name="settings[accounting.default_tax_rate]"
+                        value="{{ old('accounting.default_tax_rate', $settings->get('accounting.default_tax_rate')?->value ?? '0') }}"
+                        placeholder="0">
+                </div>
+                <div class="field" style="grid-column:1/-1">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                        <input type="hidden" name="settings[accounting.prices_include_tax]" value="0">
+                        <input type="checkbox" name="settings[accounting.prices_include_tax]" value="1"
+                            {{ ($settings->get('accounting.prices_include_tax')?->value ?? '0') == '1' ? 'checked' : '' }}>
+                        <span class="lbl" style="margin:0">Product prices are entered tax-inclusive</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        {{-- Fiscal Year --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-pop"><span class="ico" data-ico="clock" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Fiscal Year</h3><div class="sub">Used in reports and financial summaries</div></div>
+            </div>
+            <div class="field" style="max-width:280px">
+                <span class="lbl">Fiscal Year Start Month</span>
+                <select class="select" name="settings[accounting.fiscal_year_start]">
+                    @foreach(['1'=>'January','2'=>'February','3'=>'March','4'=>'April','5'=>'May','6'=>'June','7'=>'July','8'=>'August','9'=>'September','10'=>'October','11'=>'November','12'=>'December'] as $num => $name)
+                    <option value="{{ $num }}" {{ ($settings->get('accounting.fiscal_year_start')?->value ?? '1') == $num ? 'selected' : '' }}>{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end">
+            <button class="btn btn-primary" type="submit">
+                <span class="ico" data-ico="check" style="width:17px;height:17px"></span>Save Accounting Settings
+            </button>
+        </div>
+    </div>
+</form>
+@endif
+
 {{-- ═══════════════════ STORAGE ═══════════════════ --}}
 @if($tab === 'storage')
 <form method="POST" action="{{ route('admin.settings.update', 'storage') }}">
@@ -1196,7 +1334,7 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
 
         <div class="card pad">
             <div class="card-head">
-                <span class="tile sm t-info"><span class="ico" data-ico="cloud" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-info"><span class="ico" data-ico="upload" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Storage Driver</h3><div class="sub">Choose where uploaded media is stored</div></div>
             </div>
             <div class="col-gap" style="--gap:10px">
@@ -1213,7 +1351,7 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
 
         <div class="card pad">
             <div class="card-head">
-                <span class="tile sm t-warning"><span class="ico" data-ico="cloud" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-warning"><span class="ico" data-ico="key" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>AWS S3</h3><div class="sub">Credentials for Amazon S3 object storage</div></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -1253,7 +1391,7 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
 
         <div class="card pad">
             <div class="card-head">
-                <span class="tile sm t-pop"><span class="ico" data-ico="cloud" style="width:18px;height:18px"></span></span>
+                <span class="tile sm t-pop"><span class="ico" data-ico="layers" style="width:18px;height:18px"></span></span>
                 <div class="ct"><h3>Cloudflare R2</h3><div class="sub">R2 uses the S3 API. Generate a token in Cloudflare → R2 → Manage API tokens.</div></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -1364,6 +1502,107 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
                 <div class="field">
                     <span class="lbl">{{ $tpl['label'] }}</span>
                     <textarea class="input mono" name="settings[{{ $tpl['key'] }}]" rows="3" style="resize:vertical">{{ old('settings[' . $tpl['key'] . ']', $tpl['val']) }}</textarea>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Email Toggles --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-info"><span class="ico" data-ico="mail" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Email Notifications</h3><div class="sub">Transactional emails sent to customers on order events</div></div>
+            </div>
+            @php
+            $emailOnConfirmed = $settings->get('notifications.email_on_order_confirmed')?->value ?? '1';
+            $emailOnStatus    = $settings->get('notifications.email_on_status_changed')?->value  ?? '1';
+            @endphp
+            @foreach([
+                ['key' => 'notifications.email_on_order_confirmed', 'val' => $emailOnConfirmed, 'label' => 'Send email when order is placed',       'desc' => 'Customer receives an order confirmation email at checkout.'],
+                ['key' => 'notifications.email_on_status_changed',  'val' => $emailOnStatus,    'label' => 'Send email when order status changes',  'desc' => 'Triggered when admin updates status (shipped, delivered, cancelled, etc).'],
+            ] as $row)
+            <div class="set-row" x-data="{on: {{ $row['val'] === '1' ? 'true' : 'false' }}}">
+                <div class="grow">
+                    <div style="font-weight:700;font-size:14px">{{ $row['label'] }}</div>
+                    <div class="faint" style="font-size:12.5px">{{ $row['desc'] }}</div>
+                </div>
+                <span :class="on ? 'toggle on' : 'toggle'" @click="on=!on"><span class="knob"></span></span>
+                <input type="hidden" name="settings[{{ $row['key'] }}]" :value="on ? '1' : '0'">
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Email Templates --}}
+        <div class="card pad">
+            <div class="card-head">
+                <span class="tile sm t-pop"><span class="ico" data-ico="doc" style="width:18px;height:18px"></span></span>
+                <div class="ct"><h3>Email Templates</h3><div class="sub">Customize subject and body for each event. Placeholders are replaced automatically.</div></div>
+            </div>
+            @php
+            $emailPlaceholders = [
+                '{{order_number}}'  => 'Order number',
+                '{{customer_name}}' => 'Customer name',
+                '{{total}}'         => 'Order total',
+                '{{tracking}}'      => 'Tracking number (blank if none)',
+                '{{site_name}}'     => 'Store name',
+            ];
+            $emailTemplates = [
+                ['event' => 'confirmed', 'label' => 'Order Placed / Confirmed',
+                    'subject_key' => 'notifications.email_subject_confirmed',
+                    'body_key'    => 'notifications.email_body_confirmed',
+                    'subject_def' => 'Order Confirmed — #{{order_number}}',
+                    'body_def'    => "Thank you for your order. We've received it and will start processing shortly.\n\nOrder: #{{order_number}}\nTotal: {{total}}"],
+                ['event' => 'shipped', 'label' => 'Order Shipped',
+                    'subject_key' => 'notifications.email_subject_shipped',
+                    'body_key'    => 'notifications.email_body_shipped',
+                    'subject_def' => 'Your Order #{{order_number}} Has Shipped',
+                    'body_def'    => "Great news! Your order is on its way.\nTracking: {{tracking}}"],
+                ['event' => 'delivered', 'label' => 'Order Delivered',
+                    'subject_key' => 'notifications.email_subject_delivered',
+                    'body_key'    => 'notifications.email_body_delivered',
+                    'subject_def' => 'Your Order #{{order_number}} Has Been Delivered',
+                    'body_def'    => 'Your order has been delivered. We hope you love it! Thank you for shopping with us.'],
+                ['event' => 'cancelled', 'label' => 'Order Cancelled',
+                    'subject_key' => 'notifications.email_subject_cancelled',
+                    'body_key'    => 'notifications.email_body_cancelled',
+                    'subject_def' => 'Your Order #{{order_number}} Has Been Cancelled',
+                    'body_def'    => 'Your order has been cancelled. If you have questions, please contact us.'],
+                ['event' => 'status', 'label' => 'Other Status Changes',
+                    'subject_key' => 'notifications.email_subject_status',
+                    'body_key'    => 'notifications.email_body_status',
+                    'subject_def' => 'Your Order #{{order_number}} Status Update',
+                    'body_def'    => 'Your order #{{order_number}} status has been updated.'],
+            ];
+            @endphp
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+                @foreach($emailPlaceholders as $placeholder => $hint)
+                <span style="display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:.75rem">
+                    <code style="font-family:monospace;color:var(--accent);font-weight:600">{{ $placeholder }}</code>
+                    <span class="faint">— {{ $hint }}</span>
+                </span>
+                @endforeach
+            </div>
+            <div class="col-gap" style="--gap:20px">
+                @foreach($emailTemplates as $tpl)
+                <div x-data="{ open: false }">
+                    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 14px;background:var(--surface-2);border-radius:8px" @click="open=!open">
+                        <span style="font-weight:700;font-size:13px">{{ $tpl['label'] }}</span>
+                        <span class="ico" data-ico="chevDown" :style="open ? 'transform:rotate(180deg);transition:transform .2s' : 'transition:transform .2s'" style="width:16px;height:16px"></span>
+                    </div>
+                    <div x-show="open" x-collapse style="padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px">
+                        <div class="col-gap" style="--gap:12px">
+                            <div class="field">
+                                <span class="lbl">Subject</span>
+                                <input class="input" type="text" name="settings[{{ $tpl['subject_key'] }}]"
+                                    value="{{ old('settings[' . $tpl['subject_key'] . ']', $settings->get($tpl['subject_key'])?->value ?? $tpl['subject_def']) }}">
+                            </div>
+                            <div class="field">
+                                <span class="lbl">Body</span>
+                                <textarea class="input mono" name="settings[{{ $tpl['body_key'] }}]" rows="4" style="resize:vertical">{{ old('settings[' . $tpl['body_key'] . ']', $settings->get($tpl['body_key'])?->value ?? $tpl['body_def']) }}</textarea>
+                                <p class="hint">Plain text. Line breaks are preserved.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 @endforeach
             </div>

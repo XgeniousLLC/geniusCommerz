@@ -32,7 +32,7 @@ class AdminController extends Controller
             $query->where('role', $request->role);
         }
 
-        $admins = $query->with('role')->latest()->paginate(20);
+        $admins = $query->latest()->paginate(20);
 
         $stats = [
             'total'  => \App\Models\Admin::count(),

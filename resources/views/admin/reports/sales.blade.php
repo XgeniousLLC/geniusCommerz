@@ -1,171 +1,144 @@
 @extends('admin.layouts.admin')
-
 @section('title', 'Sales Report')
-
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li><span class="text-gray-400">Reports</span></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">Sales</li>
-</ol>
-@endsection
-
-@section('page-header')
-<div class="flex items-center justify-between flex-wrap gap-4">
-    <h1 class="text-2xl font-bold text-gray-900">Sales Report</h1>
-    <div class="flex gap-2">
-        @foreach([
-            ['href' => route('admin.reports.inventory'),  'label' => 'Inventory'],
-            ['href' => route('admin.reports.customers'),  'label' => 'Customers'],
-            ['href' => route('admin.reports.orders'),     'label' => 'Orders'],
-        ] as $tab)
-        <a href="{{ $tab['href'] }}" class="text-sm px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors">{{ $tab['label'] }}</a>
-        @endforeach
-    </div>
-</div>
-@endsection
 
 @section('content')
 
-{{-- Date filter --}}
-<x-admin.card class="mb-6">
-    <form method="GET" class="flex flex-wrap gap-4 items-end">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Period</label>
-            <select name="period" class="border border-gray-200 rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
+<div class="page-head">
+    <div>
+        <h2 class="display">Sales Report</h2>
+        <div class="sub">Revenue, orders, and items sold for the selected period</div>
+    </div>
+    <a href="{{ route('admin.reports.export', array_merge(request()->all(), ['type' => 'sales'])) }}" class="btn btn-outline btn-sm">
+        <span class="ico" data-ico="download" style="width:15px;height:15px"></span>Export CSV
+    </a>
+</div>
+
+<div class="card pad" style="margin-bottom:16px">
+    <form method="GET" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+        <div class="field" style="min-width:150px">
+            <label class="lbl">Period</label>
+            <select name="period" class="select" onchange="this.form.submit()">
                 @foreach(['today'=>'Today','week'=>'This Week','month'=>'This Month','year'=>'This Year','custom'=>'Custom Range'] as $val => $lbl)
                     <option value="{{ $val }}" @selected(request('period', 'month') === $val)>{{ $lbl }}</option>
                 @endforeach
             </select>
         </div>
         @if(request('period') === 'custom' || request('start_date'))
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
-            <x-admin.input type="date" name="start_date" value="{{ request('start_date', $startDate->toDateString()) }}" />
+        <div class="field" style="min-width:140px">
+            <label class="lbl">From</label>
+            <input type="date" name="start_date" class="input" value="{{ request('start_date', $startDate->toDateString()) }}">
         </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
-            <x-admin.input type="date" name="end_date" value="{{ request('end_date', $endDate->toDateString()) }}" />
+        <div class="field" style="min-width:140px">
+            <label class="lbl">To</label>
+            <input type="date" name="end_date" class="input" value="{{ request('end_date', $endDate->toDateString()) }}">
         </div>
-        <x-admin.button type="submit" variant="secondary">Apply</x-admin.button>
+        <button type="submit" class="btn">Apply</button>
         @endif
-        <a href="{{ route('admin.reports.export', array_merge(request()->all(), ['type' => 'sales'])) }}"
-           class="ml-auto text-sm flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-green-400 hover:text-green-700 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            Export CSV
-        </a>
     </form>
-</x-admin.card>
-
-{{-- Stats --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    @foreach([
-        ['label' => 'Total Revenue',     'value' => '৳' . number_format($stats['total_revenue'], 0),  'color' => 'text-green-600'],
-        ['label' => 'Total Orders',      'value' => number_format($stats['total_orders']),             'color' => 'text-blue-600'],
-        ['label' => 'Avg Order Value',   'value' => '৳' . number_format($stats['avg_order_value'], 0), 'color' => 'text-indigo-600'],
-        ['label' => 'Items Sold',        'value' => number_format($stats['total_items_sold']),          'color' => 'text-purple-600'],
-    ] as $s)
-    <x-admin.card class="text-center">
-        <div class="text-2xl font-extrabold {{ $s['color'] }}">{{ $s['value'] }}</div>
-        <div class="text-xs text-gray-500 mt-1">{{ $s['label'] }}</div>
-    </x-admin.card>
-    @endforeach
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
+    <div class="card lift stat">
+        <span class="tile sm t-accent"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
+        <div class="num">৳{{ number_format($stats['total_revenue'], 0) }}</div>
+        <div class="lbl">Total Revenue</div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile sm t-info"><span class="ico" data-ico="receipt" style="width:18px;height:18px"></span></span>
+        <div class="num">{{ number_format($stats['total_orders']) }}</div>
+        <div class="lbl">Total Orders</div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile sm t-violet"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
+        <div class="num">৳{{ number_format($stats['avg_order_value'], 0) }}</div>
+        <div class="lbl">Avg Order Value</div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile sm t-success"><span class="ico" data-ico="package" style="width:18px;height:18px"></span></span>
+        <div class="num">{{ number_format($stats['total_items_sold']) }}</div>
+        <div class="lbl">Items Sold</div>
+    </div>
+</div>
 
-    {{-- Chart placeholder + data table --}}
-    <div class="lg:col-span-2 space-y-6">
-        <x-admin.card>
-            <h2 class="text-base font-semibold text-gray-900 mb-4">Revenue Over Time</h2>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card pad">
+            <div class="card-head"><div class="ct"><h3>Revenue Over Time</h3></div></div>
             @if(empty($chartData))
-                <p class="text-center text-gray-400 py-8 text-sm">No data for this period.</p>
+                <p style="text-align:center;color:var(--text-muted);padding:32px 0;font-size:13px">No data for this period.</p>
             @else
-                {{-- Simple bar chart using CSS --}}
                 @php $maxRev = max(array_column($chartData, 'revenue')) ?: 1; @endphp
-                <div class="flex items-end gap-1 h-32 overflow-x-auto pb-2">
+                <div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-bottom:12px">
                     @foreach($chartData as $row)
-                    <div class="flex flex-col items-center gap-1 min-w-[28px] flex-1 group relative">
-                        <div class="w-full bg-blue-500 rounded-t hover:bg-blue-600 transition-colors cursor-default"
-                             style="height: {{ max(2, round(($row['revenue'] / $maxRev) * 100)) }}%"
-                             title="{{ $row['date'] }}: ৳{{ number_format($row['revenue']) }} ({{ $row['orders'] }} orders)">
-                        </div>
-                        <span class="text-[9px] text-gray-400 truncate w-full text-center">{{ substr($row['date'], -5) }}</span>
+                    @php $h = max(2, round(($row['revenue'] / $maxRev) * 100)); @endphp
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:20px"
+                         title="{{ $row['date'] }}: ৳{{ number_format($row['revenue']) }} ({{ $row['orders'] }} orders)">
+                        <div style="width:100%;height:{{ $h }}%;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85"></div>
+                        <span style="font-size:9px;color:var(--text-muted);white-space:nowrap;overflow:hidden;max-width:100%;text-align:center">{{ substr($row['date'], -5) }}</span>
                     </div>
                     @endforeach
                 </div>
-                <div class="mt-4 overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b text-left text-xs text-gray-500 font-semibold uppercase tracking-wide">
-                                <th class="pb-2 pr-4">Period</th>
-                                <th class="pb-2 pr-4">Orders</th>
-                                <th class="pb-2">Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            @foreach(array_slice($chartData, -10) as $row)
-                            <tr>
-                                <td class="py-2 pr-4 text-gray-700 font-mono text-xs">{{ $row['date'] }}</td>
-                                <td class="py-2 pr-4 text-gray-700">{{ $row['orders'] }}</td>
-                                <td class="py-2 font-semibold text-gray-900">৳{{ number_format($row['revenue']) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table">
+                    <thead><tr><th>Period</th><th>Orders</th><th>Revenue</th></tr></thead>
+                    <tbody>
+                        @foreach(array_slice($chartData, -10) as $row)
+                        <tr>
+                            <td style="font-family:monospace;font-size:12px">{{ $row['date'] }}</td>
+                            <td>{{ $row['orders'] }}</td>
+                            <td><strong>৳{{ number_format($row['revenue']) }}</strong></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             @endif
-        </x-admin.card>
+        </div>
 
-        {{-- Top products --}}
-        <x-admin.card>
-            <h2 class="text-base font-semibold text-gray-900 mb-4">Top Products by Revenue</h2>
+        <div class="card pad">
+            <div class="card-head"><div class="ct"><h3>Top Products by Revenue</h3></div></div>
             @if($topProducts->isEmpty())
-                <p class="text-center text-gray-400 py-4 text-sm">No data.</p>
+                <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:13px">No data.</p>
             @else
-                <div class="space-y-3">
+                <div style="display:flex;flex-direction:column;gap:12px">
                     @foreach($topProducts as $i => $p)
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-gray-400 w-5">{{ $i + 1 }}</span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $p->product_name }}</p>
-                            <p class="text-xs text-gray-500">{{ $p->qty_sold }} units sold</p>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <span style="font-size:12px;font-weight:700;color:var(--text-muted);width:20px">{{ $i + 1 }}</span>
+                        <div style="flex:1;min-width:0">
+                            <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $p->product_name }}</div>
+                            <div style="font-size:11px;color:var(--text-muted)">{{ $p->qty_sold }} units sold</div>
                         </div>
-                        <span class="font-bold text-gray-900 shrink-0">৳{{ number_format($p->revenue) }}</span>
+                        <strong style="color:var(--text);flex-shrink:0">৳{{ number_format($p->revenue) }}</strong>
                     </div>
                     @endforeach
                 </div>
             @endif
-        </x-admin.card>
+        </div>
     </div>
 
-    {{-- Right: Payment method breakdown --}}
-    <div>
-        <x-admin.card>
-            <h2 class="text-base font-semibold text-gray-900 mb-4">Revenue by Payment Method</h2>
-            @if($revenueByPaymentMethod->isEmpty())
-                <p class="text-center text-gray-400 py-4 text-sm">No data.</p>
-            @else
-                @php $totalRev = $revenueByPaymentMethod->sum('revenue') ?: 1; @endphp
-                <div class="space-y-3">
-                    @foreach($revenueByPaymentMethod as $row)
-                    @php $pct = round(($row->revenue / $totalRev) * 100); @endphp
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="capitalize text-gray-700 font-medium">{{ str_replace('_', ' ', $row->payment_method) }}</span>
-                            <span class="font-bold text-gray-900">৳{{ number_format($row->revenue) }}</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5">
-                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ $pct }}%"></div>
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5">{{ $row->orders }} orders · {{ $pct }}%</div>
+    <div class="card pad">
+        <div class="card-head"><div class="ct"><h3>Revenue by Payment Method</h3></div></div>
+        @if($revenueByPaymentMethod->isEmpty())
+            <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:13px">No data.</p>
+        @else
+            @php $totalRev = $revenueByPaymentMethod->sum('revenue') ?: 1; @endphp
+            <div style="display:flex;flex-direction:column;gap:16px">
+                @foreach($revenueByPaymentMethod as $row)
+                @php $pct = round(($row->revenue / $totalRev) * 100); @endphp
+                <div>
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                        <span style="text-transform:capitalize;color:var(--text)">{{ str_replace('_', ' ', $row->payment_method) }}</span>
+                        <strong>৳{{ number_format($row->revenue) }}</strong>
                     </div>
-                    @endforeach
+                    <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
+                        <div style="width:{{ $pct }}%;height:6px;background:var(--accent);border-radius:4px"></div>
+                    </div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ $row->orders }} orders · {{ $pct }}%</div>
                 </div>
-            @endif
-        </x-admin.card>
+                @endforeach
+            </div>
+        @endif
     </div>
+
 </div>
+
 @endsection

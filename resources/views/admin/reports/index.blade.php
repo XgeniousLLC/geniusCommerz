@@ -11,9 +11,9 @@
     </div>
     <div class="row" style="gap:10px">
         <div class="seg sm">
-            <a href="{{ route('admin.reports.sales', ['from' => now()->subDays(7)->format('Y-m-d')]) }}" style="text-decoration:none">7d</a>
-            <a style="text-decoration:none" class="active">30d</a>
-            <a href="{{ route('admin.reports.sales', ['from' => now()->subDays(90)->format('Y-m-d')]) }}" style="text-decoration:none">90d</a>
+            <button type="button" onclick="location.href='{{ route('admin.reports.sales', ['from' => now()->subDays(7)->format('Y-m-d')]) }}'">7d</button>
+            <button type="button" class="active">30d</button>
+            <button type="button" onclick="location.href='{{ route('admin.reports.sales', ['from' => now()->subDays(90)->format('Y-m-d')]) }}'">90d</button>
         </div>
         <a href="{{ route('admin.reports.sales') }}" class="btn btn-outline btn-sm">
             <span class="ico" data-ico="chart" style="width:16px;height:16px"></span>Full reports
@@ -105,35 +105,6 @@
         @endif
     </div>
 
-</div>
-
-{{-- Quick links to sub-reports --}}
-<div class="card pad" style="margin-top:0">
-    <div class="card-head">
-        <span class="tile sm t-teal"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
-        <div class="ct"><h3>All reports</h3></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
-        @foreach([
-            ['Sales overview',    route('admin.reports.sales'),           'dollar',  't-accent'],
-            ['Profit analysis',   route('admin.reports.profit'),          'trendUp', 't-success'],
-            ['Top products',      route('admin.reports.top-products'),    'package', 't-info'],
-            ['Demand trends',     route('admin.reports.demand-trends'),   'chart',   't-violet'],
-            ['Category revenue',  route('admin.reports.category-revenue'),'layers',  't-teal'],
-            ['Inventory',         route('admin.reports.inventory'),       'box',     't-warning'],
-            ['Customers',         route('admin.reports.customers'),       'users',   't-pop'],
-            ['Orders report',     route('admin.reports.orders'),          'receipt', 't-info'],
-            ['Coupon usage',      route('admin.reports.coupon-usage'),    'tag',     't-accent'],
-            ['Refund analysis',   route('admin.reports.refund-analysis'), 'refresh', 't-danger'],
-            ['Payment trends',    route('admin.reports.payment-trends'),  'card',    't-teal'],
-            ['Geographic',        route('admin.reports.geographic'),      'pin',     't-violet'],
-        ] as [$label, $url, $icon, $tile])
-        <a href="{{ $url }}" class="card pad lift" style="display:flex;gap:12px;align-items:center;text-decoration:none;padding:14px 16px">
-            <span class="tile sm {{ $tile }}" style="flex-shrink:0"><span class="ico" data-ico="{{ $icon }}" style="width:17px;height:17px"></span></span>
-            <span style="font-weight:600;font-size:13.5px;color:var(--text)">{{ $label }}</span>
-        </a>
-        @endforeach
-    </div>
 </div>
 
 @endsection

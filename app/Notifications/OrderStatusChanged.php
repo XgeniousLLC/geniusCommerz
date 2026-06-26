@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Models\SiteSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -15,29 +16,57 @@ class OrderStatusChanged extends Notification
 
     public function via(object $notifiable): array
     {
+        if (SiteSetting::get('notifications.email_on_status_changed', '1') !== '1') {
+            return [];
+        }
         return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        $siteName = \App\Models\SiteSetting::get('general.site_name', config('app.name'));
-        $symbol   = \App\Models\SiteSetting::get('general.currency_symbol', '৳');
-
+        $siteName    = SiteSetting::get('general.site_name', config('app.name'));
+        $symbol      = SiteSetting::get('general.currency_symbol', '৳');
         $statusLabel = ucfirst($this->newStatus);
-        $message     = match($this->newStatus) {
-            'processing' => 'Your order is now being processed and will be dispatched soon.',
-            'shipped'    => 'Great news! Your order is on its way.' . ($this->order->tracking_number ? " Tracking #: {$this->order->tracking_number}" : ''),
-            'delivered'  => 'Your order has been delivered. We hope you love it!',
-            'cancelled'  => 'Your order has been cancelled. If you have questions, please contact us.',
-            default      => "Your order status has been updated to: {$statusLabel}.",
+
+        // Per-status subject/body keys
+        $statusKey = match($this->newStatus) {
+            'shipped'   => 'shipped',
+            'delivered' => 'delivered',
+            'cancelled' => 'cancelled',
+            default     => 'status',
         };
 
+        $defaultSubjects = [
+            'shipped'   => "Your Order #{$this->order->order_number} Has Shipped",
+            'delivered' => "Your Order #{$this->order->order_number} Has Been Delivered",
+            'cancelled' => "Your Order #{$this->order->order_number} Has Been Cancelled",
+            'status'    => "Your Order #{$this->order->order_number} Status Update",
+        ];
+        $defaultBodies = [
+            'shipped'   => "Great news! Your order is on its way." . ($this->order->tracking_number ? "\nTracking: {$this->order->tracking_number}" : ''),
+            'delivered' => 'Your order has been delivered. We hope you love it! Thank you for shopping with us.',
+            'cancelled' => 'Your order has been cancelled. If you have questions, please contact us.',
+            'status'    => "Your order #{$this->order->order_number} status has been updated to: {$statusLabel}.",
+        ];
+
+        $subject = $this->replacePlaceholders(
+            SiteSetting::get("notifications.email_subject_{$statusKey}", $defaultSubjects[$statusKey]),
+            $symbol,
+            $statusLabel
+        );
+        $body = $this->replacePlaceholders(
+            SiteSetting::get("notifications.email_body_{$statusKey}", $defaultBodies[$statusKey]),
+            $symbol,
+            $statusLabel
+        );
+
         $mail = (new MailMessage)
-            ->subject("Order #{$this->order->order_number} — {$statusLabel}")
-            ->greeting("Hi {$this->order->customer_name}!")
-            ->line($message)
-            ->line("**Order:** #{$this->order->order_number}")
-            ->line("**Status:** {$statusLabel}");
+            ->subject($subject)
+            ->greeting("Hi {$this->order->customer_name}!");
+
+        foreach (explode("\n", $body) as $line) {
+            $mail->line($line);
+        }
 
         if ($this->newStatus === 'delivered') {
             $mail->action('Leave a Review', url('/account/reviews'));
@@ -46,5 +75,21 @@ class OrderStatusChanged extends Notification
         }
 
         return $mail->salutation("Thanks,\n{$siteName}");
+    }
+
+    private function replacePlaceholders(string $text, string $symbol, string $statusLabel): string
+    {
+        return str_replace(
+            ['{{order_number}}', '{{customer_name}}', '{{total}}', '{{tracking}}', '{{site_name}}', '{{status}}'],
+            [
+                $this->order->order_number,
+                $this->order->customer_name,
+                $symbol . number_format($this->order->total, 2),
+                $this->order->tracking_number ?? '',
+                SiteSetting::get('general.site_name', config('app.name')),
+                $statusLabel,
+            ],
+            $text
+        );
     }
 }

@@ -9,153 +9,146 @@
     $savedScore = $meta?->seo_score ?? 0;
 @endphp
 
-<x-admin.card x-data="blogSeo()" x-init="init()">
+<div class="card pad" x-data="blogSeo()" x-init="init()">
+
+    {{-- Header / toggle --}}
     <button type="button" @click="open = !open"
-        class="flex items-center justify-between w-full text-left">
-        <div class="flex items-center space-x-3">
-            <h3 class="text-base font-semibold text-gray-900">SEO</h3>
+        style="width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-weight:700;font-size:14px">SEO</span>
             @if($savedScore > 0)
                 @php
-                    $scoreBadge = match(true) {
-                        $savedScore >= 90 => 'bg-green-100 text-green-700',
-                        $savedScore >= 70 => 'bg-blue-100 text-blue-700',
-                        $savedScore >= 50 => 'bg-yellow-100 text-yellow-700',
-                        $savedScore >= 30 => 'bg-orange-100 text-orange-700',
-                        default           => 'bg-red-100 text-red-700',
+                    $scoreClass = match(true) {
+                        $savedScore >= 90 => 'green',
+                        $savedScore >= 70 => 'blue',
+                        $savedScore >= 50 => 'yellow',
+                        $savedScore >= 30 => 'orange',
+                        default           => 'red',
                     };
                 @endphp
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $scoreBadge }}">
-                    Score: {{ $savedScore }}/100
-                </span>
+                <span class="pill sm {{ $scoreClass }}">{{ $savedScore }}/100</span>
             @endif
         </div>
-        <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-             :class="open ? 'rotate-180' : ''"
-             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
+        <span class="ico" data-ico="chevronDown"
+              style="width:16px;height:16px;color:var(--text-muted);transition:transform .2s"
+              :style="open ? 'transform:rotate(180deg)' : ''"></span>
     </button>
 
-    <div x-show="open" x-collapse class="mt-5 space-y-5">
+    <div x-show="open" x-collapse style="margin-top:16px">
 
-        <div class="p-3 rounded-lg bg-gray-50 space-y-3">
-            <div class="flex items-center gap-3">
-                <div class="relative flex-shrink-0" style="width:56px;height:56px">
-                    <svg style="width:56px;height:56px;transform:rotate(-90deg)" viewBox="0 0 36 36">
-                        <path stroke="currentColor" class="text-gray-200" stroke-width="3" fill="transparent"
+        {{-- Score ring + checks --}}
+        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+                <div style="position:relative;width:52px;height:52px;flex-shrink:0">
+                    <svg style="width:52px;height:52px;transform:rotate(-90deg)" viewBox="0 0 36 36">
+                        <path stroke="var(--border)" stroke-width="3" fill="transparent"
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         <path stroke="currentColor" :class="scoreColor" stroke-width="3" fill="transparent"
                               :stroke-dasharray="score + ', 100'"
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                     </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-sm font-bold text-gray-800" x-text="score"></span>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+                        <span style="font-size:12px;font-weight:700" x-text="score"></span>
                     </div>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-gray-700" x-text="grade.charAt(0).toUpperCase() + grade.slice(1)"></p>
-                    <p class="text-xs text-gray-500 mt-0.5">Live SEO score</p>
+                    <div style="font-weight:700;font-size:13px" x-text="grade.charAt(0).toUpperCase() + grade.slice(1)"></div>
+                    <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px">Live SEO score</div>
                 </div>
             </div>
-            <div class="space-y-1.5">
+            <div style="display:flex;flex-direction:column;gap:5px">
                 <template x-for="(chk, key) in checks" :key="key">
-                    <div class="flex items-start gap-1.5">
-                        <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"
-                             :class="chk.status==='good' ? 'text-green-500' : chk.status==='warning' ? 'text-yellow-500' : 'text-red-500'"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <template x-if="chk.status==='good'">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </template>
-                            <template x-if="chk.status!=='good'">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                            </template>
-                        </svg>
-                        <span class="text-xs text-gray-600" x-text="chk.message"></span>
+                    <div style="display:flex;align-items:flex-start;gap:7px;font-size:12px">
+                        <span :style="chk.status==='good' ? 'color:var(--success)' : chk.status==='warning' ? 'color:var(--warning)' : 'color:var(--danger)'"
+                              style="font-size:14px;line-height:1.2;flex-shrink:0"
+                              x-text="chk.status==='good' ? '✓' : '⚠'"></span>
+                        <span style="color:var(--text-muted)" x-text="chk.message"></span>
                     </div>
                 </template>
             </div>
         </div>
 
-        <div>
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-sm font-medium text-gray-700">Meta Title</label>
-                <span class="text-xs" :class="titleCountColor" x-text="titleLen + ' / 60'"></span>
+        {{-- Meta Title --}}
+        <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="field" style="margin:0">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="lbl">Meta Title</span>
+                    <span style="font-size:11px" :class="titleCountColor" x-text="titleLen + ' / 60'"></span>
+                </div>
+                <input type="text" name="meta_title" id="seo-meta-title" class="input"
+                    x-model="metaTitle" @input="recalculate()"
+                    value="{{ $metaTitle }}"
+                    placeholder="Defaults to post title if blank">
+                <div style="height:3px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:4px">
+                    <div style="height:100%;border-radius:99px;transition:width .2s"
+                         :style="'width:' + Math.min((titleLen/60)*100,100) + '%;background:' + (titleLen>=50&&titleLen<=60 ? 'var(--success)' : titleLen>0 ? 'var(--warning)' : 'var(--border)')"></div>
+                </div>
             </div>
-            <input type="text" name="meta_title" id="seo-meta-title"
-                x-model="metaTitle"
-                @input="recalculate()"
-                value="{{ $metaTitle }}"
-                placeholder="Defaults to post title if blank"
-                class="mt-0.5 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm" />
-            <div class="mt-1 h-1 rounded bg-gray-100 overflow-hidden">
-                <div class="h-full rounded transition-all duration-200"
-                     :class="titleCountColor.replace('text-','bg-')"
-                     :style="'width:' + Math.min((titleLen/60)*100,100) + '%'"></div>
-            </div>
-        </div>
 
-        <div>
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-sm font-medium text-gray-700">Meta Description</label>
-                <span class="text-xs" :class="descCountColor" x-text="descLen + ' / 160'"></span>
+            {{-- Meta Description --}}
+            <div class="field" style="margin:0">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span class="lbl">Meta Description</span>
+                    <span style="font-size:11px" :class="descCountColor" x-text="descLen + ' / 160'"></span>
+                </div>
+                <textarea name="meta_description" id="seo-meta-description" class="input" rows="3"
+                    x-model="metaDesc" @input="recalculate()"
+                    placeholder="150–160 characters for best results">{{ $metaDesc }}</textarea>
+                <div style="height:3px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:4px">
+                    <div style="height:100%;border-radius:99px;transition:width .2s"
+                         :style="'width:' + Math.min((descLen/160)*100,100) + '%;background:' + (descLen>=150&&descLen<=160 ? 'var(--success)' : descLen>0 ? 'var(--warning)' : 'var(--border)')"></div>
+                </div>
             </div>
-            <textarea name="meta_description" id="seo-meta-description" rows="3"
-                x-model="metaDesc"
-                @input="recalculate()"
-                placeholder="150–160 characters for best results"
-                class="mt-0.5 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">{{ $metaDesc }}</textarea>
-            <div class="mt-1 h-1 rounded bg-gray-100 overflow-hidden">
-                <div class="h-full rounded transition-all duration-200"
-                     :class="descCountColor.replace('text-','bg-')"
-                     :style="'width:' + Math.min((descLen/160)*100,100) + '%'"></div>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Focus Keyword</label>
-                <input type="text" name="focus_keyword" value="{{ $focusKw }}"
-                    placeholder="primary target keyword"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm" />
+            {{-- Focus Keyword + Meta Keywords --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="field" style="margin:0">
+                    <span class="lbl">Focus Keyword</span>
+                    <input type="text" name="focus_keyword" class="input"
+                        value="{{ $focusKw }}" placeholder="primary target keyword"
+                        @input="recalculate()">
+                </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl">Meta Keywords</span>
+                    <input type="text" name="meta_keywords" class="input"
+                        value="{{ $metaKw }}" placeholder="kw1, kw2, kw3">
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
-                <input type="text" name="meta_keywords" value="{{ $metaKw }}"
-                    placeholder="kw1, kw2, kw3"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Canonical URL</label>
-                <input type="text" name="canonical_url" value="{{ $canonical }}"
-                    placeholder="Leave blank for default"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Robots</label>
-                <select name="robots"
-                    class="block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-sm">
-                    @foreach(['index,follow','noindex,nofollow','noindex,follow','index,nofollow'] as $opt)
-                        <option value="{{ $opt }}" {{ $robots === $opt ? 'selected' : '' }}>{{ $opt }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
 
-        <template x-if="suggestions.length > 0">
-            <div class="p-3 rounded-md bg-blue-50 border border-blue-100">
-                <p class="text-xs font-semibold text-blue-700 mb-1">Suggestions</p>
-                <ul class="space-y-0.5">
-                    <template x-for="s in suggestions" :key="s">
-                        <li class="text-xs text-blue-600 flex items-start space-x-1">
-                            <span class="mt-0.5">·</span><span x-text="s"></span>
-                        </li>
-                    </template>
-                </ul>
+            {{-- Canonical + Robots --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="field" style="margin:0">
+                    <span class="lbl">Canonical URL</span>
+                    <input type="text" name="canonical_url" class="input"
+                        value="{{ $canonical }}" placeholder="Leave blank for default">
+                </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl">Robots</span>
+                    <select name="robots" class="input">
+                        @foreach(['index,follow','noindex,nofollow','noindex,follow','index,nofollow'] as $opt)
+                            <option value="{{ $opt }}" {{ $robots === $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-        </template>
+
+            {{-- Suggestions --}}
+            <template x-if="suggestions.length > 0">
+                <div style="background:color-mix(in srgb,var(--info) 8%,transparent);border:1px solid color-mix(in srgb,var(--info) 20%,transparent);border-radius:8px;padding:12px">
+                    <div style="font-size:11.5px;font-weight:700;color:var(--info);margin-bottom:6px">Suggestions</div>
+                    <ul style="display:flex;flex-direction:column;gap:4px;list-style:none;margin:0;padding:0">
+                        <template x-for="s in suggestions" :key="s">
+                            <li style="font-size:12px;color:var(--text-muted);display:flex;gap:6px">
+                                <span style="color:var(--info)">·</span><span x-text="s"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+        </div>
 
     </div>
-</x-admin.card>
+</div>
 
 @once
 @push('scripts')
@@ -174,16 +167,16 @@ function blogSeo() {
         get descLen()  { return this.metaDesc.length; },
 
         get titleCountColor() {
-            if (this.titleLen === 0)                          return 'text-gray-400';
-            if (this.titleLen >= 50 && this.titleLen <= 60)   return 'text-green-600';
-            if (this.titleLen < 70)                           return 'text-yellow-600';
-            return 'text-red-600';
+            if (this.titleLen === 0)                        return '';
+            if (this.titleLen >= 50 && this.titleLen <= 60) return 'color:var(--success)';
+            if (this.titleLen < 70)                         return 'color:var(--warning)';
+            return 'color:var(--danger)';
         },
         get descCountColor() {
-            if (this.descLen === 0)                           return 'text-gray-400';
-            if (this.descLen >= 150 && this.descLen <= 160)   return 'text-green-600';
-            if (this.descLen < 320)                           return 'text-yellow-600';
-            return 'text-red-600';
+            if (this.descLen === 0)                           return '';
+            if (this.descLen >= 150 && this.descLen <= 160)   return 'color:var(--success)';
+            if (this.descLen < 320)                           return 'color:var(--warning)';
+            return 'color:var(--danger)';
         },
         get scoreColor() {
             if (this.score >= 90) return 'text-green-500';
@@ -205,7 +198,6 @@ function blogSeo() {
             const checks = {};
             const suggestions = [];
 
-            // Title
             if (title.length >= 50 && title.length <= 60) {
                 checks.title = { status: 'good', message: 'Title length is good (' + title.length + ' chars)' };
                 score += 20;
@@ -218,7 +210,6 @@ function blogSeo() {
                 suggestions.push('Add a meta title');
             }
 
-            // Description
             if (desc.length >= 150 && desc.length <= 160) {
                 checks.desc = { status: 'good', message: 'Description length is good (' + desc.length + ' chars)' };
                 score += 20;
@@ -231,7 +222,6 @@ function blogSeo() {
                 suggestions.push('Add a meta description');
             }
 
-            // Content
             const words = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(w => w).length;
             if (words >= 300) {
                 checks.content = { status: 'good', message: 'Content length is good (' + words + ' words)' };
@@ -244,7 +234,6 @@ function blogSeo() {
                 checks.content = { status: 'error', message: 'No content added yet' };
             }
 
-            // Focus keyword
             if (focus) {
                 const inTitle = title.toLowerCase().includes(focus.toLowerCase());
                 const inDesc  = desc.toLowerCase().includes(focus.toLowerCase());
@@ -261,7 +250,6 @@ function blogSeo() {
                 suggestions.push('Set a focus keyword');
             }
 
-            // Cover image
             const hasImage = document.querySelector('[name="cover_image"]')?.value?.trim();
             if (hasImage) {
                 checks.image = { status: 'good', message: 'Cover image is set' };
@@ -271,10 +259,10 @@ function blogSeo() {
                 suggestions.push('Add a cover image');
             }
 
-            this.score   = Math.min(100, score);
-            this.checks  = checks;
+            this.score       = Math.min(100, score);
+            this.checks      = checks;
             this.suggestions = suggestions;
-            this.grade   = score >= 90 ? 'excellent' : score >= 70 ? 'good' : score >= 50 ? 'average' : score >= 30 ? 'poor' : 'critical';
+            this.grade       = score >= 90 ? 'excellent' : score >= 70 ? 'good' : score >= 50 ? 'average' : score >= 30 ? 'poor' : 'critical';
         }
     };
 }

@@ -1,122 +1,117 @@
 @extends('admin.layouts.admin')
 @section('title', 'Geographic Sales')
 
-@section('breadcrumbs')
-<ol class="flex items-center space-x-2 text-sm text-gray-500">
-    <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li><a href="{{ route('admin.reports.sales') }}" class="hover:text-gray-700">Reports</a></li>
-    <li><span class="mx-1">/</span></li>
-    <li class="text-gray-900 font-medium">Geographic Sales</li>
-</ol>
-@endsection
-
-@section('page-header')
-<div>
-    <h1 class="text-2xl font-bold text-gray-900">Geographic Sales Distribution</h1>
-    <p class="text-sm text-gray-500 mt-1">Revenue and order counts by city and state/division.</p>
-</div>
-@endsection
-
 @section('content')
-<form method="GET" class="flex flex-wrap items-end gap-3 mb-6">
-    <div>
-        <label class="text-xs text-gray-500 block mb-1">Period</label>
-        <select name="period" onchange="this.form.submit()" class="border border-gray-200 rounded px-3 py-2 text-sm">
-            @foreach(['today'=>'Today','week'=>'This Week','month'=>'This Month','year'=>'This Year'] as $val=>$lbl)
-                <option value="{{ $val }}" {{ $request->input('period','month')===$val?'selected':'' }}>{{ $lbl }}</option>
-            @endforeach
-            <option value="custom" {{ $request->input('period')==='custom'?'selected':'' }}>Custom</option>
-        </select>
-    </div>
-    <div><label class="text-xs text-gray-500 block mb-1">From</label><input type="date" name="start_date" value="{{ $request->input('start_date',$startDate->format('Y-m-d')) }}" class="border border-gray-200 rounded px-3 py-2 text-sm"></div>
-    <div><label class="text-xs text-gray-500 block mb-1">To</label><input type="date" name="end_date" value="{{ $request->input('end_date',$endDate->format('Y-m-d')) }}" class="border border-gray-200 rounded px-3 py-2 text-sm"></div>
-    <button type="submit" class="kb-btn kb-btn-primary text-sm px-4 py-2">Apply</button>
-</form>
 
-<div class="grid lg:grid-cols-2 gap-6">
-    {{-- By City --}}
-    <x-admin.card>
-        <h3 class="font-semibold text-gray-800 mb-4">Top Cities by Revenue (top 30)</h3>
+<div class="page-head">
+    <div>
+        <h2 class="display">Geographic Sales Distribution</h2>
+        <div class="sub">Revenue and order counts by city and state/division</div>
+    </div>
+</div>
+
+<div class="card pad" style="margin-bottom:16px">
+    <form method="GET" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+        <div class="field" style="min-width:150px">
+            <label class="lbl">Period</label>
+            <select name="period" class="select" onchange="this.form.submit()">
+                @foreach(['today'=>'Today','week'=>'This Week','month'=>'This Month','year'=>'This Year','custom'=>'Custom'] as $val=>$lbl)
+                    <option value="{{ $val }}" {{ $request->input('period','month')===$val?'selected':'' }}>{{ $lbl }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="field" style="min-width:140px">
+            <label class="lbl">From</label>
+            <input type="date" name="start_date" class="input" value="{{ $request->input('start_date',$startDate->format('Y-m-d')) }}">
+        </div>
+        <div class="field" style="min-width:140px">
+            <label class="lbl">To</label>
+            <input type="date" name="end_date" class="input" value="{{ $request->input('end_date',$endDate->format('Y-m-d')) }}">
+        </div>
+        <button type="submit" class="btn">Apply</button>
+    </form>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="card pad">
+        <div class="card-head"><div class="ct"><h3>Top Cities by Revenue</h3><div class="sub">Top 30</div></div></div>
         @if($byCity->isEmpty())
-            <p class="text-sm text-gray-400 py-8 text-center">No geographic data available. Ensure shipping addresses include city.</p>
+            <p style="text-align:center;color:var(--text-muted);padding:32px 0;font-size:13px">No geographic data. Ensure shipping addresses include city.</p>
         @else
         @php $maxCity = $byCity->max('revenue') ?: 1; @endphp
-        <div class="space-y-2 max-h-96 overflow-y-auto">
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;max-height:400px;overflow-y:auto">
             @foreach($byCity as $i => $row)
             @php $pct = $totalRevenue > 0 ? round(($row->revenue/$totalRevenue)*100,1) : 0; @endphp
-            <div class="flex items-center gap-2">
-                <span class="w-5 text-xs text-gray-400 font-mono">{{ $i+1 }}</span>
-                <div class="flex-1">
-                    <div class="flex justify-between text-sm mb-0.5">
-                        <span class="font-medium text-gray-700">{{ $row->city }}</span>
-                        <span class="font-semibold">৳{{ number_format($row->revenue,0) }} <span class="text-xs text-gray-400">({{ $pct }}%)</span></span>
+            <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:11px;color:var(--text-muted);font-family:monospace;width:20px">{{ $i+1 }}</span>
+                <div style="flex:1;min-width:0">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+                        <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $row->city }}</span>
+                        <span style="flex-shrink:0;margin-left:8px">৳{{ number_format($row->revenue,0) }} <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
                     </div>
-                    <div class="w-full h-1.5 bg-gray-100 rounded overflow-hidden">
-                        <div class="h-1.5 bg-blue-400 rounded" style="width:{{ min(100, round(($row->revenue/$maxCity)*100)) }}%"></div>
+                    <div style="background:var(--surface-3);border-radius:3px;height:4px;overflow:hidden">
+                        <div style="width:{{ min(100, round(($row->revenue/$maxCity)*100)) }}%;height:4px;background:var(--accent);border-radius:3px"></div>
                     </div>
-                    <span class="text-xs text-gray-400">{{ number_format($row->orders) }} orders • AOV ৳{{ number_format($row->avg_order,0) }}</span>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ number_format($row->orders) }} orders · AOV ৳{{ number_format($row->avg_order,0) }}</div>
                 </div>
             </div>
             @endforeach
         </div>
         @endif
-    </x-admin.card>
+    </div>
 
-    {{-- By State/Division --}}
-    <x-admin.card>
-        <h3 class="font-semibold text-gray-800 mb-4">Revenue by State / Division</h3>
+    <div class="card pad">
+        <div class="card-head"><div class="ct"><h3>Revenue by State / Division</h3></div></div>
         @if($byState->isEmpty())
-            <p class="text-sm text-gray-400 py-8 text-center">No state data available.</p>
+            <p style="text-align:center;color:var(--text-muted);padding:32px 0;font-size:13px">No state data available.</p>
         @else
         @php $maxState = $byState->max('revenue') ?: 1; $stateTotalRev = $byState->sum('revenue') ?: 1; @endphp
-        <div class="space-y-2">
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
             @foreach($byState as $row)
             @php $pct = round(($row->revenue/$stateTotalRev)*100,1); @endphp
             <div>
-                <div class="flex justify-between text-sm mb-0.5">
-                    <span class="font-medium text-gray-700">{{ $row->state }}</span>
-                    <span class="font-semibold">৳{{ number_format($row->revenue,0) }} <span class="text-xs text-gray-400">({{ $pct }}%)</span></span>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                    <span style="font-weight:600">{{ $row->state }}</span>
+                    <span>৳{{ number_format($row->revenue,0) }} <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
                 </div>
-                <div class="w-full h-2 bg-gray-100 rounded overflow-hidden">
-                    <div class="h-2 bg-indigo-400 rounded" style="width:{{ $pct }}%"></div>
+                <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
+                    <div style="width:{{ $pct }}%;height:6px;background:var(--violet);border-radius:4px"></div>
                 </div>
-                <span class="text-xs text-gray-400">{{ number_format($row->orders) }} orders</span>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ number_format($row->orders) }} orders</div>
             </div>
             @endforeach
         </div>
         @endif
-    </x-admin.card>
+    </div>
 </div>
 
 @if($byCity->isNotEmpty())
-<x-admin.card class="mt-6">
-    <h3 class="font-semibold text-gray-800 mb-4">City Details Table</h3>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead><tr class="border-b text-xs text-gray-400 uppercase">
-                <th class="pb-2 text-left">#</th>
-                <th class="pb-2 text-left">City</th>
-                <th class="pb-2 text-right">Orders</th>
-                <th class="pb-2 text-right">Revenue</th>
-                <th class="pb-2 text-right">Avg Order</th>
-                <th class="pb-2 text-right">% of Revenue</th>
-            </tr></thead>
-            <tbody class="divide-y divide-gray-50">
-                @foreach($byCity as $i => $row)
-                @php $pct = $totalRevenue > 0 ? round(($row->revenue/$totalRevenue)*100,2) : 0; @endphp
-                <tr class="hover:bg-gray-50">
-                    <td class="py-2 text-gray-400 text-xs">{{ $i+1 }}</td>
-                    <td class="py-2 font-medium">{{ $row->city }}</td>
-                    <td class="py-2 text-right">{{ number_format($row->orders) }}</td>
-                    <td class="py-2 text-right font-semibold">৳{{ number_format($row->revenue,0) }}</td>
-                    <td class="py-2 text-right text-gray-500">৳{{ number_format($row->avg_order,0) }}</td>
-                    <td class="py-2 text-right text-gray-500">{{ $pct }}%</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</x-admin.card>
+<div class="card flush">
+    <div class="card-head" style="padding:16px 20px"><div class="ct"><h3>City Details Table</h3></div></div>
+    <table class="table">
+        <thead><tr>
+            <th>#</th>
+            <th>City</th>
+            <th style="text-align:right">Orders</th>
+            <th style="text-align:right">Revenue</th>
+            <th style="text-align:right">Avg Order</th>
+            <th style="text-align:right">% of Revenue</th>
+        </tr></thead>
+        <tbody>
+            @foreach($byCity as $i => $row)
+            @php $pct = $totalRevenue > 0 ? round(($row->revenue/$totalRevenue)*100,2) : 0; @endphp
+            <tr>
+                <td style="color:var(--text-muted);font-size:12px">{{ $i+1 }}</td>
+                <td style="font-weight:600">{{ $row->city }}</td>
+                <td style="text-align:right">{{ number_format($row->orders) }}</td>
+                <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue,0) }}</td>
+                <td style="text-align:right;color:var(--text-muted)">৳{{ number_format($row->avg_order,0) }}</td>
+                <td style="text-align:right;color:var(--text-muted)">{{ $pct }}%</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 @endif
+
 @endsection

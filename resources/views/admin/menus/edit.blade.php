@@ -164,12 +164,12 @@ function setSubItemParent(id, label) {
                 <h3 style="font-weight:700;font-size:13.5px;color:var(--info)">Add Dropdown Group</h3>
             </div>
             <div class="faint" style="font-size:12px;margin-bottom:10px">Label-only parent that opens a dropdown in the navbar.</div>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" style="display:flex;flex-direction:column;gap:8px">
                 @csrf
                 <input type="hidden" name="type" value="custom">
                 <input type="hidden" name="url" value="">
                 <input type="hidden" name="target" value="_self">
-                <input class="input" type="text" name="label" placeholder="e.g. Collections, Services…" required style="height:36px">
+                <input class="input" type="text" name="label" placeholder="e.g. Collections, Services…" required>
                 <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;background:var(--info);border-color:var(--info)">Create Dropdown Group</button>
             </form>
         </div>
@@ -215,7 +215,7 @@ function setSubItemParent(id, label) {
         {{-- Custom Link --}}
         <div class="card pad">
             <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Custom Link</h3>
-            <form id="add-custom-form" method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
+            <form id="add-custom-form" method="POST" action="{{ route('admin.menus.items.store', $menu) }}" style="display:flex;flex-direction:column;gap:10px">
                 @csrf
                 <input type="hidden" name="type" value="custom">
                 <div class="field" style="margin:0">
@@ -226,23 +226,21 @@ function setSubItemParent(id, label) {
                     <span class="lbl" style="font-size:11px">URL <span class="faint">(blank = dropdown group)</span></span>
                     <input class="input" type="text" name="url" placeholder="e.g. /about or https://…" style="height:34px">
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <div class="field" style="margin:0">
-                        <span class="lbl" style="font-size:11px">Open in</span>
-                        <select class="input" name="target" style="height:34px">
-                            <option value="_self">Same tab</option>
-                            <option value="_blank">New tab</option>
-                        </select>
-                    </div>
-                    <div class="field" style="margin:0">
-                        <span class="lbl" style="font-size:11px">Under (dropdown)</span>
-                        <select class="input" name="parent_id" style="height:34px">
-                            <option value="">Top level</option>
-                            @foreach($menu->items->whereNull('parent_id') as $parent)
-                                <option value="{{ $parent->id }}">{{ $parent->label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">Open in</span>
+                    <select class="input" name="target" style="height:34px">
+                        <option value="_self">Same tab</option>
+                        <option value="_blank">New tab</option>
+                    </select>
+                </div>
+                <div class="field" style="margin:0">
+                    <span class="lbl" style="font-size:11px">Under (dropdown)</span>
+                    <select class="input" name="parent_id" style="height:34px">
+                        <option value="">Top level</option>
+                        @foreach($menu->items->whereNull('parent_id') as $parent)
+                            <option value="{{ $parent->id }}">{{ $parent->label }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <p id="parent-hint" class="faint" style="font-size:11.5px;display:none;color:var(--info)"></p>
                 <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Add to Menu</button>
@@ -253,12 +251,11 @@ function setSubItemParent(id, label) {
         @if($pages->isNotEmpty())
         <div class="card pad">
             <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Page</h3>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" style="display:flex;flex-direction:column;gap:10px">
                 @csrf
                 <input type="hidden" name="type" value="page">
                 <input type="hidden" name="target" value="_self">
-                <select class="input" name="item_id" required style="height:34px"
-                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
+                <select class="input" name="item_id" required                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
                     <option value="">Select a page…</option>
                     @foreach($pages as $page)
                         <option value="{{ $page->id }}">{{ $page->title }}</option>
@@ -280,12 +277,11 @@ function setSubItemParent(id, label) {
         @if($categories->isNotEmpty())
         <div class="card pad">
             <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Add Category</h3>
-            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" class="col-gap" style="--gap:8px">
+            <form method="POST" action="{{ route('admin.menus.items.store', $menu) }}" style="display:flex;flex-direction:column;gap:10px">
                 @csrf
                 <input type="hidden" name="type" value="category">
                 <input type="hidden" name="target" value="_self">
-                <select class="input" name="item_id" required style="height:34px"
-                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
+                <select class="input" name="item_id" required                    onchange="this.form.label.value = this.options[this.selectedIndex].text">
                     <option value="">Select a category…</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -306,7 +302,7 @@ function setSubItemParent(id, label) {
         {{-- Menu Settings --}}
         <div class="card pad">
             <h3 style="font-weight:700;font-size:13.5px;margin-bottom:12px">Menu Settings</h3>
-            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" class="col-gap" style="--gap:8px">
+            <form method="POST" action="{{ route('admin.menus.update', $menu) }}" style="display:flex;flex-direction:column;gap:10px">
                 @csrf @method('PUT')
                 <div class="field" style="margin:0">
                     <span class="lbl" style="font-size:11px">Menu Name</span>

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Order;
+use App\Models\SiteSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -15,23 +16,54 @@ class OrderConfirmed extends Notification
 
     public function via(object $notifiable): array
     {
+        if (SiteSetting::get('notifications.email_on_order_confirmed', '1') !== '1') {
+            return [];
+        }
         return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        $siteName = \App\Models\SiteSetting::get('general.site_name', config('app.name'));
-        $symbol   = \App\Models\SiteSetting::get('general.currency_symbol', '৳');
+        $siteName = SiteSetting::get('general.site_name', config('app.name'));
+        $symbol   = SiteSetting::get('general.currency_symbol', '৳');
 
-        return (new MailMessage)
-            ->subject("Order Confirmed — #{$this->order->order_number}")
-            ->greeting("Hi {$this->order->customer_name}!")
-            ->line("Thank you for your order. We've received it and will start processing shortly.")
-            ->line("**Order Number:** #{$this->order->order_number}")
-            ->line("**Total:** {$symbol}" . number_format($this->order->total, 2))
-            ->line("**Payment:** " . ucwords(str_replace('_', ' ', $this->order->payment_method ?? 'N/A')))
+        $defaultSubject = "Order Confirmed — #{$this->order->order_number}";
+        $defaultBody    = "Thank you for your order. We've received it and will start processing shortly.\n\nOrder: #{$this->order->order_number}\nTotal: {$symbol}" . number_format($this->order->total, 2);
+
+        $subject = $this->replacePlaceholders(
+            SiteSetting::get('notifications.email_subject_confirmed', $defaultSubject),
+            $symbol
+        );
+        $body = $this->replacePlaceholders(
+            SiteSetting::get('notifications.email_body_confirmed', $defaultBody),
+            $symbol
+        );
+
+        $mail = (new MailMessage)
+            ->subject($subject)
+            ->greeting("Hi {$this->order->customer_name}!");
+
+        foreach (explode("\n", $body) as $line) {
+            $mail->line($line);
+        }
+
+        return $mail
             ->action('Track Your Order', url('/track?order_number=' . $this->order->order_number))
-            ->line("If you have any questions, please contact us.")
             ->salutation("Thanks,\n{$siteName}");
+    }
+
+    private function replacePlaceholders(string $text, string $symbol): string
+    {
+        return str_replace(
+            ['{{order_number}}', '{{customer_name}}', '{{total}}', '{{tracking}}', '{{site_name}}'],
+            [
+                $this->order->order_number,
+                $this->order->customer_name,
+                $symbol . number_format($this->order->total, 2),
+                $this->order->tracking_number ?? '',
+                SiteSetting::get('general.site_name', config('app.name')),
+            ],
+            $text
+        );
     }
 }

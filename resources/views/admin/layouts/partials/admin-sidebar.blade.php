@@ -122,10 +122,55 @@
         </div></div></div>
     </div>
 
-    <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
-        <span class="ico" data-ico="chart"></span>
-        <span>Reports</span>
-    </a>
+    @php $reportsActive = request()->routeIs('admin.reports.*'); @endphp
+    <div class="nav-group {{ $reportsActive ? 'open' : '' }}">
+        <button class="nav-grouphead focusable" type="button" data-group-toggle>
+            <span class="ico" data-ico="chart"></span>
+            <span>Reports</span>
+            <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
+        </button>
+        <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+                <span>Overview</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.sales') ? 'active' : '' }}" href="{{ route('admin.reports.sales') }}">
+                <span>Sales overview</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.profit') ? 'active' : '' }}" href="{{ route('admin.reports.profit') }}">
+                <span>Profit analysis</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.top-products') ? 'active' : '' }}" href="{{ route('admin.reports.top-products') }}">
+                <span>Top products</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.demand-trends') ? 'active' : '' }}" href="{{ route('admin.reports.demand-trends') }}">
+                <span>Demand trends</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.category-revenue') ? 'active' : '' }}" href="{{ route('admin.reports.category-revenue') }}">
+                <span>Category revenue</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.inventory') ? 'active' : '' }}" href="{{ route('admin.reports.inventory') }}">
+                <span>Inventory</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.customers') ? 'active' : '' }}" href="{{ route('admin.reports.customers') }}">
+                <span>Customers</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.orders') ? 'active' : '' }}" href="{{ route('admin.reports.orders') }}">
+                <span>Orders report</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.coupon-usage') ? 'active' : '' }}" href="{{ route('admin.reports.coupon-usage') }}">
+                <span>Coupon usage</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.refund-analysis') ? 'active' : '' }}" href="{{ route('admin.reports.refund-analysis') }}">
+                <span>Refund analysis</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.payment-trends') ? 'active' : '' }}" href="{{ route('admin.reports.payment-trends') }}">
+                <span>Payment trends</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.reports.geographic') ? 'active' : '' }}" href="{{ route('admin.reports.geographic') }}">
+                <span>Geographic</span>
+            </a>
+        </div></div></div>
+    </div>
 
     @php $financeActive = request()->routeIs('admin.accounting.*'); @endphp
     <div class="nav-group {{ $financeActive ? 'open' : '' }}">
