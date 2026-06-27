@@ -78,8 +78,12 @@ class HomeController extends Controller
             'id'               => $p->id,
             'name'             => $p->name,
             'slug'             => $p->slug,
-            'price'            => (float) $p->price,
-            'compare_at_price' => $p->compare_at_price ? (float) $p->compare_at_price : null,
+            'price'            => $p->has_variants
+                ? (float) ($p->variants->min('price') ?? 0)
+                : (float) $p->price,
+            'compare_at_price' => $p->has_variants
+                ? null
+                : ($p->compare_at_price ? (float) $p->compare_at_price : null),
             'has_variants'     => $p->has_variants,
             'image_url'        => $firstImage?->getUrl('thumb'),
             'is_featured'      => $p->is_featured,
