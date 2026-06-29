@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import Layout from '../../layouts/Layout';
 import type { SharedProps } from '../../types';
 
 export default function ForgotPassword({ status }: { status?: string }) {
@@ -13,67 +14,57 @@ export default function ForgotPassword({ status }: { status?: string }) {
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', height: 38, padding: '0 12px', border: '1px solid #E6E8EE',
-    background: '#fff', borderRadius: 8, outline: 'none', fontSize: 14,
-    color: '#0E1320', transition: 'border-color .15s, box-shadow .15s', boxSizing: 'border-box',
+    width: '100%', height: 46, padding: '0 14px', border: '1px solid var(--av-line)',
+    background: 'var(--av-paper)', borderRadius: 2, outline: 'none', fontSize: 14,
+    color: 'var(--av-ink)', fontFamily: 'var(--av-sans)',
+    transition: 'border-color .2s, box-shadow .2s', boxSizing: 'border-box',
   };
 
   return (
-    <>
+    <Layout>
       <Head title={`Reset password · ${site.name}`} />
 
-      {/* Gradient background */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        background: 'radial-gradient(ellipse 600px 400px at 80% 20%, #EEF2FB 0%, transparent 60%), radial-gradient(ellipse 500px 360px at 15% 85%, #DDE4F4 0%, transparent 65%), #F2F4F9',
-      }}/>
+      {/* Editorial shell */}
+      <section style={{ position: 'relative', overflow: 'hidden', display: 'grid', placeItems: 'center', padding: 'clamp(48px,8vw,96px) 16px', background: 'radial-gradient(ellipse 620px 420px at 82% 14%, var(--av-paper) 0%, transparent 62%), radial-gradient(ellipse 520px 380px at 12% 88%, var(--av-paper-2) 0%, transparent 66%), var(--av-ivory)' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
+          <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(180px,32vw,420px)', fontWeight: 600, color: 'rgba(31,26,21,.025)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+          {site.name}
+        </span>
+        </div>
 
-      {/* Shell */}
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '48px 16px' }}>
-        <div style={{ width: '100%', maxWidth: 440 }}>
-
-          {/* Back link */}
-          <Link href="/login"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#8A93A6', marginBottom: 24, textDecoration: 'none' }}
-            className="hover:text-[#0E1320]">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to sign in
-          </Link>
+        <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
 
           {/* Card */}
-          <div style={{ background: '#fff', border: '1px solid #E6E8EE', borderRadius: 16, padding: '36px 32px', boxShadow: '0 1px 2px rgba(14,19,32,.06), 0 8px 24px rgba(14,19,32,.06)' }}>
+          <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 4, padding: '44px 40px', boxShadow: '0 1px 2px rgba(31,26,21,.04), 0 24px 48px -24px rgba(31,26,21,.18)' }}>
 
             {sent ? (
               /* ── Step 2: sent confirmation ── */
               <>
-                <div style={{ textAlign: 'center', padding: '12px 0 20px' }}>
-                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#E6F5EE', color: '#0F8A5F', margin: '0 auto 12px', display: 'grid', placeItems: 'center' }}>
+                <div style={{ textAlign: 'center', padding: '12px 0 22px' }}>
+                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(15,138,95,.10)', color: '#0F8A5F', margin: '0 auto 16px', display: 'grid', placeItems: 'center' }}>
                     <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
                     </svg>
                   </div>
-                  <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 8px', color: '#0E1320' }}>Check your email</h2>
-                  <p style={{ color: '#5A6478', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+                  <h2 style={{ fontSize: 'clamp(24px,3.5vw,32px)', fontWeight: 400, letterSpacing: '-0.012em', margin: '0 0 10px', color: 'var(--av-ink)', fontFamily: 'var(--av-display)', lineHeight: 1.06 }}>Check your email</h2>
+                  <p style={{ color: 'var(--av-muted)', fontSize: 13.5, margin: 0, lineHeight: 1.7, fontFamily: 'var(--av-sans)' }}>
                     We've sent a password reset link to<br/>
-                    <strong style={{ color: '#0E1320', fontWeight: 700 }}>{data.email}</strong>
+                    <strong style={{ color: 'var(--av-ink)', fontWeight: 600 }}>{data.email}</strong>
                   </p>
                   {status && (
-                    <p style={{ marginTop: 8, fontSize: 12, color: '#0F8A5F' }}>{status}</p>
+                    <p style={{ marginTop: 10, fontSize: 12.5, color: '#0F8A5F', fontFamily: 'var(--av-sans)' }}>{status}</p>
                   )}
                 </div>
 
                 <Link href="/login"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 48, borderRadius: 10, background: '#0B1F4F', color: '#fff', fontWeight: 600, fontSize: 15, textDecoration: 'none', transition: 'background .15s' }}
-                  className="hover:bg-[#102B6B]">
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 50, borderRadius: 2, background: 'var(--av-ink)', color: 'var(--av-paper)', fontWeight: 500, fontSize: 11.5, letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', fontFamily: 'var(--av-sans)', transition: 'background .2s' }}>
                   Back to sign in
                 </Link>
 
-                <p style={{ textAlign: 'center', fontSize: 12, color: '#8A93A6', marginTop: 16 }}>
+                <p style={{ textAlign: 'center', fontSize: 12.5, color: 'var(--av-muted)', marginTop: 18, fontFamily: 'var(--av-sans)' }}>
                   Didn't receive it?{' '}
                   <button type="button" onClick={() => post('/forgot-password')}
-                    style={{ color: '#0B1F4F', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12 }}
+                    style={{ color: 'var(--av-cognac)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontFamily: 'var(--av-sans)' }}
                     className="hover:underline">
                     Resend
                   </button>
@@ -83,27 +74,30 @@ export default function ForgotPassword({ status }: { status?: string }) {
               /* ── Step 1: email form ── */
               <>
                 {/* Lock icon */}
-                <div style={{ width: 56, height: 56, borderRadius: 14, background: '#EEF2FB', color: '#0B1F4F', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
+                <div style={{ width: 58, height: 58, borderRadius: 2, background: 'var(--av-paper-2)', color: 'var(--av-cognac)', display: 'grid', placeItems: 'center', margin: '0 auto 18px' }}>
                   <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <rect x="3" y="11" width="18" height="11" rx="2" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect x="3" y="11" width="18" height="11" rx="2" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
 
-                <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 4px', textAlign: 'center', color: '#0E1320' }}>Forgot your password?</h1>
-                <p style={{ color: '#8A93A6', fontSize: 13, textAlign: 'center', margin: '0 0 24px', lineHeight: 1.5 }}>
-                  No worries — enter your email and we'll send you a reset link.
-                </p>
+                <div style={{ textAlign: 'center', marginBottom: 26 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.34em', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', marginBottom: 12 }}>Account Recovery</div>
+                  <h1 style={{ fontSize: 'clamp(26px,3.8vw,34px)', fontWeight: 400, letterSpacing: '-0.012em', margin: '0 0 8px', color: 'var(--av-ink)', fontFamily: 'var(--av-display)', lineHeight: 1.06 }}>Forgot your password?</h1>
+                  <p style={{ color: 'var(--av-muted)', fontSize: 13.5, margin: 0, lineHeight: 1.6, fontFamily: 'var(--av-sans)' }}>
+                    No worries — enter your email and we'll send you a reset link.
+                  </p>
+                </div>
 
                 {errors.email && (
-                  <div style={{ marginBottom: 14, padding: '10px 14px', borderRadius: 8, background: '#FCEDED', color: '#C43030', border: '1px solid #f5c6c6', fontSize: 13 }}>
+                  <div style={{ marginBottom: 16, padding: '11px 14px', borderRadius: 2, background: 'rgba(196,48,48,.07)', color: '#9c2b2b', border: '1px solid rgba(196,48,48,.22)', fontSize: 13, fontFamily: 'var(--av-sans)' }}>
                     {errors.email}
                   </div>
                 )}
 
                 <form onSubmit={submit}>
                   <div style={{ marginBottom: 20 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#2A3142', display: 'block', marginBottom: 6 }}>Email address</label>
+                    <label style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--av-muted)', display: 'block', marginBottom: 8, fontFamily: 'var(--av-sans)' }}>Email address</label>
                     <input
                       type="email"
                       value={data.email}
@@ -112,28 +106,27 @@ export default function ForgotPassword({ status }: { status?: string }) {
                       required
                       autoFocus
                       style={inputStyle}
-                      onFocus={e => { e.currentTarget.style.borderColor = '#0B1F4F'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(11,31,79,.12)'; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = '#E6E8EE'; e.currentTarget.style.boxShadow = 'none'; }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'var(--av-ink)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(149,97,58,.10)'; }}
+                      onBlur={e => { e.currentTarget.style.borderColor = 'var(--av-line)'; e.currentTarget.style.boxShadow = 'none'; }}
                     />
                   </div>
                   <button type="submit" disabled={processing}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 48, borderRadius: 10, background: processing ? '#8A93A6' : '#0B1F4F', color: '#fff', fontWeight: 600, fontSize: 15, border: 'none', cursor: processing ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
-                    className="hover:bg-[#102B6B]">
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 50, borderRadius: 2, background: processing ? 'var(--av-muted)' : 'var(--av-ink)', color: 'var(--av-paper)', fontWeight: 500, fontSize: 11.5, letterSpacing: '0.2em', textTransform: 'uppercase', border: 'none', cursor: processing ? 'not-allowed' : 'pointer', fontFamily: 'var(--av-sans)', transition: 'background .2s' }}>
                     {processing ? 'Sending…' : 'Send reset link'}
                   </button>
                 </form>
               </>
             )}
 
-            <p style={{ textAlign: 'center', fontSize: 13, color: '#8A93A6', marginTop: 18 }}>
+            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--av-muted)', marginTop: 22, fontFamily: 'var(--av-sans)' }}>
               {sent ? 'Back to ' : 'Remember your password? '}
-              <Link href="/login" style={{ color: '#0B1F4F', fontWeight: 600, textDecoration: 'none' }} className="hover:underline">
+              <Link href="/login" style={{ color: 'var(--av-cognac)', fontWeight: 500, textDecoration: 'none' }} className="hover:underline">
                 Sign in
               </Link>
             </p>
           </div>
         </div>
-      </div>
-    </>
+      </section>
+    </Layout>
   );
 }
