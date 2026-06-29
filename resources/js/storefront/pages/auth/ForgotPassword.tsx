@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import Layout from '../../layouts/Layout';
 import type { SharedProps } from '../../types';
 
 export default function ForgotPassword({ status }: { status?: string }) {
@@ -20,33 +21,18 @@ export default function ForgotPassword({ status }: { status?: string }) {
   };
 
   return (
-    <>
+    <Layout>
       <Head title={`Reset password · ${site.name}`} />
 
-      {/* Editorial background */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        background: 'radial-gradient(ellipse 620px 420px at 82% 14%, var(--av-paper) 0%, transparent 62%), radial-gradient(ellipse 520px 380px at 12% 88%, var(--av-paper-2) 0%, transparent 66%), var(--av-ivory)',
-      }}/>
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
-        <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(180px,32vw,420px)', fontWeight: 600, color: 'rgba(31,26,21,.025)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+      {/* Editorial shell */}
+      <section style={{ position: 'relative', overflow: 'hidden', display: 'grid', placeItems: 'center', padding: 'clamp(48px,8vw,96px) 16px', background: 'radial-gradient(ellipse 620px 420px at 82% 14%, var(--av-paper) 0%, transparent 62%), radial-gradient(ellipse 520px 380px at 12% 88%, var(--av-paper-2) 0%, transparent 66%), var(--av-ivory)' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
+          <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(180px,32vw,420px)', fontWeight: 600, color: 'rgba(31,26,21,.025)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
           {site.name}
         </span>
-      </div>
+        </div>
 
-      {/* Shell */}
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '48px 16px' }}>
-        <div style={{ width: '100%', maxWidth: 440 }}>
-
-          {/* Back link */}
-          <Link href="/login"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 26, textDecoration: 'none', fontFamily: 'var(--av-sans)' }}
-            className="hover:text-[#1f1a15]">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to sign in
-          </Link>
+        <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
 
           {/* Card */}
           <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 4, padding: '44px 40px', boxShadow: '0 1px 2px rgba(31,26,21,.04), 0 24px 48px -24px rgba(31,26,21,.18)' }}>
@@ -140,7 +126,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             </p>
           </div>
         </div>
-      </div>
-    </>
+      </section>
+    </Layout>
   );
 }

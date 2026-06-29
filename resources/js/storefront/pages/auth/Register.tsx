@@ -1,5 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import Layout from '../../layouts/Layout';
 import type { SharedProps } from '../../types';
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -86,44 +87,21 @@ export default function Register() {
   };
 
   return (
-    <>
+    <Layout>
       <Head title={`Create account · ${site.name}`} />
 
-      {/* Editorial background — blobs at opposite corners vs login */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        background: 'radial-gradient(ellipse 620px 420px at 18% 14%, var(--av-paper) 0%, transparent 62%), radial-gradient(ellipse 520px 380px at 88% 88%, var(--av-paper-2) 0%, transparent 66%), var(--av-ivory)',
-      }}/>
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
-        <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(180px,32vw,420px)', fontWeight: 600, color: 'rgba(31,26,21,.025)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
-          {site.name}
-        </span>
-      </div>
+      {/* Editorial shell — blobs at opposite corners vs login */}
+      <section style={{ position: 'relative', overflow: 'hidden', display: 'grid', placeItems: 'center', padding: 'clamp(48px,8vw,96px) 16px', background: 'radial-gradient(ellipse 620px 420px at 18% 14%, var(--av-paper) 0%, transparent 62%), radial-gradient(ellipse 520px 380px at 88% 88%, var(--av-paper-2) 0%, transparent 66%), var(--av-ivory)' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
+          <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(180px,32vw,420px)', fontWeight: 600, color: 'rgba(31,26,21,.025)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+            {site.name}
+          </span>
+        </div>
 
-      {/* Shell */}
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '48px 16px' }}>
-        <div style={{ width: '100%', maxWidth: 440 }}>
-
-          {/* Back link */}
-          <Link href="/"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-muted)', marginBottom: 26, textDecoration: 'none', fontFamily: 'var(--av-sans)' }}
-            className="hover:text-[#1f1a15]">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to {site.name}
-          </Link>
+        <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
 
           {/* Card */}
           <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 4, padding: '44px 40px', boxShadow: '0 1px 2px rgba(31,26,21,.04), 0 24px 48px -24px rgba(31,26,21,.18)' }}>
-
-            {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 11, marginBottom: 18 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 2, background: 'var(--av-ink)', display: 'grid', placeItems: 'center', color: 'var(--av-paper)', fontWeight: 600, fontSize: 22, fontFamily: 'var(--av-display)', flexShrink: 0 }}>
-                {site.name.slice(0, 1).toUpperCase()}
-              </div>
-              <span style={{ fontWeight: 500, fontSize: 22, letterSpacing: '0.04em', color: 'var(--av-ink)', fontFamily: 'var(--av-display)' }}>{site.name}</span>
-            </div>
 
             <div style={{ textAlign: 'center', marginBottom: 26 }}>
               <div style={{ fontSize: 10.5, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.34em', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', marginBottom: 12 }}>Join Us</div>
@@ -234,37 +212,7 @@ export default function Register() {
               </button>
             </form>
 
-            {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--av-muted)', fontSize: 10, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', margin: '24px 0', fontFamily: 'var(--av-sans)' }}>
-              <div style={{ flex: 1, height: 1, background: 'var(--av-line)' }}/>
-              Or sign up with
-              <div style={{ flex: 1, height: 1, background: 'var(--av-line)' }}/>
-            </div>
-
-            {/* Social buttons */}
-            <div style={{ display: 'grid', gap: 9 }}>
-              <a href="/auth/google"
-                style={{ height: 46, border: '1px solid var(--av-line)', background: 'var(--av-paper)', color: 'var(--av-ink)', fontWeight: 500, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, textDecoration: 'none', fontFamily: 'var(--av-sans)', transition: 'border-color .2s' }}
-                className="hover:border-[#1f1a15]">
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09a6.6 6.6 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.66-2.84z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
-                </svg>
-                Continue with Google
-              </a>
-              <a href="/auth/facebook"
-                style={{ height: 46, border: '1px solid var(--av-line)', background: 'var(--av-paper)', color: 'var(--av-ink)', fontWeight: 500, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, textDecoration: 'none', fontFamily: 'var(--av-sans)', transition: 'border-color .2s' }}
-                className="hover:border-[#1f1a15]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
-                  <path d="M22 12a10 10 0 1 0-11.6 9.9V14.9H8V12h2.4V9.8c0-2.4 1.4-3.8 3.6-3.8 1 0 2.1.2 2.1.2v2.4h-1.2c-1.2 0-1.5.7-1.5 1.5V12h2.7l-.4 2.9h-2.2v6.9A10 10 0 0 0 22 12Z"/>
-                </svg>
-                Continue with Facebook
-              </a>
-            </div>
-
-            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--av-muted)', marginTop: 22, fontFamily: 'var(--av-sans)' }}>
+            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--av-muted)', marginTop: 24, fontFamily: 'var(--av-sans)' }}>
               Already have an account?{' '}
               <Link href="/login" style={{ color: 'var(--av-cognac)', fontWeight: 500, textDecoration: 'none' }} className="hover:underline">
                 Sign in
@@ -272,7 +220,7 @@ export default function Register() {
             </p>
           </div>
         </div>
-      </div>
-    </>
+      </section>
+    </Layout>
   );
 }
