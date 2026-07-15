@@ -185,6 +185,9 @@ class HandleInertiaRequests extends Middleware
                 'showNewArrivals'        => (bool) SiteSetting::get('storefront.show_new_arrivals', '1'),
                 'showCategories'         => (bool) SiteSetting::get('storefront.show_categories', '1'),
                 'showBlog'               => (bool) SiteSetting::get('storefront.show_blog', '1'),
+                'showSaleBanner'         => (bool) SiteSetting::get('storefront.show_sale_banner', '1'),
+                'showBrands'             => (bool) SiteSetting::get('storefront.show_brands', '1'),
+                'showTrackOrder'         => (bool) SiteSetting::get('storefront.show_track_order', '1'),
             ],
             'auth' => [
                 'user' => $request->user()
