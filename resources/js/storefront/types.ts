@@ -42,6 +42,7 @@ export interface SiteSettings {
   showSaleBanner: boolean;
   showBrands: boolean;
   showTrackOrder: boolean;
+  sectionOrder: string[];
   saleAlertEnabled: boolean;
   saleAlertIntervalMin: number;
   saleAlertIntervalMax: number;

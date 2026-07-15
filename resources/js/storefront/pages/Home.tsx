@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 import { usePrice } from '../usePrice';
@@ -18,6 +18,8 @@ interface Props {
 }
 
 const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' } as React.SVGProps<SVGSVGElement>;
+
+const DEFAULT_SECTION_ORDER = ['featured_products', 'categories', 'sale_banner', 'new_arrivals', 'brands', 'blog', 'track_order'];
 
 const VALUE_PROPS = [
   {
@@ -336,156 +338,158 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
         </div>
       </div>
 
-      {/* ══ FEATURED PRODUCTS ══════════════════════════════════════════════════ */}
-      {site.showFeaturedProducts !== false && featuredProducts.length > 0 && (
-        <section style={{ padding: 'clamp(56px,10vw,96px) 0' }}>
-          <div style={W}>
-            <div style={{ textAlign: 'center', marginBottom: 48 }}>
-              <Eyebrow>Curated Selection</Eyebrow>
-              <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(28px,4vw,48px)', fontWeight: 400, margin: '0 0 10px', color: 'var(--av-ink)', letterSpacing: '-0.012em', lineHeight: 1.04 }}>
-                Featured Pieces
-              </h2>
-              <p style={{ color: 'var(--av-muted)', fontSize: 14.5, fontFamily: 'var(--av-sans)', maxWidth: 400, margin: '0 auto' }}>
-                Hand-picked for quality, craft, and lasting appeal.
-              </p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }} className="av-prod-grid">
-              {featuredProducts.map(p => <AvProductCard key={p.id} product={p} />)}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: 44 }}>
-              <Link href="/shop?sort=featured" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 11.5, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--av-ink)', textDecoration: 'none', borderBottom: '1px solid var(--av-line)', paddingBottom: 3, fontFamily: 'var(--av-sans)', fontWeight: 500 }}>
-                View All Featured
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+      {(() => {
+        const stored = Array.isArray(site.sectionOrder) && site.sectionOrder.length ? site.sectionOrder : DEFAULT_SECTION_ORDER;
+        const order = [...new Set([...stored, ...DEFAULT_SECTION_ORDER])].filter(k => DEFAULT_SECTION_ORDER.includes(k));
 
-      {/* ══ EDITORIAL SPLIT ════════════════════════════════════════════════════ */}
-      {site.showCategories !== false && shopCategories.length > 0 && (
-        <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-paper)' }}>
-          <div style={{ ...W, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(28px,5vw,60px)', alignItems: 'center' }} className="av-split-grid">
-            <div style={{ aspectRatio: '3/4', background: 'var(--av-paper-2)', overflow: 'hidden' }}>
-              {heroImageUrl && (
-                <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              )}
-            </div>
-            <div>
-              <Eyebrow>Shop by Category</Eyebrow>
-              <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(26px,3.5vw,48px)', fontWeight: 400, margin: '0 0 20px', color: 'var(--av-ink)', lineHeight: 1.04, letterSpacing: '-0.012em' }}>
-                Explore the collection
-              </h2>
-              <p style={{ color: 'var(--av-muted)', fontSize: 14.5, fontFamily: 'var(--av-sans)', lineHeight: 1.7, margin: '0 0 32px', maxWidth: 380 }}>
-                Each category is carefully curated to offer pieces that stand the test of time.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, borderTop: '1px solid var(--av-line)' }}>
-                {shopCategories.slice(0, 5).map(cat => (
-                  <Link key={cat.id} href={`/shop/c/${cat.slug}`}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--av-line-soft)', textDecoration: 'none', color: 'var(--av-ink)', fontSize: 14, fontFamily: 'var(--av-sans)', letterSpacing: '0.02em', transition: 'color .18s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-cognac)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-ink)'; }}>
-                    {cat.name}
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
+        const sections: Record<string, React.ReactNode> = {
+          featured_products: site.showFeaturedProducts !== false && featuredProducts.length > 0 && (
+            <section style={{ padding: 'clamp(56px,10vw,96px) 0' }}>
+              <div style={W}>
+                <div style={{ textAlign: 'center', marginBottom: 48 }}>
+                  <Eyebrow>Curated Selection</Eyebrow>
+                  <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(28px,4vw,48px)', fontWeight: 400, margin: '0 0 10px', color: 'var(--av-ink)', letterSpacing: '-0.012em', lineHeight: 1.04 }}>
+                    Featured Pieces
+                  </h2>
+                  <p style={{ color: 'var(--av-muted)', fontSize: 14.5, fontFamily: 'var(--av-sans)', maxWidth: 400, margin: '0 auto' }}>
+                    Hand-picked for quality, craft, and lasting appeal.
+                  </p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }} className="av-prod-grid">
+                  {featuredProducts.map(p => <AvProductCard key={p.id} product={p} />)}
+                </div>
+                <div style={{ textAlign: 'center', marginTop: 44 }}>
+                  <Link href="/shop?sort=featured" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 11.5, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--av-ink)', textDecoration: 'none', borderBottom: '1px solid var(--av-line)', paddingBottom: 3, fontFamily: 'var(--av-sans)', fontWeight: 500 }}>
+                    View All Featured
+                  </Link>
+                </div>
+              </div>
+            </section>
+          ),
+
+          categories: site.showCategories !== false && shopCategories.length > 0 && (
+            <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-paper)' }}>
+              <div style={{ ...W, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(28px,5vw,60px)', alignItems: 'center' }} className="av-split-grid">
+                <div style={{ aspectRatio: '3/4', background: 'var(--av-paper-2)', overflow: 'hidden' }}>
+                  {heroImageUrl && (
+                    <img src={heroImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  )}
+                </div>
+                <div>
+                  <Eyebrow>Shop by Category</Eyebrow>
+                  <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(26px,3.5vw,48px)', fontWeight: 400, margin: '0 0 20px', color: 'var(--av-ink)', lineHeight: 1.04, letterSpacing: '-0.012em' }}>
+                    Explore the collection
+                  </h2>
+                  <p style={{ color: 'var(--av-muted)', fontSize: 14.5, fontFamily: 'var(--av-sans)', lineHeight: 1.7, margin: '0 0 32px', maxWidth: 380 }}>
+                    Each category is carefully curated to offer pieces that stand the test of time.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0, borderTop: '1px solid var(--av-line)' }}>
+                    {shopCategories.slice(0, 5).map(cat => (
+                      <Link key={cat.id} href={`/shop/c/${cat.slug}`}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--av-line-soft)', textDecoration: 'none', color: 'var(--av-ink)', fontSize: 14, fontFamily: 'var(--av-sans)', letterSpacing: '0.02em', transition: 'color .18s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-cognac)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-ink)'; }}>
+                        {cat.name}
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          ),
+
+          sale_banner: site.showSaleBanner !== false && (
+            <section style={{ background: 'var(--av-ink)', padding: 'clamp(56px,10vw,96px) 0', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
+                <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(100px,20vw,220px)', fontWeight: 600, color: 'rgba(244,239,229,.045)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
+                  Sale
+                </span>
+              </div>
+              <div style={{ ...W, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                <Eyebrow>Limited Time</Eyebrow>
+                <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(30px,5vw,64px)', fontWeight: 400, color: 'var(--av-paper)', margin: '0 0 18px', lineHeight: 1.04, letterSpacing: '-0.018em', fontStyle: 'italic' }}>
+                  Shop the season's finest
+                </h2>
+                <p style={{ color: 'rgba(244,239,229,.62)', fontFamily: 'var(--av-sans)', fontSize: 15, maxWidth: 460, margin: '0 auto 36px', lineHeight: 1.65 }}>
+                  Select pieces marked down. Quality unchanged.
+                </p>
+                <Link href="/shop?sale=1"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px 40px', border: '1px solid rgba(244,239,229,.34)', color: 'var(--av-paper)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, background: 'transparent', transition: 'border-color .2s' }}>
+                  View Sale Items
+                </Link>
+              </div>
+            </section>
+          ),
+
+          new_arrivals: site.showNewArrivals !== false && newArrivals.length > 0 && (
+            <section style={{ padding: 'clamp(56px,10vw,96px) 0' }}>
+              <div style={W}>
+                <SectionHead title="New Arrivals" sub="Just landed in the collection." href="/shop?sort=newest" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }} className="av-prod-grid">
+                  {newArrivals.map(p => <AvProductCard key={p.id} product={p} />)}
+                </div>
+              </div>
+            </section>
+          ),
+
+          brands: site.showBrands !== false && brands.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--av-line)', borderBottom: '1px solid var(--av-line)', background: 'var(--av-paper)' }}>
+              <div style={{ ...W, display: 'flex', justifyContent: 'center', gap: 'clamp(24px,5vw,64px)', padding: 'clamp(24px,4vw,36px) var(--av-gutter)', flexWrap: 'wrap', alignItems: 'center' }}>
+                {brands.slice(0, 6).map(brand => (
+                  <Link key={brand.id} href={`/shop?brand=${brand.slug}`}
+                    style={{ fontSize: 12, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-muted)', textDecoration: 'none', fontFamily: 'var(--av-sans)', fontWeight: 500, transition: 'color .2s' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-ink)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-muted)'; }}>
+                    {brand.name}
                   </Link>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
-      )}
+          ),
 
-      {/* ══ DARK BAND / CLEARANCE ═══════════════════════════════════════════════ */}
-      {site.showSaleBanner !== false && (
-      <section style={{ background: 'var(--av-ink)', padding: 'clamp(56px,10vw,96px) 0', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
-          <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(100px,20vw,220px)', fontWeight: 600, color: 'rgba(244,239,229,.045)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
-            Sale
-          </span>
-        </div>
-        <div style={{ ...W, position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <Eyebrow>Limited Time</Eyebrow>
-          <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(30px,5vw,64px)', fontWeight: 400, color: 'var(--av-paper)', margin: '0 0 18px', lineHeight: 1.04, letterSpacing: '-0.018em', fontStyle: 'italic' }}>
-            Shop the season's finest
-          </h2>
-          <p style={{ color: 'rgba(244,239,229,.62)', fontFamily: 'var(--av-sans)', fontSize: 15, maxWidth: 460, margin: '0 auto 36px', lineHeight: 1.65 }}>
-            Select pieces marked down. Quality unchanged.
-          </p>
-          <Link href="/shop?sale=1"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px 40px', border: '1px solid rgba(244,239,229,.34)', color: 'var(--av-paper)', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: 2, background: 'transparent', transition: 'border-color .2s' }}>
-            View Sale Items
-          </Link>
-        </div>
-      </section>
-      )}
+          blog: site.showBlog !== false && latestPosts.length > 0 && (
+            <section style={{ padding: 'clamp(56px,10vw,96px) 0', background: 'var(--av-paper)' }}>
+              <div style={W}>
+                <SectionHead title="From the Journal" sub="Essays, guides, and notes on craft." href="/blog" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }} className="av-blog-grid">
+                  {latestPosts.map(post => <AvBlogCard key={post.id} post={post} />)}
+                </div>
+              </div>
+            </section>
+          ),
 
-      {/* ══ NEW ARRIVALS ════════════════════════════════════════════════════════ */}
-      {site.showNewArrivals !== false && newArrivals.length > 0 && (
-        <section style={{ padding: 'clamp(56px,10vw,96px) 0' }}>
-          <div style={W}>
-            <SectionHead title="New Arrivals" sub="Just landed in the collection." href="/shop?sort=newest" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }} className="av-prod-grid">
-              {newArrivals.map(p => <AvProductCard key={p.id} product={p} />)}
-            </div>
-          </div>
-        </section>
-      )}
+          track_order: site.showTrackOrder !== false && (
+            <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-ivory)' }}>
+              <div style={{ ...W, textAlign: 'center' }}>
+                <Eyebrow>Your Order</Eyebrow>
+                <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(24px,3vw,38px)', fontWeight: 400, margin: '0 0 10px', color: 'var(--av-ink)', letterSpacing: '-0.012em' }}>
+                  Track a shipment
+                </h2>
+                <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14.5, margin: '0 0 30px', lineHeight: 1.6 }}>
+                  Enter your order number to check live delivery status.
+                </p>
+                <form onSubmit={handleTrack} style={{ display: 'flex', gap: 10, maxWidth: 480, margin: '0 auto', flexWrap: 'wrap' }}>
+                  <input type="text" value={trackQ} onChange={e => setTrackQ(e.target.value)}
+                    placeholder="e.g. KLX-10248" required
+                    style={{ flex: 1, minWidth: 200, border: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: '13px 16px', fontSize: 14, color: 'var(--av-ink)', outline: 'none', borderRadius: 2, fontFamily: 'var(--av-sans)', transition: 'border-color .2s' }}
+                    onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--av-ink)'; }}
+                    onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--av-line)'; }}
+                  />
+                  <button type="submit"
+                    style={{ padding: '13px 30px', background: 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', borderRadius: 2, cursor: 'pointer', flexShrink: 0 }}>
+                    Track
+                  </button>
+                </form>
+              </div>
+            </section>
+          ),
+        };
 
-      {/* ══ BRANDS STRIP ════════════════════════════════════════════════════════ */}
-      {site.showBrands !== false && brands.length > 0 && (
-        <div style={{ borderTop: '1px solid var(--av-line)', borderBottom: '1px solid var(--av-line)', background: 'var(--av-paper)' }}>
-          <div style={{ ...W, display: 'flex', justifyContent: 'center', gap: 'clamp(24px,5vw,64px)', padding: 'clamp(24px,4vw,36px) var(--av-gutter)', flexWrap: 'wrap', alignItems: 'center' }}>
-            {brands.slice(0, 6).map(brand => (
-              <Link key={brand.id} href={`/shop?brand=${brand.slug}`}
-                style={{ fontSize: 12, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--av-muted)', textDecoration: 'none', fontFamily: 'var(--av-sans)', fontWeight: 500, transition: 'color .2s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-ink)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--av-muted)'; }}>
-                {brand.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ══ BLOG / JOURNAL ══════════════════════════════════════════════════════ */}
-      {site.showBlog !== false && latestPosts.length > 0 && (
-        <section style={{ padding: 'clamp(56px,10vw,96px) 0', background: 'var(--av-paper)' }}>
-          <div style={W}>
-            <SectionHead title="From the Journal" sub="Essays, guides, and notes on craft." href="/blog" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }} className="av-blog-grid">
-              {latestPosts.map(post => <AvBlogCard key={post.id} post={post} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ══ TRACK ORDER ═════════════════════════════════════════════════════════ */}
-      {site.showTrackOrder !== false && (
-      <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-ivory)' }}>
-        <div style={{ ...W, textAlign: 'center' }}>
-          <Eyebrow>Your Order</Eyebrow>
-          <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(24px,3vw,38px)', fontWeight: 400, margin: '0 0 10px', color: 'var(--av-ink)', letterSpacing: '-0.012em' }}>
-            Track a shipment
-          </h2>
-          <p style={{ color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 14.5, margin: '0 0 30px', lineHeight: 1.6 }}>
-            Enter your order number to check live delivery status.
-          </p>
-          <form onSubmit={handleTrack} style={{ display: 'flex', gap: 10, maxWidth: 480, margin: '0 auto', flexWrap: 'wrap' }}>
-            <input type="text" value={trackQ} onChange={e => setTrackQ(e.target.value)}
-              placeholder="e.g. KLX-10248" required
-              style={{ flex: 1, minWidth: 200, border: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: '13px 16px', fontSize: 14, color: 'var(--av-ink)', outline: 'none', borderRadius: 2, fontFamily: 'var(--av-sans)', transition: 'border-color .2s' }}
-              onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--av-ink)'; }}
-              onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--av-line)'; }}
-            />
-            <button type="submit"
-              style={{ padding: '13px 30px', background: 'var(--av-ink)', color: 'var(--av-paper)', border: 'none', fontFamily: 'var(--av-sans)', fontSize: 11.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', borderRadius: 2, cursor: 'pointer', flexShrink: 0 }}>
-              Track
-            </button>
-          </form>
-        </div>
-      </section>
-      )}
+        return order.map(key => <Fragment key={key}>{sections[key]}</Fragment>);
+      })()}
 
       <style>{`
         @media(max-width:920px){.av-prod-grid{grid-template-columns:1fr 1fr!important;gap:20px!important}}
