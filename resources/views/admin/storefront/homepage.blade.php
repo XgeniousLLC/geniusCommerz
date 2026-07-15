@@ -1,5 +1,12 @@
 @extends('admin.layouts.admin')
 @section('title', 'Homepage Settings')
+
+@push('styles')
+<style>
+.sortable-ghost { opacity: 0.4; background: color-mix(in srgb, var(--info) 8%, transparent) !important; }
+</style>
+@endpush
+
 @section('content')
 
 <div class="page-head">
@@ -99,27 +106,37 @@
 </div>
 
 {{-- Section Visibility --}}
+@php
+    $sectionMeta = [
+        'featured_products' => ['storefront.show_featured_products', 'Featured Products section'],
+        'categories'        => ['storefront.show_categories', 'Shop by Categories section'],
+        'sale_banner'       => ['storefront.show_sale_banner', 'Sale Banner section'],
+        'new_arrivals'      => ['storefront.show_new_arrivals', 'New Arrivals section'],
+        'brands'            => ['storefront.show_brands', 'Brand Strip section'],
+        'blog'              => ['storefront.show_blog', 'Latest Blog Posts section'],
+        'track_order'       => ['storefront.show_track_order', 'Track Order section'],
+    ];
+    $defaultOrder = array_keys($sectionMeta);
+    $storedOrder = json_decode($settings->get('storefront.section_order')?->value ?? '[]', true) ?: [];
+    $storedOrder = array_values(array_intersect($storedOrder, $defaultOrder));
+    $sectionOrder = array_values(array_unique(array_merge($storedOrder, $defaultOrder)));
+@endphp
 <div class="card pad">
     <div class="card-head" style="margin-bottom:20px">
         <span class="tile sm t-success"><span class="ico" data-ico="eye" style="width:18px;height:18px"></span></span>
-        <div class="ct"><h3>Section Visibility</h3><div class="sub">Toggle which sections appear on the homepage</div></div>
+        <div class="ct"><h3>Section Visibility & Order</h3><div class="sub">Toggle and drag to reorder which sections appear on the homepage</div></div>
     </div>
-    <div style="display:grid;gap:12px;margin-bottom:20px">
-        @foreach([
-            'storefront.show_featured_products' => 'Featured Products section',
-            'storefront.show_new_arrivals'      => 'New Arrivals section',
-            'storefront.show_categories'        => 'Shop by Categories section',
-            'storefront.show_blog'              => 'Latest Blog Posts section',
-            'storefront.show_sale_banner'       => 'Sale Banner section',
-            'storefront.show_brands'            => 'Brand Strip section',
-            'storefront.show_track_order'       => 'Track Order section',
-        ] as $key => $label)
-        <label class="toggle-row">
+    <input type="hidden" id="section-order-input" name="settings[storefront.section_order]" value="{{ json_encode($sectionOrder) }}">
+    <div id="section-order-list" style="display:grid;gap:8px;margin-bottom:20px">
+        @foreach($sectionOrder as $sectionKey)
+        @php [$key, $label] = $sectionMeta[$sectionKey]; @endphp
+        <div class="toggle-row" data-section="{{ $sectionKey }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+            <span class="drag-handle" aria-hidden="true" style="color:var(--muted);letter-spacing:2px;user-select:none;cursor:grab;padding:2px 4px">⠿⠿</span>
             <input type="hidden" name="settings[{{ $key }}]" value="0">
             <input type="checkbox" role="switch" name="settings[{{ $key }}]" value="1"
                 {{ ($settings->get($key)?->value ?? '1') ? 'checked' : '' }}>
             <span>{{ $label }}</span>
-        </label>
+        </div>
         @endforeach
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:16px;border-top:1px solid var(--border)">
@@ -140,4 +157,31 @@
     <button type="submit" class="btn primary">Save homepage settings</button>
 </div>
 </form>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const list = document.getElementById('section-order-list');
+    const input = document.getElementById('section-order-input');
+    if (!list || !input) return;
+
+    new Sortable(list, {
+        animation: 150,
+        handle: '.drag-handle',
+        forceFallback: true,
+        ghostClass: 'sortable-ghost',
+        onEnd: () => {
+            const order = [...list.querySelectorAll('[data-section]')].map(el => el.dataset.section);
+            input.value = JSON.stringify(order);
+        },
+    });
+
+    list.closest('form').addEventListener('submit', () => {
+        const order = [...list.querySelectorAll('[data-section]')].map(el => el.dataset.section);
+        input.value = JSON.stringify(order);
+    });
+});
+</script>
+@endpush
 @endsection

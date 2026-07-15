@@ -33,6 +33,7 @@ class StorefrontPageController extends Controller
             'storefront.show_sale_banner',
             'storefront.show_brands',
             'storefront.show_track_order',
+            'storefront.section_order',
         ])->get()->keyBy('key');
 
         return view('admin.storefront.homepage', compact('settings'));
@@ -59,6 +60,7 @@ class StorefrontPageController extends Controller
             'storefront.show_sale_banner',
             'storefront.show_brands',
             'storefront.show_track_order',
+            'storefront.section_order',
         ]);
 
         return back()->with('success', 'Homepage settings saved.');
