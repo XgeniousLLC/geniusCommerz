@@ -39,6 +39,9 @@ export interface SiteSettings {
   showNewArrivals: boolean;
   showCategories: boolean;
   showBlog: boolean;
+  showSaleBanner: boolean;
+  showBrands: boolean;
+  showTrackOrder: boolean;
   saleAlertEnabled: boolean;
   saleAlertIntervalMin: number;
   saleAlertIntervalMax: number;

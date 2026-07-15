@@ -362,7 +362,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       )}
 
       {/* ══ EDITORIAL SPLIT ════════════════════════════════════════════════════ */}
-      {shopCategories.length > 0 && (
+      {site.showCategories !== false && shopCategories.length > 0 && (
         <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-paper)' }}>
           <div style={{ ...W, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(28px,5vw,60px)', alignItems: 'center' }} className="av-split-grid">
             <div style={{ aspectRatio: '3/4', background: 'var(--av-paper-2)', overflow: 'hidden' }}>
@@ -397,6 +397,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       )}
 
       {/* ══ DARK BAND / CLEARANCE ═══════════════════════════════════════════════ */}
+      {site.showSaleBanner !== false && (
       <section style={{ background: 'var(--av-ink)', padding: 'clamp(56px,10vw,96px) 0', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', overflow: 'hidden' }}>
           <span style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(100px,20vw,220px)', fontWeight: 600, color: 'rgba(244,239,229,.045)', letterSpacing: '-0.04em', userSelect: 'none', whiteSpace: 'nowrap', fontStyle: 'italic' }}>
@@ -417,6 +418,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
           </Link>
         </div>
       </section>
+      )}
 
       {/* ══ NEW ARRIVALS ════════════════════════════════════════════════════════ */}
       {site.showNewArrivals !== false && newArrivals.length > 0 && (
@@ -431,7 +433,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       )}
 
       {/* ══ BRANDS STRIP ════════════════════════════════════════════════════════ */}
-      {brands.length > 0 && (
+      {site.showBrands !== false && brands.length > 0 && (
         <div style={{ borderTop: '1px solid var(--av-line)', borderBottom: '1px solid var(--av-line)', background: 'var(--av-paper)' }}>
           <div style={{ ...W, display: 'flex', justifyContent: 'center', gap: 'clamp(24px,5vw,64px)', padding: 'clamp(24px,4vw,36px) var(--av-gutter)', flexWrap: 'wrap', alignItems: 'center' }}>
             {brands.slice(0, 6).map(brand => (
@@ -459,6 +461,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
       )}
 
       {/* ══ TRACK ORDER ═════════════════════════════════════════════════════════ */}
+      {site.showTrackOrder !== false && (
       <section style={{ padding: 'clamp(40px,8vw,72px) 0', background: 'var(--av-ivory)' }}>
         <div style={{ ...W, textAlign: 'center' }}>
           <Eyebrow>Your Order</Eyebrow>
@@ -482,6 +485,7 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
           </form>
         </div>
       </section>
+      )}
 
       <style>{`
         @media(max-width:920px){.av-prod-grid{grid-template-columns:1fr 1fr!important;gap:20px!important}}

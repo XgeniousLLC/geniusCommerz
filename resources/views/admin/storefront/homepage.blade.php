@@ -110,6 +110,9 @@
             'storefront.show_new_arrivals'      => 'New Arrivals section',
             'storefront.show_categories'        => 'Shop by Categories section',
             'storefront.show_blog'              => 'Latest Blog Posts section',
+            'storefront.show_sale_banner'       => 'Sale Banner section',
+            'storefront.show_brands'            => 'Brand Strip section',
+            'storefront.show_track_order'       => 'Track Order section',
         ] as $key => $label)
         <label class="toggle-row">
             <input type="hidden" name="settings[{{ $key }}]" value="0">
