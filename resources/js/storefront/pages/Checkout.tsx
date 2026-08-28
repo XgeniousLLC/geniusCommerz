@@ -76,7 +76,7 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
 }
 
 export default function Checkout({ shippingCost, freeAbove, paymentMethods, loyaltyEnabled = false, loyaltyBalance = 0, loyaltyTaka = 0, courierLocationEnabled = false, prefill = null }: Props) {
-  const { auth } = usePage<SharedProps>().props;
+  const { auth, site } = usePage<SharedProps>().props;
   const items        = useCartStore(s => s.items);
   const coupon       = useCartStore(s => s.coupon);
   const applyCoupon  = useCartStore(s => s.applyCoupon);
@@ -84,6 +84,13 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
   const clearCart    = useCartStore(s => s.clearCart);
   const { subtotal, discount } = useCartDerived();
   const fmt = usePrice();
+  const cartGoals = (site as any).cartGoals ?? [] as Array<{ amount: number; reward: string; value?: number; label?: string }>;
+  const allGoals = (() => {
+    const goals = [...cartGoals];
+    if (freeAbove > 0 && !goals.some(g => g.amount === freeAbove && g.reward === 'free_shipping')) goals.push({ amount: freeAbove, reward: 'free_shipping' });
+    return goals.sort((a, b) => a.amount - b.amount);
+  })();
+  const nextGoal = allGoals.find(g => subtotal < g.amount);
 
   const allShippingIncluded = items.length > 0 && items.every(i => i.shipping_included);
 
@@ -176,15 +183,30 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
     <Layout>
       <Head title="Checkout" />
 
-      {/* Header bar */}
-      <div style={{ background: 'var(--av-paper)', borderBottom: '1px solid var(--av-line)', padding: '20px var(--av-gutter)' }}>
+      {/* Header bar + 4-step progress */}
+      <div style={{ background: 'var(--av-paper)', borderBottom: '1px solid var(--av-line)', padding: '20px var(--av-gutter) 18px' }}>
         <div style={{ ...W }}>
           <nav style={{ display: 'flex', gap: 8, fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 8 }}>
             <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link><span>/</span>
             <Link href="/cart" style={{ color: 'inherit', textDecoration: 'none' }}>Cart</Link><span>/</span>
             <span style={{ color: 'var(--av-ink)' }}>Checkout</span>
           </nav>
-          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 400, color: 'var(--av-ink)', margin: 0, letterSpacing: '-0.012em' }}>Complete your order</h1>
+          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 16px', letterSpacing: '-0.012em' }}>Complete your order</h1>
+          <div style={{ display: 'flex', gap: 0, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[
+              { n: '01', label: 'Contact & delivery' },
+              { n: '02', label: 'Shipping' },
+              { n: '03', label: 'Payment' },
+              { n: '04', label: 'Review' },
+            ].map((s, i) => (
+              <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', fontFamily: 'var(--av-sans)', color: i === 0 ? 'var(--av-paper)' : 'var(--av-ink)', background: i === 0 ? 'var(--av-ink)' : 'var(--av-paper-2)', border: `1px solid ${i === 0 ? 'var(--av-ink)' : 'var(--av-line)'}`, width: 24, height: 24, display: 'grid', placeItems: 'center' }}>{s.n}</span>
+                <span style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'var(--av-sans)', color: i === 0 ? 'var(--av-ink)' : 'var(--av-muted)', fontWeight: i === 0 ? 600 : 400 }}>{s.label}</span>
+                {i < 3 && <span style={{ width: 24, height: 1, background: 'var(--av-line-soft)', margin: '0 10px' }} />}
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '10px 0 0' }}>Details below are validated securely on the server before order creation.</p>
         </div>
       </div>
 
@@ -428,8 +450,16 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
                   ))}
                   {!allShippingIncluded && !courierLocationEnabled && freeAbove > 0 && effectiveShipping > 0 && (
                     <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0 }}>
-                      Add {fmt(freeAbove - subtotal)} more for free shipping
+                      Add {fmt(freeAbove - subtotal)} more for complimentary shipping
                     </p>
+                  )}
+                  {nextGoal && nextGoal.reward !== 'free_shipping' && (
+                    <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0 }}>
+                      Add {fmt(nextGoal.amount - subtotal)} more to get {(nextGoal as any).label || ((nextGoal as any).reward === 'discount_pct' ? `${(nextGoal as any).value}% off` : `${fmt((nextGoal as any).value ?? 0)} off`)}
+                    </p>
+                  )}
+                  {!nextGoal && allGoals.length > 0 && (
+                    <p style={{ fontSize: 11.5, color: 'var(--av-cognac)', fontWeight: 500, fontFamily: 'var(--av-sans)', margin: 0 }}>You've unlocked all rewards.</p>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--av-line)', fontFamily: 'var(--av-sans)' }}>
                     <span style={{ fontSize: 14, color: 'var(--av-ink)', fontWeight: 500 }}>Total</span>
