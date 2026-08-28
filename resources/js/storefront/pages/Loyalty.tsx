@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import Layout from '../layouts/Layout';
+import { usePrice } from '../usePrice';
 
 interface Tier { name: string; min: number; max: number | null; bonus_pct: number }
 interface HistoryEntry { type: string; points: number; balance_after: number; description: string; order_number: string | null; created_at: string }
@@ -13,33 +14,35 @@ interface Settings {
 }
 interface Props { settings: Settings; userProps: UserProps | null }
 
-const TIER_COLORS: Record<string, string> = {
-  Silver: 'bg-gray-100 text-gray-700',
-  Gold: 'bg-yellow-100 text-yellow-800',
-  Platinum: 'bg-blue-100 text-blue-800',
+const TIER_STYLE: Record<string, { bg: string; color: string }> = {
+  Silver:   { bg: 'var(--av-paper-2)', color: 'var(--av-muted)' },
+  Gold:     { bg: 'rgba(149,97,58,.12)', color: 'var(--av-cognac)' },
+  Platinum: { bg: 'var(--av-ink)', color: 'var(--av-paper)' },
 };
 
 export default function Loyalty({ settings, userProps }: Props) {
+  const fmt = usePrice();
   const tierProgress = userProps && userProps.next_tier
     ? Math.min(100, Math.round(((userProps.total_earned - userProps.tier.min) / ((userProps.next_tier.min - userProps.tier.min) || 1)) * 100))
     : 100;
 
   const howToEarn = [
-    { icon: '🛍️', title: 'Shop', desc: `${(settings.points_per_taka * 10).toFixed(0)} point${settings.points_per_taka * 10 !== 1 ? 's' : ''} per ৳10 spent`, color: 'var(--kb-primary-50)', iconColor: 'var(--kb-primary)' },
-    { icon: '⭐', title: 'Review products', desc: 'Write a review after receiving your order', color: '#FFF7ED', iconColor: '#F97316' },
-    { icon: '👥', title: 'Refer a friend', desc: 'Earn bonus points when they place their first order', color: '#DCFCE7', iconColor: '#16A34A' },
-    { icon: '🎁', title: 'Birthday bonus', desc: 'Special bonus points on your birthday', color: '#FEF3C7', iconColor: '#92400E' },
+    { title: 'Shop', desc: `${(settings.points_per_taka * 10).toFixed(0)} pts per ৳10 spent` },
+    { title: 'Review', desc: 'Write a review after delivery' },
+    { title: 'Refer', desc: 'Bonus when friends order first time' },
+    { title: 'Birthday', desc: 'Special birthday bonus' },
   ];
+
+  const W = { maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' };
 
   if (!settings.enabled) {
     return (
       <Layout>
-        <Head title="Loyalty Program" />
-        <div className="max-w-xl mx-auto px-4 py-20 text-center">
-          <div className="text-5xl mb-4">⭐</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Loyalty Program Coming Soon</h1>
-          <p className="text-gray-500">We're setting up our rewards program. Check back soon!</p>
-          <Link href="/shop" className="kb-btn kb-btn-primary mt-6 inline-flex outline-none">Browse Products</Link>
+        <Head title="Loyalty" />
+        <div style={{ ...W, padding: '80px var(--av-gutter)', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--av-display)', fontSize: 40, fontWeight: 400, color: 'var(--av-ink)', marginBottom: 12 }}>Loyalty coming soon</div>
+          <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 20 }}>We're setting up rewards. Check back soon.</p>
+          <Link href="/shop" className="av-btn av-btn-primary av-btn-md" style={{ textDecoration: 'none' }}>Browse collection</Link>
         </div>
       </Layout>
     );
@@ -47,143 +50,138 @@ export default function Loyalty({ settings, userProps }: Props) {
 
   return (
     <Layout>
-      <Head title="Loyalty Program — Earn & Redeem Points" />
-      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-10 space-y-8">
+      <Head title="Loyalty — Earn & Redeem" />
+      <div style={{ ...W, padding: '32px var(--av-gutter) 64px' }}>
 
         {/* Hero */}
-        <section className="kb-card p-6 md:p-8 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #4338CA 0%, #312E81 100%)' }}>
-          <div className="grid md:grid-cols-2 items-center gap-6">
+        <section style={{ border: '1px solid var(--av-line)', background: 'var(--av-ink)', color: 'var(--av-paper)', padding: '32px 28px', marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: userProps?.next_tier || userProps && !userProps.next_tier ? '1fr 1fr' : '1fr', gap: 24, alignItems: 'center' }} className="av-loyalty-hero">
             <div>
               {userProps ? (
                 <>
-                  <div className="text-xs uppercase tracking-wide opacity-70 mb-1">Your Klix Points</div>
-                  <div className="text-5xl md:text-6xl font-extrabold">
-                    {userProps.balance.toLocaleString()}
-                    <span className="text-base font-normal opacity-70 ml-2">≈ ৳{Math.round(userProps.taka_value).toLocaleString()}</span>
+                  <div style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 10 }}>Your balance</div>
+                  <div style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(36px,5vw,56px)', fontWeight: 400, lineHeight: 1, letterSpacing: '-0.02em' }}>
+                    {userProps.balance.toLocaleString()} <span style={{ fontFamily: 'var(--av-sans)', fontSize: 14, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, color: 'rgba(244,239,229,.6)' }}>pts</span>
+                    <span style={{ fontFamily: 'var(--av-sans)', fontSize: 13, fontWeight: 400, color: 'rgba(244,239,229,.6)', marginLeft: 10 }}>≈ {fmt(userProps.taka_value)}</span>
                   </div>
-                  <p className="text-sm opacity-80 mt-2">
-                    Earn {(settings.points_per_taka * 10).toFixed(0)} point{settings.points_per_taka * 10 !== 1 ? 's' : ''} per ৳10 spent. Redeem at checkout for instant discounts.
+                  <p style={{ fontSize: 13, color: 'rgba(244,239,229,.62)', fontFamily: 'var(--av-sans)', marginTop: 10, lineHeight: 1.6 }}>
+                    Earn {(settings.points_per_taka * 10).toFixed(0)} pts per ৳10 spent. Redeem at checkout.
                   </p>
-                  <div className="mt-4 flex gap-2 flex-wrap">
-                    <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: 'rgba(255,255,255,.18)' }}>
-                      {userProps.tier.name} tier
+                  <div style={{ marginTop: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', background: 'rgba(244,239,229,.12)', border: '1px solid rgba(244,239,229,.18)', fontFamily: 'var(--av-sans)', color: 'var(--av-paper)' }}>
+                      {userProps.tier.name}
                     </span>
                     {userProps.tier.bonus_pct > 0 && (
-                      <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: 'rgba(255,255,255,.18)' }}>
-                        +{userProps.tier.bonus_pct}% bonus on every order
+                      <span style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '5px 10px', background: 'rgba(244,239,229,.12)', border: '1px solid rgba(244,239,229,.18)', fontFamily: 'var(--av-sans)', color: 'var(--av-paper)' }}>
+                        +{userProps.tier.bonus_pct}% bonus
                       </span>
                     )}
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="text-xs uppercase tracking-wide opacity-70 mb-1">Klix Loyalty</div>
-                  <div className="text-3xl md:text-4xl font-extrabold">Earn Points, Get Rewards</div>
-                  <p className="text-sm opacity-80 mt-2">
-                    Sign in to start earning {(settings.points_per_taka * 10).toFixed(0)} point{settings.points_per_taka * 10 !== 1 ? 's' : ''} for every ৳10 you spend.
+                  <div style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 10 }}>Loyalty</div>
+                  <div style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(28px,4vw,38px)', fontWeight: 400, lineHeight: 1.1, letterSpacing: '-0.012em' }}>Earn points, get rewards</div>
+                  <p style={{ fontSize: 13.5, color: 'rgba(244,239,229,.62)', fontFamily: 'var(--av-sans)', marginTop: 10, lineHeight: 1.6 }}>
+                    Sign in to earn {(settings.points_per_taka * 10).toFixed(0)} pts per ৳10.
                   </p>
-                  <Link href="/login" className="kb-btn mt-4 inline-flex font-semibold px-5 py-2.5 rounded-lg outline-none" style={{ background: 'rgba(255,255,255,.2)', color: '#fff', border: '1px solid rgba(255,255,255,.3)' }}>
-                    Sign in to check balance
+                  <Link href="/login" className="av-btn av-btn-secondary av-btn-sm" style={{ marginTop: 16, background: 'transparent', color: 'var(--av-paper)', borderColor: 'rgba(244,239,229,.3)', textDecoration: 'none' }}>
+                    Sign in
                   </Link>
                 </>
               )}
             </div>
 
             {userProps && userProps.next_tier && (
-              <div className="kb-card p-4" style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)' }}>
-                <div className="flex justify-between text-sm text-white/80 mb-2">
+              <div style={{ border: '1px solid rgba(244,239,229,.18)', background: 'rgba(244,239,229,.07)', padding: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(244,239,229,.7)', fontFamily: 'var(--av-sans)', marginBottom: 10 }}>
                   <span>{userProps.tier.name}</span>
                   <span>{userProps.next_tier.name}</span>
                 </div>
-                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,.2)' }}>
-                  <div className="h-2.5 rounded-full bg-yellow-400 transition-all" style={{ width: `${tierProgress}%` }} />
+                <div style={{ width: '100%', height: 2, background: 'rgba(244,239,229,.18)', overflow: 'hidden' }}>
+                  <div style={{ height: 2, background: 'var(--av-cognac)', width: `${tierProgress}%`, transition: 'width .4s' }} />
                 </div>
-                <p className="text-xs text-white/70 mt-2">
-                  {Math.max(0, userProps.next_tier.min - userProps.total_earned).toLocaleString()} more points to unlock{' '}
-                  <span className="text-white font-semibold">{userProps.next_tier.name}</span>
+                <p style={{ fontSize: 11.5, color: 'rgba(244,239,229,.62)', fontFamily: 'var(--av-sans)', marginTop: 10, lineHeight: 1.5 }}>
+                  {Math.max(0, userProps.next_tier.min - userProps.total_earned).toLocaleString()} pts to <span style={{ color: 'var(--av-paper)' }}>{userProps.next_tier.name}</span>
                   {userProps.next_tier.bonus_pct > 0 && ` (+${userProps.next_tier.bonus_pct}% bonus)`}
                 </p>
               </div>
             )}
 
             {userProps && !userProps.next_tier && (
-              <div className="kb-card p-4" style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)' }}>
-                <p className="text-white/80 text-sm">🏆 You're at the highest tier!</p>
-                <p className="text-white font-bold mt-1">{userProps.tier.name} member</p>
-                {userProps.tier.bonus_pct > 0 && (
-                  <p className="text-white/70 text-xs mt-1">+{userProps.tier.bonus_pct}% bonus points on every order</p>
-                )}
+              <div style={{ border: '1px solid rgba(244,239,229,.18)', background: 'rgba(244,239,229,.07)', padding: 18, textAlign: 'center' }}>
+                <p style={{ color: 'var(--av-paper)', fontFamily: 'var(--av-sans)', fontSize: 13, margin: 0 }}>Highest tier reached</p>
+                <p style={{ color: 'var(--av-paper)', fontFamily: 'var(--av-display)', fontSize: 18, marginTop: 4 }}>{userProps.tier.name}</p>
+                {userProps.tier.bonus_pct > 0 && <p style={{ color: 'rgba(244,239,229,.62)', fontSize: 11.5, fontFamily: 'var(--av-sans)', marginTop: 6 }}>+{userProps.tier.bonus_pct}% bonus on every order</p>}
               </div>
             )}
           </div>
         </section>
 
         {/* How to earn */}
-        <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">How to Earn Points</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 20, fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 14px', letterSpacing: '-0.01em' }}>How to earn</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }} className="av-loyalty-earn">
             {howToEarn.map((item, i) => (
-              <div key={i} className="kb-card p-5">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl" style={{ background: item.color }}>
-                  {item.icon}
-                </div>
-                <h3 className="font-semibold mt-3 text-gray-900">{item.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+              <div key={i} style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: '0 0 4px' }}>{item.title}</h3>
+                <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Tiers */}
-        <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Membership Tiers</h2>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {settings.tiers.map(tier => (
-              <div key={tier.name} className={`kb-card p-5 ${userProps?.tier.name === tier.name ? 'ring-2' : ''}`}
-                style={userProps?.tier.name === tier.name ? { '--tw-ring-color': 'var(--kb-primary)' } as any : {}}>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-bold ${TIER_COLORS[tier.name] ?? 'bg-purple-100 text-purple-800'}`}>
-                  {tier.name}
-                  {userProps?.tier.name === tier.name && <span className="ml-1.5">← You</span>}
-                </span>
-                <p className="text-sm text-gray-600 mt-2">
-                  {tier.max ? `${tier.min.toLocaleString()} – ${tier.max.toLocaleString()} pts` : `${tier.min.toLocaleString()}+ pts`}
-                </p>
-                {tier.bonus_pct > 0
-                  ? <p className="text-xs text-green-700 font-semibold mt-1">+{tier.bonus_pct}% bonus points per order</p>
-                  : <p className="text-xs text-gray-400 mt-1">Standard earning rate</p>
-                }
-              </div>
-            ))}
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 20, fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 14px', letterSpacing: '-0.01em' }}>Tiers</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }} className="av-loyalty-tiers">
+            {settings.tiers.map(tier => {
+              const active = userProps?.tier.name === tier.name;
+              const style = TIER_STYLE[tier.name] ?? { bg: 'var(--av-paper-2)', color: 'var(--av-muted)' };
+              return (
+                <div key={tier.name} style={{ border: `1px solid ${active ? 'var(--av-ink)' : 'var(--av-line-soft)'}`, background: 'var(--av-paper)', padding: 18, position: 'relative' }}>
+                  {active && <div style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>You</div>}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '5px 10px', fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500, fontFamily: 'var(--av-sans)', background: style.bg, color: style.color }}>
+                    {tier.name}
+                  </span>
+                  <p style={{ fontSize: 13, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: '10px 0 0' }}>
+                    {tier.max ? `${tier.min.toLocaleString()} – ${tier.max.toLocaleString()} pts` : `${tier.min.toLocaleString()}+ pts`}
+                  </p>
+                  {tier.bonus_pct > 0
+                    ? <p style={{ fontSize: 11.5, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', marginTop: 6, fontWeight: 500 }}>+{tier.bonus_pct}% bonus</p>
+                    : <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 6 }}>Standard rate</p>
+                  }
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* Points history (logged in users only) */}
+        {/* History */}
         {userProps && userProps.history.length > 0 && (
-          <section className="kb-card p-5">
-            <h2 className="font-semibold text-lg text-gray-900 mb-4">Points History</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+          <section style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+            <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 18, fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 14px' }}>Points history</h2>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', fontSize: 13, fontFamily: 'var(--av-sans)', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="border-b border-gray-100 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide">
-                    <th className="pb-2 pr-4">Date</th>
-                    <th className="pb-2 pr-4">Activity</th>
-                    <th className="pb-2 pr-4">Reference</th>
-                    <th className="pb-2 text-right">Points</th>
-                    <th className="pb-2 text-right">Balance</th>
+                  <tr style={{ borderBottom: '1px solid var(--av-line)', textAlign: 'left', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--av-muted)', fontWeight: 500 }}>
+                    <th style={{ padding: '8px 10px 8px 0' }}>Date</th>
+                    <th style={{ padding: '8px 10px' }}>Activity</th>
+                    <th style={{ padding: '8px 10px' }}>Ref</th>
+                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Points</th>
+                    <th style={{ padding: '8px 0 8px 10px', textAlign: 'right' }}>Balance</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody>
                   {userProps.history.map((entry, i) => (
-                    <tr key={i}>
-                      <td className="py-2.5 pr-4 text-gray-500 text-xs">{entry.created_at}</td>
-                      <td className="py-2.5 pr-4 text-gray-700 max-w-[200px] truncate">{entry.description}</td>
-                      <td className="py-2.5 pr-4 text-gray-500 font-mono text-xs">
-                        {entry.order_number ? `#${entry.order_number}` : '—'}
-                      </td>
-                      <td className={`py-2.5 pr-4 text-right font-bold ${entry.points >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                    <tr key={i} style={{ borderBottom: '1px solid var(--av-line-soft)' }}>
+                      <td style={{ padding: '10px 10px 10px 0', color: 'var(--av-muted)', fontSize: 11.5, whiteSpace: 'nowrap' }}>{entry.created_at}</td>
+                      <td style={{ padding: '10px', color: 'var(--av-ink)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.description}</td>
+                      <td style={{ padding: '10px', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontSize: 11.5 }}>{entry.order_number ? `#${entry.order_number}` : '—'}</td>
+                      <td style={{ padding: '10px', textAlign: 'right', fontWeight: 500, color: entry.points >= 0 ? 'var(--av-cognac)' : '#b94040' }}>
                         {entry.points >= 0 ? '+' : ''}{entry.points.toLocaleString()}
                       </td>
-                      <td className="py-2.5 text-right font-mono text-gray-700">{entry.balance_after.toLocaleString()}</td>
+                      <td style={{ padding: '10px 0 10px 10px', textAlign: 'right', color: 'var(--av-ink)', fontWeight: 500 }}>{entry.balance_after.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -192,18 +190,28 @@ export default function Loyalty({ settings, userProps }: Props) {
           </section>
         )}
 
-        {/* CTA for guests */}
         {!userProps && (
-          <div className="kb-card p-8 text-center">
-            <p className="text-gray-700 font-medium text-lg mb-2">Ready to start earning?</p>
-            <p className="text-gray-500 text-sm mb-4">Create an account and earn {(settings.points_per_taka * 10).toFixed(0)} point{settings.points_per_taka * 10 !== 1 ? 's' : ''} for every ৳10 you spend.</p>
-            <div className="flex gap-3 justify-center">
-              <Link href="/register" className="kb-btn kb-btn-primary px-6 py-2.5 outline-none">Create Account</Link>
-              <Link href="/login" className="kb-btn px-6 py-2.5 outline-none" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>Sign In</Link>
+          <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 32, textAlign: 'center', marginTop: 28 }}>
+            <p style={{ fontFamily: 'var(--av-display)', fontSize: 20, fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 8px' }}>Ready to start?</p>
+            <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 16 }}>Create an account and earn {(settings.points_per_taka * 10).toFixed(0)} pts per ৳10.</p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <Link href="/register" className="av-btn av-btn-primary av-btn-sm" style={{ textDecoration: 'none' }}>Create account</Link>
+              <Link href="/login" className="av-btn av-btn-secondary av-btn-sm" style={{ textDecoration: 'none' }}>Sign in</Link>
             </div>
           </div>
         )}
       </div>
+
+      <style>{`
+        @media(max-width: 860px){
+          .av-loyalty-hero{ grid-template-columns: 1fr !important; }
+          .av-loyalty-earn{ grid-template-columns: 1fr 1fr !important; }
+          .av-loyalty-tiers{ grid-template-columns: 1fr !important; }
+        }
+        @media(max-width: 540px){
+          .av-loyalty-earn{ grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </Layout>
   );
 }
