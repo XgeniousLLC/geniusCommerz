@@ -133,6 +133,7 @@ export interface ProductCard {
   avg_rating: number | null;
   reviews_count: number;
   category_name: string | null;
+  shipping_included: boolean;
 }
 
 export interface ProductVariantOption {

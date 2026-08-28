@@ -91,6 +91,7 @@ class HomeController extends Controller
             'avg_rating'       => $p->reviews_avg_rating ? round((float) $p->reviews_avg_rating, 1) : null,
             'reviews_count'    => (int) ($p->reviews_count ?? 0),
             'category_name'    => $p->categories->first()?->name,
+            'shipping_included'=> (bool) $p->shipping_included,
         ];
     }
 
