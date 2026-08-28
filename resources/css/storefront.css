@@ -20,7 +20,7 @@
     --av-maxw:       1280px;
     --av-gutter:     36px;
 
-    /* ── klixbd legacy tokens ── */
+    /* ── legacy tokens (kept for compat) ── */
     --kb-primary:      #0B1F4F;
     --kb-primary-600:  #102B6B;
     --kb-primary-700:  #0A1A40;

@@ -165,7 +165,7 @@ function NewsletterCard() {
   return (
     <div style={{ background: 'linear-gradient(135deg, var(--av-ink) 0%, var(--av-cognac) 100%)', color: '#fff', borderRadius: 2, padding: '16px 20px', border: 'none' }}>
       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,.7)', marginBottom: 6 }}>Newsletter</div>
-      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Get the best of klixbd</div>
+      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Get the best of geniusCommerz</div>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,.8)', marginBottom: 14, lineHeight: 1.5 }}>
         Weekly buying guides, sales, and reviews.
       </div>

@@ -1481,8 +1481,8 @@ $infoBox   = 'padding:.875rem 1rem;background:var(--accent-soft);border-top:1px 
                 '{{amount}}'        => 'Order total',
                 '{{customer_name}}' => 'Customer name',
             ];
-            $tplPlaced    = $settings->get('notifications.sms_template_placed')?->value    ?? "Thank you for your order at KlixBD!\nYour order #{{order_id}} has been placed successfully.\nTotal: {{amount}} BDT.";
-            $tplConfirmed = $settings->get('notifications.sms_template_confirmed')?->value ?? "Your order #{{order_id}} has been confirmed by KlixBD.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you!";
+            $tplPlaced    = $settings->get('notifications.sms_template_placed')?->value    ?? "Thank you for your order at GeniusCommerz!\nYour order #{{order_id}} has been placed successfully.\nTotal: {{amount}} BDT.";
+            $tplConfirmed = $settings->get('notifications.sms_template_confirmed')?->value ?? "Your order #{{order_id}} has been confirmed by GeniusCommerz.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you!";
             $tplDelivered = $settings->get('notifications.sms_template_delivered')?->value ?? "Your order #{{order_id}} has been delivered. Thank you for shopping with us!";
             @endphp
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
