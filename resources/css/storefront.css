@@ -285,19 +285,20 @@ body::before {
     .kb-footer a { color: #CBD5E1; text-decoration: none; }
     .kb-footer a:hover { color: #fff; }
 
-    /* Prose / blog content */
-    .kb-prose h2 { font-size: 1.5rem; font-weight: 700; margin: 2rem 0 0.75rem; color: var(--kb-ink); }
-    .kb-prose h3 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--kb-ink); }
-    .kb-prose p  { margin-bottom: 1rem; line-height: 1.75; }
+    /* Prose / blog content — editorial (av-ink/cognac) */
+    .kb-prose h2 { font-family: var(--av-display); font-size: 1.5rem; font-weight: 400; margin: 2rem 0 0.75rem; color: var(--av-ink); letter-spacing: -0.01em; }
+    .kb-prose h3 { font-family: var(--av-display); font-size: 1.2rem; font-weight: 400; margin: 1.5rem 0 0.5rem; color: var(--av-ink); letter-spacing: -0.01em; }
+    .kb-prose p  { margin-bottom: 1rem; line-height: 1.75; color: var(--av-ink); font-family: var(--av-sans); }
     .kb-prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
     .kb-prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-    .kb-prose li { margin-bottom: 0.25rem; }
-    .kb-prose a  { color: var(--kb-primary); text-decoration: underline; }
-    .kb-prose blockquote { border-left: 3px solid var(--kb-primary); padding-left: 1rem; color: var(--kb-ink-muted); font-style: italic; margin: 1.5rem 0; }
-    .kb-prose pre { background: #f1f5f9; border-radius: 8px; padding: 1rem; overflow-x: auto; font-size: 0.875rem; margin-bottom: 1rem; }
-    .kb-prose img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
-    .kb-prose strong { font-weight: 700; }
+    .kb-prose li { margin-bottom: 0.25rem; color: var(--av-ink); font-family: var(--av-sans); }
+    .kb-prose a  { color: var(--av-cognac); text-decoration: underline; text-decoration-color: var(--av-line); }
+    .kb-prose blockquote { border-left: 2px solid var(--av-cognac); padding-left: 1rem; color: var(--av-muted); font-style: italic; margin: 1.5rem 0; font-family: var(--av-sans); }
+    .kb-prose pre { background: var(--av-paper-2); border: 1px solid var(--av-line-soft); border-radius: 2px; padding: 1rem; overflow-x: auto; font-size: 0.875rem; margin-bottom: 1rem; }
+    .kb-prose img { max-width: 100%; border: 1px solid var(--av-line-soft); border-radius: 2px; margin: 1rem 0; display: block; }
+    .kb-prose strong { font-weight: 600; color: var(--av-ink); }
 
 }
 
-:focus-visible { outline: 2px solid var(--kb-primary); outline-offset: 2px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--av-cognac); outline-offset: 2px; border-radius: 2px; }
+:focus-visible:not(:focus) { outline: none; }
