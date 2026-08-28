@@ -46,134 +46,137 @@ export default function AddressPage({ addresses, profile }: Props) {
     router.post('/account/profile', profForm, { onFinish: () => setSaving(false) });
   };
 
-  return (
-    <AccountLayout title="Address & Profile" active="/account/address">
-      <Head title="Address & Profile" />
+  const Lbl = ({ children }: { children: React.ReactNode }) => (
+    <label style={{ display: 'block', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 6 }}>{children}</label>
+  );
 
-      {/* Address Book */}
-      <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--kb-ink)' }}>Saved Addresses</h2>
-          <button onClick={openNew} className="kb-btn kb-btn-primary text-xs px-3 py-1.5">+ Add Address</button>
+  return (
+    <AccountLayout title="Addresses & Profile" active="/account/address">
+      <Head title="Addresses & Profile" />
+
+      <section style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 18, fontWeight: 400, color: 'var(--av-ink)', margin: 0 }}>Saved addresses</h2>
+          <button onClick={openNew} className="av-btn av-btn-primary av-btn-sm">+ Add</button>
         </div>
 
         {addresses.length === 0 && !addrForm && (
-          <div className="kb-card p-6 text-center">
-            <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>No addresses saved yet.</p>
+          <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>No addresses saved yet.</p>
           </div>
         )}
 
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {addresses.map(a => (
-            <div key={a.id} className="kb-card p-4 flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded" style={{ background: 'var(--kb-surface-2)', color: 'var(--kb-ink)' }}>{a.label}</span>
-                  {a.is_default && <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: 'var(--kb-primary)', color: '#fff' }}>Default</span>}
+            <div key={a.id} style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                  <span style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 7px', background: 'var(--av-paper-2)', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', border: '1px solid var(--av-line-soft)' }}>{a.label}</span>
+                  {a.is_default && <span style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '3px 7px', background: 'var(--av-ink)', color: 'var(--av-paper)', fontFamily: 'var(--av-sans)' }}>Default</span>}
                 </div>
-                <p className="text-sm font-medium mt-1.5" style={{ color: 'var(--kb-ink)' }}>{a.name}</p>
-                <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>{a.phone}</p>
-                <p className="text-sm mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{a.address}, {a.city}</p>
+                <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: 0 }}>{a.name}</p>
+                <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '2px 0 0' }}>{a.phone}</p>
+                <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '4px 0 0' }}>{a.address}, {a.city}</p>
               </div>
-              <div className="flex flex-col gap-1 shrink-0">
-                <button onClick={() => openEdit(a)} className="text-xs underline" style={{ color: 'var(--kb-primary)' }}>Edit</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                <button onClick={() => openEdit(a)} style={{ fontSize: 11.5, color: 'var(--av-ink)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--av-line)', fontFamily: 'var(--av-sans)' }}>Edit</button>
                 {!a.is_default && (
-                  <button onClick={() => setDefault(a.id)} className="text-xs underline" style={{ color: 'var(--kb-ink-soft)' }}>Set default</button>
+                  <button onClick={() => setDefault(a.id)} style={{ fontSize: 11.5, color: 'var(--av-muted)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--av-line)', fontFamily: 'var(--av-sans)' }}>Default</button>
                 )}
-                <button onClick={() => del(a.id)} className="text-xs underline" style={{ color: 'var(--kb-danger)' }}>Remove</button>
+                <button onClick={() => del(a.id)} style={{ fontSize: 11.5, color: '#b94040', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'var(--av-sans)' }}>Remove</button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add / Edit form */}
         {addrForm && (
-          <form onSubmit={saveAddress} className="kb-card p-5 mt-4 space-y-3">
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--kb-ink)' }}>{editId ? 'Edit Address' : 'New Address'}</h3>
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={saveAddress} style={{ border: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: 20, marginTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <h3 style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: 0 }}>{editId ? 'Edit address' : 'New address'}</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="av-addr-grid">
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Label</label>
-                <input className="kb-input text-sm" value={addrForm.label}
-                  onChange={e => setAddrForm(f => f ? { ...f, label: e.target.value } : f)} placeholder="e.g. Home, Work" />
+                <Lbl>Label</Lbl>
+                <input className="av-input" value={addrForm.label}
+                  onChange={e => setAddrForm(f => f ? { ...f, label: e.target.value } : f)} placeholder="Home, Work" />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Full Name</label>
-                <input className="kb-input text-sm" value={addrForm.name}
-                  onChange={e => setAddrForm(f => f ? { ...f, name: e.target.value } : f)} placeholder="Recipient name" />
+                <Lbl>Full Name</Lbl>
+                <input className="av-input" value={addrForm.name}
+                  onChange={e => setAddrForm(f => f ? { ...f, name: e.target.value } : f)} placeholder="Recipient" />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Phone</label>
-                <input className="kb-input text-sm" value={addrForm.phone}
+                <Lbl>Phone</Lbl>
+                <input className="av-input" value={addrForm.phone}
                   onChange={e => setAddrForm(f => f ? { ...f, phone: e.target.value } : f)} placeholder="01XXXXXXXXX" />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>City</label>
-                <input className="kb-input text-sm" value={addrForm.city}
+                <Lbl>City</Lbl>
+                <input className="av-input" value={addrForm.city}
                   onChange={e => setAddrForm(f => f ? { ...f, city: e.target.value } : f)} placeholder="Dhaka" />
               </div>
             </div>
             <div>
-              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Address</label>
-              <textarea className="kb-input text-sm resize-none" rows={2} value={addrForm.address}
-                onChange={e => setAddrForm(f => f ? { ...f, address: e.target.value } : f)} placeholder="Street, area, house/flat number" />
+              <Lbl>Address</Lbl>
+              <textarea className="av-input av-textarea" rows={2} value={addrForm.address}
+                onChange={e => setAddrForm(f => f ? { ...f, address: e.target.value } : f)} placeholder="Street, area, house/flat" />
             </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: 'var(--kb-ink)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', cursor: 'pointer' }}>
               <input type="checkbox" checked={addrForm.is_default}
-                onChange={e => setAddrForm(f => f ? { ...f, is_default: e.target.checked } : f)} />
-              Set as default address
+                onChange={e => setAddrForm(f => f ? { ...f, is_default: e.target.checked } : f)} style={{ accentColor: 'var(--av-ink)' }} />
+              Set as default
             </label>
-            <div className="flex gap-2 pt-1">
-              <button type="submit" disabled={saving} className="kb-btn kb-btn-primary text-sm px-4 py-2">
-                {saving ? 'Saving…' : 'Save Address'}
+            <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
+              <button type="submit" disabled={saving} className="av-btn av-btn-primary av-btn-sm">
+                {saving ? 'Saving…' : 'Save'}
               </button>
-              <button type="button" onClick={() => setAddrForm(null)} className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>Cancel</button>
+              <button type="button" onClick={() => setAddrForm(null)} className="av-btn av-btn-secondary av-btn-sm">Cancel</button>
             </div>
           </form>
         )}
       </section>
 
-      {/* Profile */}
       <section>
-        <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--kb-ink)' }}>Profile & Password</h2>
-        <form onSubmit={saveProfile} className="kb-card p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h2 style={{ fontFamily: 'var(--av-display)', fontSize: 18, fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 16px' }}>Profile & password</h2>
+        <form onSubmit={saveProfile} style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="av-addr-grid">
             <div>
-              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Full Name</label>
-              <input className="kb-input" value={profForm.name}
+              <Lbl>Full Name</Lbl>
+              <input className="av-input" value={profForm.name}
                 onChange={e => setProfForm(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div>
-              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Phone</label>
-              <input className="kb-input" value={profForm.phone}
+              <Lbl>Phone</Lbl>
+              <input className="av-input" value={profForm.phone}
                 onChange={e => setProfForm(f => ({ ...f, phone: e.target.value }))} placeholder="01XXXXXXXXX" />
             </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Email (read-only)</label>
-              <input className="kb-input opacity-60" value={profile.email} readOnly />
+            <div style={{ gridColumn: '1/-1' }}>
+              <Lbl>Email (read-only)</Lbl>
+              <input className="av-input" value={profile.email} readOnly style={{ opacity: 0.6 }} />
             </div>
           </div>
 
-          <div className="border-t pt-4" style={{ borderColor: 'var(--kb-border)' }}>
-            <p className="text-xs font-semibold mb-3" style={{ color: 'var(--kb-ink-soft)' }}>Change Password (leave blank to keep current)</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div style={{ borderTop: '1px solid var(--av-line-soft)', paddingTop: 16 }}>
+            <p style={{ fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: '0 0 12px' }}>Change password (leave blank to keep)</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="av-addr-grid">
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>New Password</label>
-                <input type="password" className="kb-input" value={profForm.password}
+                <Lbl>New Password</Lbl>
+                <input type="password" className="av-input" value={profForm.password}
                   onChange={e => setProfForm(f => ({ ...f, password: e.target.value }))} placeholder="Min 8 characters" />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Confirm Password</label>
-                <input type="password" className="kb-input" value={profForm.password_confirmation}
+                <Lbl>Confirm Password</Lbl>
+                <input type="password" className="av-input" value={profForm.password_confirmation}
                   onChange={e => setProfForm(f => ({ ...f, password_confirmation: e.target.value }))} />
               </div>
             </div>
           </div>
 
-          <button type="submit" disabled={saving} className="kb-btn kb-btn-primary text-sm px-4 py-2">
-            {saving ? 'Saving…' : 'Save Changes'}
+          <button type="submit" disabled={saving} className="av-btn av-btn-primary av-btn-sm" style={{ alignSelf: 'flex-start' }}>
+            {saving ? 'Saving…' : 'Save changes'}
           </button>
         </form>
       </section>
+
+      <style>{`@media(max-width:640px){ .av-addr-grid{ grid-template-columns: 1fr !important; } }`}</style>
     </AccountLayout>
   );
 }

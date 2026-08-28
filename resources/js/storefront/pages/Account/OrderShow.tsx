@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountLayout from '../../components/AccountLayout';
+import { usePrice } from '../../usePrice';
 
 interface OrderItem { id: number; product_id: number; product_name: string; variant_label: string | null; sku: string | null; unit_price: number; quantity: number; total: number; thumb: string | null; slug: string | null }
 interface Activity { id: number; title: string; description: string | null; created_at: string }
@@ -13,13 +14,14 @@ interface Order {
 interface Props { order: Order; reviewedProductIds: number[] }
 
 const STATUS_COLOR: Record<string, string> = {
-  pending: '#D97706', processing: '#2563EB', shipped: '#7C3AED',
-  delivered: '#16A34A', cancelled: '#DC2626', refunded: '#6B7280',
+  pending: '#95613a', processing: '#6f4527', shipped: '#b2904f',
+  delivered: '#16A34A', cancelled: '#b94040', refunded: '#756a59',
 };
 
 export default function OrderShow({ order, reviewedProductIds }: Props) {
   const [reviewForm, setReviewForm] = useState<{ product_id: number; rating: number; title: string; body: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const fmt = usePrice();
 
   const submitReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,76 +38,72 @@ export default function OrderShow({ order, reviewedProductIds }: Props) {
     <AccountLayout title={`Order #${order.order_number}`} active="/account/orders">
       <Head title={`Order #${order.order_number}`} />
 
-      <Link href="/account/orders" className="text-xs mb-4 inline-flex items-center gap-1" style={{ color: 'var(--kb-ink-soft)' }}>
-        ← Back to Orders
+      <Link href="/account/orders" style={{ fontSize: 11.5, display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--av-muted)', textDecoration: 'none', fontFamily: 'var(--av-sans)', marginBottom: 16 }}>
+        ← Back to orders
       </Link>
 
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="kb-card p-5 flex flex-wrap items-center justify-between gap-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="font-mono font-bold text-lg" style={{ color: 'var(--kb-ink)' }}>#{order.order_number}</span>
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold capitalize"
-                style={{ background: STATUS_COLOR[order.status] + '20', color: STATUS_COLOR[order.status] }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'var(--av-sans)', fontWeight: 500, fontSize: 16, color: 'var(--av-ink)' }}>#{order.order_number}</span>
+              <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 8px', background: STATUS_COLOR[order.status] + '14', color: STATUS_COLOR[order.status], fontFamily: 'var(--av-sans)', fontWeight: 500 }}>
                 {order.status}
               </span>
             </div>
-            <p className="text-xs mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Placed on {order.created_at}</p>
+            <p style={{ fontSize: 11.5, color: 'var(--av-muted)', marginTop: 4, fontFamily: 'var(--av-sans)' }}>Placed {order.created_at}</p>
           </div>
           {order.status === 'delivered' && !hasRefund && (
-            <Link href="/account/refunds" className="kb-btn text-xs px-3 py-2 outline-none" style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>
-              Request Refund
+            <Link href="/account/refunds" className="av-btn av-btn-secondary av-btn-sm" style={{ textDecoration: 'none' }}>
+              Request refund
             </Link>
           )}
         </div>
 
-        {/* Items */}
-        <div className="kb-card">
-          <h3 className="px-5 py-3 text-sm font-semibold border-b" style={{ color: 'var(--kb-ink)', borderColor: 'var(--kb-border)' }}>Items</h3>
-          <div className="divide-y" style={{ borderColor: 'var(--kb-border)' }}>
+        <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)' }}>
+          <h3 style={{ padding: '14px 18px', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: 0, borderBottom: '1px solid var(--av-line-soft)' }}>Items</h3>
+          <div>
             {order.items.map(item => (
-              <div key={item.id} className="px-5 py-4">
-                <div className="flex gap-3">
-                  <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0" style={{ background: 'var(--kb-surface-2)' }}>
-                    {item.thumb ? <img src={item.thumb} alt={item.product_name} className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
+              <div key={item.id} style={{ padding: '16px 18px', borderTop: '1px solid var(--av-line-soft)' }}>
+                <div style={{ display: 'flex', gap: 14 }}>
+                  <div style={{ width: 56, height: 70, overflow: 'hidden', flexShrink: 0, background: 'var(--av-paper-2)' }}>
+                    {item.thumb ? <img src={item.thumb} alt={item.product_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /> : null}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: 'var(--kb-ink)' }}>{item.product_name}</p>
-                    {item.variant_label && <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{item.variant_label}</p>}
-                    <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>৳{Number(item.unit_price).toLocaleString()} × {item.quantity}</span>
-                      <span className="text-sm font-bold" style={{ color: 'var(--kb-ink)' }}>৳{Number(item.total).toLocaleString()}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: 'var(--av-display)', fontSize: 14.5, fontWeight: 400, color: 'var(--av-ink)', margin: 0 }}>{item.product_name}</p>
+                    {item.variant_label && <p style={{ fontSize: 11.5, color: 'var(--av-muted)', marginTop: 3, fontFamily: 'var(--av-sans)' }}>{item.variant_label}</p>}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                      <span style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{fmt(item.unit_price)} × {item.quantity}</span>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{fmt(item.total)}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Review prompt */}
                 {order.status === 'delivered' && item.product_id && (
                   reviewedProductIds.includes(item.product_id) ? (
-                    <p className="text-xs mt-2" style={{ color: 'var(--kb-success)' }}>✓ You reviewed this product</p>
+                    <p style={{ fontSize: 11.5, color: 'var(--av-cognac)', marginTop: 10, fontFamily: 'var(--av-sans)' }}>✓ You reviewed this</p>
                   ) : reviewForm?.product_id === item.product_id ? (
-                    <form onSubmit={submitReview} className="mt-3 space-y-2 p-3 rounded-lg" style={{ background: 'var(--kb-surface-2)' }}>
-                      <div className="flex gap-1">
+                    <form onSubmit={submitReview} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10, padding: 14, border: '1px solid var(--av-line-soft)', background: 'var(--av-paper-2)' }}>
+                      <div style={{ display: 'flex', gap: 4 }}>
                         {[1,2,3,4,5].map(s => (
                           <button key={s} type="button" onClick={() => setReviewForm(f => f ? { ...f, rating: s } : f)}
-                            className="text-xl" style={{ color: s <= (reviewForm?.rating ?? 0) ? '#F59E0B' : 'var(--kb-border)' }}>★</button>
+                            style={{ fontSize: 18, color: s <= (reviewForm?.rating ?? 0) ? 'var(--av-gold)' : 'var(--av-line)', background: 'transparent', border: 'none', cursor: 'pointer' }}>★</button>
                         ))}
                       </div>
-                      <input className="kb-input text-sm" placeholder="Review title (optional)" value={reviewForm.title}
+                      <input className="av-input" style={{ height: 38, fontSize: 13 }} placeholder="Title (optional)" value={reviewForm.title}
                         onChange={e => setReviewForm(f => f ? { ...f, title: e.target.value } : f)} />
-                      <textarea className="kb-input text-sm resize-none" rows={3} placeholder="Your review…" value={reviewForm.body}
+                      <textarea className="av-input av-textarea" style={{ fontSize: 13 }} rows={3} placeholder="Your review…" value={reviewForm.body}
                         onChange={e => setReviewForm(f => f ? { ...f, body: e.target.value } : f)} />
-                      <div className="flex gap-2">
-                        <button type="submit" disabled={submitting} className="kb-btn kb-btn-primary text-xs px-3 py-1.5">
-                          {submitting ? 'Submitting…' : 'Submit Review'}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button type="submit" disabled={submitting} className="av-btn av-btn-primary av-btn-sm">
+                          {submitting ? 'Submitting…' : 'Submit'}
                         </button>
-                        <button type="button" onClick={() => setReviewForm(null)} className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Cancel</button>
+                        <button type="button" onClick={() => setReviewForm(null)} className="av-btn av-btn-secondary av-btn-sm">Cancel</button>
                       </div>
                     </form>
                   ) : (
                     <button onClick={() => setReviewForm({ product_id: item.product_id!, rating: 5, title: '', body: '' })}
-                      className="text-xs mt-2 underline" style={{ color: 'var(--kb-primary)' }}>
+                      style={{ fontSize: 11.5, marginTop: 10, color: 'var(--av-cognac)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--av-line)', fontFamily: 'var(--av-sans)' }}>
                       Write a review
                     </button>
                   )
@@ -115,45 +113,43 @@ export default function OrderShow({ order, reviewedProductIds }: Props) {
           </div>
         </div>
 
-        {/* Summary + address */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="kb-card p-5">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--kb-ink)' }}>Payment Summary</h3>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between" style={{ color: 'var(--kb-ink-soft)' }}><span>Subtotal</span><span>৳{Number(order.subtotal).toLocaleString()}</span></div>
-              {Number(order.discount_amount) > 0 && <div className="flex justify-between" style={{ color: 'var(--kb-success)' }}><span>Discount {order.coupon_code && `(${order.coupon_code})`}</span><span>−৳{Number(order.discount_amount).toLocaleString()}</span></div>}
-              <div className="flex justify-between" style={{ color: 'var(--kb-ink-soft)' }}><span>Shipping</span><span>{Number(order.shipping_cost) === 0 ? 'Free' : `৳${Number(order.shipping_cost).toLocaleString()}`}</span></div>
-              <div className="flex justify-between font-bold text-base pt-1.5 border-t" style={{ color: 'var(--kb-ink)', borderColor: 'var(--kb-border)' }}><span>Total</span><span>৳{Number(order.total).toLocaleString()}</span></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="av-order-bottom">
+          <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+            <h3 style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: '0 0 14px' }}>Payment</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, fontFamily: 'var(--av-sans)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--av-muted)' }}><span>Subtotal</span><span style={{ color: 'var(--av-ink)', fontWeight: 500 }}>{fmt(order.subtotal)}</span></div>
+              {Number(order.discount_amount) > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--av-cognac)', fontWeight: 500 }}><span>Discount {order.coupon_code && `(${order.coupon_code})`}</span><span>−{fmt(order.discount_amount)}</span></div>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--av-muted)' }}><span>Shipping</span><span style={{ color: Number(order.shipping_cost) === 0 ? 'var(--av-cognac)' : 'var(--av-ink)', fontWeight: 500 }}>{Number(order.shipping_cost) === 0 ? 'Complimentary' : fmt(order.shipping_cost)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 500, fontSize: 14, paddingTop: 10, borderTop: '1px solid var(--av-line)', color: 'var(--av-ink)' }}><span>Total</span><span>{fmt(order.total)}</span></div>
             </div>
-            <p className="text-xs mt-3 capitalize" style={{ color: order.payment_status === 'paid' ? 'var(--kb-success)' : 'var(--kb-warn)' }}>
-              Payment: {order.payment_status.replace('_', ' ')} · {order.payment_method?.replace('_', ' ') || 'N/A'}
+            <p style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 12, color: order.payment_status === 'paid' ? '#16A34A' : 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>
+              Payment: {order.payment_status.replace('_', ' ')} · {order.payment_method?.replace('_', ' ') || '—'}
             </p>
           </div>
           {order.shipping_address && (
-            <div className="kb-card p-5">
-              <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--kb-ink)' }}>Delivery Address</h3>
-              <p className="text-sm" style={{ color: 'var(--kb-ink)' }}>{order.shipping_address.address}</p>
-              <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>{order.shipping_address.city}</p>
-              {order.tracking_number && <p className="text-xs mt-2 font-mono" style={{ color: 'var(--kb-primary)' }}>Tracking: {order.tracking_number}</p>}
+            <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+              <h3 style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: '0 0 14px' }}>Delivery address</h3>
+              <p style={{ fontSize: 13.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: 0 }}>{order.shipping_address.address}</p>
+              <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '4px 0 0' }}>{order.shipping_address.city}</p>
+              {order.tracking_number && <p style={{ fontSize: 11, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', marginTop: 10 }}>Tracking: {order.tracking_number}</p>}
             </div>
           )}
         </div>
 
-        {/* Activity timeline */}
         {order.activities.length > 0 && (
-          <div className="kb-card p-5">
-            <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--kb-ink)' }}>Order Timeline</h3>
-            <div className="space-y-4">
+          <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+            <h3 style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: '0 0 16px' }}>Timeline</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {order.activities.map((a, i) => (
-                <div key={a.id} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2.5 h-2.5 rounded-full mt-0.5 shrink-0" style={{ background: i === 0 ? 'var(--kb-primary)' : 'var(--kb-border)' }}/>
-                    {i < order.activities.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: 'var(--kb-border)' }}/>}
+                <div key={a.id} style={{ display: 'flex', gap: 12 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', marginTop: 4, flexShrink: 0, background: i === 0 ? 'var(--av-ink)' : 'var(--av-line)' }}/>
+                    {i < order.activities.length - 1 && <div style={{ width: 1, flex: 1, marginTop: 4, background: 'var(--av-line-soft)' }}/>}
                   </div>
-                  <div className="pb-3">
-                    <p className="text-sm font-medium" style={{ color: 'var(--kb-ink)' }}>{a.title}</p>
-                    {a.description && <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{a.description}</p>}
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{a.created_at}</p>
+                  <div style={{ paddingBottom: 16 }}>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: 0 }}>{a.title}</p>
+                    {a.description && <p style={{ fontSize: 12.5, color: 'var(--av-muted)', marginTop: 2, fontFamily: 'var(--av-sans)' }}>{a.description}</p>}
+                    <p style={{ fontSize: 11, color: 'var(--av-muted)', marginTop: 4, fontFamily: 'var(--av-sans)' }}>{a.created_at}</p>
                   </div>
                 </div>
               ))}
@@ -161,6 +157,8 @@ export default function OrderShow({ order, reviewedProductIds }: Props) {
           </div>
         )}
       </div>
+
+      <style>{`@media(max-width:640px){ .av-order-bottom{ grid-template-columns: 1fr !important; } }`}</style>
     </AccountLayout>
   );
 }

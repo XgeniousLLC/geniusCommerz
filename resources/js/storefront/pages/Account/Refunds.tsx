@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountLayout from '../../components/AccountLayout';
+import { usePrice } from '../../usePrice';
 
 interface Refund {
   id: number; order_number: string; reason: string; details: string | null;
@@ -15,16 +16,17 @@ interface Props {
 }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  pending:   { bg: '#FEF3C7', color: '#92400E' },
-  approved:  { bg: '#D1FAE5', color: '#065F46' },
-  rejected:  { bg: '#FEE2E2', color: '#991B1B' },
-  processed: { bg: '#DBEAFE', color: '#1E40AF' },
+  pending:   { bg: 'var(--av-paper-2)', color: 'var(--av-cognac)' },
+  approved:  { bg: '#dcfce7', color: '#166534' },
+  rejected:  { bg: '#fee2e2', color: '#991b1b' },
+  processed: { bg: '#dbeafe', color: '#1e40af' },
 };
 
 export default function Refunds({ refunds, eligibleOrders, reasons }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ order_id: '', reason: '', details: '' });
   const [submitting, setSubmitting] = useState(false);
+  const fmt = usePrice();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,36 +41,34 @@ export default function Refunds({ refunds, eligibleOrders, reasons }: Props) {
     <AccountLayout title="Refunds" active="/account/refunds">
       <Head title="My Refunds" />
 
-      {/* Request button */}
       {eligibleOrders.length > 0 && !showForm && (
-        <div className="mb-4">
-          <button onClick={() => setShowForm(true)} className="kb-btn kb-btn-primary text-sm px-4 py-2">
-            Request a Refund
+        <div style={{ marginBottom: 16 }}>
+          <button onClick={() => setShowForm(true)} className="av-btn av-btn-primary av-btn-sm">
+            Request a refund
           </button>
         </div>
       )}
 
-      {/* New refund form */}
       {showForm && (
-        <form onSubmit={submit} className="kb-card p-5 mb-5 space-y-4">
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--kb-ink)' }}>New Refund Request</h2>
+        <form onSubmit={submit} style={{ border: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: 20, marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <h2 style={{ fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', fontWeight: 500, margin: 0 }}>New refund request</h2>
 
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Order</label>
-            <select className="kb-input text-sm" value={form.order_id}
+            <label style={{ display: 'block', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 6 }}>Order</label>
+            <select className="av-select" value={form.order_id}
               onChange={e => setForm(f => ({ ...f, order_id: e.target.value }))} required>
-              <option value="">Select an order…</option>
+              <option value="">Select order…</option>
               {eligibleOrders.map(o => (
-                <option key={o.id} value={o.id}>#{o.order_number} — ৳{Number(o.total).toLocaleString()}</option>
+                <option key={o.id} value={o.id}>#{o.order_number} — {fmt(o.total)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Reason</label>
-            <select className="kb-input text-sm" value={form.reason}
+            <label style={{ display: 'block', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 6 }}>Reason</label>
+            <select className="av-select" value={form.reason}
               onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} required>
-              <option value="">Select a reason…</option>
+              <option value="">Select reason…</option>
               {Object.entries(reasons).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
@@ -76,61 +76,59 @@ export default function Refunds({ refunds, eligibleOrders, reasons }: Props) {
           </div>
 
           <div>
-            <label className="text-xs font-medium block mb-1" style={{ color: 'var(--kb-ink-soft)' }}>Additional Details (optional)</label>
-            <textarea className="kb-input text-sm resize-none" rows={3} value={form.details}
+            <label style={{ display: 'block', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 6 }}>Details (optional)</label>
+            <textarea className="av-input av-textarea" rows={3} value={form.details}
               onChange={e => setForm(f => ({ ...f, details: e.target.value }))}
-              placeholder="Describe the issue in detail…" />
+              placeholder="Describe the issue…" />
           </div>
 
-          <div className="flex gap-2">
-            <button type="submit" disabled={submitting} className="kb-btn kb-btn-primary text-sm px-4 py-2">
-              {submitting ? 'Submitting…' : 'Submit Request'}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="submit" disabled={submitting} className="av-btn av-btn-primary av-btn-sm">
+              {submitting ? 'Submitting…' : 'Submit'}
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>Cancel</button>
+            <button type="button" onClick={() => setShowForm(false)} className="av-btn av-btn-secondary av-btn-sm">Cancel</button>
           </div>
         </form>
       )}
 
-      {/* Refund list */}
       {refunds.length === 0 ? (
-        <div className="kb-card p-8 text-center">
-          <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>No refund requests yet.</p>
+        <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: '28px 18px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0 }}>No refund requests yet.</p>
           {eligibleOrders.length === 0 && (
-            <p className="text-xs mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Refunds can only be requested for delivered orders.</p>
+            <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 6 }}>Refunds are available for delivered orders.</p>
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {refunds.map(r => {
             const style = STATUS_STYLE[r.status] ?? STATUS_STYLE.pending;
             return (
-              <div key={r.id} className="kb-card p-5">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div key={r.id} style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono font-bold text-sm" style={{ color: 'var(--kb-ink)' }}>#{r.order_number}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize"
-                        style={{ background: style.bg, color: style.color }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: 'var(--av-sans)', fontWeight: 500, fontSize: 13, color: 'var(--av-ink)' }}>#{r.order_number}</span>
+                      <span style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 7px', background: style.bg, color: style.color, border: r.status === 'pending' ? '1px solid var(--av-line)' : 'none', fontFamily: 'var(--av-sans)', fontWeight: 500 }}>
                         {r.status}
                       </span>
                     </div>
-                    <p className="text-sm mt-1 capitalize" style={{ color: 'var(--kb-ink)' }}>
+                    <p style={{ fontSize: 13, marginTop: 8, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', textTransform: 'capitalize' }}>
                       {reasons[r.reason] ?? r.reason}
                     </p>
-                    {r.details && <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>{r.details}</p>}
+                    {r.details && <p style={{ fontSize: 12.5, marginTop: 4, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{r.details}</p>}
                   </div>
-                  <div className="text-right shrink-0">
-                    {r.amount && (
-                      <p className="text-sm font-bold" style={{ color: 'var(--kb-ink)' }}>৳{Number(r.amount).toLocaleString()}</p>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    {r.amount !== null && (
+                      <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: 0 }}>{fmt(r.amount)}</p>
                     )}
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>Requested {r.created_at}</p>
-                    {r.resolved_at && <p className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>Resolved {r.resolved_at}</p>}
+                    <p style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 4 }}>Requested {r.created_at}</p>
+                    {r.resolved_at && <p style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>Resolved {r.resolved_at}</p>}
                   </div>
                 </div>
 
                 {r.admin_note && (
-                  <div className="mt-3 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--kb-surface-2)', color: 'var(--kb-ink-soft)' }}>
-                    <span className="font-semibold" style={{ color: 'var(--kb-ink)' }}>Note from us: </span>
+                  <div style={{ marginTop: 12, padding: '10px 12px', background: 'var(--av-paper-2)', border: '1px solid var(--av-line-soft)', fontSize: 12.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', lineHeight: 1.5 }}>
+                    <span style={{ fontWeight: 500, color: 'var(--av-ink)' }}>Note: </span>
                     {r.admin_note}
                   </div>
                 )}
