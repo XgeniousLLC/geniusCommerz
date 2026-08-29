@@ -3,19 +3,12 @@
 namespace App\Services\Couriers;
 
 use App\Contracts\CourierInterface;
-use App\Models\Integration;
 use App\Models\Order;
+use App\Services\ProviderDriver;
 use Illuminate\Support\Facades\Http;
 
-class SteadfastService implements CourierInterface
+class SteadfastService extends ProviderDriver implements CourierInterface
 {
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('steadfast')
-            ?? new Integration(['credentials' => [], 'environment' => 'live']);
-    }
 
     public function createOrder(Order $order, array $extra = []): array
     {

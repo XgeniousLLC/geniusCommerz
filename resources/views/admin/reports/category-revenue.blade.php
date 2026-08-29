@@ -44,7 +44,7 @@
             <div>
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
                     <span style="font-weight:600">{{ $row->category }}</span>
-                    <span><strong>৳{{ number_format($row->revenue,0) }}</strong> <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
+                    <span><strong>{{ money($row->revenue, 0) }}</strong> <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
                 </div>
                 <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                     <div style="width:{{ min(100,$pct) }}%;height:6px;background:var(--accent);border-radius:4px"></div>
@@ -67,7 +67,7 @@
             <div>
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
                     <span style="font-weight:600">{{ $row->brand }}</span>
-                    <span><strong>৳{{ number_format($row->revenue,0) }}</strong> <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
+                    <span><strong>{{ money($row->revenue, 0) }}</strong> <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
                 </div>
                 <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                     <div style="width:{{ min(100,$pct) }}%;height:6px;background:var(--violet);border-radius:4px"></div>
@@ -92,7 +92,7 @@
                     <td>{{ $row->category }}</td>
                     <td style="text-align:right">{{ number_format($row->qty_sold) }}</td>
                     <td style="text-align:right">{{ number_format($row->order_count) }}</td>
-                    <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue,0) }}</td>
+                    <td style="text-align:right;font-weight:600">{{ money($row->revenue, 0) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -110,7 +110,7 @@
                     <td>{{ $row->brand }}</td>
                     <td style="text-align:right">{{ number_format($row->qty_sold) }}</td>
                     <td style="text-align:right">{{ number_format($row->order_count) }}</td>
-                    <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue,0) }}</td>
+                    <td style="text-align:right;font-weight:600">{{ money($row->revenue, 0) }}</td>
                 </tr>
                 @endforeach
             </tbody>

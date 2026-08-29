@@ -204,7 +204,7 @@
                                         <div class="text-sm font-medium text-gray-900 truncate" x-text="product.name"></div>
                                         <div class="text-xs text-gray-400" x-text="product.sku ? 'SKU: ' + product.sku : ''"></div>
                                     </div>
-                                    <div class="text-sm font-semibold text-gray-700 shrink-0" x-text="'৳' + product.price.toFixed(2)"></div>
+                                    <div class="text-sm font-semibold text-gray-700 shrink-0" x-text="'{{ currency_symbol() }}' + product.price.toFixed(2)"></div>
                                 </button>
                             </template>
                         </div>
@@ -246,7 +246,7 @@
                                                    class="w-full text-right rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
                                         </td>
                                         <td class="px-3 py-2.5 text-right font-medium text-gray-900"
-                                            x-text="'৳' + (item.unit_price * item.quantity).toFixed(2)"></td>
+                                            x-text="'{{ currency_symbol() }}' + (item.unit_price * item.quantity).toFixed(2)"></td>
                                         <td class="px-2 py-2.5">
                                             <button type="button" @click="removeItem(index)"
                                                     class="text-gray-400 hover:text-red-500 transition-colors p-1">
@@ -366,13 +366,13 @@
                 <h2 class="text-base font-semibold text-gray-900 mb-4">Summary</h2>
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Cost (৳)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Cost ({{ currency_symbol() }})</label>
                         <x-admin.input type="number" name="shipping_cost"
                             value="{{ old('shipping_cost', 0) }}" min="0" step="0.01"
                             x-model.number="shippingCost" @input="recalc" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Discount (৳)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Discount ({{ currency_symbol() }})</label>
                         <x-admin.input type="number" name="discount_amount"
                             value="{{ old('discount_amount', 0) }}" min="0" step="0.01"
                             x-model.number="discountAmount" @input="recalc" />
@@ -381,21 +381,21 @@
                     <div class="pt-3 border-t border-gray-100 space-y-1.5 text-sm">
                         <div class="flex justify-between text-gray-600">
                             <span>Subtotal</span>
-                            <span x-text="'৳' + subtotal.toFixed(2)"></span>
+                            <span x-text="'{{ currency_symbol() }}' + subtotal.toFixed(2)"></span>
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Shipping</span>
-                            <span x-text="'৳' + shippingCost.toFixed(2)"></span>
+                            <span x-text="'{{ currency_symbol() }}' + shippingCost.toFixed(2)"></span>
                         </div>
                         <template x-if="discountAmount > 0">
                             <div class="flex justify-between text-green-600">
                                 <span>Discount</span>
-                                <span x-text="'−৳' + discountAmount.toFixed(2)"></span>
+                                <span x-text="'−{{ currency_symbol() }}' + discountAmount.toFixed(2)"></span>
                             </div>
                         </template>
                         <div class="flex justify-between font-bold text-gray-900 text-base pt-1 border-t border-gray-200">
                             <span>Total</span>
-                            <span x-text="'৳' + total.toFixed(2)"></span>
+                            <span x-text="'{{ currency_symbol() }}' + total.toFixed(2)"></span>
                         </div>
                     </div>
                 </div>

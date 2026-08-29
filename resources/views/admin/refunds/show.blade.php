@@ -43,7 +43,7 @@ $statusColors = ['approved'=>'success','processed'=>'info','rejected'=>'danger',
                 </div>
                 <div>
                     <div class="faint" style="font-size:12px;margin-bottom:2px">Refund Amount</div>
-                    <div class="tnum" style="font-weight:700;font-size:15px">৳{{ number_format($refund->amount ?? $refund->order->total, 0) }}</div>
+                    <div class="tnum" style="font-weight:700;font-size:15px">{{ money($refund->amount ?? $refund->order->total, 0) }}</div>
                 </div>
                 <div>
                     <div class="faint" style="font-size:12px;margin-bottom:2px">Reason</div>
@@ -85,15 +85,15 @@ $statusColors = ['approved'=>'success','processed'=>'info','rejected'=>'danger',
                         @if($item->variant_label)
                         <div class="faint" style="font-size:12px">{{ $item->variant_label }}</div>
                         @endif
-                        <div class="faint" style="font-size:12px">৳{{ number_format($item->unit_price, 0) }} × {{ $item->quantity }}</div>
+                        <div class="faint" style="font-size:12px">{{ money($item->unit_price, 0) }} × {{ $item->quantity }}</div>
                     </div>
-                    <div style="font-weight:700;font-size:14px;flex-shrink:0">৳{{ number_format($item->total, 0) }}</div>
+                    <div style="font-weight:700;font-size:14px;flex-shrink:0">{{ money($item->total, 0) }}</div>
                 </div>
                 @endforeach
             </div>
             <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-weight:700;font-size:14px">
                 <span>Order Total</span>
-                <span>৳{{ number_format($refund->order->total, 0) }}</span>
+                <span>{{ money($refund->order->total, 0) }}</span>
             </div>
         </div>
     </div>
@@ -158,7 +158,7 @@ $statusColors = ['approved'=>'success','processed'=>'info','rejected'=>'danger',
                 @endforeach
                 <div class="between" style="padding-top:8px;border-top:1px solid var(--border);font-weight:700">
                     <span>Total</span>
-                    <span>৳{{ number_format($refund->order->total, 0) }}</span>
+                    <span>{{ money($refund->order->total, 0) }}</span>
                 </div>
             </div>
         </div>

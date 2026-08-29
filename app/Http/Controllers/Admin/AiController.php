@@ -183,12 +183,14 @@ PROMPT;
             return response()->json(['error' => 'No AI provider configured.'], 422);
         }
 
+        $currency = \App\Models\SiteSetting::get('general.currency', 'BDT');
+
         $prompt = "You are an e-commerce pricing expert. Given the product name and cost price below, "
             . "suggest an optimal retail selling price that achieves a healthy margin (typically 50–70%) "
-            . "and is competitive in the Bangladeshi e-commerce market.\n\n"
+            . "and is competitive in the store's market.\n\n"
             . "Product: {$data['product_name']}\n"
-            . "Cost price: ৳{$data['cost_price']}\n\n"
-            . "Return ONLY a single number — the suggested sell price in BDT, no currency symbol, no text.";
+            . "Cost price: {$currency} {$data['cost_price']}\n\n"
+            . "Return ONLY a single number — the suggested sell price in {$currency}, no currency symbol, no text.";
 
         try {
             $raw = $this->ai->complete($prompt, ['max_tokens' => 20, 'temperature' => 0.3]);

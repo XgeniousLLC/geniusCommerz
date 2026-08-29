@@ -42,7 +42,7 @@
 
 <div class="card flush">
     <div class="card-head" style="padding:16px 20px">
-        <div class="ct"><h3>Top 50 Products</h3><div class="sub">Total revenue: ৳{{ number_format($totalRevenue,0) }}</div></div>
+        <div class="ct"><h3>Top 50 Products</h3><div class="sub">Total revenue: {{ money($totalRevenue, 0) }}</div></div>
     </div>
     @if($products->isEmpty())
         <p style="text-align:center;color:var(--text-muted);padding:48px 0;font-size:13px">No orders in this period.</p>
@@ -69,11 +69,11 @@
                     @if($p->sku)<div style="font-size:11px;color:var(--text-muted)">{{ $p->sku }}</div>@endif
                 </td>
                 <td style="text-align:right;{{ $sortBy==='qty'?'font-weight:700;color:var(--accent)':'' }}">{{ number_format($p->qty_sold) }}</td>
-                <td style="text-align:right;{{ $sortBy==='revenue'?'font-weight:700;color:var(--accent)':'' }}">৳{{ number_format($p->revenue,0) }}</td>
-                <td style="text-align:right;color:var(--text-muted)">৳{{ number_format($p->avg_price,0) }}</td>
+                <td style="text-align:right;{{ $sortBy==='revenue'?'font-weight:700;color:var(--accent)':'' }}">{{ money($p->revenue, 0) }}</td>
+                <td style="text-align:right;color:var(--text-muted)">{{ money($p->avg_price, 0) }}</td>
                 <td style="text-align:right;{{ $sortBy==='orders'?'font-weight:700;color:var(--accent)':'' }}">{{ number_format($p->order_count) }}</td>
                 <td style="text-align:right;{{ is_null($p->profit) ? 'color:var(--text-muted)' : 'color:var(--success);font-weight:600' }}">
-                    {{ is_null($p->profit) ? '—' : '৳'.number_format($p->profit,0) }}
+                    {{ is_null($p->profit) ? '—' : money($p->profit, 0) }}
                 </td>
                 <td style="text-align:right">
                     @if(!is_null($p->margin_pct))

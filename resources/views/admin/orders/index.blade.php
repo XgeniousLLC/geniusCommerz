@@ -207,7 +207,7 @@ $dateTabs = [
                     @endif
                 </td>
                 <td class="faint" style="font-size:13px">{{ $order->created_at->format('M j, H:i') }}</td>
-                <td style="text-align:right" class="tnum"><b>৳{{ number_format($order->total, 0) }}</b></td>
+                <td style="text-align:right" class="tnum"><b>{{ money($order->total, 0) }}</b></td>
                 <td style="text-align:right">
                     <span class="ico" data-ico="chevRight" style="width:17px;height:17px;color:var(--text-faint)"></span>
                 </td>

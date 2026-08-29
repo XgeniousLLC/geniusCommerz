@@ -52,20 +52,20 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" class="grid-2">
             <div class="field">
-                <span class="lbl">Points earned per ৳1 spent</span>
+                <span class="lbl">Points earned per {{ currency_symbol() }}1 spent</span>
                 <div class="input-prefix">
                     <input class="input" type="number" name="points_per_taka" value="{{ $settings['points_per_taka'] }}" step="0.01" min="0" required>
-                    <span style="left:auto;right:13px">pts / ৳1</span>
+                    <span style="left:auto;right:13px">pts / {{ currency_symbol() }}1</span>
                 </div>
-                <span class="hint">e.g. 0.1 = 1 point per ৳10</span>
+                <span class="hint">e.g. 0.1 = 1 point per {{ currency_symbol() }}10</span>
             </div>
             <div class="field">
                 <span class="lbl">Taka value per point</span>
                 <div class="input-prefix">
-                    <span>৳</span>
+                    <span>{{ currency_symbol() }}</span>
                     <input class="input" type="number" name="taka_per_point" value="{{ $settings['taka_per_point'] }}" step="0.01" min="0" required style="padding-left:28px">
                 </div>
-                <span class="hint">e.g. 0.5 = 100 pts = ৳50</span>
+                <span class="hint">e.g. 0.5 = 100 pts = {{ currency_symbol() }}50</span>
             </div>
             <div class="field">
                 <span class="lbl">Minimum points to redeem</span>
@@ -130,8 +130,8 @@
             <span class="ico" data-ico="eye" style="width:17px;height:17px;color:var(--accent)"></span>
             <h3 class="display" style="font-size:15.5px;font-weight:700">Quick Preview</h3>
         </div>
-        <div class="between" style="padding:11px 0"><span class="muted" style="font-size:13px">Order ৳1,000</span><span class="tnum" style="font-weight:700;font-size:13.5px">{{ round($settings['points_per_taka'] * 1000) }} pts</span></div>
-        <div class="between" style="padding:11px 0;border-top:1px solid var(--border)"><span class="muted" style="font-size:13px">100 points</span><span class="tnum" style="font-weight:700;font-size:13.5px">৳{{ round($settings['taka_per_point'] * 100) }}</span></div>
+        <div class="between" style="padding:11px 0"><span class="muted" style="font-size:13px">Order {{ money(1000, 0) }}</span><span class="tnum" style="font-weight:700;font-size:13.5px">{{ round($settings['points_per_taka'] * 1000) }} pts</span></div>
+        <div class="between" style="padding:11px 0;border-top:1px solid var(--border)"><span class="muted" style="font-size:13px">100 points</span><span class="tnum" style="font-weight:700;font-size:13.5px">{{ money(round($settings['taka_per_point'] * 100), 0) }}</span></div>
         <div class="between" style="padding:11px 0;border-top:1px solid var(--border)"><span class="muted" style="font-size:13px">Min to redeem</span><span class="tnum" style="font-weight:700;font-size:13.5px">{{ $settings['min_redemption'] }} pts</span></div>
         <div class="between" style="padding:11px 0;border-top:1px solid var(--border)"><span class="muted" style="font-size:13px">Max per order</span><span class="tnum" style="font-weight:700;font-size:13.5px">{{ $settings['max_redemption_pct'] }}% of total</span></div>
     </div>

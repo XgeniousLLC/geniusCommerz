@@ -3,8 +3,12 @@ import { useRef, useState } from 'react';
 import Layout from '../../layouts/Layout';
 import type { SharedProps } from '../../types';
 
+interface DialCode { code: string; name: string; dial: string }
+
 interface Props {
   loginMethod?: 'email_password' | 'phone_otp' | 'both';
+  dialCodes?: DialCode[];
+  storeCountry?: string;
 }
 
 /* ── Shared editorial (av-*) styles ─────────────────────────────────────── */
@@ -122,7 +126,10 @@ function EmailPasswordForm() {
   );
 }
 
-function PhoneOtpForm() {
+function PhoneOtpForm({ dialCodes, storeCountry }: { dialCodes: DialCode[]; storeCountry: string }) {
+  const [dial, setDial]     = useState(
+    dialCodes.find(c => c.code === storeCountry)?.dial ?? dialCodes[0]?.dial ?? '',
+  );
   const [phone, setPhone]   = useState('');
   const [step, setStep]     = useState<'phone' | 'otp'>('phone');
   const [otp, setOtp]       = useState(['', '', '', '', '', '']);
@@ -145,6 +152,10 @@ function PhoneOtpForm() {
     if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
   }
 
+  // Submit the full international number rather than the local part, so the server
+  // does not have to infer which country it belongs to.
+  const fullNumber = () => `+${dial}${phone.replace(/\D/g, '').replace(/^0+/, '')}`;
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError('');
@@ -152,7 +163,7 @@ function PhoneOtpForm() {
       const res = await fetch('/login/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: fullNumber() }),
       });
       const json = await res.json();
       if (!res.ok) setError(json.message ?? 'Failed to send OTP.');
@@ -168,7 +179,7 @@ function PhoneOtpForm() {
       const res = await fetch('/login/otp/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
-        body: JSON.stringify({ phone, otp: otp.join('') }),
+        body: JSON.stringify({ phone: fullNumber(), otp: otp.join('') }),
       });
       const json = await res.json();
       if (!res.ok) setError(json.message ?? 'Invalid OTP.');
@@ -191,8 +202,9 @@ function PhoneOtpForm() {
           <div style={{ marginBottom: 16 }}>
             <label style={labelStyle}>Phone number</label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <select style={{ ...inputStyle, width: 110, flexShrink: 0 }} onFocus={focusOn} onBlur={focusOff}>
-                <option>🇧🇩 +880</option>
+              <select value={dial} onChange={e => setDial(e.target.value)}
+                style={{ ...inputStyle, width: 130, flexShrink: 0 }} onFocus={focusOn} onBlur={focusOff}>
+                {dialCodes.map(c => <option key={c.code} value={c.dial}>{c.code} +{c.dial}</option>)}
               </select>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="1712 345 678" required autoFocus style={{ ...inputStyle, flex: 1 }}
@@ -223,7 +235,7 @@ function PhoneOtpForm() {
               ))}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--av-muted)', marginTop: 8, fontFamily: 'var(--av-sans)' }}>
-              Sent to +880 {phone} ·{' '}
+              Sent to +{dial} {phone} ·{' '}
               <button type="button" style={{ color: 'var(--av-cognac)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontSize: 11.5, fontFamily: 'var(--av-sans)' }}>Resend</button>
             </div>
           </div>
@@ -241,7 +253,7 @@ function PhoneOtpForm() {
   );
 }
 
-export default function Login({ loginMethod = 'email_password' }: Props) {
+export default function Login({ loginMethod = 'email_password', dialCodes = [], storeCountry = 'BD' }: Props) {
   const { site } = usePage<SharedProps>().props;
   const [method, setMethod] = useState<'email' | 'phone'>(
     loginMethod === 'phone_otp' ? 'phone' : 'email'
@@ -305,7 +317,7 @@ export default function Login({ loginMethod = 'email_password' }: Props) {
             {/* Form */}
             {(loginMethod === 'email_password' || (showToggle && method === 'email'))
               ? <EmailPasswordForm />
-              : <PhoneOtpForm />
+              : <PhoneOtpForm dialCodes={dialCodes} storeCountry={storeCountry} />
             }
 
             <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--av-muted)', marginTop: 24, fontFamily: 'var(--av-sans)' }}>

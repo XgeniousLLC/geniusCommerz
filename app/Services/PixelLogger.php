@@ -48,9 +48,12 @@ class PixelLogger
         $entries = [];
 
         foreach (array_reverse($lines) as $line) {
-            // Monolog wraps the message: [timestamp] channel.INFO: {json}  []  []
-            if (preg_match('/\] \S+\.INFO: (.+?)  \[\]/', $line, $m)) {
-                $raw = json_decode($m[1], true);
+            // Monolog wraps the message as: [timestamp] channel.INFO: {json} [] []
+            // The trailing context and extra arrays are omitted when both are empty, so
+            // strip the prefix and any trailing arrays rather than requiring them.
+            if (preg_match('/^\[[^\]]+\]\s+\S+:\s*(.+)$/', $line, $m)) {
+                $json = preg_replace('/(\s*\[\])+\s*$/', '', $m[1]);
+                $raw  = json_decode(trim($json), true);
             } else {
                 $raw = json_decode(trim($line), true);
             }

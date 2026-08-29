@@ -50,7 +50,7 @@ class TikTokService
             'event_id'   => 'order_' . $order['id'],
             'user'       => $userData,
             'properties' => [
-                'currency'     => $order['currency'] ?? 'BDT',
+                'currency'     => $order['currency'] ?: \App\Models\SiteSetting::get('general.currency', 'BDT'),
                 'value'        => (float) $order['total'],
                 'content_type' => 'product',
                 'contents'     => collect($order['items'] ?? [])->map(fn ($item) => [

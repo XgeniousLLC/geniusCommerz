@@ -34,14 +34,19 @@ class LoyaltyService
         return $this->getBalance($user) >= $points;
     }
 
-    public function pointsToTaka(int $points): float
+    /**
+     * The settings keys are still named `taka_per_point` / `points_per_taka` — renaming
+     * them would need a data migration for no functional gain. They mean "per unit of the
+     * store's base currency".
+     */
+    public function pointsToCurrency(int $points): float
     {
         $takaPerPoint = (float) LoyaltySetting::get('taka_per_point', 0.5);
 
         return round($points * $takaPerPoint, 2);
     }
 
-    public function takaToPoints(float $taka): int
+    public function currencyToPoints(float $taka): int
     {
         $pointsPerTaka = (float) LoyaltySetting::get('points_per_taka', 0.1);
 
@@ -60,7 +65,7 @@ class LoyaltyService
 
         $user = $order->user;
 
-        $basePoints = $this->takaToPoints((float) $order->total);
+        $basePoints = $this->currencyToPoints((float) $order->total);
 
         if ($basePoints <= 0) {
             return;
@@ -90,9 +95,9 @@ class LoyaltyService
 
         $maxPct      = (int) LoyaltySetting::get('max_redemption_pct', 20);
         $maxDiscount = (float) $order->total * $maxPct / 100;
-        $discount    = min($this->pointsToTaka($points), $maxDiscount);
+        $discount    = min($this->pointsToCurrency($points), $maxDiscount);
 
-        $pointsToUse = $this->takaToPoints($discount) ?: $points;
+        $pointsToUse = $this->currencyToPoints($discount) ?: $points;
         $balance     = $this->getBalance($user) - $pointsToUse;
 
         LoyaltyPoint::create([

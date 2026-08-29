@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -234,7 +235,7 @@ class OrderController extends Controller
             'invoice_footer'     => SiteSetting::get('accounting.invoice_footer', ''),
             'tax_number'         => SiteSetting::get('accounting.tax_number', ''),
             'tax_rate'           => (float) SiteSetting::get('accounting.default_tax_rate', 0),
-            'prices_include_tax' => SiteSetting::get('accounting.prices_include_tax', '0') === '1',
+            'prices_include_tax' => SiteSetting::bool('accounting.prices_include_tax'),
         ];
         return view('admin.orders.print', compact('order', 'site'));
     }
@@ -315,7 +316,11 @@ class OrderController extends Controller
                 'name'  => $order->customer_name,
                 'email' => $order->customer_email,
             ]);
-            try { $notifiable->notify(new OrderStatusChanged($order->fresh(), $data['status'])); } catch (\Throwable) {}
+            try {
+                $notifiable->notify(new OrderStatusChanged($order->fresh(), $data['status']));
+            } catch (\Throwable $e) {
+                Log::warning('Order status notification failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+            }
         }
 
         // Send SMS on confirmed / delivered status transitions
@@ -329,9 +334,11 @@ class OrderController extends Controller
                 try {
                     $sms = app(SmsService::class);
                     if ($sms->hasDefault()) {
-                        $fresh    = $order->fresh();
-                        $defaults = [
-                            'confirmed' => "Your order #{{order_id}} has been confirmed by KlixBD.\nTotal: {{amount}} BDT.\nWe are now preparing your order for delivery. Thank you for shopping with us!",
+                        $fresh       = $order->fresh();
+                        $smsSiteName = SiteSetting::get('general.site_name', config('app.name'));
+                        $smsCurrency = $fresh->presentment_currency ?: $fresh->base_currency;
+                        $defaults    = [
+                            'confirmed' => "Your order #{{order_id}} has been confirmed by {$smsSiteName}.\nTotal: {{amount}} {$smsCurrency}.\nWe are now preparing your order for delivery. Thank you for shopping with us!",
                             'delivered' => "Your order #{{order_id}} has been delivered. Thank you for shopping with us!",
                         ];
                         $templateKey = 'notifications.sms_template_' . $data['status'];
@@ -341,9 +348,11 @@ class OrderController extends Controller
                             'amount'        => $fresh->total,
                             'customer_name' => $fresh->customer_name,
                         ]);
-                        $sms->send($fresh->customer_phone, $message);
+                        $sms->send($fresh->customer_phone, $message, $fresh->shipping_address['country'] ?? null);
                     }
-                } catch (\Throwable) {}
+                } catch (\Throwable $e) {
+                    Log::warning('Order status SMS failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+                }
             }
         }
 
@@ -395,17 +404,18 @@ class OrderController extends Controller
         ]);
 
         try {
-            $result = $courier->driver()->createOrder($order, array_filter($extra));
+            $driver = $courier->driver();
+            $result = $driver->createOrder($order, array_filter($extra));
 
             $order->update([
-                'courier_provider' => $courier->driver()->name(),
+                'courier_provider' => $driver->name(),
                 'consignment_id'   => $result['consignment_id'],
                 'courier_status'   => 'dispatched',
                 'courier_data'     => $result['raw'],
                 'tracking_number'  => $result['tracking_code'] ?? $result['consignment_id'],
             ]);
 
-            $order->logActivity('courier_dispatched', 'Order dispatched via ' . $courier->driver()->name(), null, $result, Auth::guard('admin')->id());
+            $order->logActivity('courier_dispatched', 'Order dispatched via ' . $driver->name(), null, $result, Auth::guard('admin')->id());
 
         } catch (\Throwable $e) {
             return back()->with('error', 'Courier dispatch failed: ' . $e->getMessage());

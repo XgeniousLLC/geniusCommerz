@@ -33,7 +33,7 @@
             @for($m = 1; $m <= 12; $m++)
             @php $row = $monthly->get($m); $pct = $row ? round(($row->revenue / $maxMonthly) * 100) : 0; @endphp
             <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"
-                 title="{{ $monthNames[$m-1] }}: {{ $row ? '৳'.number_format($row->revenue,0) : '৳0' }}">
+                 title="{{ $monthNames[$m-1] }}: {{ $row ? money($row->revenue, 0) : money(0, 0) }}">
                 <div style="width:100%;height:{{ max(2,$pct) }}%;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85"></div>
                 <span style="font-size:9px;color:var(--text-muted)">{{ $monthNames[$m-1] }}</span>
             </div>
@@ -47,8 +47,8 @@
                 <tr>
                     <td>{{ $monthNames[$m-1] }}</td>
                     <td style="text-align:right">{{ $row ? number_format($row->orders) : '—' }}</td>
-                    <td style="text-align:right;font-weight:600">{{ $row ? '৳'.number_format($row->revenue,0) : '—' }}</td>
-                    <td style="text-align:right;color:var(--text-muted)">{{ $row ? '৳'.number_format($row->avg_order,0) : '—' }}</td>
+                    <td style="text-align:right;font-weight:600">{{ $row ? money($row->revenue, 0) : '—' }}</td>
+                    <td style="text-align:right;color:var(--text-muted)">{{ $row ? money($row->avg_order, 0) : '—' }}</td>
                 </tr>
                 @endfor
             </tbody>
@@ -66,7 +66,7 @@
                     <div style="width:{{ max(2,$pct) }}%;height:18px;background:var(--violet);border-radius:4px;opacity:.8"></div>
                 </div>
                 <span style="font-size:12px;color:var(--text-muted);width:80px;text-align:right">{{ number_format($row->orders) }} orders</span>
-                <span style="font-size:12px;color:var(--text-muted);width:90px;text-align:right">৳{{ number_format($row->revenue,0) }}</span>
+                <span style="font-size:12px;color:var(--text-muted);width:90px;text-align:right">{{ money($row->revenue, 0) }}</span>
             </div>
             @endforeach
         </div>
@@ -107,7 +107,7 @@
                 <td style="font-weight:600">{{ $monthNames[$m-1] }}</td>
                 @foreach($years as $y)
                 @php $entry = $yoyByYear->get($y)?->firstWhere('month', $m); @endphp
-                <td style="text-align:right">{{ $entry ? '৳'.number_format($entry->revenue,0) : '—' }}</td>
+                <td style="text-align:right">{{ $entry ? money($entry->revenue, 0) : '—' }}</td>
                 @endforeach
             </tr>
             @endfor

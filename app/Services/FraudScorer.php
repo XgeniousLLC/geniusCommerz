@@ -56,6 +56,73 @@ class FraudScorer
         ]);
     }
 
+    /**
+     * Map an IPQualityScore phone response onto the same vocabulary.
+     *
+     * Their `fraud_score` runs 0 (safe) to 100 (fraudulent) — the inverse of ours — and
+     * an invalid or VOIP line is a strong signal on its own.
+     */
+    public static function fromIpQualityScore(array $result): array
+    {
+        $fraudScore = (int) ($result['fraud_score'] ?? 50);
+        $score      = max(0, 100 - $fraudScore);
+
+        $level = match (true) {
+            ($result['valid'] ?? true) === false => 'high_risk',
+            $fraudScore >= 85                    => 'high_risk',
+            $fraudScore >= 60                    => 'mid_risk',
+            $fraudScore >= 35                    => 'low_risk',
+            default                              => 'safe',
+        };
+
+        return array_merge($result, [
+            'provider'   => 'ipqualityscore',
+            'risk_level' => $level,
+            'risk_score' => $score,
+            'summary'    => [
+                'valid'   => $result['valid'] ?? null,
+                'carrier' => $result['carrier'] ?? null,
+                'line_type' => $result['line_type'] ?? null,
+                'country' => $result['country'] ?? null,
+            ],
+            'reports'    => [],
+            'couriers'   => [],
+        ]);
+    }
+
+    /**
+     * Normalise any provider's numeric score onto the shared vocabulary.
+     *
+     * Most services publish a 0-100 risk score where higher means riskier — the inverse
+     * of ours. Passing $higherIsRiskier = false handles the few that score confidence
+     * instead, so each driver states its direction rather than silently inverting.
+     */
+    public static function fromRiskScore(
+        float $score,
+        array $raw,
+        string $provider,
+        bool $higherIsRiskier = true,
+        ?string $forceLevel = null,
+    ): array {
+        $risk  = $higherIsRiskier ? $score : (100 - $score);
+        $safety = (int) round(max(0, min(100, 100 - $risk)));
+
+        $level = $forceLevel ?? match (true) {
+            $risk >= 80 => 'high_risk',
+            $risk >= 55 => 'mid_risk',
+            $risk >= 30 => 'low_risk',
+            default     => 'safe',
+        };
+
+        return array_merge($raw, [
+            'provider'   => $provider,
+            'risk_level' => $level,
+            'risk_score' => $safety,
+            'reports'    => $raw['reports'] ?? [],
+            'couriers'   => $raw['couriers'] ?? [],
+        ]);
+    }
+
     public static function riskColor(string $level): string
     {
         return match($level) {

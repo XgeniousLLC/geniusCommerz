@@ -40,7 +40,7 @@
 <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
     <div class="card lift stat">
         <span class="tile sm t-accent"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($stats['total_revenue'], 0) }}</div>
+        <div class="num">{{ money($stats['total_revenue'], 0) }}</div>
         <div class="lbl">Total Revenue</div>
     </div>
     <div class="card lift stat">
@@ -50,7 +50,7 @@
     </div>
     <div class="card lift stat">
         <span class="tile sm t-violet"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($stats['avg_order_value'], 0) }}</div>
+        <div class="num">{{ money($stats['avg_order_value'], 0) }}</div>
         <div class="lbl">Avg Order Value</div>
     </div>
     <div class="card lift stat">
@@ -73,7 +73,7 @@
                     @foreach($chartData as $row)
                     @php $h = max(2, round(($row['revenue'] / $maxRev) * 100)); @endphp
                     <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:20px"
-                         title="{{ $row['date'] }}: ৳{{ number_format($row['revenue']) }} ({{ $row['orders'] }} orders)">
+                         title="{{ $row['date'] }}: {{ money($row['revenue']) }} ({{ $row['orders'] }} orders)">
                         <div style="width:100%;height:{{ $h }}%;background:var(--accent);border-radius:3px 3px 0 0;opacity:.85"></div>
                         <span style="font-size:9px;color:var(--text-muted);white-space:nowrap;overflow:hidden;max-width:100%;text-align:center">{{ substr($row['date'], -5) }}</span>
                     </div>
@@ -86,7 +86,7 @@
                         <tr>
                             <td style="font-family:monospace;font-size:12px">{{ $row['date'] }}</td>
                             <td>{{ $row['orders'] }}</td>
-                            <td><strong>৳{{ number_format($row['revenue']) }}</strong></td>
+                            <td><strong>{{ money($row['revenue']) }}</strong></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -107,7 +107,7 @@
                             <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $p->product_name }}</div>
                             <div style="font-size:11px;color:var(--text-muted)">{{ $p->qty_sold }} units sold</div>
                         </div>
-                        <strong style="color:var(--text);flex-shrink:0">৳{{ number_format($p->revenue) }}</strong>
+                        <strong style="color:var(--text);flex-shrink:0">{{ money($p->revenue) }}</strong>
                     </div>
                     @endforeach
                 </div>
@@ -127,7 +127,7 @@
                 <div>
                     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
                         <span style="text-transform:capitalize;color:var(--text)">{{ str_replace('_', ' ', $row->payment_method) }}</span>
-                        <strong>৳{{ number_format($row->revenue) }}</strong>
+                        <strong>{{ money($row->revenue) }}</strong>
                     </div>
                     <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                         <div style="width:{{ $pct }}%;height:6px;background:var(--accent);border-radius:4px"></div>

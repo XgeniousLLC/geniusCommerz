@@ -81,7 +81,7 @@
                         <input class="input" type="number" :name="`items[${idx}][quantity]`" x-model.number="item.quantity" min="1" required>
                     </div>
                     <div class="field" style="margin:0">
-                        <span class="lbl">Unit Cost (৳)</span>
+                        <span class="lbl">Unit Cost ({{ currency_symbol() }})</span>
                         <input class="input" type="number" :name="`items[${idx}][unit_cost]`" x-model.number="item.unit_cost" min="0" step="0.01" required>
                     </div>
                     <div style="padding-top:26px">
@@ -111,7 +111,7 @@
                         <input class="input" type="text" :name="`shipments[${idx}][description]`" x-model="s.description" placeholder="e.g. Air freight" required>
                     </div>
                     <div class="field" style="margin:0">
-                        <span class="lbl">Amount (৳)</span>
+                        <span class="lbl">Amount ({{ currency_symbol() }})</span>
                         <input class="input" type="number" :name="`shipments[${idx}][amount]`" x-model.number="s.amount" min="0" step="0.01" required>
                     </div>
                     <div class="field" style="margin:0">

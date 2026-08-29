@@ -35,17 +35,17 @@
 <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
     <div class="card lift stat">
         <span class="tile sm t-accent"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($revenue, 0) }}</div>
+        <div class="num">{{ money($revenue, 0) }}</div>
         <div class="lbl">Total Revenue</div>
     </div>
     <div class="card lift stat">
         <span class="tile sm t-danger"><span class="ico" data-ico="trendDown" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($cogs, 0) }}</div>
+        <div class="num">{{ money($cogs, 0) }}</div>
         <div class="lbl">COGS</div>
     </div>
     <div class="card lift stat">
         <span class="tile sm t-success"><span class="ico" data-ico="trendUp" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($grossProfit, 0) }}</div>
+        <div class="num">{{ money($grossProfit, 0) }}</div>
         <div class="lbl">Gross Profit</div>
     </div>
     <div class="card lift stat">
@@ -67,9 +67,9 @@
                 @foreach($byMonth as $row)
                 <tr>
                     <td>{{ $row->month }}</td>
-                    <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue,0) }}</td>
-                    <td style="text-align:right;color:var(--danger)">-৳{{ number_format($row->discount,0) }}</td>
-                    <td style="text-align:right;color:var(--accent)">+৳{{ number_format($row->shipping,0) }}</td>
+                    <td style="text-align:right;font-weight:600">{{ money($row->revenue, 0) }}</td>
+                    <td style="text-align:right;color:var(--danger)">-{{ money($row->discount, 0) }}</td>
+                    <td style="text-align:right;color:var(--accent)">+{{ money($row->shipping, 0) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -82,27 +82,27 @@
         <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
             <div style="display:flex;justify-content:space-between">
                 <span style="color:var(--text-muted)">Gross Revenue</span>
-                <strong>৳{{ number_format($revenue,0) }}</strong>
+                <strong>{{ money($revenue, 0) }}</strong>
             </div>
             <div style="display:flex;justify-content:space-between;color:var(--danger)">
                 <span>Cost of Goods (COGS)</span>
-                <span>-৳{{ number_format($cogs,0) }}</span>
+                <span>-{{ money($cogs, 0) }}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--border);padding-top:10px">
                 <span>Gross Profit</span>
-                <span style="color:var(--success)">৳{{ number_format($grossProfit,0) }}</span>
+                <span style="color:var(--success)">{{ money($grossProfit, 0) }}</span>
             </div>
             <div style="display:flex;justify-content:space-between;color:var(--danger)">
                 <span>Discounts Given</span>
-                <span>-৳{{ number_format($discount,0) }}</span>
+                <span>-{{ money($discount, 0) }}</span>
             </div>
             <div style="display:flex;justify-content:space-between;color:var(--accent)">
                 <span>Shipping Collected</span>
-                <span>+৳{{ number_format($shipping,0) }}</span>
+                <span>+{{ money($shipping, 0) }}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px;border-top:1px solid var(--border);padding-top:10px">
                 <span>Est. Net Profit</span>
-                <span style="color:{{ $netProfit >= 0 ? 'var(--success)' : 'var(--danger)' }}">৳{{ number_format($netProfit,0) }}</span>
+                <span style="color:{{ $netProfit >= 0 ? 'var(--success)' : 'var(--danger)' }}">{{ money($netProfit, 0) }}</span>
             </div>
             <p style="font-size:11px;color:var(--text-muted)">* COGS only calculated for products with cost price set. Net profit is an estimate.</p>
         </div>
@@ -126,9 +126,9 @@
             @foreach($topMargin as $p)
             <tr>
                 <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $p->product_name }}</td>
-                <td style="text-align:right">৳{{ number_format($p->revenue,0) }}</td>
-                <td style="text-align:right;color:var(--danger)">৳{{ number_format($p->cost,0) }}</td>
-                <td style="text-align:right;font-weight:600;color:var(--success)">৳{{ number_format($p->profit,0) }}</td>
+                <td style="text-align:right">{{ money($p->revenue, 0) }}</td>
+                <td style="text-align:right;color:var(--danger)">{{ money($p->cost, 0) }}</td>
+                <td style="text-align:right;font-weight:600;color:var(--success)">{{ money($p->profit, 0) }}</td>
                 <td style="text-align:right">
                     <span class="pill sm {{ $p->margin_pct >= 30 ? 't-success' : ($p->margin_pct >= 10 ? 't-warning' : 't-danger') }}">{{ number_format($p->margin_pct,1) }}%</span>
                 </td>

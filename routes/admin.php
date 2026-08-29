@@ -145,13 +145,58 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings/{group}', [SettingsController::class, 'update'])->name('settings.update');
 
+        // Exchange-rate sources, managed from the Currencies page
+        Route::post('/currencies/refresh-rates', [\App\Http\Controllers\Admin\FxSourceController::class, 'refresh'])->name('currencies.refresh');
+        Route::post('/currencies/fx/{provider}/toggle', [\App\Http\Controllers\Admin\FxSourceController::class, 'toggle'])->name('currencies.fx.toggle');
+        Route::post('/currencies/fx/{provider}/default', [\App\Http\Controllers\Admin\FxSourceController::class, 'setDefault'])->name('currencies.fx.default');
+
+        // SMS gateways
+        Route::get('/sms', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'index'])->name('sms.index');
+        Route::post('/sms/{provider}/toggle', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'toggle'])->name('sms.toggle');
+        Route::post('/sms/{provider}/default', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'setDefault'])->name('sms.default');
+        Route::post('/sms/{provider}/test', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'test'])->name('sms.test');
+        Route::post('/sms/{provider}/balance', [\App\Http\Controllers\Admin\SmsGatewayController::class, 'balance'])->name('sms.balance');
+
+        // Fraud checks
+        Route::get('/fraud', [\App\Http\Controllers\Admin\FraudCheckController::class, 'index'])->name('fraud.index');
+        Route::post('/fraud/test', [\App\Http\Controllers\Admin\FraudCheckController::class, 'test'])->name('fraud.test');
+        Route::post('/fraud/{provider}/toggle', [\App\Http\Controllers\Admin\FraudCheckController::class, 'toggle'])->name('fraud.toggle');
+        Route::post('/fraud/{provider}/default', [\App\Http\Controllers\Admin\FraudCheckController::class, 'setDefault'])->name('fraud.default');
+
+        // Shipping zones
+        Route::get('/shipping', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'index'])->name('shipping.index');
+        Route::post('/shipping/origin', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'updateOrigin'])->name('shipping.origin');
+        Route::post('/shipping/presets', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'applyPreset'])->name('shipping.presets');
+        Route::post('/shipping/zones', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'store'])->name('shipping.store');
+        Route::delete('/shipping/zones/{zone}', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'destroy'])->name('shipping.destroy');
+        Route::post('/shipping/zones/{zone}/rates', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'storeRate'])->name('shipping.rates.store');
+        Route::delete('/shipping/rates/{rate}', [\App\Http\Controllers\Admin\ShippingZoneController::class, 'destroyRate'])->name('shipping.rates.destroy');
+
+        // Tax zones
+        Route::get('/tax', [\App\Http\Controllers\Admin\TaxZoneController::class, 'index'])->name('tax.index');
+        Route::post('/tax/settings', [\App\Http\Controllers\Admin\TaxZoneController::class, 'updateSettings'])->name('tax.settings');
+        Route::post('/tax/presets', [\App\Http\Controllers\Admin\TaxZoneController::class, 'applyPreset'])->name('tax.presets');
+        Route::post('/tax/zones', [\App\Http\Controllers\Admin\TaxZoneController::class, 'store'])->name('tax.store');
+        Route::put('/tax/zones/{zone}', [\App\Http\Controllers\Admin\TaxZoneController::class, 'update'])->name('tax.update');
+        Route::delete('/tax/zones/{zone}', [\App\Http\Controllers\Admin\TaxZoneController::class, 'destroy'])->name('tax.destroy');
+        Route::post('/tax/zones/{zone}/rates', [\App\Http\Controllers\Admin\TaxZoneController::class, 'storeRate'])->name('tax.rates.store');
+        Route::delete('/tax/rates/{rate}', [\App\Http\Controllers\Admin\TaxZoneController::class, 'destroyRate'])->name('tax.rates.destroy');
+
+        // Payment gateways — many active at once, ordered for checkout, so they get
+        // their own page rather than the single-default Integrations flow.
+        Route::get('/payment-gateways', [\App\Http\Controllers\Admin\PaymentGatewayController::class, 'index'])->name('payment-gateways.index');
+        Route::post('/payment-gateways/reorder', [\App\Http\Controllers\Admin\PaymentGatewayController::class, 'reorder'])->name('payment-gateways.reorder');
+        Route::post('/payment-gateways/{provider}/toggle', [\App\Http\Controllers\Admin\PaymentGatewayController::class, 'toggle'])->name('payment-gateways.toggle');
+
         // Integrations
         Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations.index');
-        Route::get('/integrations/{integration}/edit', [IntegrationController::class, 'edit'])->name('integrations.edit');
-        Route::put('/integrations/{integration}', [IntegrationController::class, 'update'])->name('integrations.update');
-        Route::post('/integrations/{integration}/set-default', [IntegrationController::class, 'setDefault'])->name('integrations.set-default');
-        Route::post('/integrations/{integration}/test-sms', [IntegrationController::class, 'testSms'])->name('integrations.test-sms');
-        Route::post('/integrations/{integration}/sms-balance', [IntegrationController::class, 'smsBalance'])->name('integrations.sms-balance');
+        // Bound by provider slug, not model id: rows are created lazily on first save,
+        // so a configurable provider may not have a row yet.
+        Route::get('/integrations/{provider}/edit', [IntegrationController::class, 'edit'])->name('integrations.edit');
+        Route::put('/integrations/{provider}', [IntegrationController::class, 'update'])->name('integrations.update');
+        Route::post('/integrations/{provider}/set-default', [IntegrationController::class, 'setDefault'])->name('integrations.set-default');
+        Route::post('/integrations/{provider}/test-sms', [IntegrationController::class, 'testSms'])->name('integrations.test-sms');
+        Route::post('/integrations/{provider}/sms-balance', [IntegrationController::class, 'smsBalance'])->name('integrations.sms-balance');
 
         // AI Settings
         Route::get('/ai-settings', [IntegrationController::class, 'aiSettings'])->name('ai-settings.index');

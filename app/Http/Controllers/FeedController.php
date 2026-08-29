@@ -15,6 +15,9 @@ class FeedController extends Controller
         }
 
         $siteName = SiteSetting::get('general.site_name', config('app.name'));
+        // Catalogue prices are in the store's base currency; declaring the wrong code
+        // here misprices every product on Google Shopping.
+        $feedCurrency = SiteSetting::get('general.currency', 'BDT');
         $baseUrl  = rtrim(config('app.url'), '/');
 
         $products = Product::where('status', 'active')
@@ -47,10 +50,10 @@ class FeedController extends Controller
             if ($imageUrl) {
                 $xml .= '  <g:image_link>' . $imageUrl . '</g:image_link>' . "\n";
             }
-            $xml .= '  <g:price>' . $price . ' BDT</g:price>' . "\n";
+            $xml .= '  <g:price>' . $price . ' ' . $feedCurrency . '</g:price>' . "\n";
             if ($product->compare_at_price && (float)$product->compare_at_price > (float)$product->price) {
-                $xml .= '  <g:sale_price>' . $price . ' BDT</g:sale_price>' . "\n";
-                $xml .= '  <g:price>' . number_format((float) $product->compare_at_price, 2, '.', '') . ' BDT</g:price>' . "\n";
+                $xml .= '  <g:sale_price>' . $price . ' ' . $feedCurrency . '</g:sale_price>' . "\n";
+                $xml .= '  <g:price>' . number_format((float) $product->compare_at_price, 2, '.', '') . ' ' . $feedCurrency . '</g:price>' . "\n";
             }
             $xml .= '  <g:availability>' . ($inStock ? 'in_stock' : 'out_of_stock') . '</g:availability>' . "\n";
             $xml .= '  <g:condition>new</g:condition>' . "\n";
@@ -81,7 +84,8 @@ class FeedController extends Controller
             abort(404);
         }
 
-        $baseUrl = rtrim(config('app.url'), '/');
+        $baseUrl      = rtrim(config('app.url'), '/');
+        $feedCurrency = SiteSetting::get('general.currency', 'BDT');
 
         $products = Product::where('status', 'active')
             ->with(['images', 'brand', 'categories'])
@@ -103,7 +107,7 @@ class FeedController extends Controller
                 'description'      => strip_tags($product->short_description ?? $product->name),
                 'availability'     => $inStock ? 'in stock' : 'out of stock',
                 'condition'        => 'new',
-                'price'            => $price . ' BDT',
+                'price'            => $price . ' ' . $feedCurrency,
                 'link'             => $baseUrl . '/shop/' . $product->slug,
                 'image_link'       => $imageUrl,
                 'brand'            => $product->brand?->name ?? '',
@@ -115,8 +119,8 @@ class FeedController extends Controller
             }
 
             if ($product->compare_at_price && (float)$product->compare_at_price > (float)$product->price) {
-                $item['sale_price'] = $price . ' BDT';
-                $item['price']      = number_format((float) $product->compare_at_price * 100, 0, '.', '') . ' BDT';
+                $item['sale_price'] = $price . ' ' . $feedCurrency;
+                $item['price']      = number_format((float) $product->compare_at_price * 100, 0, '.', '') . ' ' . $feedCurrency;
             }
 
             return $item;

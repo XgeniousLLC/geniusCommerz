@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>geniusCommerz Admin Panel Documentation</title>
+    <title>geniusCommerz Documentation</title>
     <style>
         * {
             margin: 0;
@@ -12,24 +12,21 @@
         }
 
         :root {
-            --primary-color: #0B1F4F;
-            --secondary-color: #8B6F47;
-            --text-dark: #1a1a1a;
-            --text-light: #555555;
-            --bg-light: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
             --bg-white: #ffffff;
-            --border-color: #d0d0d0;
-            --code-bg: #f0f0f0;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --info: #3498db;
+            --bg-light: #f8f8f8;
+            --border-color: #e0e0e0;
+            --code-bg: #f5f5f5;
+            --sidebar-bg: #2d2d2d;
+            --sidebar-text: #ffffff;
+            --accent: #333333;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.7;
-            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
             background: var(--bg-white);
         }
 
@@ -38,79 +35,96 @@
             min-height: 100vh;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: var(--primary-color);
-            color: #ffffff;
-            padding: 2rem 1.5rem;
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 2rem 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             left: 0;
             top: 0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: #ffffff;
+            margin-bottom: 0.3rem;
         }
 
         .sidebar-tagline {
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
         }
 
         .nav-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            padding: 0 1.5rem;
         }
 
         .nav-section-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.8rem;
             font-weight: 600;
         }
 
         .nav-link {
             display: block;
-            padding: 0.65rem 1rem;
-            color: rgba(255,255,255,0.85);
+            padding: 0.6rem 0.8rem;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             border-radius: 4px;
-            transition: all 0.3s;
-            margin-bottom: 0.25rem;
+            transition: all 0.2s;
             font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            cursor: pointer;
         }
 
         .nav-link:hover {
             background: rgba(255,255,255,0.1);
             color: #ffffff;
-            padding-left: 1.25rem;
         }
 
         .nav-link.active {
-            background: var(--secondary-color);
+            background: rgba(255,255,255,0.2);
             color: #ffffff;
-            padding-left: 1.25rem;
+            font-weight: 500;
         }
 
         /* Main Content */
         .main {
-            margin-left: 280px;
+            margin-left: 260px;
             flex: 1;
-            background: var(--bg-white);
+        }
+
+        .header {
+            background: var(--bg-light);
+            padding: 3rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
         }
 
         .content {
@@ -119,83 +133,44 @@
             padding: 3rem 2rem;
         }
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), #1a2f5f), url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80');
-            background-size: cover;
-            background-position: center;
-            color: #ffffff;
-            padding: 4rem 2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 100px;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(11, 31, 79, 0.85);
-            z-index: 1;
-        }
-
-        .header h1, .header p {
-            position: relative;
-            z-index: 2;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.95);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Typography */
         h1 {
             font-size: 2rem;
-            margin: 2rem 0 1rem;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--secondary-color);
-            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         h2 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             margin: 2rem 0 1rem;
-            color: var(--primary-color);
+            color: var(--text-primary);
         }
 
         h3 {
-            font-size: 1.3rem;
-            margin: 1.5rem 0 0.75rem;
-            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.8rem;
+            color: var(--text-primary);
         }
 
         h4 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin: 1rem 0 0.5rem;
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         p {
             margin-bottom: 1rem;
-            color: var(--text-dark);
             line-height: 1.8;
+            color: var(--text-primary);
         }
 
-        /* Lists */
         ul, ol {
             margin-left: 2rem;
             margin-bottom: 1rem;
@@ -203,41 +178,8 @@
 
         li {
             margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-
-        /* Features Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .feature {
-            padding: 1.5rem;
-            background: var(--bg-light);
-            border-radius: 8px;
-            border-left: 4px solid var(--secondary-color);
-            overflow: hidden;
-        }
-
-        .feature-image {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .feature h4 {
-            margin: 0.5rem 0;
-            color: var(--primary-color);
-        }
-
-        .feature p {
-            color: var(--text-light);
-            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.8;
         }
 
         /* Code Blocks */
@@ -245,26 +187,50 @@
             background: var(--code-bg);
             padding: 2px 6px;
             border-radius: 3px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Courier New', monospace;
             font-size: 0.9rem;
             color: #c23030;
         }
 
         pre {
-            background: #2c3e50;
-            color: #ecf0f1;
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
             padding: 1.5rem;
             border-radius: 6px;
             overflow-x: auto;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
+            position: relative;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
             line-height: 1.5;
-            border-left: 4px solid var(--secondary-color);
         }
 
         pre code {
             background: none;
             padding: 0;
-            color: #ecf0f1;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--text-primary);
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
         }
 
         /* Tables */
@@ -272,175 +238,81 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         thead {
-            background: var(--primary-color);
-            color: #ffffff;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border-color);
         }
 
         th, td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
-            color: var(--text-dark);
         }
 
-        thead th {
-            color: #ffffff;
+        th {
             font-weight: 600;
-        }
-
-        tbody tr:nth-child(even) {
-            background: var(--bg-light);
+            color: var(--text-primary);
         }
 
         tbody tr:hover {
-            background: #eeeeee;
+            background: var(--bg-light);
         }
 
-        /* Callouts */
-        .callout {
-            padding: 1.25rem;
+        /* Boxes */
+        .box {
+            padding: 1.5rem;
             margin: 1.5rem 0;
-            border-radius: 6px;
-            border-left: 4px solid;
+            border-left: 4px solid var(--accent);
+            background: var(--bg-light);
+            border-radius: 4px;
         }
 
-        .callout.info {
-            background: #e3f2fd;
-            border-color: var(--info);
-            color: #01579b;
+        .box.info {
+            border-left-color: #0066cc;
+            background: #f0f7ff;
         }
 
-        .callout.warning {
-            background: #fff3e0;
-            border-color: var(--warning);
-            color: #e65100;
+        .box.warning {
+            border-left-color: #ff9800;
+            background: #fff8f0;
         }
 
-        .callout.success {
-            background: #e8f5e9;
-            border-color: var(--success);
-            color: #1b5e20;
+        .box.success {
+            border-left-color: #4caf50;
+            background: #f0fff4;
         }
 
-        .callout.danger {
-            background: #ffebee;
-            border-color: var(--danger);
-            color: #b71c1c;
-        }
-
-        .callout strong {
+        .box strong {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        /* Hero Image Section */
-        .hero-image {
-            width: 100%;
-            max-width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 2rem 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Image Gallery */
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .gallery-item {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        /* Navigation */
-        .nav-bottom {
-            display: flex;
-            gap: 1rem;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            justify-content: space-between;
-        }
-
-        .nav-bottom a {
-            flex: 1;
-            padding: 0.75rem;
-            text-align: center;
-            color: var(--primary-color);
-            text-decoration: none;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .nav-bottom a:hover {
-            border-color: var(--primary-color);
-            background: var(--bg-light);
-            color: var(--primary-color);
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--primary-color);
-            color: #ffffff;
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-        }
-
-        .footer p {
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 0.5rem;
-        }
-
-        .footer a {
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .unsplash-credit {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.7);
-            margin-top: 1rem;
+            color: var(--text-primary);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                position: relative;
                 width: 100%;
                 height: auto;
-                margin-bottom: 1rem;
+                position: relative;
             }
 
             .main {
                 margin-left: 0;
             }
 
+            .header {
+                padding: 2rem 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
             .content {
-                padding: 1.5rem;
+                padding: 2rem 1.5rem;
             }
 
             h1 {
@@ -448,19 +320,12 @@
             }
 
             h2 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
             }
 
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .features {
-                grid-template-columns: 1fr;
-            }
-
-            .image-grid {
-                grid-template-columns: 1fr;
+            pre {
+                font-size: 0.85rem;
+                padding: 1rem;
             }
         }
 
@@ -489,158 +354,221 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">geniusCommerz</div>
-                <div class="sidebar-tagline">Admin Panel Documentation</div>
+                <div class="sidebar-tagline">Documentation</div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Getting Started</div>
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#overview" class="nav-link">Overview</a>
-                <a href="#login" class="nav-link">Login & Access</a>
-                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="#home" class="nav-link active" onclick="scrollToSection('home')">Home</a>
+                <a href="#installation" class="nav-link" onclick="scrollToSection('installation')">Installation</a>
+                <a href="#requirements" class="nav-link" onclick="scrollToSection('requirements')">Server Requirements</a>
+                <a href="#login" class="nav-link" onclick="scrollToSection('login')">Login</a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Catalog Management</div>
-                <a href="#products" class="nav-link">Products</a>
-                <a href="#categories" class="nav-link">Categories</a>
-                <a href="#brands" class="nav-link">Brands</a>
-                <a href="#attributes" class="nav-link">Attributes</a>
+                <div class="nav-section-title">Admin Panel</div>
+                <a href="#dashboard" class="nav-link" onclick="scrollToSection('dashboard')">Dashboard</a>
+                <a href="#products" class="nav-link" onclick="scrollToSection('products')">Products</a>
+                <a href="#orders" class="nav-link" onclick="scrollToSection('orders')">Orders</a>
+                <a href="#categories" class="nav-link" onclick="scrollToSection('categories')">Categories</a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Sales & Orders</div>
-                <a href="#orders" class="nav-link">Orders</a>
-                <a href="#coupons" class="nav-link">Coupons</a>
-                <a href="#refunds" class="nav-link">Refunds</a>
-                <a href="#loyalty" class="nav-link">Loyalty Points</a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Content Management</div>
-                <a href="#pages" class="nav-link">Pages</a>
-                <a href="#blogs" class="nav-link">Blog</a>
-                <a href="#menus" class="nav-link">Menus</a>
-                <a href="#media" class="nav-link">Media</a>
+                <div class="nav-section-title">Deployment</div>
+                <a href="#deployment" class="nav-link" onclick="scrollToSection('deployment')">Deployment Guide</a>
+                <a href="#aws" class="nav-link" onclick="scrollToSection('aws')">AWS EC2</a>
+                <a href="#digitalocean" class="nav-link" onclick="scrollToSection('digitalocean')">DigitalOcean</a>
+                <a href="#cpanel" class="nav-link" onclick="scrollToSection('cpanel')">cPanel</a>
+                <a href="#docker" class="nav-link" onclick="scrollToSection('docker')">Docker</a>
+                <a href="#vps" class="nav-link" onclick="scrollToSection('vps')">Custom VPS</a>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Configuration</div>
-                <a href="#settings" class="nav-link">Store Settings</a>
-                <a href="#storefront" class="nav-link">Storefront</a>
-                <a href="#payment" class="nav-link">Payment Methods</a>
-                <a href="#shipping" class="nav-link">Shipping</a>
-                <a href="#integrations" class="nav-link">Integrations</a>
+                <a href="#settings" class="nav-link" onclick="scrollToSection('settings')">Store Settings</a>
+                <a href="#payment" class="nav-link" onclick="scrollToSection('payment')">Payment</a>
+                <a href="#shipping" class="nav-link" onclick="scrollToSection('shipping')">Shipping</a>
+                <a href="#tax" class="nav-link" onclick="scrollToSection('tax')">Tax</a>
+                <a href="#currencies" class="nav-link" onclick="scrollToSection('currencies')">Currencies</a>
+                <a href="#integrations" class="nav-link" onclick="scrollToSection('integrations')">Integrations</a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Administration</div>
-                <a href="#customers" class="nav-link">Customers</a>
-                <a href="#team" class="nav-link">Team & Roles</a>
-                <a href="#reports" class="nav-link">Reports</a>
-                <a href="#audit" class="nav-link">Audit Log</a>
+                <div class="nav-section-title">Support</div>
+                <a href="#faq" class="nav-link" onclick="scrollToSection('faq')">FAQ</a>
+                <a href="#troubleshooting" class="nav-link" onclick="scrollToSection('troubleshooting')">Troubleshooting</a>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="main">
             <div class="header">
-                <h1>geniusCommerz Admin Panel</h1>
-                <p>Complete documentation for managing your e-commerce store. Everything you need to know about the admin dashboard.</p>
+                <h1>geniusCommerz</h1>
+                <p>Complete documentation for your e-commerce platform. Learn how to set up, configure, and manage your store.</p>
             </div>
 
             <div class="content">
 
                 <!-- HOME -->
                 <section id="home">
-                    <h1>Welcome to geniusCommerz Admin</h1>
-
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80" alt="E-commerce dashboard" class="hero-image">
-
-                    <p>geniusCommerz is a modern, powerful e-commerce platform designed to help you build and manage your online store with ease. This documentation covers every feature of the admin panel.</p>
-
-                    <div class="features">
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="Dashboard analytics" class="feature-image">
-                            <h4>Dashboard</h4>
-                            <p>Real-time analytics, KPI cards, and sales overview at a glance</p>
-                        </div>
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80" alt="Product management" class="feature-image">
-                            <h4>Inventory Management</h4>
-                            <p>Manage products, variants, categories, and brands efficiently</p>
-                        </div>
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80" alt="Order management" class="feature-image">
-                            <h4>Order Management</h4>
-                            <p>Complete order lifecycle from creation to delivery</p>
-                        </div>
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1563013544-824ae1c83d3f?w=400&q=80" alt="Payment processing" class="feature-image">
-                            <h4>Payment Processing</h4>
-                            <p>Multiple payment gateways integrated and ready to use</p>
-                        </div>
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80" alt="Content management" class="feature-image">
-                            <h4>Content Management</h4>
-                            <p>Pages, blogs, menus, and media library management</p>
-                        </div>
-                        <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="Settings" class="feature-image">
-                            <h4>Settings & Configuration</h4>
-                            <p>Complete control over store settings and integrations</p>
-                        </div>
-                    </div>
-
-                    <h2>Documentation Sections</h2>
-                    <ul>
-                        <li><strong>Login & Access:</strong> Get started with your admin account</li>
-                        <li><strong>Dashboard Overview:</strong> Understand your dashboard metrics</li>
-                        <li><strong>Product Management:</strong> Add and manage products</li>
-                        <li><strong>Order Processing:</strong> Handle customer orders</li>
-                        <li><strong>Store Configuration:</strong> Configure your store settings</li>
-                        <li><strong>Payment & Shipping:</strong> Setup payment and shipping methods</li>
-                        <li><strong>Integrations:</strong> Connect third-party services</li>
-                        <li><strong>Reports:</strong> View analytics and reports</li>
-                    </ul>
-                </section>
-
-                <!-- OVERVIEW -->
-                <section id="overview">
-                    <h1>Admin Panel Overview</h1>
-
-                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80" alt="Admin panel overview" class="hero-image">
+                    <h1>Welcome to geniusCommerz</h1>
+                    <p>geniusCommerz is a modern e-commerce platform built with Laravel and React. It ships with 98 provider integrations &mdash; payments, SMS, fraud screening, shipping carriers, exchange rates and AI &mdash; and handles the parts of selling internationally that are usually painful: per-country addresses, currency conversion recorded per order, destination tax, and shipping zones.</p>
 
                     <h2>Key Features</h2>
                     <ul>
-                        <li>Dual Authentication: Separate admin and customer login systems</li>
-                        <li>Role-Based Access Control: Customize permissions per team member</li>
-                        <li>Real-Time Analytics: Track revenue, orders, and customer metrics</li>
-                        <li>Multi-Language Support: English, Bengali, and more</li>
-                        <li>Multi-Currency Support: Automatic conversion between currencies</li>
-                        <li>AI Integration: OpenAI, Claude, Gemini content generation</li>
-                        <li>Courier Integration: Pathao, RedX, Steadfast shipping</li>
-                        <li>Payment Gateways: Stripe, bKash, Nagad, Cash on Delivery</li>
-                    </ul>
-
-                    <h2>Admin Interface Design</h2>
-                    <p>The admin panel uses a modern, clean design system for optimal usability:</p>
-                    <ul>
-                        <li>Dark blue sidebar with intuitive navigation</li>
-                        <li>Clean, organized content area for easy reading</li>
-                        <li>Responsive design works on desktop, tablet, and mobile</li>
-                        <li>Dark mode support for reduced eye strain</li>
-                        <li>Global search functionality across all pages</li>
+                        <li>Admin panel with Blade + Alpine.js</li>
+                        <li>Storefront with Inertia v3 + React 19</li>
+                        <li>Dual authentication (Admin &amp; Customer)</li>
+                        <li>Real-time analytics and reporting</li>
+                        <li>Sell worldwide &mdash; 213 countries, with address forms and dial codes that adapt per country</li>
+                        <li>Multi-currency, with the rate frozen onto each order and refreshed automatically</li>
+                        <li>Destination-based tax &mdash; VAT, GST and sales tax, inclusive or exclusive</li>
+                        <li>Shipping zones with weight and order-value bands, plus live carrier rates</li>
+                        <li><strong>39 payment gateways</strong> across every major region</li>
+                        <li><strong>20 SMS gateways</strong> &mdash; global, Bangladesh, India, Gulf and Africa</li>
+                        <li><strong>11 fraud checkers</strong> on one shared risk scale</li>
+                        <li><strong>19 shipping carriers</strong> plus 3 Bangladeshi couriers</li>
+                        <li>AI content generation (OpenAI, Claude, Gemini, DeepSeek)</li>
+                        <li>One-click templates for tax and shipping configuration</li>
                     </ul>
                 </section>
 
-                <!-- LOGIN & ACCESS -->
+                <!-- INSTALLATION -->
+                <section id="installation">
+                    <h1>Installation</h1>
+
+                    <h2>Prerequisites</h2>
+                    <p>Before installing geniusCommerz, ensure you have the following installed on your system:</p>
+                    <ul>
+                        <li>PHP 8.2 or higher</li>
+                        <li>MySQL 8.0 or PostgreSQL 12+</li>
+                        <li>Node.js 18+ and npm</li>
+                        <li>Composer</li>
+                        <li>Git</li>
+                    </ul>
+
+                    <h2>Step 1: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/XgeniousLLC/geniusCommerz.git
+cd geniusCommerz</code></pre>
+
+                    <h2>Step 2: Install PHP Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>composer install</code></pre>
+
+                    <h2>Step 3: Environment Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cp .env.example .env
+php artisan key:generate</code></pre>
+
+                    <p>Edit your <code>.env</code> file and configure:</p>
+                    <ul>
+                        <li>Database connection (DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD)</li>
+                        <li>App URL (APP_URL)</li>
+                        <li>Mail configuration (MAIL_DRIVER, MAIL_FROM_ADDRESS)</li>
+                    </ul>
+
+                    <h2>Step 4: Create Database</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed</code></pre>
+
+                    <h2>Step 5: Install Node Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>npm install</code></pre>
+
+                    <h2>Step 6: Build Frontend Assets</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>npm run build</code></pre>
+
+                    <div class="box info">
+                        <strong>Development Mode</strong>
+                        For development, use: <code>npm run dev</code> to watch for changes
+                    </div>
+
+                    <h2>Step 7: Start Development Server</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan serve</code></pre>
+
+                    <p>Your application will be available at <code>http://localhost:8000</code></p>
+                </section>
+
+                <!-- SERVER REQUIREMENTS -->
+                <section id="requirements">
+                    <h1>Server Requirements</h1>
+
+                    <h2>Minimum Requirements</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Minimum Version</th>
+                                <th>Recommended</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PHP</td>
+                                <td>8.2</td>
+                                <td>8.3 or later</td>
+                            </tr>
+                            <tr>
+                                <td>MySQL</td>
+                                <td>8.0</td>
+                                <td>8.1 or later</td>
+                            </tr>
+                            <tr>
+                                <td>PostgreSQL</td>
+                                <td>12</td>
+                                <td>15 or later</td>
+                            </tr>
+                            <tr>
+                                <td>Node.js</td>
+                                <td>18</td>
+                                <td>20 or later</td>
+                            </tr>
+                            <tr>
+                                <td>Composer</td>
+                                <td>2.0</td>
+                                <td>Latest</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>PHP Extensions Required</h2>
+                    <ul>
+                        <li>BCMath</li>
+                        <li>Ctype</li>
+                        <li>Fileinfo</li>
+                        <li>JSON</li>
+                        <li>Mbstring</li>
+                        <li>OpenSSL</li>
+                        <li>PDO</li>
+                        <li>Tokenizer</li>
+                        <li>XML</li>
+                        <li>Zip</li>
+                        <li>GD (for image processing)</li>
+                    </ul>
+
+                    <h2>Server Configuration</h2>
+                    <ul>
+                        <li><strong>Memory Limit:</strong> Minimum 256MB (Recommended 512MB)</li>
+                        <li><strong>Max Upload Size:</strong> Minimum 50MB</li>
+                        <li><strong>Max Execution Time:</strong> Minimum 30 seconds</li>
+                        <li><strong>Document Root:</strong> Point to <code>public</code> directory</li>
+                    </ul>
+
+                    <h2>Recommended Web Server Configuration</h2>
+                    <p>For Apache, ensure <code>.htaccess</code> is supported and mod_rewrite is enabled:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>a2enmod rewrite
+systemctl restart apache2</code></pre>
+
+                    <p>For Nginx, configure your server block properly to route requests to <code>public/index.php</code></p>
+
+                    <h2>File Permissions</h2>
+                    <p>Set proper permissions for storage and cache directories:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chmod -R 775 storage
+chmod -R 775 bootstrap/cache</code></pre>
+                </section>
+
+                <!-- LOGIN -->
                 <section id="login">
                     <h1>Login & Account Access</h1>
 
-                    <img src="https://images.unsplash.com/photo-1606994863033-cfe385b99d27?w=900&q=80" alt="Security and login" class="hero-image">
-
-                    <h2>Default Administrator Account</h2>
+                    <h2>Default Admin Account</h2>
                     <table>
                         <thead>
                             <tr>
@@ -650,286 +578,726 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Email Address</td>
-                                <td><code>admin@geniuscommerz.com</code></td>
+                                <td>Email</td>
+                                <td><code>admin@example.com</code></td>
                             </tr>
                             <tr>
                                 <td>Password</td>
                                 <td><code>password</code></td>
                             </tr>
                             <tr>
-                                <td>Login URL</td>
-                                <td><code>https://yourdomain.com/admin/login</code></td>
+                                <td>URL</td>
+                                <td><code>http://localhost:8000/admin/login</code></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="callout warning">
-                        <strong>Security Notice:</strong> Change your password immediately after first login. Use a strong, unique password with at least 12 characters including uppercase, lowercase, numbers, and symbols.
+                    <div class="box warning">
+                        <strong>Security Notice</strong>
+                        Change the default password immediately after first login.
                     </div>
 
-                    <h2>Change Your Password</h2>
+                    <h2>Change Password</h2>
                     <ol>
-                        <li>Click your profile avatar in the top-right corner</li>
-                        <li>Select "Profile" from the dropdown menu</li>
-                        <li>Click the "Change Password" button</li>
-                        <li>Enter your current password for verification</li>
-                        <li>Enter your new password (minimum 12 characters)</li>
-                        <li>Confirm the new password by entering it again</li>
-                        <li>Click "Update Password" to save changes</li>
-                    </ol>
-
-                    <h2>Enable Two-Factor Authentication</h2>
-                    <ol>
-                        <li>Go to your Profile settings</li>
-                        <li>Navigate to the Security section</li>
-                        <li>Click "Enable Two-Factor Authentication"</li>
-                        <li>Scan the QR code with your authenticator app (Google Authenticator, Authy, or Microsoft Authenticator)</li>
-                        <li>Enter the 6-digit code displayed in the app</li>
-                        <li>Save your backup codes in a secure location</li>
-                        <li>Two-factor authentication is now enabled</li>
+                        <li>Log in to the admin panel</li>
+                        <li>Click your profile avatar in the top-right</li>
+                        <li>Select "Profile Settings"</li>
+                        <li>Click "Change Password"</li>
+                        <li>Enter current password and new password</li>
+                        <li>Click "Update"</li>
                     </ol>
                 </section>
 
                 <!-- DASHBOARD -->
                 <section id="dashboard">
                     <h1>Dashboard</h1>
+                    <p>The dashboard provides an overview of your store's performance with key metrics and charts.</p>
 
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&q=80" alt="Analytics dashboard" class="hero-image">
-
-                    <h2>Dashboard Overview</h2>
-                    <p>The dashboard provides a comprehensive overview of your store's performance with real-time data and key metrics.</p>
-
-                    <h2>Key Performance Indicators</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Description</th>
-                                <th>Time Periods Available</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Revenue</td>
-                                <td>Total sales amount for the selected period</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>Orders</td>
-                                <td>Total number of orders placed</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>Average Order Value</td>
-                                <td>Average revenue per order</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>New Customers</td>
-                                <td>Number of newly registered customers</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h2>Dashboard Charts</h2>
+                    <h2>Key Metrics</h2>
                     <ul>
-                        <li><strong>Orders by Status:</strong> Visual breakdown showing pending, confirmed, processing, shipped, delivered, and cancelled orders</li>
-                        <li><strong>Revenue Trend:</strong> Line chart displaying revenue changes over the selected time period</li>
-                        <li><strong>Top Products:</strong> Best-selling products during the current period</li>
-                        <li><strong>Top Categories:</strong> Most popular product categories by sales</li>
+                        <li><strong>Total Revenue:</strong> Sales revenue for selected period</li>
+                        <li><strong>Total Orders:</strong> Number of orders placed</li>
+                        <li><strong>Average Order Value:</strong> Average revenue per order</li>
+                        <li><strong>New Customers:</strong> Newly registered customers</li>
                     </ul>
 
-                    <h2>Recent Orders</h2>
-                    <p>The dashboard displays a table of recent orders with quick actions including:</p>
+                    <h2>Dashboard Widgets</h2>
                     <ul>
-                        <li>Order number and creation date</li>
-                        <li>Customer name and contact information</li>
-                        <li>Current order status with color indicator</li>
-                        <li>Total order amount</li>
-                        <li>Quick action buttons to view, edit, or print order</li>
+                        <li><strong>Revenue Chart:</strong> Visual trend of sales over time</li>
+                        <li><strong>Order Status:</strong> Breakdown of orders by status</li>
+                        <li><strong>Recent Orders:</strong> Latest orders with quick actions</li>
+                        <li><strong>Top Products:</strong> Best-selling products</li>
                     </ul>
                 </section>
 
                 <!-- PRODUCTS -->
                 <section id="products">
-                    <h1>Product Management</h1>
+                    <h1>Products</h1>
 
-                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=900&q=80" alt="Product management" class="hero-image">
-
-                    <h2>Accessing Products</h2>
-                    <ol>
-                        <li>Click "Catalog" in the sidebar</li>
-                        <li>Select "Products" from the menu</li>
-                    </ol>
-
-                    <h2>Products List</h2>
-                    <p>The products page displays all your store's products with various management options:</p>
-                    <ul>
-                        <li>Search by product name, SKU, or category</li>
-                        <li>Filter by status (Active/Draft), category, brand, or price range</li>
-                        <li>Sort by name, price, stock quantity, or creation date</li>
-                        <li>Bulk actions to change status or delete multiple products</li>
-                        <li>Export product list as CSV or Excel file</li>
-                    </ul>
+                    <h2>Managing Products</h2>
+                    <p>Navigate to Admin → Catalog → Products to manage your products.</p>
 
                     <h2>Add New Product</h2>
                     <ol>
-                        <li>Click the "Add Product" button in the top-right corner</li>
-                        <li>Complete the product form (see sections below)</li>
-                        <li>Click "Save & Publish" to make it live or "Save as Draft"</li>
+                        <li>Click "Add Product" button</li>
+                        <li>Fill in product details (Name, Description, Price)</li>
+                        <li>Add categories and brands</li>
+                        <li>Set inventory and SKU</li>
+                        <li>Click "Save & Publish"</li>
                     </ol>
 
-                    <div class="image-grid">
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt="Product showcase 1">
-                        </div>
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&q=80" alt="Product showcase 2">
-                        </div>
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" alt="Product showcase 3">
-                        </div>
-                    </div>
-
-                    <h2>Product Information Form</h2>
-
-                    <h3>Basic Details</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Field</th>
-                                <th>Description</th>
-                                <th>Required</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Product Name</td>
-                                <td>Display name shown to customers</td>
-                                <td>Yes</td>
-                            </tr>
-                            <tr>
-                                <td>Description</td>
-                                <td>Detailed product description using rich text editor</td>
-                                <td>Yes</td>
-                            </tr>
-                            <tr>
-                                <td>Short Description</td>
-                                <td>Brief summary for listings (maximum 160 characters)</td>
-                                <td>No</td>
-                            </tr>
-                            <tr>
-                                <td>SKU</td>
-                                <td>Unique product identifier for inventory tracking</td>
-                                <td>Yes</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2>Product Information</h2>
+                    <ul>
+                        <li><strong>Name:</strong> Product display name</li>
+                        <li><strong>Description:</strong> Detailed product information</li>
+                        <li><strong>Price:</strong> Product selling price</li>
+                        <li><strong>SKU:</strong> Unique identifier for inventory</li>
+                        <li><strong>Category:</strong> Product category</li>
+                        <li><strong>Brand:</strong> Product brand</li>
+                        <li><strong>Stock:</strong> Available quantity</li>
+                    </ul>
                 </section>
 
                 <!-- ORDERS -->
                 <section id="orders">
-                    <h1>Order Management</h1>
+                    <h1>Orders</h1>
 
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80" alt="Order management" class="hero-image">
+                    <h2>Order Management</h2>
+                    <p>Navigate to Admin → Orders to manage customer orders.</p>
 
-                    <h2>Accessing Orders</h2>
-                    <ol>
-                        <li>Click "Orders" in the sidebar</li>
-                    </ol>
-
-                    <h2>Orders List</h2>
-                    <p>View and manage all customer orders:</p>
+                    <h2>Order Status Flow</h2>
                     <ul>
-                        <li>View orders by status: All, Pending, Confirmed, Processing, Shipped, Delivered, Cancelled</li>
-                        <li>Search by order number, customer name, or email</li>
-                        <li>Filter by date range</li>
-                        <li>Sort by date, amount, or status</li>
-                        <li>Bulk export orders as CSV</li>
+                        <li><strong>Pending:</strong> Order received, awaiting confirmation</li>
+                        <li><strong>Confirmed:</strong> Order verified and ready</li>
+                        <li><strong>Processing:</strong> Items being prepared</li>
+                        <li><strong>Shipped:</strong> With courier</li>
+                        <li><strong>Delivered:</strong> Received by customer</li>
+                        <li><strong>Cancelled:</strong> Order cancelled</li>
                     </ul>
 
-                    <h2>Order Status Workflow</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Status</th>
-                                <th>Description</th>
-                                <th>Next Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Pending</td>
-                                <td>Order received, awaiting confirmation</td>
-                                <td>Review and confirm</td>
-                            </tr>
-                            <tr>
-                                <td>Confirmed</td>
-                                <td>Order verified and ready to process</td>
-                                <td>Prepare for shipping</td>
-                            </tr>
-                            <tr>
-                                <td>Processing</td>
-                                <td>Items being picked and packed</td>
-                                <td>Dispatch to courier</td>
-                            </tr>
-                            <tr>
-                                <td>Shipped</td>
-                                <td>Package with courier in transit</td>
-                                <td>Wait for delivery</td>
-                            </tr>
-                            <tr>
-                                <td>Delivered</td>
-                                <td>Order received by customer</td>
-                                <td>Request product review</td>
-                            </tr>
-                            <tr>
-                                <td>Cancelled</td>
-                                <td>Order cancelled by customer or admin</td>
-                                <td>Process refund if applicable</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2>Order Actions</h2>
+                    <ul>
+                        <li>View order details</li>
+                        <li>Update order status</li>
+                        <li>Print invoice</li>
+                        <li>Send tracking information</li>
+                        <li>Process refund if needed</li>
+                    </ul>
                 </section>
 
-                <!-- PAYMENT -->
-                <section id="payment">
-                    <h1>Payment Configuration</h1>
+                <!-- CATEGORIES -->
+                <section id="categories">
+                    <h1>Categories</h1>
 
-                    <img src="https://images.unsplash.com/photo-1563013544-824ae1c83d3f?w=900&q=80" alt="Payment methods" class="hero-image">
+                    <h2>Managing Categories</h2>
+                    <p>Navigate to Admin → Catalog → Categories to organize your products.</p>
 
-                    <h2>Accessing Payment Settings</h2>
+                    <h2>Add Category</h2>
                     <ol>
-                        <li>Click "Settings" in the sidebar</li>
-                        <li>Click "Payment" tab</li>
+                        <li>Click "Add Category"</li>
+                        <li>Enter category name</li>
+                        <li>Add description (optional)</li>
+                        <li>Set parent category if needed</li>
+                        <li>Click "Save"</li>
                     </ol>
+                </section>
 
-                    <h2>Available Payment Methods</h2>
+                <!-- DEPLOYMENT -->
+                <section id="deployment">
+                    <h1>Deployment Guide</h1>
+                    <p>Choose your deployment platform below for step-by-step instructions.</p>
 
-                    <h3>Cash on Delivery (COD)</h3>
+                    <h2>Supported Platforms</h2>
                     <ul>
-                        <li>Enabled by default, no setup required</li>
-                        <li>Payment collected at time of delivery</li>
-                        <li>Good option for building customer trust initially</li>
+                        <li><strong>AWS EC2:</strong> Scalable cloud hosting</li>
+                        <li><strong>DigitalOcean:</strong> Affordable VPS hosting</li>
+                        <li><strong>cPanel:</strong> Shared hosting with control panel</li>
+                        <li><strong>Docker:</strong> Containerized deployment</li>
+                        <li><strong>Custom VPS:</strong> Linode, Vultr, Hetzner, etc.</li>
                     </ul>
 
-                    <h3>Stripe - International Credit and Debit Cards</h3>
-                    <p>Setup instructions:</p>
+                    <h2>Pre-Deployment Checklist</h2>
+                    <ul>
+                        <li>Domain name registered and pointing to server</li>
+                        <li>SSL certificate (free with Let's Encrypt)</li>
+                        <li>Database backups configured</li>
+                        <li>Email service configured</li>
+                        <li>Payment gateway credentials ready</li>
+                        <li>Storage space for uploads (50GB+ recommended)</li>
+                    </ul>
+                </section>
+
+                <!-- AWS EC2 -->
+                <section id="aws">
+                    <h1>Deploy on AWS EC2</h1>
+
+                    <h2>Step 1: Launch EC2 Instance</h2>
                     <ol>
-                        <li>Register account at stripe.com</li>
-                        <li>Get your Publishable Key and Secret Key</li>
-                        <li>Go to Settings > Payment tab</li>
-                        <li>Toggle "Enable Stripe"</li>
-                        <li>Paste your Publishable Key in the appropriate field</li>
-                        <li>Paste your Secret Key in the appropriate field</li>
-                        <li>Click "Save Settings"</li>
-                        <li>Always test with Stripe test keys first</li>
+                        <li>Go to AWS Console → EC2 → Instances</li>
+                        <li>Click "Launch Instances"</li>
+                        <li>Choose Ubuntu 22.04 LTS AMI</li>
+                        <li>Select instance type: <code>t3.medium</code> or higher</li>
+                        <li>Configure security group (open ports 80, 443, 22)</li>
+                        <li>Create/select key pair for SSH access</li>
+                        <li>Launch instance</li>
                     </ol>
 
-                    <div class="callout warning">
-                        <strong>Important:</strong> Test with test keys (pk_test_...) before switching to live keys (pk_live_...). Live keys will process real charges.
+                    <h2>Step 2: Connect to Instance</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh -i your-key.pem ubuntu@your-instance-ip</code></pre>
+
+                    <h2>Step 3: Install Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt update
+sudo apt install -y php8.3 php8.3-{fpm,mysql,zip,gd,mbstring,curl,xml}
+sudo apt install -y mysql-server nginx
+sudo apt install -y nodejs npm
+sudo apt install -y git composer</code></pre>
+
+                    <h2>Step 4: Configure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mysql_secure_installation
+sudo mysql -u root -p
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'strong_password';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 5: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd /var/www
+sudo git clone https://github.com/XgeniousLLC/geniusCommerz.git
+sudo chown -R ubuntu:ubuntu geniusCommerz
+cd geniusCommerz</code></pre>
+
+                    <h2>Step 6: Setup Application</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>composer install
+cp .env.example .env
+php artisan key:generate
+npm install
+npm run build</code></pre>
+
+                    <h2>Step 7: Configure .env</h2>
+                    <p>Edit <code>.env</code> with your database credentials:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_URL=https://yourdomain.com
+DB_HOST=localhost
+DB_DATABASE=geniuscommerz
+DB_USERNAME=appuser
+DB_PASSWORD=strong_password
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password</code></pre>
+
+                    <h2>Step 8: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed</code></pre>
+
+                    <h2>Step 9: Configure Nginx</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/nginx/sites-available/default</code></pre>
+
+                    <p>Replace with this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com;
+    root /var/www/geniusCommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}</code></pre>
+
+                    <h2>Step 10: Enable SSL with Let's Encrypt</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com</code></pre>
+
+                    <h2>Step 11: Set Permissions</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo chown -R www-data:www-data /var/www/geniusCommerz
+chmod -R 775 /var/www/geniusCommerz/storage
+chmod -R 775 /var/www/geniusCommerz/bootstrap/cache</code></pre>
+
+                    <h2>Step 12: Start Services</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo systemctl restart nginx
+sudo systemctl restart php8.3-fpm
+sudo systemctl restart mysql</code></pre>
+
+                    <div class="box success">
+                        <strong>Deployment Complete</strong>
+                        Your app should now be accessible at https://yourdomain.com
+                    </div>
+                </section>
+
+                <!-- DIGITALOCEAN -->
+                <section id="digitalocean">
+                    <h1>Deploy on DigitalOcean</h1>
+
+                    <h2>Step 1: Create Droplet</h2>
+                    <ol>
+                        <li>Go to DigitalOcean Console → Create → Droplets</li>
+                        <li>Choose Ubuntu 22.04 LTS</li>
+                        <li>Select plan: $12/month (2GB RAM) or higher</li>
+                        <li>Select region closest to your users</li>
+                        <li>Add SSH key</li>
+                        <li>Create Droplet</li>
+                    </ol>
+
+                    <h2>Step 2: Connect via SSH</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh root@your-droplet-ip</code></pre>
+
+                    <h2>Step 3: Update System</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>apt update
+apt upgrade -y</code></pre>
+
+                    <h2>Step 4: Install Stack</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>apt install -y php8.3 php8.3-{fpm,mysql,zip,gd,mbstring,curl,xml}
+apt install -y mysql-server nginx
+apt install -y nodejs npm git composer
+apt install -y certbot python3-certbot-nginx</code></pre>
+
+                    <h2>Step 5: Configure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>mysql -u root
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'strong_password';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 6: Clone & Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd /var/www
+git clone https://github.com/XgeniousLLC/geniusCommerz.git
+cd geniusCommerz
+composer install
+npm install
+npm run build
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed</code></pre>
+
+                    <h2>Step 7: Configure Nginx</h2>
+                    <p>Create nginx config file:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>nano /etc/nginx/sites-available/geniuscommerz</code></pre>
+
+                    <p>Add this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com;
+    root /var/www/geniusCommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</code></pre>
+
+                    <h2>Step 8: Enable Site</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ln -s /etc/nginx/sites-available/geniuscommerz /etc/nginx/sites-enabled/
+nginx -t
+systemctl restart nginx</code></pre>
+
+                    <h2>Step 9: Setup SSL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>certbot --nginx -d yourdomain.com</code></pre>
+
+                    <h2>Step 10: Fix Permissions & Start</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chown -R www-data:www-data /var/www/geniusCommerz
+chmod -R 775 /var/www/geniusCommerz/storage
+systemctl restart php8.3-fpm mysql nginx</code></pre>
+                </section>
+
+                <!-- CPANEL -->
+                <section id="cpanel">
+                    <h1>Deploy on cPanel Shared Hosting</h1>
+
+                    <h2>Requirements</h2>
+                    <ul>
+                        <li>PHP 8.2+ installed</li>
+                        <li>MySQL database</li>
+                        <li>SSH access enabled</li>
+                        <li>Composer installed</li>
+                        <li>Node.js support (if available)</li>
+                    </ul>
+
+                    <h2>Step 1: Upload Files</h2>
+                    <ol>
+                        <li>Using File Manager or FTP, upload all files to <code>public_html</code></li>
+                        <li>The <code>public</code> folder contents go to <code>public_html</code></li>
+                        <li>Other folders go one level above public_html (usually root home)</li>
+                    </ol>
+
+                    <h2>Step 2: Create Database</h2>
+                    <ol>
+                        <li>Go to cPanel → MySQL Databases</li>
+                        <li>Create new database: <code>username_geniuscommerz</code></li>
+                        <li>Create user and assign to database</li>
+                        <li>Note the credentials</li>
+                    </ol>
+
+                    <h2>Step 3: Configure .env</h2>
+                    <p>Via SSH or File Manager, edit <code>.env</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_URL=https://yourdomain.com
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_DATABASE=username_geniuscommerz
+DB_USERNAME=username_user
+DB_PASSWORD=password</code></pre>
+
+                    <h2>Step 4: Run via SSH</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd public_html
+php artisan migrate
+php artisan db:seed
+php artisan cache:clear
+php artisan config:cache</code></pre>
+
+                    <h2>Step 5: Fix File Ownership</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chmod 755 storage
+chmod 755 bootstrap/cache
+find storage -type f -exec chmod 644 {} \;
+find bootstrap/cache -type f -exec chmod 644 {} \;</code></pre>
+
+                    <h2>Step 6: Configure Document Root</h2>
+                    <ol>
+                        <li>Go to cPanel → Addon Domains or Domains</li>
+                        <li>Set document root to <code>public_html/public</code></li>
+                        <li>Update DNS to point to your server</li>
+                    </ol>
+
+                    <h2>Step 7: Setup SSL</h2>
+                    <ol>
+                        <li>Go to cPanel → SSL/TLS</li>
+                        <li>Click "Auto-configure"</li>
+                        <li>Choose your domain</li>
+                        <li>Install Let's Encrypt certificate</li>
+                    </ol>
+
+                    <div class="box warning">
+                        <strong>Note:</strong> cPanel may not support Node.js build. Build assets locally and upload compiled files, or use a provider that supports Node.js.
+                    </div>
+                </section>
+
+                <!-- DOCKER -->
+                <section id="docker">
+                    <h1>Deploy with Docker</h1>
+
+                    <h2>Prerequisites</h2>
+                    <ul>
+                        <li>Docker installed</li>
+                        <li>Docker Compose installed</li>
+                        <li>Docker Hub account (optional)</li>
+                    </ul>
+
+                    <h2>Step 1: Create Dockerfile</h2>
+                    <p>Create <code>Dockerfile</code> in project root:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>FROM php:8.3-fpm
+
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    mysql-client
+
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+WORKDIR /app
+
+COPY . .
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer install
+
+RUN chown -R www-data:www-data /app
+
+EXPOSE 9000
+
+CMD ["php-fpm"]</code></pre>
+
+                    <h2>Step 2: Create Docker Compose</h2>
+                    <p>Create <code>docker-compose.yml</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: geniuscommerz_app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    networks:
+      - geniuscommerz
+
+  mysql:
+    image: mysql:8.0
+    container_name: geniuscommerz_mysql
+    environment:
+      MYSQL_DATABASE: geniuscommerz
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_PASSWORD: app_password
+      MYSQL_USER: appuser
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - geniuscommerz
+
+  nginx:
+    image: nginx:latest
+    container_name: geniuscommerz_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/app
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - geniuscommerz
+
+networks:
+  geniuscommerz:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local</code></pre>
+
+                    <h2>Step 3: Create Nginx Configuration</h2>
+                    <p>Create <code>nginx.conf</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name localhost;
+    root /app/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</code></pre>
+
+                    <h2>Step 4: Build & Run</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose up -d --build</code></pre>
+
+                    <h2>Step 5: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose exec app php artisan migrate --seed</code></pre>
+
+                    <h2>Step 6: Build Assets</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose exec app npm install
+docker-compose exec app npm run build</code></pre>
+
+                    <h2>Useful Docker Commands</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code># View logs
+docker-compose logs app
+
+# Access shell
+docker-compose exec app bash
+
+# Run artisan commands
+docker-compose exec app php artisan cache:clear
+
+# Stop containers
+docker-compose down
+
+# Rebuild
+docker-compose up -d --build</code></pre>
+                </section>
+
+                <!-- CUSTOM VPS -->
+                <section id="vps">
+                    <h1>Deploy on Custom VPS</h1>
+                    <p>Works with Linode, Vultr, Hetzner, OVH, and other VPS providers</p>
+
+                    <h2>Step 1: Choose OS & Create VPS</h2>
+                    <ul>
+                        <li>Recommended: Ubuntu 22.04 LTS (2GB RAM minimum)</li>
+                        <li>Choose region close to your audience</li>
+                        <li>Enable SSH key (not password)</li>
+                    </ul>
+
+                    <h2>Step 2: Initial Server Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh root@your-vps-ip
+
+# Update system
+apt update && apt upgrade -y
+
+# Install curl and wget
+apt install -y curl wget
+
+# Create non-root user
+adduser deployer
+usermod -aG sudo deployer
+
+# Copy SSH key to new user
+su - deployer
+mkdir -p ~/.ssh
+echo "your-public-key" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+exit
+
+# Disable root SSH login
+sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl restart sshd</code></pre>
+
+                    <h2>Step 3: Install Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt install -y \
+  php8.3 \
+  php8.3-fpm \
+  php8.3-mysql \
+  php8.3-zip \
+  php8.3-gd \
+  php8.3-mbstring \
+  php8.3-curl \
+  php8.3-xml \
+  php8.3-bcmath \
+  nginx \
+  mysql-server \
+  nodejs \
+  npm \
+  git \
+  composer \
+  certbot \
+  python3-certbot-nginx</code></pre>
+
+                    <h2>Step 4: Secure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mysql_secure_installation
+sudo mysql -u root -p
+
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'VeryStrongPassword123!';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 5: Setup Web Directory</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mkdir -p /var/www/geniuscommerz
+sudo chown deployer:deployer /var/www/geniuscommerz
+cd /var/www/geniuscommerz</code></pre>
+
+                    <h2>Step 6: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/XgeniousLLC/geniusCommerz.git .
+composer install --no-dev
+npm install
+npm run build</code></pre>
+
+                    <h2>Step 7: Configure Application</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cp .env.example .env
+php artisan key:generate
+
+# Edit .env with your details
+nano .env</code></pre>
+
+                    <p>Required .env settings:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=geniuscommerz
+DB_USERNAME=appuser
+DB_PASSWORD=VeryStrongPassword123!</code></pre>
+
+                    <h2>Step 8: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed
+php artisan cache:clear
+php artisan config:cache
+php artisan route:cache</code></pre>
+
+                    <h2>Step 9: Configure Nginx</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/nginx/sites-available/geniuscommerz</code></pre>
+
+                    <p>Add this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    root /var/www/geniuscommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}</code></pre>
+
+                    <h2>Step 10: Enable Site</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo ln -s /etc/nginx/sites-available/geniuscommerz /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx</code></pre>
+
+                    <h2>Step 11: Setup SSL with Let's Encrypt</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo systemctl restart nginx</code></pre>
+
+                    <h2>Step 12: Set Permissions</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo chown -R www-data:www-data /var/www/geniuscommerz
+sudo chmod -R 775 /var/www/geniuscommerz/storage
+sudo chmod -R 775 /var/www/geniuscommerz/bootstrap/cache</code></pre>
+
+                    <h2>Step 13: Configure PHP</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/php/8.3/fpm/php.ini</code></pre>
+
+                    <p>Update these settings:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>upload_max_filesize = 100M
+post_max_size = 100M
+max_execution_time = 300
+memory_limit = 512M</code></pre>
+
+                    <h2>Step 14: Restart Services</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo systemctl restart php8.3-fpm
+sudo systemctl restart nginx
+sudo systemctl restart mysql</code></pre>
+
+                    <h2>Step 15: Setup Automated Backups (Optional)</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo crontab -e
+
+# Add this line for daily backups at 2 AM
+0 2 * * * mysqldump -u appuser -p'VeryStrongPassword123!' geniuscommerz | gzip > /backups/geniuscommerz_$(date +\%Y\%m\%d).sql.gz</code></pre>
+
+                    <div class="box success">
+                        <strong>Deployment Complete!</strong>
+                        Your application should be live at https://yourdomain.com
                     </div>
                 </section>
 
@@ -937,37 +1305,435 @@
                 <section id="settings">
                     <h1>Store Settings</h1>
 
-                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80" alt="Store configuration" class="hero-image">
+                    <h2>General Settings</h2>
+                    <p>Navigate to Admin → Settings to configure your store.</p>
 
-                    <h2>Accessing Settings</h2>
+                    <h2>Configuration Options</h2>
+                    <ul>
+                        <li><strong>Store Name:</strong> Your business name</li>
+                        <li><strong>Store URL:</strong> Your website domain</li>
+                        <li><strong>Email:</strong> Contact email address</li>
+                        <li><strong>Phone:</strong> Business phone number</li>
+                        <li><strong>Address:</strong> Business address</li>
+                        <li><strong>Store Country:</strong> Where you ship from &mdash; drives tax, shipping and phone dial-code defaults</li>
+                        <li><strong>Currency:</strong> Base currency. Order totals are recorded in it, and every report sums it</li>
+                        <li><strong>Timezone:</strong> Server timezone</li>
+                    </ul>
+                </section>
+
+                <!-- PAYMENT -->
+                <section id="payment">
+                    <h1>Payment Gateways</h1>
+
+                    <p>39 gateways are available, covering every major region. Configure them at
+                    <strong>Admin &rarr; Payment Gateways</strong>, where you enable the ones you want and drag them
+                    into the order customers see at checkout.</p>
+
+                    <div class="info">
+                        <strong>Currency gating.</strong> Each gateway declares the currencies and countries it can
+                        actually settle. A gateway is never offered for a payment it would reject &mdash; Midtrans only
+                        appears for IDR orders, Paystack only for NGN, GHS, ZAR and KES.
+                    </div>
+
+                    <h2>Worldwide</h2>
+                    <ul>
+                        <li><strong>Stripe:</strong> cards, wallets and roughly 50 local payment methods through one integration</li>
+                        <li><strong>PayPal:</strong> Orders v2, 23 settlement currencies</li>
+                        <li><strong>Adyen:</strong> enterprise coverage via Pay by Link</li>
+                        <li><strong>Authorize.Net:</strong> Accept Hosted, large US install base</li>
+                        <li><strong>Paddle</strong> and <strong>2Checkout:</strong> merchant of record &mdash; they become the seller and remit EU VAT and US sales tax themselves</li>
+                        <li><strong>Cash on Delivery:</strong> a real driver, so checkout has one code path</li>
+                    </ul>
+
+                    <h2>Bangladesh</h2>
+                    <ul>
+                        <li><strong>SSLCOMMERZ:</strong> cards, mobile banking and net banking</li>
+                        <li><strong>bKash:</strong> tokenized checkout</li>
+                        <li><strong>Nagad:</strong> RSA-signed two-leg checkout</li>
+                        <li><strong>aamarPay</strong> and <strong>ShurjoPay</strong></li>
+                    </ul>
+
+                    <h2>India and Pakistan</h2>
+                    <ul>
+                        <li><strong>Razorpay, Cashfree, PayU India, PhonePe, Paytm:</strong> cards, UPI and netbanking</li>
+                        <li><strong>Easypaisa</strong> and <strong>JazzCash</strong> for Pakistan</li>
+                    </ul>
+
+                    <h2>Gulf, MENA and Africa</h2>
+                    <ul>
+                        <li><strong>PayTabs, Tap Payments, Moyasar:</strong> KNET, mada, Benefit, Apple Pay, STC Pay</li>
+                        <li><strong>Fawry:</strong> Egypt, including cash at Fawry outlets</li>
+                        <li><strong>Paystack, Flutterwave, Monnify:</strong> Nigeria and pan-African</li>
+                        <li><strong>M-Pesa</strong> (Kenya) and <strong>MTN MoMo:</strong> mobile money approved on the customer's handset</li>
+                        <li><strong>Yoco</strong> and <strong>Peach Payments:</strong> South Africa</li>
+                    </ul>
+
+                    <h2>Europe, LatAm and APAC</h2>
+                    <ul>
+                        <li><strong>Mollie:</strong> iDEAL, Bancontact, SEPA and cards</li>
+                        <li><strong>iyzico</strong> (T&uuml;rkiye), <strong>Vipps MobilePay</strong> (Nordics)</li>
+                        <li><strong>MercadoPago</strong> and <strong>Pagar.me:</strong> LatAm, with Pix as the default Brazilian method</li>
+                        <li><strong>Midtrans, Xendit:</strong> Indonesia and the Philippines</li>
+                        <li><strong>Square</strong> (US, CA, GB, AU, JP), <strong>KakaoPay</strong> (Korea)</li>
+                    </ul>
+
+                    <h2>How payment is settled</h2>
                     <ol>
-                        <li>Click "Settings" in the sidebar</li>
-                        <li>Select the specific settings tab</li>
+                        <li>The customer picks a gateway and the order is created as <em>pending</em></li>
+                        <li>They are sent to the gateway &mdash; by redirect, by a signed form post, or by a prompt on their phone</li>
+                        <li>The gateway notifies us by webhook, which is signature-verified before anything is written</li>
+                        <li>Only then is the order marked paid</li>
                     </ol>
 
-                    <h2>General Store Settings</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Setting</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Store Name</td>
-                                <td>Your store's official name displayed throughout the site</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="warning">
+                        <strong>The return URL never marks an order paid.</strong> When a customer comes back from a
+                        hosted page, that only triggers a server-to-server verify &mdash; the redirect itself proves
+                        nothing. Repeated webhooks are dropped by a unique event index, so an order cannot be paid twice.
+                    </div>
 
-                    <div class="callout success">
-                        <strong>Tip:</strong> Your documentation is now live on GitHub Pages! Share the link with your team.
+                    <h2>Setting up a gateway</h2>
+                    <ol>
+                        <li>Go to <strong>Admin &rarr; Payment Gateways</strong></li>
+                        <li>Click <strong>Credentials</strong> on the gateway you want</li>
+                        <li>Choose <strong>Sandbox</strong>, enter the test keys and save &mdash; sandbox and live keys are stored separately, so switching back and forth never overwrites the other set</li>
+                        <li>Point the gateway's webhook at <code>https://your-domain/api/payments/webhook/{provider}</code></li>
+                        <li>Place a test order end to end, then switch to <strong>Live</strong> and repeat</li>
+                        <li>Return to Payment Gateways, click <strong>Enable</strong>, and set the checkout order</li>
+                    </ol>
+
+                    <div class="info">
+                        A gateway will refuse to enable while a required credential is missing, rather than appearing at
+                        checkout and failing in front of a customer.
+                    </div>
+                </section>
+
+                <!-- SHIPPING -->
+                <section id="shipping">
+                    <h1>Shipping</h1>
+
+                    <p>Shipping is resolved server-side in a fixed order, so the price quoted is always the price charged.</p>
+
+                    <h2>How a rate is chosen</h2>
+                    <ol>
+                        <li><strong>Live courier quote</strong> &mdash; the Bangladeshi couriers, when zone charging is on</li>
+                        <li><strong>Live carrier rate</strong> &mdash; DHL, Shiprocket, Aramex and the rest; a rating outage falls through rather than blocking checkout</li>
+                        <li><strong>Shipping zone rate</strong> &mdash; your configured weight and order-value bands</li>
+                        <li><strong>Flat rate</strong> &mdash; the final fallback</li>
+                    </ol>
+
+                    <p>Products marked <em>shipping included</em> always ship free. Cart weight is calculated from real
+                    product weights on the server, so it cannot be understated by the browser.</p>
+
+                    <h2>Shipping zones</h2>
+                    <p>Configure at <strong>Admin &rarr; Shipping Zones</strong>. A zone matches on country, then state,
+                    then postal pattern &mdash; the most specific match wins, so a city zone beats a country-wide one.
+                    Each zone holds rates with:</p>
+                    <ul>
+                        <li>A base price, and optionally a per-kg charge above the band floor</li>
+                        <li>Weight bands and order-value bands</li>
+                        <li>A free-above threshold</li>
+                        <li>A delivery estimate shown to the customer</li>
+                    </ul>
+
+                    <div class="info">
+                        <strong>Templates.</strong> Rather than building zones by hand, apply a template: domestic flat
+                        rate, domestic weight bands, Europe, North America, Gulf, or a rest-of-world fallback. Applying a
+                        template skips any zone you already have, so it is safe to re-apply after adding countries.
+                    </div>
+
+                    <h2>Carriers (19)</h2>
+                    <ul>
+                        <li><strong>Worldwide:</strong> DHL Express, FedEx, UPS, EasyPost, Shippo</li>
+                        <li><strong>India:</strong> Delhivery, Shiprocket, Blue Dart</li>
+                        <li><strong>Nigeria and Africa:</strong> Sendbox, GIG Logistics, Kwik Delivery, Bob Go</li>
+                        <li><strong>Brazil:</strong> Melhor Envio, Correios, Loggi</li>
+                        <li><strong>Gulf:</strong> Aramex, SMSA Express, Naqel Express, Torod</li>
+                    </ul>
+
+                    <h2>Bangladeshi couriers (3)</h2>
+                    <p><strong>Pathao</strong>, <strong>RedX</strong> and <strong>Steadfast</strong> use a separate
+                    contract built around their city &rarr; zone &rarr; area location tree, which is how they actually
+                    price. They are dispatched from the order detail page.</p>
+
+                    <div class="warning">
+                        <strong>Live carrier rates need a ship-from address.</strong> Set it on the Shipping Zones page.
+                        Without it, carriers cannot rate and the system falls through to your zone rates.
+                    </div>
+                </section>
+
+                <!-- TAX -->
+                <section id="tax">
+                    <h1>Tax</h1>
+
+                    <p>Tax is calculated from the shipping address at <strong>Admin &rarr; Tax Zones</strong>. It is off
+                    by default; enable it once your zones are in place.</p>
+
+                    <h2>How zones match</h2>
+                    <p>Country, then state, then postal pattern &mdash; most specific wins. A San Francisco postal zone
+                    beats a statewide California zone, which beats a country-wide US zone. Several rates can apply in one
+                    zone and are added together, which is how US state plus county and Canadian GST plus PST are
+                    actually charged.</p>
+
+                    <h2>Tax classes</h2>
+                    <p>Each product carries a class &mdash; <strong>standard</strong>, <strong>reduced</strong> or
+                    <strong>zero</strong> &mdash; because EU rates differ for food, books and children's clothing. A zone
+                    that says nothing about a class does not tax it, which is what makes zero-rated goods genuinely zero.</p>
+
+                    <h2>Inclusive or exclusive pricing</h2>
+                    <p>With <em>prices include tax</em> off, tax is added to the total. With it on, the customer pays the
+                    listed price and the tax is the portion of it owed &mdash; extracted, not added again.</p>
+
+                    <div class="info">
+                        <strong>Templates.</strong> EU VAT (27 member states), UK VAT, US sales tax (46 state base
+                        rates), Canada GST/HST/PST, and single-rate countries covering the Gulf, APAC and Africa.
+                        Applying a template skips zones you already have, so your tuned rates survive a re-apply.
+                    </div>
+
+                    <div class="warning">
+                        <strong>Templates are a starting point, not tax advice.</strong> Rates change, and you are
+                        responsible for confirming them against your own registrations. The US template carries state
+                        base rates only &mdash; counties and cities add their own, and nexus rules decide where you must
+                        collect at all. EU B2B reverse charge is not implemented; if you sell B2B into the EU, use a
+                        merchant-of-record gateway such as Paddle or 2Checkout.
+                    </div>
+
+                    <h2>Invoices</h2>
+                    <p>The tax breakdown is frozen onto the order when it is placed, and the invoice reads that stored
+                    figure rather than recalculating. The invoice and the amount charged therefore cannot disagree, even
+                    after you change a rate.</p>
+                </section>
+
+                <!-- CURRENCIES -->
+                <section id="currencies">
+                    <h1>Currencies</h1>
+
+                    <p>Set your base currency at <strong>Admin &rarr; Settings &rarr; General</strong>. Additional
+                    currencies and their rates live at <strong>Admin &rarr; Currencies</strong>.</p>
+
+                    <h2>How money is recorded</h2>
+                    <p>Every order stores money twice: once in your base currency, which every report sums, and once in
+                    the currency the customer actually saw, alongside the exchange rate used. The rate is frozen at order
+                    time, so the figures stay reconstructible years later after rates move.</p>
+
+                    <h2>Automatic rates</h2>
+                    <ul>
+                        <li>Set a currency's source to <strong>Auto</strong> for it to be refreshed hourly</li>
+                        <li>A free keyless provider is used by default; ExchangeRate-API is available for paid tiers</li>
+                        <li>A rate that moves more than 15% in one refresh is rejected and flagged rather than applied</li>
+                        <li>A failed fetch keeps the previous rate &mdash; it never zeroes one</li>
+                        <li>Add a markup percentage per currency to cover FX spread and cross-currency fees</li>
+                    </ul>
+
+                    <p>Rates are also pinned per browsing session, so a scheduled refresh cannot change a customer's
+                    total mid-visit. If a rate has moved by the time they submit, checkout re-quotes rather than
+                    silently charging the new one.</p>
+
+                    <div class="warning">
+                        <strong>Changing base currency.</strong> Existing orders keep the base currency they were placed
+                        in, which is correct &mdash; but reports that sum order totals will mix currencies afterwards.
+                        Plan for that if you switch.
+                    </div>
+
+                    <p>Automatic refresh needs the scheduler running:</p>
+                    <pre><code>* * * * * cd /path/to/app &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1</code></pre>
+                </section>
+
+                <!-- INTEGRATIONS -->
+                <section id="integrations">
+                    <h1>Integrations</h1>
+
+                    <p>98 providers across seven groups, all managed from <strong>Admin &rarr; Integrations</strong> or
+                    their own dedicated pages. Credentials are encrypted at rest and stored separately per environment,
+                    so sandbox testing can never overwrite your live keys.</p>
+
+                    <h2>SMS gateways (20)</h2>
+                    <p>Managed at <strong>Admin &rarr; SMS Gateways</strong>, where you can also send a test message and
+                    check your balance.</p>
+                    <ul>
+                        <li><strong>Worldwide:</strong> Twilio, Vonage, MessageBird, Plivo, Amazon SNS, Infobip, Sinch, Telnyx</li>
+                        <li><strong>Bangladesh:</strong> BulkSMSBD, SMS.BD, MRAM</li>
+                        <li><strong>India:</strong> MSG91, Gupshup, Fast2SMS</li>
+                        <li><strong>Gulf and MENA:</strong> Unifonic, Taqnyat, Cequens</li>
+                        <li><strong>Africa:</strong> Africa's Talking, Termii, Clickatell</li>
+                    </ul>
+                    <p>Numbers are normalised to international format once, and each gateway reshapes from there &mdash;
+                    Bangladeshi gateways receive a local <code>01&hellip;</code> number, Fast2SMS a bare 10-digit Indian
+                    number, and most others E.164.</p>
+
+                    <div class="warning">
+                        <strong>Sender IDs need registering with the provider.</strong> India requires DLT-approved
+                        sender IDs and templates; Saudi Arabia requires locally-registered sender names. That happens
+                        with the provider, not here.
+                    </div>
+
+                    <h2>Fraud checks (11)</h2>
+                    <p>Managed at <strong>Admin &rarr; Fraud Checks</strong>, where you can run a live check on any
+                    number and see recent results.</p>
+                    <ul>
+                        <li><strong>Worldwide:</strong> IPQualityScore, SEON, Sift, MaxMind minFraud</li>
+                        <li><strong>Europe:</strong> Ravelin</li>
+                        <li><strong>India:</strong> Bureau &mdash; mobile tenure and porting history</li>
+                        <li><strong>Gulf:</strong> Uqudo</li>
+                        <li><strong>Africa:</strong> Smile ID, Youverify</li>
+                        <li><strong>Bangladesh:</strong> FraudBD, BDCourier &mdash; courier delivery history</li>
+                    </ul>
+                    <p>Every provider is reduced to one risk vocabulary &mdash; safe, low, mid or high risk with a score
+                    out of 100 &mdash; so the admin reads the same whichever you use. A checker is skipped entirely when
+                    it does not serve the destination country: a Bangladeshi courier-history service cannot score a US
+                    order, and sending it that customer's number would be pointless.</p>
+
+                    <h2>AI providers (4)</h2>
+                    <p>OpenAI, Anthropic Claude, Google Gemini and DeepSeek, configured at
+                    <strong>Admin &rarr; AI Settings</strong>. Used for product descriptions, blog content, meta
+                    descriptions, content translation and price suggestions.</p>
+
+                    <h2>Exchange rates (2)</h2>
+                    <p>A free keyless provider and ExchangeRate-API, managed from the Currencies page.</p>
+
+                    <h2>Setting up any integration</h2>
+                    <ol>
+                        <li>Go to <strong>Admin &rarr; Integrations</strong> and pick the provider</li>
+                        <li>Enter its credentials &mdash; the form shows exactly which fields that provider needs, with a link to its documentation</li>
+                        <li>Choose sandbox or live, if the provider supports both</li>
+                        <li>Save, then activate it</li>
+                        <li>For SMS and fraud, set one as the default; for payments, enable as many as you like and order them</li>
+                    </ol>
+
+                    <div class="info">
+                        Nothing needs seeding. A provider's record is created the first time you save its credentials.
+                    </div>
+                </section>
+
+                <section id="faq">
+                    <h1>Frequently Asked Questions</h1>
+
+                    <h2>Installation & Setup</h2>
+                    <h3>Q: What PHP version is required?</h3>
+                    <p>A: PHP 8.2 or higher is required. We recommend PHP 8.3 for best performance.</p>
+
+                    <h3>Q: Can I use SQLite instead of MySQL?</h3>
+                    <p>A: SQLite is not recommended for production. Use MySQL 8.0+ or PostgreSQL 12+.</p>
+
+                    <h3>Q: How do I reset the database?</h3>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate:refresh --seed</code></pre>
+
+                    <h2>Admin Panel</h2>
+                    <h3>Q: How do I add a new admin user?</h3>
+                    <p>A: Use the artisan command:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan tinker
+>>> \App\Models\Admin::create(['name' => 'Name', 'email' => 'email@example.com', 'password' => bcrypt('password')]);</code></pre>
+
+                    <h3>Q: How do I export orders?</h3>
+                    <p>A: Go to Orders page and click the Export button. You can export as CSV or Excel.</p>
+
+                    <h2>Products & Inventory</h2>
+                    <h3>Q: How do I manage product variants?</h3>
+                    <p>A: When editing a product, go to the Variants section. Add variants with different options (size, color, etc.).</p>
+
+                    <h3>Q: Can I bulk import products?</h3>
+                    <p>A: Yes, go to Products page and use the Import feature to upload CSV file.</p>
+                </section>
+
+                <!-- TROUBLESHOOTING -->
+                <section id="troubleshooting">
+                    <h1>Troubleshooting</h1>
+
+                    <h2>Database Connection Error</h2>
+                    <p><strong>Error:</strong> "SQLSTATE[HY000]: General error: 1030 Got error"</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check database credentials in <code>.env</code></li>
+                        <li>Ensure database server is running</li>
+                        <li>Verify database user has necessary permissions</li>
+                    </ol>
+
+                    <h2>File Upload Error</h2>
+                    <p><strong>Error:</strong> "The file could not be uploaded"</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check storage folder permissions (should be 775)</li>
+                        <li>Verify PHP max_upload_size in php.ini (minimum 50MB)</li>
+                        <li>Ensure storage directory is writable</li>
+                    </ol>
+
+                    <h2>Blank Admin Panel</h2>
+                    <p><strong>Error:</strong> Admin panel shows blank page</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Run: <code>php artisan cache:clear</code></li>
+                        <li>Run: <code>php artisan view:clear</code></li>
+                        <li>Rebuild assets: <code>npm run build</code></li>
+                        <li>Check application logs in <code>storage/logs</code></li>
+                    </ol>
+
+                    <h2>Mail Not Sending</h2>
+                    <p><strong>Error:</strong> Emails not being sent</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check MAIL_DRIVER in <code>.env</code></li>
+                        <li>Verify SMTP credentials are correct</li>
+                        <li>Ensure mail server is running</li>
+                        <li>Check storage/logs for detailed errors</li>
+                    </ol>
+
+                    <div class="box info">
+                        <strong>Still having issues?</strong>
+                        Check the application logs in storage/logs/laravel.log for detailed error messages.
                     </div>
                 </section>
 
             </div>
         </div>
     </div>
+
+    <script>
+        // Sidebar navigation
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                updateActiveLink(id);
+            }
+        }
+
+        function updateActiveLink(id) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`a[href="#${id}"]`).classList.add('active');
+        }
+
+        // Copy code to clipboard
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Update active link on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            if (current) {
+                updateActiveLink(current);
+            }
+        });
+    </script>
 </body>
 </html>

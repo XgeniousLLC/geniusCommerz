@@ -122,6 +122,8 @@ class LandingPageController extends Controller
             ],
             'paymentMethods'  => $paymentMethods,
             'prefill'         => $prefill,
+            'countries'       => \App\Support\Countries::options(),
+            'storeCountry'    => \App\Models\SiteSetting::get('general.store_country', 'BD'),
             'confirmedOrder'  => $this->confirmedOrder(),
         ]);
     }

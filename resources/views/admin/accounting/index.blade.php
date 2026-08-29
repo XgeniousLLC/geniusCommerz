@@ -16,10 +16,10 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach([
-            ['label' => 'Total Purchase Cost', 'value' => '৳'.number_format($totalPurchaseCost, 0), 'color' => 'text-blue-600', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10'],
-            ['label' => 'Total Shipment Cost', 'value' => '৳'.number_format($totalShipmentCost, 0), 'color' => 'text-purple-600', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
-            ['label' => 'Ad Spend (This Month)', 'value' => '৳'.number_format($totalAdSpendMonth, 0), 'color' => 'text-pink-600', 'icon' => 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z'],
-            ['label' => 'Total Ad Spend', 'value' => '৳'.number_format($totalAdSpend, 0), 'color' => 'text-orange-600', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+            ['label' => 'Total Purchase Cost', 'value' => money($totalPurchaseCost, 0), 'color' => 'text-blue-600', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10'],
+            ['label' => 'Total Shipment Cost', 'value' => money($totalShipmentCost, 0), 'color' => 'text-purple-600', 'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
+            ['label' => 'Ad Spend (This Month)', 'value' => money($totalAdSpendMonth, 0), 'color' => 'text-pink-600', 'icon' => 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z'],
+            ['label' => 'Total Ad Spend', 'value' => money($totalAdSpend, 0), 'color' => 'text-orange-600', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
         ] as $card)
         <x-admin.card class="p-4">
             <div class="flex items-start gap-3">
@@ -44,7 +44,7 @@
             <form method="POST" action="{{ route('admin.settings.update', 'accounting') }}" class="flex items-center gap-2">
                 @csrf
                 @method('PUT')
-                <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Fixed Ad Spend / Unit (৳)</label>
+                <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Fixed Ad Spend / Unit ({{ currency_symbol() }})</label>
                 <input type="number" name="settings[accounting.ad_spend_per_unit]" value="{{ $adSpendPerUnit }}" min="0" step="0.01"
                     class="w-28 border border-gray-300 rounded-lg text-sm px-2 py-1.5 focus:border-blue-500 focus:ring-blue-500 focus:outline-none" />
                 <button type="submit" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-medium">Save</button>
@@ -71,12 +71,12 @@
                     @foreach($suggestions as $s)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 font-medium text-gray-900">{{ $s['product_name'] }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">৳{{ number_format($s['avg_unit_cost'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-500">৳{{ number_format($s['shipment_cost'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-500">৳{{ number_format($s['ad_spend_unit'], 2) }}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-gray-800">৳{{ number_format($s['landed_cost'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-700">৳{{ number_format($s['current_price'], 2) }}</td>
-                        <td class="px-4 py-3 text-right font-bold text-blue-700">৳{{ number_format($s['suggested_price'], 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700">{{ money($s['avg_unit_cost'], 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-500">{{ money($s['shipment_cost'], 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-500">{{ money($s['ad_spend_unit'], 2) }}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ money($s['landed_cost'], 2) }}</td>
+                        <td class="px-4 py-3 text-right text-gray-700">{{ money($s['current_price'], 2) }}</td>
+                        <td class="px-4 py-3 text-right font-bold text-blue-700">{{ money($s['suggested_price'], 2) }}</td>
                         <td class="px-4 py-3 text-right">
                             @if($s['current_margin'] !== null)
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
@@ -108,7 +108,7 @@
                     <div class="text-xs text-gray-500">{{ $po->supplier_name }} · {{ $po->order_date->format('d M Y') }}</div>
                 </div>
                 <div class="text-right">
-                    <div class="text-sm font-bold text-gray-800">৳{{ number_format($po->totalCost(), 0) }}</div>
+                    <div class="text-sm font-bold text-gray-800">{{ money($po->totalCost(), 0) }}</div>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium
                         {{ ['draft'=>'bg-gray-100 text-gray-600','ordered'=>'bg-blue-100 text-blue-700','partial'=>'bg-yellow-100 text-yellow-700','received'=>'bg-green-100 text-green-700'][$po->status] }}">
                         {{ ucfirst($po->status) }}
@@ -131,7 +131,7 @@
                     <div class="text-sm font-semibold text-gray-900">{{ \App\Models\AdSpend::$platforms[$s->platform] }}</div>
                     <div class="text-xs text-gray-500">{{ $s->campaign_name ?? '—' }} · {{ $s->spend_date->format('d M Y') }}</div>
                 </div>
-                <div class="text-sm font-bold text-pink-600">৳{{ number_format($s->amount, 0) }}</div>
+                <div class="text-sm font-bold text-pink-600">{{ money($s->amount, 0) }}</div>
             </div>
             @empty
             <p class="text-sm text-gray-400 text-center py-6">No ad spend recorded.</p>

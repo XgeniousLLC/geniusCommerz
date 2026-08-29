@@ -240,7 +240,7 @@
                 <div class="field">
                     <span class="lbl">Price <span class="req">*</span></span>
                     <div class="input-prefix">
-                        <span>৳</span>
+                        <span>{{ currency_symbol() }}</span>
                         <input class="input" type="number" name="price" value="{{ old('price') }}" step="0.01" min="0" style="padding-left:26px">
                     </div>
                     @error('price')<span style="color:var(--danger);font-size:12px">{{ $message }}</span>@enderror
@@ -248,14 +248,14 @@
                 <div class="field">
                     <span class="lbl">Compare at</span>
                     <div class="input-prefix">
-                        <span>৳</span>
+                        <span>{{ currency_symbol() }}</span>
                         <input class="input" type="number" name="compare_at_price" value="{{ old('compare_at_price') }}" step="0.01" min="0" style="padding-left:26px">
                     </div>
                 </div>
                 <div class="field">
                     <span class="lbl">Cost price</span>
                     <div class="input-prefix">
-                        <span>৳</span>
+                        <span>{{ currency_symbol() }}</span>
                         <input class="input" type="number" name="cost_price" value="{{ old('cost_price') }}" step="0.01" min="0" style="padding-left:26px">
                     </div>
                 </div>

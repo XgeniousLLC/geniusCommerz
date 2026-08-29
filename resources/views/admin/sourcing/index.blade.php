@@ -29,7 +29,7 @@
     </div>
     <div class="card lift stat">
         <span class="tile t-warning"><span class="ico" data-ico="wallet"></span></span>
-        <div><div class="num">৳{{ number_format($capitalInvested, 0) }}</div><div class="lbl">Capital invested</div></div>
+        <div><div class="num">{{ money($capitalInvested, 0) }}</div><div class="lbl">Capital invested</div></div>
     </div>
 </div>
 
@@ -65,10 +65,10 @@
                         </div>
                     </td>
                     <td class="muted" style="font-size:13px">{{ $item->supplier }}</td>
-                    <td style="text-align:right" class="tnum">৳{{ number_format($item->cost_price, 2) }}</td>
+                    <td style="text-align:right" class="tnum">{{ money($item->cost_price, 2) }}</td>
                     <td style="text-align:right" class="tnum">
                         @if($item->sell_price)
-                        <b>৳{{ number_format($item->sell_price, 2) }}</b>
+                        <b>{{ money($item->sell_price, 2) }}</b>
                         @else
                         <form method="POST" action="{{ route('admin.ai.suggest-price') }}" style="display:inline"
                               x-data="{loading:false}" @submit.prevent="
@@ -152,11 +152,11 @@
             </div>
             <div class="row" style="gap:12px">
                 <div class="field grow">
-                    <span class="lbl">Cost Price (৳) <span style="color:var(--danger)">*</span></span>
+                    <span class="lbl">Cost Price ({{ currency_symbol() }}) <span style="color:var(--danger)">*</span></span>
                     <input class="input" type="number" name="cost_price" value="{{ old('cost_price') }}" min="0" step="0.01" required>
                 </div>
                 <div class="field grow">
-                    <span class="lbl">Sell Price (৳)</span>
+                    <span class="lbl">Sell Price ({{ currency_symbol() }})</span>
                     <input class="input" type="number" name="sell_price" value="{{ old('sell_price') }}" min="0" step="0.01" placeholder="Leave blank for AI suggest">
                 </div>
             </div>

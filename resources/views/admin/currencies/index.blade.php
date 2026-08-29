@@ -7,6 +7,53 @@
         <h2 class="display">Currencies</h2>
         <div class="sub">Manage currencies and exchange rates</div>
     </div>
+
+<div class="card pad" style="margin-bottom:18px">
+    <div class="card-head" style="margin-bottom:12px">
+        <span class="tile sm t-info"><span class="ico" data-ico="refresh" style="width:17px;height:17px"></span></span>
+        <div class="ct">
+            <h3>Automatic rates</h3>
+            <div class="sub">Refreshed hourly; a move over 15% is rejected and flagged rather than applied</div>
+        </div>
+        <form method="POST" action="{{ route('admin.currencies.refresh') }}" style="margin:0">
+            @csrf<button type="submit" class="btn btn-outline btn-sm">Refresh now</button>
+        </form>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+        @foreach($fxSources as $source)
+        @php
+            $def = $source['definition']; $row = $source['row'];
+            $on  = $row->exists && $row->is_active; $isDefault = $row->exists && $row->is_default;
+        @endphp
+        <div class="card" style="padding:14px;{{ $isDefault ? 'border:1.5px solid var(--accent);background:var(--accent-soft)' : 'background:var(--surface-2)' }}">
+            <div class="row wrap" style="gap:7px;align-items:center;margin-bottom:6px">
+                <strong style="font-size:13.5px">{{ $def->label }}</strong>
+                <span class="pill sm {{ $on ? 'success' : '' }}"><span class="dot"></span>{{ $on ? 'Enabled' : 'Disabled' }}</span>
+                @if($isDefault)<span class="pill sm accent">Default</span>@endif
+            </div>
+            <div class="faint" style="font-size:12px;margin-bottom:10px">{{ $def->hint }}</div>
+            <div class="row" style="gap:10px">
+                @if($def->fields)
+                <a href="{{ route('admin.integrations.edit', $def->slug) }}" class="link-btn" style="font-size:12.5px">Credentials</a>
+                @endif
+                @if($on && ! $isDefault)
+                <form method="POST" action="{{ route('admin.currencies.fx.default', $def->slug) }}" style="margin:0">
+                    @csrf<button type="submit" class="link-btn" style="font-size:12.5px">Make default</button>
+                </form>
+                @endif
+                <form method="POST" action="{{ route('admin.currencies.fx.toggle', $def->slug) }}" style="margin:0 0 0 auto">
+                    @csrf<button type="submit" class="link-btn" style="font-size:12.5px">{{ $on ? 'Disable' : 'Enable' }}</button>
+                </form>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <p class="faint" style="font-size:12px;margin:12px 0 0">
+        Set a currency's source to <strong>Auto</strong> below for it to be refreshed. With no
+        source enabled the free keyless provider is used.
+    </p>
+</div>
+
 </div>
 
 <div style="display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start">
@@ -69,6 +116,10 @@
                                 <input class="input" type="text" name="symbol" value="{{ $currency->symbol }}" style="width:60px;height:34px;font-size:13px">
                                 <input class="input" type="text" name="name" value="{{ $currency->name }}" style="width:130px;height:34px;font-size:13px">
                                 <input class="input" type="number" name="rate" value="{{ $currency->rate }}" step="0.000001" min="0.000001" style="width:100px;height:34px;font-size:13px">
+                                <select class="input" name="rate_source" style="width:110px;height:34px;font-size:13px">
+                                    <option value="manual" {{ $currency->rate_source === 'manual' ? 'selected' : '' }}>Manual</option>
+                                    <option value="api" {{ $currency->rate_source === 'api' ? 'selected' : '' }}>Auto</option>
+                                </select>
                                 <label class="row" style="gap:5px;font-size:12.5px;cursor:pointer">
                                     <input type="checkbox" name="is_active" value="1" {{ $currency->is_active ? 'checked' : '' }}>Active
                                 </label>
@@ -76,7 +127,17 @@
                                 <button type="button" @click="editing=false" class="btn btn-sm btn-outline">Cancel</button>
                             </form>
                         </td>
-                        <td class="mono faint" style="font-size:13px">{{ $currency->rate }}</td>
+                        <td class="mono faint" style="font-size:13px">
+                            {{ $currency->rate }}
+                            @if($currency->rate_source === 'api')
+                                <span class="pill sm {{ $currency->isRateStale() ? 'warning' : '' }}" style="margin-left:6px">
+                                    {{ $currency->isRateStale() ? 'stale' : 'auto' }}
+                                </span>
+                            @endif
+                            @if($currency->rate_updated_at)
+                                <div class="faint" style="font-size:11px">{{ $currency->rate_updated_at->diffForHumans() }}</div>
+                            @endif
+                        </td>
                         <td>
                             <span class="pill sm {{ $currency->is_active ? 'success' : '' }}">
                                 <span class="dot"></span>{{ $currency->is_active ? 'Active' : 'Inactive' }}
@@ -120,7 +181,7 @@
             </table>
         </div>
         <div style="padding:12px 18px;border-top:1px solid var(--border)">
-            <p class="faint" style="font-size:12px">Base currency is your store default. Set exchange rates relative to 1 unit of the base currency. Rates applied at display time — orders stored in base currency.</p>
+            <p class="faint" style="font-size:12px">Base currency is your store default. Set exchange rates relative to 1 unit of the base currency. Rates applied at display time — orders record the rate they were placed at. Currencies set to <strong>Auto</strong> are refreshed hourly by <code>currency:refresh-rates</code>; a move over 15% is rejected and flagged rather than applied.</p>
         </div>
     </div>
 

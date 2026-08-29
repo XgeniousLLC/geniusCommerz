@@ -25,7 +25,7 @@
     <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Total Buyers</p><p class="text-2xl font-bold mt-1">{{ number_format($stats['total_buyers']) }}</p></x-admin.card>
     <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Repeat Buyers</p><p class="text-2xl font-bold mt-1 text-blue-600">{{ number_format($stats['repeat_buyers']) }}</p></x-admin.card>
     <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Repeat Rate</p><p class="text-2xl font-bold mt-1 text-green-600">{{ $stats['repeat_rate'] }}%</p></x-admin.card>
-    <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Avg LTV</p><p class="text-2xl font-bold mt-1">৳{{ number_format($stats['avg_ltv'],0) }}</p></x-admin.card>
+    <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Avg LTV</p><p class="text-2xl font-bold mt-1">{{ money($stats['avg_ltv'], 0) }}</p></x-admin.card>
     <x-admin.card class="p-5"><p class="text-xs text-gray-500 uppercase tracking-wide">Avg Orders / Customer</p><p class="text-2xl font-bold mt-1">{{ number_format($stats['avg_order_count'],1) }}</p></x-admin.card>
 </div>
 
@@ -35,10 +35,10 @@
         <h3 class="font-semibold text-gray-800 mb-4">Customer Segments by LTV</h3>
         @php
             $segments = [
-                ['label' => 'Champions (৳10k+)',    'min' => 10000, 'max' => PHP_INT_MAX, 'color' => 'bg-green-500'],
-                ['label' => 'Loyal (৳5k–10k)',      'min' => 5000,  'max' => 10000,       'color' => 'bg-blue-400'],
-                ['label' => 'Regular (৳1k–5k)',     'min' => 1000,  'max' => 5000,        'color' => 'bg-indigo-400'],
-                ['label' => 'New/Small (<৳1k)',      'min' => 0,     'max' => 1000,        'color' => 'bg-gray-300'],
+                ['label' => 'Champions (' . currency_symbol() . '10k+)',    'min' => 10000, 'max' => PHP_INT_MAX, 'color' => 'bg-green-500'],
+                ['label' => 'Loyal (' . currency_symbol() . '5k–10k)',      'min' => 5000,  'max' => 10000,       'color' => 'bg-blue-400'],
+                ['label' => 'Regular (' . currency_symbol() . '1k–5k)',     'min' => 1000,  'max' => 5000,        'color' => 'bg-indigo-400'],
+                ['label' => 'New/Small (<' . currency_symbol() . '1k)',      'min' => 0,     'max' => 1000,        'color' => 'bg-gray-300'],
             ];
             $totalTop = $topLtv->count() ?: 1;
         @endphp
@@ -81,7 +81,7 @@
                         <td class="py-1.5 text-right">{{ number_format($row->new_customers) }}</td>
                         <td class="py-1.5 text-right">{{ number_format($row->buyers) }}</td>
                         <td class="py-1.5 text-right {{ $conv >= 50 ? 'text-green-600' : ($conv >= 20 ? 'text-yellow-600' : 'text-red-500') }} font-semibold">{{ $conv }}%</td>
-                        <td class="py-1.5 text-right">৳{{ number_format($row->revenue,0) }}</td>
+                        <td class="py-1.5 text-right">{{ money($row->revenue, 0) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -118,8 +118,8 @@
                         <div class="text-xs text-gray-400">{{ $c->email }}</div>
                     </td>
                     <td class="py-2 text-right font-semibold">{{ $c->order_count }}</td>
-                    <td class="py-2 text-right font-bold text-green-700">৳{{ number_format($c->ltv,0) }}</td>
-                    <td class="py-2 text-right text-gray-600">৳{{ number_format($c->avg_order,0) }}</td>
+                    <td class="py-2 text-right font-bold text-green-700">{{ money($c->ltv, 0) }}</td>
+                    <td class="py-2 text-right text-gray-600">{{ money($c->avg_order, 0) }}</td>
                     <td class="py-2 text-right text-xs text-gray-400">{{ \Carbon\Carbon::parse($c->first_order)->format('d M y') }}</td>
                     <td class="py-2 text-right text-xs text-gray-400">{{ \Carbon\Carbon::parse($c->last_order)->format('d M y') }}</td>
                     <td class="py-2 text-right text-xs text-gray-500">{{ number_format($c->days_active) }}d</td>

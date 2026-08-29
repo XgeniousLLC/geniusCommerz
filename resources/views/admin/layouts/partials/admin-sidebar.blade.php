@@ -199,7 +199,7 @@
         <span>Settings</span>
     </a>
 
-    @php $systemActive = request()->routeIs('admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*','admin.currencies.*','admin.pixel-logs.*'); @endphp
+    @php $systemActive = request()->routeIs('admin.sms.*','admin.fraud.*','admin.shipping.*','admin.tax.*','admin.payment-gateways.*','admin.integrations.*','admin.ai-settings.*','admin.languages.*','admin.audit.*','admin.failed-jobs.*','admin.sitemap.*','admin.currencies.*','admin.pixel-logs.*'); @endphp
     <div class="nav-group {{ $systemActive ? 'open' : '' }}">
         <button class="nav-grouphead focusable" type="button" data-group-toggle>
             <span class="ico" data-ico="system"></span>
@@ -207,6 +207,21 @@
             <span class="ico chev" data-ico="chevDown" style="width:16px;height:16px"></span>
         </button>
         <div class="nav-children"><div><div class="nav-sublist">
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.sms.*') ? 'active' : '' }}" href="{{ route('admin.sms.index') }}">
+                <span class="ico" data-ico="message"></span><span>SMS Gateways</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.fraud.*') ? 'active' : '' }}" href="{{ route('admin.fraud.index') }}">
+                <span class="ico" data-ico="shield"></span><span>Fraud Checks</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.shipping.*') ? 'active' : '' }}" href="{{ route('admin.shipping.index') }}">
+                <span class="ico" data-ico="truck"></span><span>Shipping Zones</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.tax.*') ? 'active' : '' }}" href="{{ route('admin.tax.index') }}">
+                <span class="ico" data-ico="receipt"></span><span>Tax Zones</span>
+            </a>
+            <a class="nav-leaf focusable {{ request()->routeIs('admin.payment-gateways.*') ? 'active' : '' }}" href="{{ route('admin.payment-gateways.index') }}">
+                <span class="ico" data-ico="card"></span><span>Payment Gateways</span>
+            </a>
             <a class="nav-leaf focusable {{ request()->routeIs('admin.integrations.*') && !request()->routeIs('admin.ai-settings.*') ? 'active' : '' }}" href="{{ route('admin.integrations.index') }}">
                 <span class="ico" data-ico="layers"></span><span>Integrations</span>
             </a>

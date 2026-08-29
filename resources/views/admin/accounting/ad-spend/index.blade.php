@@ -26,17 +26,17 @@ $platformMeta = [
 <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
     <div class="card lift stat">
         <span class="tile t-warning"><span class="ico" data-ico="wallet"></span></span>
-        <div><div class="num">৳{{ number_format($monthTotal, 0) }}</div><div class="lbl">This Month</div></div>
+        <div><div class="num">{{ money($monthTotal, 0) }}</div><div class="lbl">This Month</div></div>
     </div>
     <div class="card lift stat">
         <span class="tile t-info"><span class="ico" data-ico="chart"></span></span>
-        <div><div class="num">৳{{ number_format($allTotal, 0) }}</div><div class="lbl">All Time</div></div>
+        <div><div class="num">{{ money($allTotal, 0) }}</div><div class="lbl">All Time</div></div>
     </div>
     @foreach($byPlatform as $platform => $total)
     @php $pm = $platformMeta[$platform] ?? $platformMeta['other']; @endphp
     <div class="card lift stat">
         <span class="tile {{ $pm['color'] }}"><span class="ico" data-ico="{{ $pm['icon'] }}"></span></span>
-        <div><div class="num">৳{{ number_format($total, 0) }}</div><div class="lbl">{{ $pm['label'] }}</div></div>
+        <div><div class="num">{{ money($total, 0) }}</div><div class="lbl">{{ $pm['label'] }}</div></div>
     </div>
     @endforeach
 </div>
@@ -76,7 +76,7 @@ $platformMeta = [
                     <td class="muted" style="font-size:13px">{{ $s->campaign_name ?? '—' }}</td>
                     <td class="faint" style="font-size:13px">{{ $s->product?->name ?? 'All' }}</td>
                     <td style="text-align:right;font-weight:700;font-size:14px;color:var(--warning)">
-                        ৳{{ number_format($s->amount, 0) }}
+                        {{ money($s->amount, 0) }}
                     </td>
                     <td style="text-align:right">
                         <form method="POST" action="{{ route('admin.accounting.ad-spend.destroy', $s) }}"
@@ -129,7 +129,7 @@ $platformMeta = [
             </div>
             <div class="row" style="gap:12px">
                 <div class="field grow">
-                    <span class="lbl">Amount (৳) <span style="color:var(--danger)">*</span></span>
+                    <span class="lbl">Amount ({{ currency_symbol() }}) <span style="color:var(--danger)">*</span></span>
                     <input class="input" type="number" name="amount" value="{{ old('amount') }}" min="0" step="0.01" required>
                 </div>
                 <div class="field grow">

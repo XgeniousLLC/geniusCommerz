@@ -2,22 +2,39 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import AccountLayout from '../../components/AccountLayout';
 
-interface Address { id: number; label: string; name: string; phone: string; address: string; city: string; is_default: boolean }
+import { type Country, findCountry, postalLabel, stateLabel, stateOptions } from '../../countries';
+
+interface Address {
+  id: number; label: string; name: string; company: string | null; phone: string;
+  country: string; address: string; address_line_2: string | null;
+  city: string; state: string | null; postal_code: string | null; is_default: boolean;
+}
 interface Profile { name: string; email: string; phone: string | null }
-interface Props { addresses: Address[]; profile: Profile }
+interface Props { addresses: Address[]; profile: Profile; countries: Country[]; storeCountry: string }
 
-const emptyForm = { label: 'Home', name: '', phone: '', address: '', city: '', is_default: false };
+const emptyForm = {
+  label: 'Home', name: '', company: '', phone: '', country: '',
+  address: '', address_line_2: '', city: '', state: '', postal_code: '', is_default: false,
+};
 
-export default function AddressPage({ addresses, profile }: Props) {
+export default function AddressPage({ addresses, profile, countries = [], storeCountry = 'BD' }: Props) {
   const [addrForm, setAddrForm] = useState<typeof emptyForm | null>(null);
   const [editId, setEditId]   = useState<number | null>(null);
   const [profForm, setProfForm] = useState({ name: profile.name, phone: profile.phone ?? '', password: '', password_confirmation: '' });
   const [saving, setSaving]   = useState(false);
 
-  const openNew  = () => { setEditId(null); setAddrForm({ ...emptyForm }); };
+  const openNew  = () => { setEditId(null); setAddrForm({ ...emptyForm, country: storeCountry }); };
+
+  const selectedCountry = findCountry(countries, addrForm?.country ?? storeCountry);
+  const states          = stateOptions(selectedCountry);
+  const showPostal      = selectedCountry ? selectedCountry.postal !== 'none' : true;
   const openEdit = (a: Address) => {
     setEditId(a.id);
-    setAddrForm({ label: a.label, name: a.name, phone: a.phone, address: a.address, city: a.city, is_default: a.is_default });
+    setAddrForm({
+      label: a.label, name: a.name, company: a.company ?? '', phone: a.phone,
+      country: a.country || storeCountry, address: a.address, address_line_2: a.address_line_2 ?? '',
+      city: a.city, state: a.state ?? '', postal_code: a.postal_code ?? '', is_default: a.is_default,
+    });
   };
 
   const saveAddress = (e: React.FormEvent) => {
@@ -37,7 +54,7 @@ export default function AddressPage({ addresses, profile }: Props) {
   };
 
   const setDefault = (id: number) => {
-    router.put(`/account/address/${id}`, { is_default: true, label: '', name: '', phone: '', address: '', city: '' });
+    router.put(`/account/address/${id}/default`, {});
   };
 
   const saveProfile = (e: React.FormEvent) => {
@@ -76,7 +93,9 @@ export default function AddressPage({ addresses, profile }: Props) {
                 </div>
                 <p style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', margin: 0 }}>{a.name}</p>
                 <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '2px 0 0' }}>{a.phone}</p>
-                <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '4px 0 0' }}>{a.address}, {a.city}</p>
+                <p style={{ fontSize: 13, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '4px 0 0' }}>
+                  {[a.address, a.address_line_2, a.city, a.state, a.postal_code, findCountry(countries, a.country)?.name].filter(Boolean).join(', ')}
+                </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => openEdit(a)} style={{ fontSize: 11.5, color: 'var(--av-ink)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--av-line)', fontFamily: 'var(--av-sans)' }}>Edit</button>
@@ -106,18 +125,58 @@ export default function AddressPage({ addresses, profile }: Props) {
               <div>
                 <Lbl>Phone</Lbl>
                 <input className="av-input" value={addrForm.phone}
-                  onChange={e => setAddrForm(f => f ? { ...f, phone: e.target.value } : f)} placeholder="01XXXXXXXXX" />
+                  onChange={e => setAddrForm(f => f ? { ...f, phone: e.target.value } : f)}
+                  placeholder={selectedCountry ? `+${selectedCountry.dial} …` : 'Phone number'} />
               </div>
               <div>
-                <Lbl>City</Lbl>
-                <input className="av-input" value={addrForm.city}
-                  onChange={e => setAddrForm(f => f ? { ...f, city: e.target.value } : f)} placeholder="Dhaka" />
+                <Lbl>Company</Lbl>
+                <input className="av-input" value={addrForm.company}
+                  onChange={e => setAddrForm(f => f ? { ...f, company: e.target.value } : f)} placeholder="Optional" />
+              </div>
+              <div style={{ gridColumn: '1/-1' }}>
+                <Lbl>Country</Lbl>
+                <select className="av-input" value={addrForm.country}
+                  onChange={e => setAddrForm(f => f ? { ...f, country: e.target.value, state: '', postal_code: '' } : f)}>
+                  {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                </select>
               </div>
             </div>
             <div>
               <Lbl>Address</Lbl>
               <textarea className="av-input av-textarea" rows={2} value={addrForm.address}
                 onChange={e => setAddrForm(f => f ? { ...f, address: e.target.value } : f)} placeholder="Street, area, house/flat" />
+            </div>
+            <div>
+              <Lbl>Apartment, suite, unit</Lbl>
+              <input className="av-input" value={addrForm.address_line_2}
+                onChange={e => setAddrForm(f => f ? { ...f, address_line_2: e.target.value } : f)} placeholder="Optional" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: showPostal ? '1fr 1fr 1fr' : '1fr 1fr', gap: 14 }} className="av-addr-grid">
+              <div>
+                <Lbl>City</Lbl>
+                <input className="av-input" value={addrForm.city}
+                  onChange={e => setAddrForm(f => f ? { ...f, city: e.target.value } : f)} placeholder="City" />
+              </div>
+              <div>
+                <Lbl>{stateLabel(addrForm.country)}</Lbl>
+                {states.length > 0 ? (
+                  <select className="av-input" value={addrForm.state}
+                    onChange={e => setAddrForm(f => f ? { ...f, state: e.target.value } : f)}>
+                    <option value="">Select</option>
+                    {states.map(st => <option key={st.code} value={st.code}>{st.name}</option>)}
+                  </select>
+                ) : (
+                  <input className="av-input" value={addrForm.state}
+                    onChange={e => setAddrForm(f => f ? { ...f, state: e.target.value } : f)} placeholder="Optional" />
+                )}
+              </div>
+              {showPostal && (
+                <div>
+                  <Lbl>{postalLabel(addrForm.country)}</Lbl>
+                  <input className="av-input" value={addrForm.postal_code}
+                    onChange={e => setAddrForm(f => f ? { ...f, postal_code: e.target.value } : f)} />
+                </div>
+              )}
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', cursor: 'pointer' }}>
               <input type="checkbox" checked={addrForm.is_default}

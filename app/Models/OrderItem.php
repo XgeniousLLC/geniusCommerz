@@ -11,11 +11,15 @@ class OrderItem extends Model
         'order_id','product_id','variant_id',
         'product_name','sku','variant_label',
         'unit_price','quantity','total',
+        'tax_amount','presentment_unit_price','presentment_total',
     ];
 
     protected $casts = [
-        'unit_price' => 'decimal:2',
-        'total'      => 'decimal:2',
+        'unit_price'             => 'decimal:2',
+        'total'                  => 'decimal:2',
+        'tax_amount'             => 'decimal:4',
+        'presentment_unit_price' => 'decimal:4',
+        'presentment_total'      => 'decimal:4',
     ];
 
     public function order(): BelongsTo

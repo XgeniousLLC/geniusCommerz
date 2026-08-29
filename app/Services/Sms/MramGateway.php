@@ -3,10 +3,11 @@
 namespace App\Services\Sms;
 
 use App\Contracts\SmsInterface;
-use App\Models\Integration;
+use App\Services\ProviderDriver;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Http;
 
-class MramGateway implements SmsInterface
+class MramGateway extends ProviderDriver implements SmsInterface
 {
     /**
      * Error codes returned by msg.mram.com.bd in the response body.
@@ -31,20 +32,12 @@ class MramGateway implements SmsInterface
         '1019' => 'Sms Purpose Missing',
     ];
 
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('mram')
-            ?? new Integration(['credentials' => []]);
-    }
-
     public function send(string $to, string $message): bool
     {
         $params = [
             'api_key'  => $this->integration->getCredential('api_key'),
             'type'     => $this->messageType($message),
-            'contacts' => $to,
+            'contacts' => PhoneNumber::national($to, 'BD') ?? $to,
             'senderid' => $this->integration->getCredential('sender_id'),
             'msg'      => $message,
         ];

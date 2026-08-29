@@ -112,7 +112,14 @@ class HandleInertiaRequests extends Middleware
         $activeCurrency      = collect($currencies)->firstWhere('code', $currencyCode)
             ?? collect($currencies)->firstWhere('is_default', true)
             ?? collect($currencies)->firstWhere('code', $defaultCurrencyCode)
-            ?? ($currencies[0] ?? ['code' => $defaultCurrencyCode, 'symbol' => '৳', 'name' => 'Default', 'rate' => 1.0, 'is_default' => true]);
+            ?? ($currencies[0] ?? [
+                'code'       => $defaultCurrencyCode,
+                'symbol'     => SiteSetting::get('general.currency_symbol')
+                                 ?: \App\Support\Currencies::symbol($defaultCurrencyCode),
+                'name'       => \App\Support\Currencies::find($defaultCurrencyCode)['name'] ?? $defaultCurrencyCode,
+                'rate'       => 1.0,
+                'is_default' => true,
+            ]);
 
         return array_merge(parent::share($request), [
             'locale'               => $i18n['locale'],
@@ -123,6 +130,7 @@ class HandleInertiaRequests extends Middleware
             'multiCurrencyEnabled' => $multiCurrencyEnabled,
             'activeCurrency'       => $activeCurrency,
             'site' => [
+                'country'     => SiteSetting::get('general.store_country', 'BD'),
                 'name'        => SiteSetting::get('general.site_name', config('app.name')),
                 'tagline'     => SiteSetting::get('general.site_tagline', ''),
                 'logoUrl'     => $logoUrl,

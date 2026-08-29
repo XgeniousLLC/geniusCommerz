@@ -72,7 +72,7 @@
                 <span class="pill sm {{ $statusPills[$row->status] ?? 't-teal' }}" style="text-transform:capitalize">{{ $row->status }}</span>
                 <div style="text-align:right">
                     <strong style="font-size:14px">{{ number_format($row->count) }}</strong>
-                    <span style="font-size:12px;color:var(--text-muted);margin-left:8px">৳{{ number_format($row->revenue) }}</span>
+                    <span style="font-size:12px;color:var(--text-muted);margin-left:8px">{{ money($row->revenue) }}</span>
                 </div>
             </div>
             @endforeach
@@ -97,7 +97,7 @@
                 <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                     <div style="width:{{ $pct }}%;height:6px;background:var(--violet);border-radius:4px"></div>
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">৳{{ number_format($row->revenue) }}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ money($row->revenue) }}</div>
             </div>
             @endforeach
         </div>

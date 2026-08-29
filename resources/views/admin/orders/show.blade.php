@@ -71,25 +71,25 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
                             </div>
                         </div>
                     </td>
-                    <td style="text-align:right" class="tnum">৳{{ number_format($item->unit_price, 0) }}</td>
+                    <td style="text-align:right" class="tnum">{{ money($item->unit_price, 0) }}</td>
                     <td style="text-align:right" class="tnum">{{ $item->quantity }}</td>
-                    <td style="text-align:right" class="tnum"><b>৳{{ number_format($item->total, 0) }}</b></td>
+                    <td style="text-align:right" class="tnum"><b>{{ money($item->total, 0) }}</b></td>
                 </tr>
                 @endforeach
             </tbody>
         </table></div>
         <div style="padding:16px 22px;border-top:1px solid var(--border)">
-            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Subtotal</span><span class="tnum">৳{{ number_format($order->subtotal, 0) }}</span></div>
+            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Subtotal</span><span class="tnum">{{ money($order->subtotal, 0) }}</span></div>
             @if($order->discount_amount > 0)
-            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Discount {{ $order->coupon_code ? '(' . $order->coupon_code . ')' : '' }}</span><span class="tnum" style="color:var(--success)">−৳{{ number_format($order->discount_amount, 0) }}</span></div>
+            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Discount {{ $order->coupon_code ? '(' . $order->coupon_code . ')' : '' }}</span><span class="tnum" style="color:var(--success)">−{{ money($order->discount_amount, 0) }}</span></div>
             @endif
-            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Shipping</span><span class="tnum">{{ $order->shipping_cost > 0 ? '৳' . number_format($order->shipping_cost, 0) : 'Free' }}</span></div>
+            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Shipping</span><span class="tnum">{{ $order->shipping_cost > 0 ? money($order->shipping_cost, 0) : 'Free' }}</span></div>
             @if($order->tax > 0)
-            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Tax</span><span class="tnum">৳{{ number_format($order->tax, 0) }}</span></div>
+            <div class="between" style="padding:5px 0"><span class="muted" style="font-size:13.5px">Tax</span><span class="tnum">{{ money($order->tax, 0) }}</span></div>
             @endif
             <div class="between" style="padding:10px 0 0;margin-top:6px;border-top:1px solid var(--border)">
                 <span style="font-weight:700">Total</span>
-                <span class="display tnum" style="font-size:20px;font-weight:700">৳{{ number_format($order->total, 0) }}</span>
+                <span class="display tnum" style="font-size:20px;font-weight:700">{{ money($order->total, 0) }}</span>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
                 <div class="field"><span class="lbl" style="font-size:12px">City</span><input class="input" name="city" value="{{ $addr['city'] ?? '' }}" required></div>
                 <div class="field"><span class="lbl" style="font-size:12px">State</span><input class="input" name="state" value="{{ $addr['state'] ?? '' }}"></div>
                 <div class="field"><span class="lbl" style="font-size:12px">Postcode</span><input class="input" name="postcode" value="{{ $addr['postcode'] ?? '' }}"></div>
-                <div class="field"><span class="lbl" style="font-size:12px">Country</span><input class="input" name="country" value="{{ $addr['country'] ?? 'Bangladesh' }}"></div>
+                <div class="field"><span class="lbl" style="font-size:12px">Country</span><input class="input" name="country" value="{{ $addr['country'] ?? \App\Models\SiteSetting::get('general.store_country', 'BD') }}"></div>
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Save {{ $label }}</button>
         </form>
@@ -485,7 +485,7 @@ $initials     = collect(explode(' ', $order->customer_name))->map(fn($w) => strt
             @csrf
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
                 <div class="field"><span class="lbl" style="font-size:12px">Weight (kg)</span><input class="input" type="number" name="item_weight" step="0.1" min="0.1" value="0.5"></div>
-                <div class="field"><span class="lbl" style="font-size:12px">COD amount (৳)</span><input class="input" type="number" name="cod_amount" step="0.01" value="{{ $order->total }}"></div>
+                <div class="field"><span class="lbl" style="font-size:12px">COD amount ({{ currency_symbol() }})</span><input class="input" type="number" name="cod_amount" step="0.01" value="{{ $order->total }}"></div>
             </div>
             <div class="field" style="margin-bottom:14px">
                 <span class="lbl" style="font-size:12px">Delivery area</span>

@@ -85,7 +85,7 @@ $avatarColors = ['var(--info)','var(--violet)','var(--pop)','var(--teal)','var(-
                     </div>
                 </td>
                 <td style="text-align:center" class="tnum"><b>{{ $orderCount }}</b></td>
-                <td style="text-align:right" class="tnum"><b>৳{{ number_format($ltv, 0) }}</b></td>
+                <td style="text-align:right" class="tnum"><b>{{ money($ltv, 0) }}</b></td>
                 <td><span class="pill {{ $segment[1] }}">{{ $segment[0] }}</span></td>
                 <td><span class="pill sm {{ $user->is_active ? 'success' : 'danger' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
                 <td class="faint" style="font-size:13px">{{ $user->created_at->format('Y-m') }}</td>

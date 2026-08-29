@@ -3,21 +3,14 @@
 namespace App\Services\Couriers;
 
 use App\Contracts\CourierInterface;
-use App\Models\Integration;
 use App\Models\Order;
+use App\Services\ProviderDriver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class PathaoService implements CourierInterface
+class PathaoService extends ProviderDriver implements CourierInterface
 {
-    private Integration $integration;
     private ?string $accessToken = null;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('pathao')
-            ?? new Integration(['credentials' => [], 'environment' => 'sandbox']);
-    }
 
     public function createOrder(Order $order, array $extra = []): array
     {
@@ -37,7 +30,7 @@ class PathaoService implements CourierInterface
             'special_instruction' => $order->notes ?? '',
             'item_quantity'       => $order->items()->sum('quantity'),
             'item_weight'         => $extra['item_weight'] ?? 0.5,
-            'amount_to_collect'   => $extra['amount_to_collect'] ?? $order->total,
+            'amount_to_collect'   => $extra['cod_amount'] ?? $extra['amount_to_collect'] ?? $order->total,
             'item_description'    => $extra['item_description'] ?? '',
         ], $extra);
 
