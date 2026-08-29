@@ -2,7 +2,7 @@
 
 A globally-capable Laravel 12 e-commerce platform. Admin panel in Blade + Alpine.js, storefront in Inertia v3 + React 19 + TypeScript, with dual authentication (`admin` / `web`) guards.
 
-Originally built for the Bangladeshi market, the platform now sells worldwide: country-aware checkout, destination-based tax, shipping zones with live carrier rates, and **94 provider integrations** spanning payments, SMS, fraud, shipping, exchange rates and AI.
+Originally built for the Bangladeshi market, the platform now sells worldwide: country-aware checkout, destination-based tax, shipping zones with live carrier rates, and **98 provider integrations** spanning payments, SMS, fraud, shipping, exchange rates and AI.
 
 ---
 

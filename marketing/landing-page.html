@@ -1,0 +1,377 @@
+<title>geniusCommerz</title>
+<style>
+  :root{
+    --ground:#EDF0F2; --paper:#FFFFFF; --ink:#12181D; --ink-2:#33414B;
+    --muted:#5A6771; --rule:#CFD8DD; --rule-soft:#E1E7EA;
+    --accent:#1B5A73; --accent-soft:#E4EDF1; --gold:#8A6A1E; --gold-soft:#F3EEDE;
+    --good:#1F6B4F;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1418; --paper:#141C22; --ink:#E8EDF0; --ink-2:#B9C6CE;
+      --muted:#8B9AA4; --rule:#28353D; --rule-soft:#1D272E;
+      --accent:#6FB6D2; --accent-soft:#16282F; --gold:#D2B368; --gold-soft:#231E12;
+      --good:#63BD98;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1418; --paper:#141C22; --ink:#E8EDF0; --ink-2:#B9C6CE;
+    --muted:#8B9AA4; --rule:#28353D; --rule-soft:#1D272E;
+    --accent:#6FB6D2; --accent-soft:#16282F; --gold:#D2B368; --gold-soft:#231E12;
+    --good:#63BD98;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0}
+  a{color:var(--accent)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  code,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+           color:var(--muted);margin:0 0 10px}
+
+  /* ── masthead ── */
+  header{border-bottom:1px solid var(--rule);background:var(--paper)}
+  .masthead{display:flex;justify-content:space-between;align-items:baseline;gap:20px;
+            padding:18px 0;flex-wrap:wrap}
+  .brand{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.01em}
+  .brand span{color:var(--accent)}
+  .stamps{display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:11px}
+  .stamp{border:1px solid var(--rule);padding:3px 8px;color:var(--muted);letter-spacing:.06em}
+  .stamp.free{border-color:var(--gold);color:var(--gold);background:var(--gold-soft)}
+
+  /* ── hero ── */
+  .hero{padding:56px 0 40px;border-bottom:1px solid var(--rule)}
+  .hero h1{font-size:clamp(34px,5.2vw,54px);line-height:1.08;letter-spacing:-.02em;max-width:16ch}
+  .lede{font-size:19px;line-height:1.55;color:var(--ink-2);max-width:62ch;margin:20px 0 0}
+  .lede strong{color:var(--ink);font-weight:600}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+  .btn{display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;
+       text-transform:uppercase;padding:11px 18px;border:1px solid var(--accent);
+       color:var(--accent);text-decoration:none}
+  .btn.solid{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+  .btn:hover{background:var(--accent-soft)}
+  .btn.solid:hover{opacity:.88;background:var(--accent)}
+
+  /* ── the matrix: the thesis of the page ── */
+  .matrix{margin-top:44px;border:1px solid var(--rule);background:var(--paper);overflow-x:auto}
+  .matrix table{border-collapse:collapse;width:100%;min-width:660px}
+  .matrix th,.matrix td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule-soft);
+                        vertical-align:top}
+  .matrix thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+                   color:var(--muted);font-weight:400;border-bottom:1px solid var(--rule);
+                   background:var(--ground);position:sticky;top:0}
+  .matrix tbody tr:last-child td{border-bottom:0}
+  .region{font-family:var(--mono);font-size:12.5px;color:var(--ink);white-space:nowrap}
+  .providers{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+  .count{font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right;white-space:nowrap}
+
+  /* ── figures ── */
+  .figures{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));
+           border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+  .fig{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+       background:var(--paper);padding:20px 16px}
+  .fig b{display:block;font-family:var(--mono);font-size:30px;font-weight:500;
+         letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+  .fig span{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
+
+  /* ── sections ── */
+  section{padding:52px 0;border-bottom:1px solid var(--rule)}
+  section h2{font-size:clamp(24px,3vw,31px);letter-spacing:-.015em;max-width:24ch}
+  section > .wrap > p{max-width:66ch;color:var(--ink-2);margin:16px 0 0}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:1px;
+        background:var(--rule);border:1px solid var(--rule);margin-top:30px}
+  .cell{background:var(--paper);padding:22px}
+  .cell h3{font-size:17px;margin-bottom:8px}
+  .cell p{margin:0;font-size:14.5px;color:var(--ink-2)}
+  .cell .mono-list{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.7}
+
+  /* ── flow ── */
+  ol.flow{list-style:none;padding:0;margin:28px 0 0;counter-reset:s}
+  ol.flow li{counter-increment:s;display:grid;grid-template-columns:auto 1fr;gap:16px;
+             padding:15px 0;border-top:1px solid var(--rule-soft);align-items:baseline}
+  ol.flow li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:12px;
+                     color:var(--gold);letter-spacing:.06em}
+  ol.flow p{margin:0;color:var(--ink-2);font-size:15px}
+  ol.flow b{color:var(--ink);font-weight:600}
+
+  .callout{margin-top:28px;border-left:3px solid var(--accent);background:var(--accent-soft);
+           padding:18px 20px}
+  .callout p{margin:0;font-size:14.5px;color:var(--ink-2)}
+  .callout strong{color:var(--ink)}
+  .callout.caution{border-left-color:var(--gold);background:var(--gold-soft)}
+
+  pre{background:var(--paper);border:1px solid var(--rule);padding:18px;overflow-x:auto;
+      font-family:var(--mono);font-size:13px;line-height:1.7;margin:26px 0 0;color:var(--ink-2)}
+  pre b{color:var(--ink);font-weight:400}
+
+  dl.faq{margin:28px 0 0}
+  dl.faq dt{font-family:var(--serif);font-size:16.5px;font-weight:600;margin-top:22px;
+            padding-top:16px;border-top:1px solid var(--rule-soft)}
+  dl.faq dd{margin:7px 0 0;color:var(--ink-2);font-size:14.5px;max-width:68ch}
+
+  ul.plain{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:9px}
+  ul.plain li{padding-left:20px;position:relative;color:var(--ink-2);font-size:15px}
+  ul.plain li::before{content:"—";position:absolute;left:0;color:var(--gold);font-family:var(--mono)}
+
+  footer{padding:44px 0 56px;background:var(--paper)}
+  .foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:baseline}
+  .foot p{margin:0;color:var(--muted);font-size:13.5px}
+  .foot .mono{font-size:12px}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header>
+  <div class="wrap masthead">
+    <div class="brand">genius<span>Commerz</span></div>
+    <div class="stamps">
+      <span class="stamp free">MIT · FREE FOREVER</span>
+      <span class="stamp">LARAVEL 12</span>
+      <span class="stamp">REACT 19</span>
+      <span class="stamp">SELF-HOSTED</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Free open source software from Xgenious</p>
+      <h1>Sell across borders without paying for the privilege.</h1>
+      <p class="lede">A self-hosted Laravel eCommerce platform with <strong>98 integrations built in</strong> —
+        39 payment gateways, 20 SMS gateways, 19 shipping carriers and 11 fraud checkers. Country-aware
+        checkout in 213 countries, destination tax, and multi-currency that survives an audit.
+        <strong>No commission, no per-order fee, no paid tier.</strong></p>
+
+      <div class="hero-actions">
+        <a class="btn solid" href="#install">Install it</a>
+        <a class="btn" href="#gateways">See the integrations</a>
+        <a class="btn" href="https://github.com/XgeniousLLC/geniusCommerz">Source on GitHub</a>
+      </div>
+
+      <div class="matrix">
+        <table>
+          <thead>
+            <tr><th>Market</th><th>Payment gateways included</th><th>Count</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="region">WORLDWIDE</td><td class="providers">Stripe · PayPal · Adyen · Authorize.Net · Paddle · 2Checkout · Cash on Delivery</td><td class="count">7</td></tr>
+            <tr><td class="region">BANGLADESH</td><td class="providers">SSLCOMMERZ · bKash · Nagad · aamarPay · ShurjoPay</td><td class="count">5</td></tr>
+            <tr><td class="region">INDIA</td><td class="providers">Razorpay · Cashfree · PayU India · PhonePe · Paytm</td><td class="count">5</td></tr>
+            <tr><td class="region">AFRICA</td><td class="providers">Paystack · Flutterwave · Monnify · M-Pesa · MTN MoMo · Yoco · Peach Payments</td><td class="count">7</td></tr>
+            <tr><td class="region">GULF &amp; MENA</td><td class="providers">PayTabs · Tap Payments · Moyasar · Fawry</td><td class="count">4</td></tr>
+            <tr><td class="region">EUROPE</td><td class="providers">Mollie · iyzico · Vipps MobilePay</td><td class="count">3</td></tr>
+            <tr><td class="region">LATAM</td><td class="providers">MercadoPago · Pagar.me (Pix)</td><td class="count">2</td></tr>
+            <tr><td class="region">SE ASIA</td><td class="providers">Midtrans · Xendit</td><td class="count">2</td></tr>
+            <tr><td class="region">PAKISTAN</td><td class="providers">Easypaisa · JazzCash</td><td class="count">2</td></tr>
+            <tr><td class="region">APAC / N. AM</td><td class="providers">Square · KakaoPay</td><td class="count">2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="figures">
+      <div class="fig"><b>39</b><span>Payment gateways</span></div>
+      <div class="fig"><b>20</b><span>SMS gateways</span></div>
+      <div class="fig"><b>19</b><span>Shipping carriers</span></div>
+      <div class="fig"><b>11</b><span>Fraud checkers</span></div>
+      <div class="fig"><b>213</b><span>Countries</span></div>
+      <div class="fig"><b>155</b><span>Currencies</span></div>
+      <div class="fig"><b>236</b><span>Automated tests</span></div>
+      <div class="fig"><b>0%</b><span>Commission taken</span></div>
+    </div>
+  </div>
+
+  <section id="gateways">
+    <div class="wrap">
+      <p class="eyebrow">Integrations</p>
+      <h2>Ninety-eight providers, one integration layer.</h2>
+      <p>Adding a provider is two files — a definition describing its credentials, capabilities and
+        supported currencies, and a driver. That definition then drives the admin screens, the credential
+        form and checkout availability. No scattered constants, no seeders to run.</p>
+
+      <div class="cols">
+        <div class="cell">
+          <h3>Shipping &amp; couriers</h3>
+          <p>Live carrier rates, or your own zone rates with weight and order-value bands.</p>
+          <p class="mono-list">DHL · FedEx · UPS · EasyPost · Shippo · Delhivery · Shiprocket · Blue Dart ·
+            Aramex · SMSA · Naqel · Torod · Correios · Melhor Envio · Loggi · Sendbox · GIG · Kwik ·
+            Bob&nbsp;Go · Pathao · RedX · Steadfast</p>
+        </div>
+        <div class="cell">
+          <h3>SMS gateways</h3>
+          <p>Order updates and login codes. Numbers normalise once, then reshape per gateway.</p>
+          <p class="mono-list">Twilio · Vonage · MessageBird · Plivo · Amazon SNS · Infobip · Sinch · Telnyx ·
+            MSG91 · Gupshup · Fast2SMS · Unifonic · Taqnyat · Cequens · Africa's Talking · Termii ·
+            Clickatell · BulkSMSBD · SMS.BD · MRAM</p>
+        </div>
+        <div class="cell">
+          <h3>Fraud screening</h3>
+          <p>Every provider reduced to one risk scale, so the admin reads the same whichever you use.</p>
+          <p class="mono-list">SEON · Sift · MaxMind minFraud · IPQualityScore · Ravelin · Bureau ·
+            Uqudo · Smile ID · Youverify · FraudBD · BDCourier</p>
+        </div>
+        <div class="cell">
+          <h3>AI &amp; exchange rates</h3>
+          <p>Product copy, translation and price suggestions. Rates refresh hourly with a sanity check.</p>
+          <p class="mono-list">OpenAI · Anthropic Claude · Google Gemini · DeepSeek ·
+            open.er-api · ExchangeRate-API</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Cross-border</p>
+      <h2>The parts of selling abroad that usually go wrong.</h2>
+
+      <div class="cols">
+        <div class="cell">
+          <h3>Addresses that fit the country</h3>
+          <p>A state dropdown where one exists, free text where it doesn't, the right postal label —
+            ZIP, Postcode, PIN — and no postal field at all for the UAE, Hong Kong, Qatar or Panama,
+            which have no postal system.</p>
+        </div>
+        <div class="cell">
+          <h3>Money that survives an audit</h3>
+          <p>Every order stores its total twice: in your base currency, which every report sums, and in
+            the currency the customer actually saw, with the exchange rate frozen at order time. Old
+            orders stay reconstructible years later.</p>
+        </div>
+        <div class="cell">
+          <h3>Tax by destination</h3>
+          <p>Country, state or postal pattern, most specific wins. Rates stack, which is how US
+            state-plus-county and Canadian GST-plus-PST actually work. Products carry a tax class,
+            because EU rates differ for food and books.</p>
+        </div>
+        <div class="cell">
+          <h3>Templates, so setup isn't a week</h3>
+          <p>One click applies EU VAT across 27 member states, UK VAT, US sales tax across 46 states, or
+            Canada GST/HST/PST — plus shipping presets for Europe, North America and the Gulf. Re-applying
+            skips what you already have.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Settlement</p>
+      <h2>An order is paid when the gateway says so — not when the browser comes back.</h2>
+      <p>This is where self-hosted carts most often get it wrong, so it is worth being explicit about
+        how money is confirmed.</p>
+
+      <ol class="flow">
+        <li><p><b>The customer picks a gateway.</b> The order is created as pending — a real state, not
+          a guess.</p></li>
+        <li><p><b>They're sent to pay.</b> By redirect, by a signed form post, or by a prompt on their
+          phone for mobile money like M-Pesa and MTN MoMo.</p></li>
+        <li><p><b>The gateway notifies your server.</b> The webhook signature is verified before anything
+          is written.</p></li>
+        <li><p><b>Only then is the order marked paid.</b> Repeat notifications are dropped by a unique
+          event index, so an order can't be paid twice.</p></li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>The return URL never marks an order paid.</strong> A customer arriving back from a
+          hosted page only triggers a server-to-server verification — the redirect itself proves nothing,
+          and anyone can visit it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <p class="eyebrow">Install</p>
+      <h2>Running in about ten minutes.</h2>
+      <p>PHP 8.2+, MySQL 8, Node 18+. Documentation covers deployment on AWS, DigitalOcean, cPanel,
+        Docker and plain VPS.</p>
+
+<pre><b>git clone https://github.com/XgeniousLLC/geniusCommerz.git
+cd geniusCommerz
+
+composer install
+npm install &amp;&amp; npm run build
+
+cp .env.example .env
+php artisan key:generate
+</b># set your DB_* values in .env<b>
+php artisan migrate &amp;&amp; php artisan db:seed</b></pre>
+
+      <p>Then set your store country and currency, apply a tax template, apply a shipping template, and
+        enable a payment gateway. That's the whole setup.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Terms</p>
+      <h2>What free actually means here.</h2>
+      <ul class="plain">
+        <li>MIT licensed — modify it, rebrand it, sell through it</li>
+        <li>Full source code. No obfuscation, no encoded files, no phone-home</li>
+        <li>No per-order, per-product or per-user fee. No expiry, no trial</li>
+        <li>No commission — it runs on your server and talks to your gateway directly. We aren't in the transaction path and couldn't take a cut if we wanted to</li>
+        <li>Self-hosted. Your server, your database, your customer data</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Before you go live</p>
+      <h2>Things we'd rather you read here than discover in production.</h2>
+
+      <div class="callout caution">
+        <p><strong>Test each gateway in its sandbox first.</strong> Stripe, PayPal and cash on delivery
+          have end-to-end webhook coverage in the test suite. The rest are written against each provider's
+          documented API and tested for structure, but not against live accounts — and webhook signature
+          checks fail <em>open</em> if a field name is wrong.</p>
+      </div>
+
+      <dl class="faq">
+        <dt>Do I need all 39 payment gateways?</dt>
+        <dd>No. Most stores enable two or three. The rest are there so you aren't blocked the day you
+          expand into a new market.</dd>
+
+        <dt>How is this different from WooCommerce or Shopify?</dt>
+        <dd>Shopify charges monthly and takes a cut unless you use their payments. WooCommerce is free,
+          but each regional gateway, courier and tax setup is a separate paid extension.
+          geniusCommerz ships those in the box, on a common integration layer.</dd>
+
+        <dt>Are the tax templates tax advice?</dt>
+        <dd>No. They're a starting point and rates change — confirm them against your own registrations.
+          The US template carries state base rates only; counties add their own, and nexus rules decide
+          where you must collect at all.</dd>
+
+        <dt>Does it handle EU B2B reverse charge?</dt>
+        <dd>Not yet. If you sell B2B into the EU, use a merchant-of-record gateway like Paddle or
+          2Checkout, which handles VAT on your behalf.</dd>
+
+        <dt>Is there support?</dt>
+        <dd>Documentation and the issue tracker are free. Paid installation, customisation and support
+          are available through Xgenious.</dd>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div class="brand" style="margin-bottom:6px">genius<span>Commerz</span></div>
+      <p>Free, self-hosted, built to sell across borders.</p>
+    </div>
+    <p class="mono">XGENIOUS · DHAKA, BANGLADESH · CONTACT@XGENIOUS.COM</p>
+  </div>
+</footer>
