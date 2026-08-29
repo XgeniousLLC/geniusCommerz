@@ -121,9 +121,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, var(--primary-color), #1a2f5f), url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&q=80');
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(135deg, var(--primary-color), #1a2f5f);
             color: #ffffff;
             padding: 4rem 2rem;
             text-align: center;
@@ -220,14 +218,6 @@
             border-radius: 8px;
             border-left: 4px solid var(--secondary-color);
             overflow: hidden;
-        }
-
-        .feature-image {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 1rem;
         }
 
         .feature h4 {
@@ -336,37 +326,6 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-        }
-
-        /* Hero Image Section */
-        .hero-image {
-            width: 100%;
-            max-width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 2rem 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Image Gallery */
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-
-        .gallery-item {
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
         }
 
         /* Navigation */
@@ -555,38 +514,30 @@
                 <section id="home">
                     <h1>Welcome to geniusCommerz Admin</h1>
 
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80" alt="E-commerce dashboard" class="hero-image">
-
                     <p>geniusCommerz is a modern, powerful e-commerce platform designed to help you build and manage your online store with ease. This documentation covers every feature of the admin panel.</p>
 
                     <div class="features">
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="Dashboard analytics" class="feature-image">
                             <h4>Dashboard</h4>
                             <p>Real-time analytics, KPI cards, and sales overview at a glance</p>
                         </div>
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80" alt="Product management" class="feature-image">
                             <h4>Inventory Management</h4>
                             <p>Manage products, variants, categories, and brands efficiently</p>
                         </div>
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80" alt="Order management" class="feature-image">
                             <h4>Order Management</h4>
                             <p>Complete order lifecycle from creation to delivery</p>
                         </div>
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1563013544-824ae1c83d3f?w=400&q=80" alt="Payment processing" class="feature-image">
                             <h4>Payment Processing</h4>
                             <p>Multiple payment gateways integrated and ready to use</p>
                         </div>
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80" alt="Content management" class="feature-image">
                             <h4>Content Management</h4>
                             <p>Pages, blogs, menus, and media library management</p>
                         </div>
                         <div class="feature">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80" alt="Settings" class="feature-image">
                             <h4>Settings & Configuration</h4>
                             <p>Complete control over store settings and integrations</p>
                         </div>
@@ -608,8 +559,6 @@
                 <!-- OVERVIEW -->
                 <section id="overview">
                     <h1>Admin Panel Overview</h1>
-
-                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80" alt="Admin panel overview" class="hero-image">
 
                     <h2>Key Features</h2>
                     <ul>
@@ -638,7 +587,6 @@
                 <section id="login">
                     <h1>Login & Account Access</h1>
 
-                    <img src="https://images.unsplash.com/photo-1606994863033-cfe385b99d27?w=900&q=80" alt="Security and login" class="hero-image">
 
                     <h2>Default Administrator Account</h2>
                     <table>
@@ -695,7 +643,6 @@
                 <section id="dashboard">
                     <h1>Dashboard</h1>
 
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&q=80" alt="Analytics dashboard" class="hero-image">
 
                     <h2>Dashboard Overview</h2>
                     <p>The dashboard provides a comprehensive overview of your store's performance with real-time data and key metrics.</p>
@@ -756,7 +703,6 @@
                 <section id="products">
                     <h1>Product Management</h1>
 
-                    <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=900&q=80" alt="Product management" class="hero-image">
 
                     <h2>Accessing Products</h2>
                     <ol>
@@ -781,19 +727,7 @@
                         <li>Click "Save & Publish" to make it live or "Save as Draft"</li>
                     </ol>
 
-                    <div class="image-grid">
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80" alt="Product showcase 1">
-                        </div>
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&q=80" alt="Product showcase 2">
-                        </div>
-                        <div class="gallery-item">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" alt="Product showcase 3">
-                        </div>
-                    </div>
-
-                    <h2>Product Information Form</h2>
+<h2>Product Information Form</h2>
 
                     <h3>Basic Details</h3>
                     <table>
@@ -833,7 +767,6 @@
                 <section id="orders">
                     <h1>Order Management</h1>
 
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80" alt="Order management" class="hero-image">
 
                     <h2>Accessing Orders</h2>
                     <ol>
@@ -898,7 +831,6 @@
                 <section id="payment">
                     <h1>Payment Configuration</h1>
 
-                    <img src="https://images.unsplash.com/photo-1563013544-824ae1c83d3f?w=900&q=80" alt="Payment methods" class="hero-image">
 
                     <h2>Accessing Payment Settings</h2>
                     <ol>
@@ -937,7 +869,6 @@
                 <section id="settings">
                     <h1>Store Settings</h1>
 
-                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80" alt="Store configuration" class="hero-image">
 
                     <h2>Accessing Settings</h2>
                     <ol>
