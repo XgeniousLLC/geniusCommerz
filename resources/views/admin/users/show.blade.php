@@ -2,357 +2,369 @@
 
 @section('title', 'User – ' . $user->name)
 
-@section('breadcrumbs')
-    <ol class="flex items-center space-x-2 text-sm text-gray-500">
-        <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-700">Dashboard</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li><a href="{{ route('admin.users.index') }}" class="hover:text-gray-700">Users</a></li>
-        <li><span class="mx-1">/</span></li>
-        <li class="text-gray-900 font-medium">{{ $user->name }}</li>
-    </ol>
-@endsection
-
-@section('page-header')
-    <div class="flex items-start justify-between flex-wrap gap-3">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-2xl font-bold select-none">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
-                <p class="text-gray-500 text-sm mt-0.5">
-                    {{ $user->email }}{{ $user->phone ? ' · ' . $user->phone : '' }}
-                </p>
-                <div class="flex items-center gap-2 mt-1">
-                    @if($user->is_active)
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
-                    @else
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">Inactive</span>
-                    @endif
-                    <span class="text-xs text-gray-400">Joined {{ $user->created_at->format('d M Y') }}</span>
-                </div>
-            </div>
-        </div>
-        <a href="{{ route('admin.users.edit', $user) }}"
-            class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            Edit User
-        </a>
-    </div>
-@endsection
-
 @section('content')
-<div class="space-y-6">
+@php
+$avatarColors = ['var(--info)','var(--violet)','var(--pop)','var(--teal)','var(--warning)','var(--accent)','var(--success)'];
+$avatarColor  = $avatarColors[abs(crc32($user->name)) % count($avatarColors)];
+$initials     = collect(explode(' ', $user->name))->map(fn($w) => strtoupper(mb_substr($w,0,1)))->take(2)->implode('');
 
-{{-- ── KPI strip ── --}}
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-    @foreach([
-        ['Total Orders',  $totalOrders,                         'bg-blue-50   text-blue-700'],
-        ['Total Spent',   '৳'.number_format($totalSpent,2),    'bg-green-50  text-green-700'],
-        ['Avg Order',     '৳'.number_format($avgOrderValue,2), 'bg-indigo-50 text-indigo-700'],
-        ['Delivered',     $completedOrders,                     'bg-emerald-50 text-emerald-700'],
-        ['Cancelled',     $cancelledOrders,                     'bg-red-50    text-red-600'],
-        ['Loyalty Pts',   number_format($loyaltyBalance),       'bg-amber-50  text-amber-700'],
-    ] as [$label, $value, $cls])
-    <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <p class="text-xs text-gray-400 mb-1">{{ $label }}</p>
-        <p class="text-xl font-bold {{ explode(' ', $cls)[1] }}">{{ $value }}</p>
-    </div>
-    @endforeach
-</div>
+$statusPill = fn($status) => match($status) {
+    'delivered'  => 'success',
+    'shipped'    => 'violet',
+    'processing' => 'accent',
+    'confirmed'  => 'info',
+    'pending'    => 'warning',
+    'cancelled'  => 'danger',
+    default      => '',
+};
+$statusColor = fn($status) => match($status) {
+    'delivered'  => 'var(--success)',
+    'shipped'    => 'var(--violet)',
+    'processing' => 'var(--accent)',
+    'confirmed'  => 'var(--info)',
+    'pending'    => 'var(--warning)',
+    'cancelled'  => 'var(--danger)',
+    default      => 'var(--text-faint)',
+};
+@endphp
 
-<div class="grid lg:grid-cols-3 gap-6">
-
-{{-- ── Left sidebar ── --}}
-<div class="space-y-5">
-
-    {{-- Contact --}}
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Contact Details</h3>
-        <dl class="space-y-2.5 text-sm">
-            <div class="flex justify-between gap-2">
-                <dt class="text-gray-500 shrink-0">Name</dt>
-                <dd class="font-medium text-gray-900 text-right">{{ $user->name }}</dd>
-            </div>
-            <div class="flex justify-between gap-2">
-                <dt class="text-gray-500 shrink-0">Email</dt>
-                <dd class="font-medium text-gray-900 text-right break-all">{{ $user->email ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-2">
-                <dt class="text-gray-500 shrink-0">Phone</dt>
-                <dd class="font-medium text-gray-900">{{ $user->phone ?? '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-2">
-                <dt class="text-gray-500 shrink-0">Registered</dt>
-                <dd class="font-medium text-gray-900">{{ $user->created_at->format('d M Y') }}</dd>
-            </div>
-            <div class="flex justify-between gap-2">
-                <dt class="text-gray-500 shrink-0">Last seen</dt>
-                <dd class="text-gray-600">{{ $user->updated_at->diffForHumans() }}</dd>
-            </div>
-        </dl>
-    </x-admin.card>
-
-    {{-- Addresses --}}
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Saved Addresses ({{ $user->addresses->count() }})</h3>
-        @forelse($user->addresses as $addr)
-        <div class="text-sm border rounded-lg p-3 mb-2 {{ $addr->is_default ? 'border-blue-200 bg-blue-50' : 'border-gray-100' }}">
-            @if($addr->is_default)
-                <span class="text-xs font-semibold text-blue-600">Default · </span>
-            @endif
-            <span class="font-medium text-gray-800">{{ $addr->name ?? $user->name }}</span>
-            @if(isset($addr->phone))<span class="text-gray-400 text-xs"> · {{ $addr->phone }}</span>@endif
-            <p class="text-gray-500 text-xs mt-0.5">
-                {{ collect([$addr->address_line ?? null, $addr->city ?? null, $addr->state ?? null])->filter()->implode(', ') }}
-            </p>
-        </div>
-        @empty
-        <p class="text-sm text-gray-400">No saved addresses.</p>
-        @endforelse
-    </x-admin.card>
-
-    {{-- Payment preference --}}
-    @if($paymentPreference->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Preferences</h3>
-        <ul class="space-y-2">
-            @foreach($paymentPreference as $method => $count)
-            <li class="flex items-center gap-2 text-sm">
-                <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                    <div class="h-2 rounded-full bg-blue-500"
-                         style="width:{{ round(($count / $totalOrders) * 100) }}%"></div>
-                </div>
-                <span class="text-gray-600 capitalize shrink-0 w-28 truncate">{{ str_replace('_',' ',$method) }}</span>
-                <span class="font-semibold text-gray-900 shrink-0">{{ $count }}x</span>
-            </li>
-            @endforeach
-        </ul>
-    </x-admin.card>
-    @endif
-
-    {{-- Loyalty --}}
-    <x-admin.card>
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-gray-700">Loyalty Points</h3>
-            <span class="text-lg font-bold text-amber-600">{{ number_format($loyaltyBalance) }} pts</span>
-        </div>
-        @forelse($loyaltyHistory as $pt)
-        <div class="flex items-center justify-between text-xs py-1.5 border-b border-gray-50">
-            <span class="text-gray-500">{{ $pt->description ?? ($pt->points > 0 ? 'Earned' : 'Redeemed') }}</span>
-            <span class="{{ $pt->points > 0 ? 'text-green-600' : 'text-red-500' }} font-medium">
-                {{ $pt->points > 0 ? '+' : '' }}{{ $pt->points }}
+<div class="row" style="gap:14px;margin-bottom:22px;flex-wrap:wrap">
+    <a class="icon-btn" href="{{ route('admin.users.index') }}" style="width:40px;height:40px">
+        <span class="ico" data-ico="chevLeft"></span>
+    </a>
+    <span class="avatar" style="width:48px;height:48px;font-size:17px;background:{{ $avatarColor }}">{{ $initials }}</span>
+    <div class="grow" style="min-width:200px">
+        <div class="breadcrumb"><a href="{{ route('admin.users.index') }}">Customers</a> / {{ $user->name }}</div>
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+            <h2 class="display" style="font-size:24px;letter-spacing:-0.03em">{{ $user->name }}</h2>
+            <span class="pill {{ $user->is_active ? 'success' : 'danger' }}">
+                <span class="dot"></span>{{ $user->is_active ? 'Active' : 'Inactive' }}
             </span>
         </div>
-        @empty
-        <p class="text-xs text-gray-400">No loyalty activity yet.</p>
-        @endforelse
-    </x-admin.card>
+        <div class="faint" style="font-size:12.5px;margin-top:3px">
+            {{ $user->email }}{{ $user->phone ? ' · ' . $user->phone : '' }} · Joined {{ $user->created_at->format('d M Y') }}
+        </div>
+    </div>
+    <a class="btn btn-outline" href="{{ route('admin.users.edit', $user) }}">
+        <span class="ico" data-ico="edit" style="width:18px;height:18px"></span>Edit customer
+    </a>
+</div>
 
-</div>{{-- /left --}}
+<div class="stat-grid">
+    <div class="card lift stat">
+        <span class="tile t-info"><span class="ico" data-ico="cart"></span></span>
+        <div><div class="num">{{ number_format($totalOrders) }}</div><div class="lbl">Total orders</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-success"><span class="ico" data-ico="wallet"></span></span>
+        <div><div class="num">{{ money($totalSpent, 0) }}</div><div class="lbl">Total spent</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-accent"><span class="ico" data-ico="chart"></span></span>
+        <div><div class="num">{{ money($avgOrderValue, 0) }}</div><div class="lbl">Avg order</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-teal"><span class="ico" data-ico="check"></span></span>
+        <div><div class="num">{{ number_format($completedOrders) }}</div><div class="lbl">Delivered</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile" style="background:var(--danger-soft);color:var(--danger)"><span class="ico" data-ico="x"></span></span>
+        <div><div class="num">{{ number_format($cancelledOrders) }}</div><div class="lbl">Cancelled</div></div>
+    </div>
+    <div class="card lift stat">
+        <span class="tile t-warning"><span class="ico" data-ico="star"></span></span>
+        <div><div class="num">{{ number_format($loyaltyBalance) }}</div><div class="lbl">Loyalty points</div></div>
+    </div>
+</div>
 
-{{-- ── Main panel ── --}}
-<div class="lg:col-span-2 space-y-5">
+<div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px;align-items:start" class="grid-2">
 
-    {{-- Monthly spend bar chart --}}
+<div class="col-gap">
+
+    {{-- Monthly spend --}}
     @if($monthlySpend->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Monthly Spend – Last 12 Months</h3>
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-accent"><span class="ico" data-ico="chart" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Monthly spend</h3><div class="sub">Last 12 months</div></div>
+        </div>
         @php $maxSpend = $monthlySpend->max() ?: 1; @endphp
-        <div class="flex items-end gap-1 h-28">
+        <div class="row" style="gap:6px;align-items:flex-end;height:132px">
             @foreach($monthlySpend as $month => $amount)
-            <div class="flex-1 flex flex-col items-center gap-1 group cursor-default"
-                 title="{{ $month }}: ৳{{ number_format($amount, 2) }}">
-                <div class="w-full rounded-t bg-blue-500 group-hover:bg-blue-600 transition-colors"
-                     style="height:{{ max(4, round(($amount / $maxSpend) * 88)) }}px"></div>
-                <span class="text-gray-400 text-center leading-none" style="font-size:10px">
+            <div class="grow stack" style="align-items:center;gap:6px"
+                 title="{{ $month }}: {{ money($amount, 2) }}">
+                <div style="width:100%;border-radius:6px 6px 0 0;background:var(--accent);height:{{ max(4, round(($amount / $maxSpend) * 104)) }}px"></div>
+                <span class="faint" style="font-size:10.5px;font-weight:600;line-height:1">
                     {{ \Carbon\Carbon::createFromFormat('Y-m', $month)->format('M') }}
                 </span>
             </div>
             @endforeach
         </div>
-    </x-admin.card>
+    </div>
     @endif
 
-    {{-- Top products --}}
+    {{-- Most purchased --}}
     @if($topProducts->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Most Purchased Products</h3>
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-violet"><span class="ico" data-ico="package" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Most purchased</h3><div class="sub">Top {{ $topProducts->count() }} {{ Str::plural('product', $topProducts->count()) }}</div></div>
+        </div>
         @php $maxQty = $topProducts->max('total_qty') ?: 1; @endphp
-        <div class="space-y-2">
+        <div class="stack" style="gap:14px">
             @foreach($topProducts as $item)
-            <div class="flex items-center gap-3 text-sm">
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between mb-0.5">
-                        <span class="font-medium text-gray-800 truncate">{{ $item->product_name }}</span>
-                        <span class="text-gray-500 shrink-0 ml-2">×{{ $item->total_qty }}</span>
-                    </div>
-                    <div class="bg-gray-100 rounded-full h-1.5">
-                        <div class="h-1.5 rounded-full bg-indigo-500"
-                             style="width:{{ round(($item->total_qty / $maxQty) * 100) }}%"></div>
-                    </div>
+            <div>
+                <div class="between" style="margin-bottom:6px;gap:10px">
+                    <span style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $item->product_name }}</span>
+                    <span class="tnum faint" style="font-size:13px;flex-shrink:0">×{{ $item->total_qty }} · {{ money($item->total_spent, 0) }}</span>
                 </div>
-                <span class="font-semibold text-gray-900 shrink-0 w-28 text-right">৳{{ number_format($item->total_spent, 2) }}</span>
+                <div style="height:6px;border-radius:99px;background:var(--surface-3)">
+                    <div style="width:{{ round(($item->total_qty / $maxQty) * 100) }}%;height:100%;border-radius:99px;background:var(--violet)"></div>
+                </div>
             </div>
             @endforeach
         </div>
-    </x-admin.card>
+    </div>
     @endif
 
-    {{-- Order status summary --}}
+    {{-- Order status breakdown --}}
     @if($statusCounts->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Order Status Breakdown</h3>
-        <div class="flex flex-wrap gap-3">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-teal"><span class="ico" data-ico="layers" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Order status breakdown</h3></div>
+        </div>
+        <div class="row wrap" style="gap:10px">
             @foreach($statusCounts as $status => $cnt)
-            <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg text-sm">
-                <span class="inline-block w-2 h-2 rounded-full
-                    {{ match($status) {
-                        'delivered'  => 'bg-green-500',
-                        'shipped'    => 'bg-blue-500',
-                        'processing' => 'bg-yellow-400',
-                        'cancelled'  => 'bg-red-500',
-                        default      => 'bg-gray-400'
-                    } }}"></span>
-                <span class="text-gray-600 capitalize">{{ $status }}</span>
-                <span class="font-bold text-gray-900">{{ $cnt }}</span>
+            <div class="row" style="gap:8px;background:var(--surface-2);border:1px solid var(--border);padding:8px 13px;border-radius:99px">
+                <span style="width:7px;height:7px;border-radius:99px;background:{{ $statusColor($status) }};flex-shrink:0"></span>
+                <span class="muted" style="font-size:13px">{{ ucfirst($status) }}</span>
+                <b class="tnum" style="font-size:13.5px">{{ $cnt }}</b>
             </div>
             @endforeach
         </div>
-    </x-admin.card>
+    </div>
     @endif
 
     {{-- Order history --}}
-    <x-admin.card>
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-semibold text-gray-700">Order History</h3>
-            <span class="text-xs text-gray-400">{{ $totalOrders }} total</span>
+    <div class="card flush">
+        <div class="card-head" style="padding:20px 22px 14px;margin:0">
+            <span class="tile sm t-info"><span class="ico" data-ico="receipt" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Order history</h3><div class="sub">{{ $totalOrders }} total</div></div>
         </div>
-        @forelse($orders->take(20) as $order)
-        <div class="border border-gray-100 rounded-lg p-3 mb-2 hover:border-gray-200 transition-colors">
-            <div class="flex items-start justify-between flex-wrap gap-2">
-                <div>
-                    <a href="{{ route('admin.orders.show', $order) }}"
-                       class="text-sm font-semibold text-blue-600 hover:underline">#{{ $order->order_number }}</a>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ $order->created_at->format('d M Y, H:i') }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm font-bold text-gray-900">৳{{ number_format($order->total, 2) }}</p>
-                    <div class="flex gap-1 mt-0.5 justify-end flex-wrap">
-                        <span class="inline-flex px-1.5 py-0.5 rounded text-xs font-medium
-                            {{ match($order->status) {
-                                'delivered'  => 'bg-green-100 text-green-700',
-                                'shipped'    => 'bg-blue-100 text-blue-700',
-                                'processing' => 'bg-yellow-100 text-yellow-700',
-                                'cancelled'  => 'bg-red-100 text-red-600',
-                                default      => 'bg-gray-100 text-gray-600'
-                            } }}">{{ ucfirst($order->status) }}</span>
-                        <span class="inline-flex px-1.5 py-0.5 rounded text-xs font-medium
-                            {{ $order->payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-600' }}">
-                            {{ ucfirst($order->payment_status) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            @if($order->items->isNotEmpty())
-            <div class="mt-2 flex flex-wrap gap-1">
-                @foreach($order->items->take(3) as $item)
-                <span class="text-xs text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded">
-                    {{ $item->product_name }} ×{{ $item->quantity }}
-                </span>
+        @if($orders->isEmpty())
+        <div class="empty">
+            <span class="tile"><span class="ico" data-ico="cart" style="width:26px;height:26px"></span></span>
+            <h4>No orders yet</h4>
+            <p>This customer has not placed an order.</p>
+        </div>
+        @else
+        <div class="table-scroll"><table class="table">
+            <thead><tr>
+                <th>Order</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th style="text-align:right">Total</th>
+            </tr></thead>
+            <tbody>
+                @foreach($orders->take(20) as $order)
+                <tr class="hoverable" onclick="location.href='{{ route('admin.orders.show', $order) }}'">
+                    <td>
+                        <div style="font-weight:700;font-size:13.5px">#{{ $order->order_number }}</div>
+                        <div class="faint" style="font-size:12px">{{ $order->created_at->format('d M Y, H:i') }}</div>
+                    </td>
+                    <td>
+                        @if($order->items->isNotEmpty())
+                        <div class="faint" style="font-size:12.5px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                            {{ $order->items->take(2)->map(fn($i) => $i->product_name . ' ×' . $i->quantity)->implode(', ') }}{{ $order->items->count() > 2 ? ' +' . ($order->items->count() - 2) . ' more' : '' }}
+                        </div>
+                        @else
+                        <span class="faint">—</span>
+                        @endif
+                    </td>
+                    <td><span class="pill sm {{ $statusPill($order->status) }}">{{ ucfirst($order->status) }}</span></td>
+                    <td><span class="pill sm {{ $order->payment_status === 'paid' ? 'success' : 'warning' }}">{{ ucfirst($order->payment_status) }}</span></td>
+                    <td style="text-align:right" class="tnum"><b>{{ money($order->total, 0) }}</b></td>
+                </tr>
                 @endforeach
-                @if($order->items->count() > 3)
-                <span class="text-xs text-gray-400">+{{ $order->items->count() - 3 }} more</span>
-                @endif
-            </div>
-            @endif
-        </div>
-        @empty
-        <p class="text-sm text-gray-400 py-4 text-center">No orders yet.</p>
-        @endforelse
+            </tbody>
+        </table></div>
         @if($orders->count() > 20)
-        <p class="text-xs text-gray-400 text-center mt-2">Showing 20 of {{ $orders->count() }} orders.</p>
+        <div style="padding:12px 22px;border-top:1px solid var(--border)" class="faint">
+            Showing 20 of {{ $orders->count() }} orders.
+        </div>
         @endif
-    </x-admin.card>
+        @endif
+    </div>
 
     {{-- Refunds --}}
     @if($refunds->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Refunds ({{ $refunds->count() }})</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm divide-y divide-gray-100">
-                <thead>
-                    <tr class="text-xs text-gray-400 uppercase">
-                        <th class="text-left pb-2 pr-3">Order</th>
-                        <th class="text-left pb-2 pr-3">Reason</th>
-                        <th class="text-right pb-2 pr-3">Amount</th>
-                        <th class="text-right pb-2">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @foreach($refunds as $refund)
-                    <tr>
-                        <td class="py-2 pr-3">
-                            @if($refund->order)
-                            <a href="{{ route('admin.orders.show', $refund->order) }}"
-                               class="text-blue-600 hover:underline text-xs font-medium">
-                                #{{ $refund->order->order_number }}
-                            </a>
-                            @else <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <td class="py-2 pr-3 text-gray-600 max-w-[180px] truncate">{{ $refund->reason ?? '—' }}</td>
-                        <td class="py-2 pr-3 text-right font-medium text-gray-900">৳{{ number_format($refund->amount ?? 0, 2) }}</td>
-                        <td class="py-2 text-right">
-                            <span class="inline-flex px-1.5 py-0.5 rounded text-xs font-medium
-                                {{ match($refund->status ?? '') {
-                                    'approved' => 'bg-green-100 text-green-700',
-                                    'rejected' => 'bg-red-100 text-red-600',
-                                    default    => 'bg-yellow-100 text-yellow-700'
-                                } }}">{{ ucfirst($refund->status ?? 'pending') }}</span>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <div class="card flush">
+        <div class="card-head" style="padding:20px 22px 14px;margin:0">
+            <span class="tile sm t-warning"><span class="ico" data-ico="refresh" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Refunds</h3><div class="sub">{{ $refunds->count() }} {{ Str::plural('request', $refunds->count()) }}</div></div>
         </div>
-    </x-admin.card>
+        <div class="table-scroll"><table class="table">
+            <thead><tr>
+                <th>Order</th>
+                <th>Reason</th>
+                <th style="text-align:right">Amount</th>
+                <th>Status</th>
+            </tr></thead>
+            <tbody>
+                @foreach($refunds as $refund)
+                <tr>
+                    <td>
+                        @if($refund->order)
+                        <a href="{{ route('admin.orders.show', $refund->order) }}" style="font-weight:700;font-size:13.5px;color:var(--accent)">
+                            #{{ $refund->order->order_number }}
+                        </a>
+                        @else
+                        <span class="faint">—</span>
+                        @endif
+                    </td>
+                    <td class="muted" style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $refund->reason ?? '—' }}</td>
+                    <td style="text-align:right" class="tnum">{{ money($refund->amount ?? 0, 0) }}</td>
+                    <td>
+                        <span class="pill sm {{ match($refund->status ?? '') { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' } }}">
+                            {{ ucfirst($refund->status ?? 'pending') }}
+                        </span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table></div>
+    </div>
     @endif
 
     {{-- Reviews --}}
     @if($reviews->isNotEmpty())
-    <x-admin.card>
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Product Reviews ({{ $reviews->count() }})</h3>
-        <div class="space-y-3">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-warning"><span class="ico" data-ico="star" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Product reviews</h3><div class="sub">{{ $reviews->count() }} {{ Str::plural('review', $reviews->count()) }}</div></div>
+        </div>
+        <div class="stack" style="gap:10px">
             @foreach($reviews as $review)
-            <div class="border border-gray-100 rounded-lg p-3">
-                <div class="flex items-center justify-between mb-1">
-                    <p class="text-sm font-medium text-gray-800 truncate">
+            <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px">
+                <div class="between" style="gap:10px;margin-bottom:4px">
+                    <span style="font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                         {{ $review->product?->name ?? 'Deleted product' }}
-                    </p>
-                    <div class="flex gap-0.5 shrink-0 ml-2">
+                    </span>
+                    <span class="row" style="gap:2px;flex-shrink:0">
                         @for($i = 1; $i <= 5; $i++)
-                        <svg class="w-3.5 h-3.5 {{ $i <= $review->rating ? 'text-amber-400' : 'text-gray-200' }}"
-                             fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
+                        <span class="ico" data-ico="star"
+                              style="width:13px;height:13px;color:{{ $i <= $review->rating ? 'var(--warning)' : 'var(--border-strong)' }}"></span>
                         @endfor
-                    </div>
+                    </span>
                 </div>
                 @if($review->body)
-                <p class="text-xs text-gray-500">{{ Str::limit($review->body, 140) }}</p>
+                <p class="muted" style="font-size:12.5px;line-height:1.6">{{ Str::limit($review->body, 140) }}</p>
                 @endif
-                <p class="text-xs text-gray-400 mt-1">{{ $review->created_at->format('d M Y') }}</p>
+                <div class="faint" style="font-size:11.5px;margin-top:5px">{{ $review->created_at->format('d M Y') }}</div>
             </div>
             @endforeach
         </div>
-    </x-admin.card>
+    </div>
     @endif
 
 </div>{{-- /main --}}
-</div>{{-- /grid --}}
+
+<div class="col-gap">
+
+    {{-- Contact --}}
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-info"><span class="ico" data-ico="mail" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Contact details</h3></div>
+        </div>
+        <div class="stack" style="gap:11px">
+            @foreach([
+                'Name'       => $user->name,
+                'Email'      => $user->email ?: '—',
+                'Phone'      => $user->phone ?: '—',
+                'Registered' => $user->created_at->format('d M Y'),
+                'Last seen'  => $user->updated_at->diffForHumans(),
+            ] as $label => $value)
+            <div class="between" style="gap:12px;align-items:flex-start">
+                <span class="muted" style="font-size:13px;flex-shrink:0">{{ $label }}</span>
+                <span style="font-weight:600;font-size:13px;text-align:right;word-break:break-word">{{ $value }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- Addresses --}}
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-violet"><span class="ico" data-ico="pin" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Saved addresses</h3><div class="sub">{{ $user->addresses->count() }} saved</div></div>
+        </div>
+        @forelse($user->addresses as $addr)
+        <div style="border:1px solid {{ $addr->is_default ? 'var(--accent)' : 'var(--border)' }};border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px">
+            <div class="row wrap" style="gap:7px;margin-bottom:3px">
+                <span style="font-weight:700;font-size:13px">{{ $addr->name ?? $user->name }}</span>
+                @if($addr->is_default)<span class="pill sm accent">Default</span>@endif
+            </div>
+            @if(isset($addr->phone))
+            <div class="faint" style="font-size:12px">{{ $addr->phone }}</div>
+            @endif
+            <div class="muted" style="font-size:12.5px;line-height:1.55;margin-top:2px">
+                {{ collect([$addr->address_line ?? null, $addr->city ?? null, $addr->state ?? null])->filter()->implode(', ') ?: '—' }}
+            </div>
+        </div>
+        @empty
+        <p class="faint" style="font-size:13px">No saved addresses.</p>
+        @endforelse
+    </div>
+
+    {{-- Payment preference --}}
+    @if($paymentPreference->isNotEmpty())
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-teal"><span class="ico" data-ico="card" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Payment preference</h3></div>
+        </div>
+        <div class="stack" style="gap:13px">
+            @foreach($paymentPreference as $method => $count)
+            @php $pct = $totalOrders ? round(($count / $totalOrders) * 100) : 0; @endphp
+            <div>
+                <div class="between" style="margin-bottom:6px;gap:10px">
+                    <span style="font-weight:600;font-size:13px;text-transform:capitalize">{{ str_replace('_', ' ', $method ?: 'Unknown') }}</span>
+                    <span class="tnum faint" style="font-size:12.5px;flex-shrink:0">{{ $count }}× · {{ $pct }}%</span>
+                </div>
+                <div style="height:6px;border-radius:99px;background:var(--surface-3)">
+                    <div style="width:{{ $pct }}%;height:100%;border-radius:99px;background:var(--teal)"></div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Loyalty --}}
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-warning"><span class="ico" data-ico="star" style="width:18px;height:18px"></span></span>
+            <div class="ct"><h3>Loyalty points</h3></div>
+            <span class="display head-action tnum" style="font-size:19px;font-weight:700;color:var(--warning)">
+                {{ number_format($loyaltyBalance) }}
+            </span>
+        </div>
+        @forelse($loyaltyHistory as $pt)
+        <div class="between" style="gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span class="muted" style="font-size:12.5px">{{ $pt->description ?? ($pt->points > 0 ? 'Earned' : 'Redeemed') }}</span>
+            <b class="tnum" style="font-size:12.5px;flex-shrink:0;color:{{ $pt->points > 0 ? 'var(--success)' : 'var(--danger)' }}">
+                {{ $pt->points > 0 ? '+' : '' }}{{ $pt->points }}
+            </b>
+        </div>
+        @empty
+        <p class="faint" style="font-size:13px">No loyalty activity yet.</p>
+        @endforelse
+    </div>
+
+</div>{{-- /sidebar --}}
 </div>
+
 @endsection
