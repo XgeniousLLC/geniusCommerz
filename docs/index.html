@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>geniusCommerz Admin Panel Documentation</title>
+    <title>geniusCommerz Documentation</title>
     <style>
         * {
             margin: 0;
@@ -12,24 +12,21 @@
         }
 
         :root {
-            --primary-color: #0B1F4F;
-            --secondary-color: #8B6F47;
-            --text-dark: #1a1a1a;
-            --text-light: #555555;
-            --bg-light: #f5f5f5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
             --bg-white: #ffffff;
-            --border-color: #d0d0d0;
-            --code-bg: #f0f0f0;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --info: #3498db;
+            --bg-light: #f8f8f8;
+            --border-color: #e0e0e0;
+            --code-bg: #f5f5f5;
+            --sidebar-bg: #2d2d2d;
+            --sidebar-text: #ffffff;
+            --accent: #333333;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.7;
-            color: var(--text-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
             background: var(--bg-white);
         }
 
@@ -38,79 +35,96 @@
             min-height: 100vh;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: var(--primary-color);
-            color: #ffffff;
-            padding: 2rem 1.5rem;
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 2rem 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             left: 0;
             top: 0;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1.5rem;
         }
 
         .sidebar-logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
-            color: #ffffff;
+            margin-bottom: 0.3rem;
         }
 
         .sidebar-tagline {
-            font-size: 0.85rem;
-            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
         }
 
         .nav-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            padding: 0 1.5rem;
         }
 
         .nav-section-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.8rem;
             font-weight: 600;
         }
 
         .nav-link {
             display: block;
-            padding: 0.65rem 1rem;
-            color: rgba(255,255,255,0.85);
+            padding: 0.6rem 0.8rem;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             border-radius: 4px;
-            transition: all 0.3s;
-            margin-bottom: 0.25rem;
+            transition: all 0.2s;
             font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            cursor: pointer;
         }
 
         .nav-link:hover {
             background: rgba(255,255,255,0.1);
             color: #ffffff;
-            padding-left: 1.25rem;
         }
 
         .nav-link.active {
-            background: var(--secondary-color);
+            background: rgba(255,255,255,0.2);
             color: #ffffff;
-            padding-left: 1.25rem;
+            font-weight: 500;
         }
 
         /* Main Content */
         .main {
-            margin-left: 280px;
+            margin-left: 260px;
             flex: 1;
-            background: var(--bg-white);
+        }
+
+        .header {
+            background: var(--bg-light);
+            padding: 3rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
         }
 
         .content {
@@ -119,81 +133,44 @@
             padding: 3rem 2rem;
         }
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), #1a2f5f);
-            color: #ffffff;
-            padding: 4rem 2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 100px;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(11, 31, 79, 0.85);
-            z-index: 1;
-        }
-
-        .header h1, .header p {
-            position: relative;
-            z-index: 2;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.95);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Typography */
         h1 {
             font-size: 2rem;
-            margin: 2rem 0 1rem;
-            color: var(--primary-color);
-            border-bottom: 3px solid var(--secondary-color);
-            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         h2 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             margin: 2rem 0 1rem;
-            color: var(--primary-color);
+            color: var(--text-primary);
         }
 
         h3 {
-            font-size: 1.3rem;
-            margin: 1.5rem 0 0.75rem;
-            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.8rem;
+            color: var(--text-primary);
         }
 
         h4 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin: 1rem 0 0.5rem;
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         p {
             margin-bottom: 1rem;
-            color: var(--text-dark);
             line-height: 1.8;
+            color: var(--text-primary);
         }
 
-        /* Lists */
         ul, ol {
             margin-left: 2rem;
             margin-bottom: 1rem;
@@ -201,33 +178,8 @@
 
         li {
             margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-
-        /* Features Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .feature {
-            padding: 1.5rem;
-            background: var(--bg-light);
-            border-radius: 8px;
-            border-left: 4px solid var(--secondary-color);
-            overflow: hidden;
-        }
-
-        .feature h4 {
-            margin: 0.5rem 0;
-            color: var(--primary-color);
-        }
-
-        .feature p {
-            color: var(--text-light);
-            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.8;
         }
 
         /* Code Blocks */
@@ -235,26 +187,50 @@
             background: var(--code-bg);
             padding: 2px 6px;
             border-radius: 3px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Monaco', 'Courier New', monospace;
             font-size: 0.9rem;
             color: #c23030;
         }
 
         pre {
-            background: #2c3e50;
-            color: #ecf0f1;
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
             padding: 1.5rem;
             border-radius: 6px;
             overflow-x: auto;
-            margin: 1rem 0;
+            margin: 1.5rem 0;
+            position: relative;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
             line-height: 1.5;
-            border-left: 4px solid var(--secondary-color);
         }
 
         pre code {
             background: none;
             padding: 0;
-            color: #ecf0f1;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--text-primary);
+        }
+
+        .copy-btn.copied {
+            background: #4caf50;
         }
 
         /* Tables */
@@ -262,144 +238,81 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         thead {
-            background: var(--primary-color);
-            color: #ffffff;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border-color);
         }
 
         th, td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
-            color: var(--text-dark);
         }
 
-        thead th {
-            color: #ffffff;
+        th {
             font-weight: 600;
-        }
-
-        tbody tr:nth-child(even) {
-            background: var(--bg-light);
+            color: var(--text-primary);
         }
 
         tbody tr:hover {
-            background: #eeeeee;
+            background: var(--bg-light);
         }
 
-        /* Callouts */
-        .callout {
-            padding: 1.25rem;
+        /* Boxes */
+        .box {
+            padding: 1.5rem;
             margin: 1.5rem 0;
-            border-radius: 6px;
-            border-left: 4px solid;
+            border-left: 4px solid var(--accent);
+            background: var(--bg-light);
+            border-radius: 4px;
         }
 
-        .callout.info {
-            background: #e3f2fd;
-            border-color: var(--info);
-            color: #01579b;
+        .box.info {
+            border-left-color: #0066cc;
+            background: #f0f7ff;
         }
 
-        .callout.warning {
-            background: #fff3e0;
-            border-color: var(--warning);
-            color: #e65100;
+        .box.warning {
+            border-left-color: #ff9800;
+            background: #fff8f0;
         }
 
-        .callout.success {
-            background: #e8f5e9;
-            border-color: var(--success);
-            color: #1b5e20;
+        .box.success {
+            border-left-color: #4caf50;
+            background: #f0fff4;
         }
 
-        .callout.danger {
-            background: #ffebee;
-            border-color: var(--danger);
-            color: #b71c1c;
-        }
-
-        .callout strong {
+        .box strong {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        /* Navigation */
-        .nav-bottom {
-            display: flex;
-            gap: 1rem;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            justify-content: space-between;
-        }
-
-        .nav-bottom a {
-            flex: 1;
-            padding: 0.75rem;
-            text-align: center;
-            color: var(--primary-color);
-            text-decoration: none;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .nav-bottom a:hover {
-            border-color: var(--primary-color);
-            background: var(--bg-light);
-            color: var(--primary-color);
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--primary-color);
-            color: #ffffff;
-            padding: 2rem;
-            text-align: center;
-            margin-top: 4rem;
-        }
-
-        .footer p {
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 0.5rem;
-        }
-
-        .footer a {
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .unsplash-credit {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.7);
-            margin-top: 1rem;
+            color: var(--text-primary);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                position: relative;
                 width: 100%;
                 height: auto;
-                margin-bottom: 1rem;
+                position: relative;
             }
 
             .main {
                 margin-left: 0;
             }
 
+            .header {
+                padding: 2rem 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
             .content {
-                padding: 1.5rem;
+                padding: 2rem 1.5rem;
             }
 
             h1 {
@@ -407,19 +320,12 @@
             }
 
             h2 {
-                font-size: 1.3rem;
+                font-size: 1.2rem;
             }
 
-            .header h1 {
-                font-size: 1.8rem;
-            }
-
-            .features {
-                grid-template-columns: 1fr;
-            }
-
-            .image-grid {
-                grid-template-columns: 1fr;
+            pre {
+                font-size: 0.85rem;
+                padding: 1rem;
             }
         }
 
@@ -448,147 +354,203 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">geniusCommerz</div>
-                <div class="sidebar-tagline">Admin Panel Documentation</div>
+                <div class="sidebar-tagline">Documentation</div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Getting Started</div>
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#overview" class="nav-link">Overview</a>
-                <a href="#login" class="nav-link">Login & Access</a>
-                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="#home" class="nav-link active" onclick="scrollToSection('home')">Home</a>
+                <a href="#installation" class="nav-link" onclick="scrollToSection('installation')">Installation</a>
+                <a href="#requirements" class="nav-link" onclick="scrollToSection('requirements')">Server Requirements</a>
+                <a href="#login" class="nav-link" onclick="scrollToSection('login')">Login</a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Catalog Management</div>
-                <a href="#products" class="nav-link">Products</a>
-                <a href="#categories" class="nav-link">Categories</a>
-                <a href="#brands" class="nav-link">Brands</a>
-                <a href="#attributes" class="nav-link">Attributes</a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Sales & Orders</div>
-                <a href="#orders" class="nav-link">Orders</a>
-                <a href="#coupons" class="nav-link">Coupons</a>
-                <a href="#refunds" class="nav-link">Refunds</a>
-                <a href="#loyalty" class="nav-link">Loyalty Points</a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">Content Management</div>
-                <a href="#pages" class="nav-link">Pages</a>
-                <a href="#blogs" class="nav-link">Blog</a>
-                <a href="#menus" class="nav-link">Menus</a>
-                <a href="#media" class="nav-link">Media</a>
+                <div class="nav-section-title">Admin Panel</div>
+                <a href="#dashboard" class="nav-link" onclick="scrollToSection('dashboard')">Dashboard</a>
+                <a href="#products" class="nav-link" onclick="scrollToSection('products')">Products</a>
+                <a href="#orders" class="nav-link" onclick="scrollToSection('orders')">Orders</a>
+                <a href="#categories" class="nav-link" onclick="scrollToSection('categories')">Categories</a>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">Configuration</div>
-                <a href="#settings" class="nav-link">Store Settings</a>
-                <a href="#storefront" class="nav-link">Storefront</a>
-                <a href="#payment" class="nav-link">Payment Methods</a>
-                <a href="#shipping" class="nav-link">Shipping</a>
-                <a href="#integrations" class="nav-link">Integrations</a>
+                <a href="#settings" class="nav-link" onclick="scrollToSection('settings')">Store Settings</a>
+                <a href="#payment" class="nav-link" onclick="scrollToSection('payment')">Payment</a>
+                <a href="#shipping" class="nav-link" onclick="scrollToSection('shipping')">Shipping</a>
+                <a href="#integrations" class="nav-link" onclick="scrollToSection('integrations')">Integrations</a>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">Administration</div>
-                <a href="#customers" class="nav-link">Customers</a>
-                <a href="#team" class="nav-link">Team & Roles</a>
-                <a href="#reports" class="nav-link">Reports</a>
-                <a href="#audit" class="nav-link">Audit Log</a>
+                <div class="nav-section-title">Support</div>
+                <a href="#faq" class="nav-link" onclick="scrollToSection('faq')">FAQ</a>
+                <a href="#troubleshooting" class="nav-link" onclick="scrollToSection('troubleshooting')">Troubleshooting</a>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="main">
             <div class="header">
-                <h1>geniusCommerz Admin Panel</h1>
-                <p>Complete documentation for managing your e-commerce store. Everything you need to know about the admin dashboard.</p>
+                <h1>geniusCommerz</h1>
+                <p>Complete documentation for your e-commerce platform. Learn how to set up, configure, and manage your store.</p>
             </div>
 
             <div class="content">
 
                 <!-- HOME -->
                 <section id="home">
-                    <h1>Welcome to geniusCommerz Admin</h1>
-
-                    <p>geniusCommerz is a modern, powerful e-commerce platform designed to help you build and manage your online store with ease. This documentation covers every feature of the admin panel.</p>
-
-                    <div class="features">
-                        <div class="feature">
-                            <h4>Dashboard</h4>
-                            <p>Real-time analytics, KPI cards, and sales overview at a glance</p>
-                        </div>
-                        <div class="feature">
-                            <h4>Inventory Management</h4>
-                            <p>Manage products, variants, categories, and brands efficiently</p>
-                        </div>
-                        <div class="feature">
-                            <h4>Order Management</h4>
-                            <p>Complete order lifecycle from creation to delivery</p>
-                        </div>
-                        <div class="feature">
-                            <h4>Payment Processing</h4>
-                            <p>Multiple payment gateways integrated and ready to use</p>
-                        </div>
-                        <div class="feature">
-                            <h4>Content Management</h4>
-                            <p>Pages, blogs, menus, and media library management</p>
-                        </div>
-                        <div class="feature">
-                            <h4>Settings & Configuration</h4>
-                            <p>Complete control over store settings and integrations</p>
-                        </div>
-                    </div>
-
-                    <h2>Documentation Sections</h2>
-                    <ul>
-                        <li><strong>Login & Access:</strong> Get started with your admin account</li>
-                        <li><strong>Dashboard Overview:</strong> Understand your dashboard metrics</li>
-                        <li><strong>Product Management:</strong> Add and manage products</li>
-                        <li><strong>Order Processing:</strong> Handle customer orders</li>
-                        <li><strong>Store Configuration:</strong> Configure your store settings</li>
-                        <li><strong>Payment & Shipping:</strong> Setup payment and shipping methods</li>
-                        <li><strong>Integrations:</strong> Connect third-party services</li>
-                        <li><strong>Reports:</strong> View analytics and reports</li>
-                    </ul>
-                </section>
-
-                <!-- OVERVIEW -->
-                <section id="overview">
-                    <h1>Admin Panel Overview</h1>
+                    <h1>Welcome to geniusCommerz</h1>
+                    <p>geniusCommerz is a modern e-commerce platform built with Laravel and React. It provides everything you need to build and manage a successful online store.</p>
 
                     <h2>Key Features</h2>
                     <ul>
-                        <li>Dual Authentication: Separate admin and customer login systems</li>
-                        <li>Role-Based Access Control: Customize permissions per team member</li>
-                        <li>Real-Time Analytics: Track revenue, orders, and customer metrics</li>
-                        <li>Multi-Language Support: English, Bengali, and more</li>
-                        <li>Multi-Currency Support: Automatic conversion between currencies</li>
-                        <li>AI Integration: OpenAI, Claude, Gemini content generation</li>
-                        <li>Courier Integration: Pathao, RedX, Steadfast shipping</li>
-                        <li>Payment Gateways: Stripe, bKash, Nagad, Cash on Delivery</li>
-                    </ul>
-
-                    <h2>Admin Interface Design</h2>
-                    <p>The admin panel uses a modern, clean design system for optimal usability:</p>
-                    <ul>
-                        <li>Dark blue sidebar with intuitive navigation</li>
-                        <li>Clean, organized content area for easy reading</li>
-                        <li>Responsive design works on desktop, tablet, and mobile</li>
-                        <li>Dark mode support for reduced eye strain</li>
-                        <li>Global search functionality across all pages</li>
+                        <li>Admin panel with Blade + Alpine.js</li>
+                        <li>Storefront with Inertia v3 + React 19</li>
+                        <li>Dual authentication (Admin & Customer)</li>
+                        <li>Real-time analytics and reporting</li>
+                        <li>Multi-language and multi-currency support</li>
+                        <li>AI content generation (OpenAI, Claude, Gemini)</li>
+                        <li>Multiple payment gateways</li>
+                        <li>Courier integration (Pathao, RedX, Steadfast)</li>
                     </ul>
                 </section>
 
-                <!-- LOGIN & ACCESS -->
+                <!-- INSTALLATION -->
+                <section id="installation">
+                    <h1>Installation</h1>
+
+                    <h2>Prerequisites</h2>
+                    <p>Before installing geniusCommerz, ensure you have the following installed on your system:</p>
+                    <ul>
+                        <li>PHP 8.2 or higher</li>
+                        <li>MySQL 8.0 or PostgreSQL 12+</li>
+                        <li>Node.js 18+ and npm</li>
+                        <li>Composer</li>
+                        <li>Git</li>
+                    </ul>
+
+                    <h2>Step 1: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/XgeniousLLC/geniusCommerz.git
+cd geniusCommerz</code></pre>
+
+                    <h2>Step 2: Install PHP Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>composer install</code></pre>
+
+                    <h2>Step 3: Environment Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cp .env.example .env
+php artisan key:generate</code></pre>
+
+                    <p>Edit your <code>.env</code> file and configure:</p>
+                    <ul>
+                        <li>Database connection (DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD)</li>
+                        <li>App URL (APP_URL)</li>
+                        <li>Mail configuration (MAIL_DRIVER, MAIL_FROM_ADDRESS)</li>
+                    </ul>
+
+                    <h2>Step 4: Create Database</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed</code></pre>
+
+                    <h2>Step 5: Install Node Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>npm install</code></pre>
+
+                    <h2>Step 6: Build Frontend Assets</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>npm run build</code></pre>
+
+                    <div class="box info">
+                        <strong>Development Mode</strong>
+                        For development, use: <code>npm run dev</code> to watch for changes
+                    </div>
+
+                    <h2>Step 7: Start Development Server</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan serve</code></pre>
+
+                    <p>Your application will be available at <code>http://localhost:8000</code></p>
+                </section>
+
+                <!-- SERVER REQUIREMENTS -->
+                <section id="requirements">
+                    <h1>Server Requirements</h1>
+
+                    <h2>Minimum Requirements</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Minimum Version</th>
+                                <th>Recommended</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PHP</td>
+                                <td>8.2</td>
+                                <td>8.3 or later</td>
+                            </tr>
+                            <tr>
+                                <td>MySQL</td>
+                                <td>8.0</td>
+                                <td>8.1 or later</td>
+                            </tr>
+                            <tr>
+                                <td>PostgreSQL</td>
+                                <td>12</td>
+                                <td>15 or later</td>
+                            </tr>
+                            <tr>
+                                <td>Node.js</td>
+                                <td>18</td>
+                                <td>20 or later</td>
+                            </tr>
+                            <tr>
+                                <td>Composer</td>
+                                <td>2.0</td>
+                                <td>Latest</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>PHP Extensions Required</h2>
+                    <ul>
+                        <li>BCMath</li>
+                        <li>Ctype</li>
+                        <li>Fileinfo</li>
+                        <li>JSON</li>
+                        <li>Mbstring</li>
+                        <li>OpenSSL</li>
+                        <li>PDO</li>
+                        <li>Tokenizer</li>
+                        <li>XML</li>
+                        <li>Zip</li>
+                        <li>GD (for image processing)</li>
+                    </ul>
+
+                    <h2>Server Configuration</h2>
+                    <ul>
+                        <li><strong>Memory Limit:</strong> Minimum 256MB (Recommended 512MB)</li>
+                        <li><strong>Max Upload Size:</strong> Minimum 50MB</li>
+                        <li><strong>Max Execution Time:</strong> Minimum 30 seconds</li>
+                        <li><strong>Document Root:</strong> Point to <code>public</code> directory</li>
+                    </ul>
+
+                    <h2>Recommended Web Server Configuration</h2>
+                    <p>For Apache, ensure <code>.htaccess</code> is supported and mod_rewrite is enabled:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>a2enmod rewrite
+systemctl restart apache2</code></pre>
+
+                    <p>For Nginx, configure your server block properly to route requests to <code>public/index.php</code></p>
+
+                    <h2>File Permissions</h2>
+                    <p>Set proper permissions for storage and cache directories:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chmod -R 775 storage
+chmod -R 775 bootstrap/cache</code></pre>
+                </section>
+
+                <!-- LOGIN -->
                 <section id="login">
                     <h1>Login & Account Access</h1>
 
-
-                    <h2>Default Administrator Account</h2>
+                    <h2>Default Admin Account</h2>
                     <table>
                         <thead>
                             <tr>
@@ -598,307 +560,366 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Email Address</td>
-                                <td><code>admin@geniuscommerz.com</code></td>
+                                <td>Email</td>
+                                <td><code>admin@example.com</code></td>
                             </tr>
                             <tr>
                                 <td>Password</td>
                                 <td><code>password</code></td>
                             </tr>
                             <tr>
-                                <td>Login URL</td>
-                                <td><code>https://yourdomain.com/admin/login</code></td>
+                                <td>URL</td>
+                                <td><code>http://localhost:8000/admin/login</code></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="callout warning">
-                        <strong>Security Notice:</strong> Change your password immediately after first login. Use a strong, unique password with at least 12 characters including uppercase, lowercase, numbers, and symbols.
+                    <div class="box warning">
+                        <strong>Security Notice</strong>
+                        Change the default password immediately after first login.
                     </div>
 
-                    <h2>Change Your Password</h2>
+                    <h2>Change Password</h2>
                     <ol>
-                        <li>Click your profile avatar in the top-right corner</li>
-                        <li>Select "Profile" from the dropdown menu</li>
-                        <li>Click the "Change Password" button</li>
-                        <li>Enter your current password for verification</li>
-                        <li>Enter your new password (minimum 12 characters)</li>
-                        <li>Confirm the new password by entering it again</li>
-                        <li>Click "Update Password" to save changes</li>
-                    </ol>
-
-                    <h2>Enable Two-Factor Authentication</h2>
-                    <ol>
-                        <li>Go to your Profile settings</li>
-                        <li>Navigate to the Security section</li>
-                        <li>Click "Enable Two-Factor Authentication"</li>
-                        <li>Scan the QR code with your authenticator app (Google Authenticator, Authy, or Microsoft Authenticator)</li>
-                        <li>Enter the 6-digit code displayed in the app</li>
-                        <li>Save your backup codes in a secure location</li>
-                        <li>Two-factor authentication is now enabled</li>
+                        <li>Log in to the admin panel</li>
+                        <li>Click your profile avatar in the top-right</li>
+                        <li>Select "Profile Settings"</li>
+                        <li>Click "Change Password"</li>
+                        <li>Enter current password and new password</li>
+                        <li>Click "Update"</li>
                     </ol>
                 </section>
 
                 <!-- DASHBOARD -->
                 <section id="dashboard">
                     <h1>Dashboard</h1>
+                    <p>The dashboard provides an overview of your store's performance with key metrics and charts.</p>
 
-
-                    <h2>Dashboard Overview</h2>
-                    <p>The dashboard provides a comprehensive overview of your store's performance with real-time data and key metrics.</p>
-
-                    <h2>Key Performance Indicators</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Description</th>
-                                <th>Time Periods Available</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Revenue</td>
-                                <td>Total sales amount for the selected period</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>Orders</td>
-                                <td>Total number of orders placed</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>Average Order Value</td>
-                                <td>Average revenue per order</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                            <tr>
-                                <td>New Customers</td>
-                                <td>Number of newly registered customers</td>
-                                <td>Last 7, 30, 90 days</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h2>Dashboard Charts</h2>
+                    <h2>Key Metrics</h2>
                     <ul>
-                        <li><strong>Orders by Status:</strong> Visual breakdown showing pending, confirmed, processing, shipped, delivered, and cancelled orders</li>
-                        <li><strong>Revenue Trend:</strong> Line chart displaying revenue changes over the selected time period</li>
-                        <li><strong>Top Products:</strong> Best-selling products during the current period</li>
-                        <li><strong>Top Categories:</strong> Most popular product categories by sales</li>
+                        <li><strong>Total Revenue:</strong> Sales revenue for selected period</li>
+                        <li><strong>Total Orders:</strong> Number of orders placed</li>
+                        <li><strong>Average Order Value:</strong> Average revenue per order</li>
+                        <li><strong>New Customers:</strong> Newly registered customers</li>
                     </ul>
 
-                    <h2>Recent Orders</h2>
-                    <p>The dashboard displays a table of recent orders with quick actions including:</p>
+                    <h2>Dashboard Widgets</h2>
                     <ul>
-                        <li>Order number and creation date</li>
-                        <li>Customer name and contact information</li>
-                        <li>Current order status with color indicator</li>
-                        <li>Total order amount</li>
-                        <li>Quick action buttons to view, edit, or print order</li>
+                        <li><strong>Revenue Chart:</strong> Visual trend of sales over time</li>
+                        <li><strong>Order Status:</strong> Breakdown of orders by status</li>
+                        <li><strong>Recent Orders:</strong> Latest orders with quick actions</li>
+                        <li><strong>Top Products:</strong> Best-selling products</li>
                     </ul>
                 </section>
 
                 <!-- PRODUCTS -->
                 <section id="products">
-                    <h1>Product Management</h1>
+                    <h1>Products</h1>
 
-
-                    <h2>Accessing Products</h2>
-                    <ol>
-                        <li>Click "Catalog" in the sidebar</li>
-                        <li>Select "Products" from the menu</li>
-                    </ol>
-
-                    <h2>Products List</h2>
-                    <p>The products page displays all your store's products with various management options:</p>
-                    <ul>
-                        <li>Search by product name, SKU, or category</li>
-                        <li>Filter by status (Active/Draft), category, brand, or price range</li>
-                        <li>Sort by name, price, stock quantity, or creation date</li>
-                        <li>Bulk actions to change status or delete multiple products</li>
-                        <li>Export product list as CSV or Excel file</li>
-                    </ul>
+                    <h2>Managing Products</h2>
+                    <p>Navigate to Admin → Catalog → Products to manage your products.</p>
 
                     <h2>Add New Product</h2>
                     <ol>
-                        <li>Click the "Add Product" button in the top-right corner</li>
-                        <li>Complete the product form (see sections below)</li>
-                        <li>Click "Save & Publish" to make it live or "Save as Draft"</li>
+                        <li>Click "Add Product" button</li>
+                        <li>Fill in product details (Name, Description, Price)</li>
+                        <li>Add categories and brands</li>
+                        <li>Set inventory and SKU</li>
+                        <li>Click "Save & Publish"</li>
                     </ol>
 
-<h2>Product Information Form</h2>
-
-                    <h3>Basic Details</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Field</th>
-                                <th>Description</th>
-                                <th>Required</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Product Name</td>
-                                <td>Display name shown to customers</td>
-                                <td>Yes</td>
-                            </tr>
-                            <tr>
-                                <td>Description</td>
-                                <td>Detailed product description using rich text editor</td>
-                                <td>Yes</td>
-                            </tr>
-                            <tr>
-                                <td>Short Description</td>
-                                <td>Brief summary for listings (maximum 160 characters)</td>
-                                <td>No</td>
-                            </tr>
-                            <tr>
-                                <td>SKU</td>
-                                <td>Unique product identifier for inventory tracking</td>
-                                <td>Yes</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2>Product Information</h2>
+                    <ul>
+                        <li><strong>Name:</strong> Product display name</li>
+                        <li><strong>Description:</strong> Detailed product information</li>
+                        <li><strong>Price:</strong> Product selling price</li>
+                        <li><strong>SKU:</strong> Unique identifier for inventory</li>
+                        <li><strong>Category:</strong> Product category</li>
+                        <li><strong>Brand:</strong> Product brand</li>
+                        <li><strong>Stock:</strong> Available quantity</li>
+                    </ul>
                 </section>
 
                 <!-- ORDERS -->
                 <section id="orders">
-                    <h1>Order Management</h1>
+                    <h1>Orders</h1>
 
+                    <h2>Order Management</h2>
+                    <p>Navigate to Admin → Orders to manage customer orders.</p>
 
-                    <h2>Accessing Orders</h2>
-                    <ol>
-                        <li>Click "Orders" in the sidebar</li>
-                    </ol>
-
-                    <h2>Orders List</h2>
-                    <p>View and manage all customer orders:</p>
+                    <h2>Order Status Flow</h2>
                     <ul>
-                        <li>View orders by status: All, Pending, Confirmed, Processing, Shipped, Delivered, Cancelled</li>
-                        <li>Search by order number, customer name, or email</li>
-                        <li>Filter by date range</li>
-                        <li>Sort by date, amount, or status</li>
-                        <li>Bulk export orders as CSV</li>
+                        <li><strong>Pending:</strong> Order received, awaiting confirmation</li>
+                        <li><strong>Confirmed:</strong> Order verified and ready</li>
+                        <li><strong>Processing:</strong> Items being prepared</li>
+                        <li><strong>Shipped:</strong> With courier</li>
+                        <li><strong>Delivered:</strong> Received by customer</li>
+                        <li><strong>Cancelled:</strong> Order cancelled</li>
                     </ul>
 
-                    <h2>Order Status Workflow</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Status</th>
-                                <th>Description</th>
-                                <th>Next Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Pending</td>
-                                <td>Order received, awaiting confirmation</td>
-                                <td>Review and confirm</td>
-                            </tr>
-                            <tr>
-                                <td>Confirmed</td>
-                                <td>Order verified and ready to process</td>
-                                <td>Prepare for shipping</td>
-                            </tr>
-                            <tr>
-                                <td>Processing</td>
-                                <td>Items being picked and packed</td>
-                                <td>Dispatch to courier</td>
-                            </tr>
-                            <tr>
-                                <td>Shipped</td>
-                                <td>Package with courier in transit</td>
-                                <td>Wait for delivery</td>
-                            </tr>
-                            <tr>
-                                <td>Delivered</td>
-                                <td>Order received by customer</td>
-                                <td>Request product review</td>
-                            </tr>
-                            <tr>
-                                <td>Cancelled</td>
-                                <td>Order cancelled by customer or admin</td>
-                                <td>Process refund if applicable</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2>Order Actions</h2>
+                    <ul>
+                        <li>View order details</li>
+                        <li>Update order status</li>
+                        <li>Print invoice</li>
+                        <li>Send tracking information</li>
+                        <li>Process refund if needed</li>
+                    </ul>
                 </section>
 
-                <!-- PAYMENT -->
-                <section id="payment">
-                    <h1>Payment Configuration</h1>
+                <!-- CATEGORIES -->
+                <section id="categories">
+                    <h1>Categories</h1>
 
+                    <h2>Managing Categories</h2>
+                    <p>Navigate to Admin → Catalog → Categories to organize your products.</p>
 
-                    <h2>Accessing Payment Settings</h2>
+                    <h2>Add Category</h2>
                     <ol>
-                        <li>Click "Settings" in the sidebar</li>
-                        <li>Click "Payment" tab</li>
+                        <li>Click "Add Category"</li>
+                        <li>Enter category name</li>
+                        <li>Add description (optional)</li>
+                        <li>Set parent category if needed</li>
+                        <li>Click "Save"</li>
                     </ol>
-
-                    <h2>Available Payment Methods</h2>
-
-                    <h3>Cash on Delivery (COD)</h3>
-                    <ul>
-                        <li>Enabled by default, no setup required</li>
-                        <li>Payment collected at time of delivery</li>
-                        <li>Good option for building customer trust initially</li>
-                    </ul>
-
-                    <h3>Stripe - International Credit and Debit Cards</h3>
-                    <p>Setup instructions:</p>
-                    <ol>
-                        <li>Register account at stripe.com</li>
-                        <li>Get your Publishable Key and Secret Key</li>
-                        <li>Go to Settings > Payment tab</li>
-                        <li>Toggle "Enable Stripe"</li>
-                        <li>Paste your Publishable Key in the appropriate field</li>
-                        <li>Paste your Secret Key in the appropriate field</li>
-                        <li>Click "Save Settings"</li>
-                        <li>Always test with Stripe test keys first</li>
-                    </ol>
-
-                    <div class="callout warning">
-                        <strong>Important:</strong> Test with test keys (pk_test_...) before switching to live keys (pk_live_...). Live keys will process real charges.
-                    </div>
                 </section>
 
                 <!-- SETTINGS -->
                 <section id="settings">
                     <h1>Store Settings</h1>
 
+                    <h2>General Settings</h2>
+                    <p>Navigate to Admin → Settings to configure your store.</p>
 
-                    <h2>Accessing Settings</h2>
+                    <h2>Configuration Options</h2>
+                    <ul>
+                        <li><strong>Store Name:</strong> Your business name</li>
+                        <li><strong>Store URL:</strong> Your website domain</li>
+                        <li><strong>Email:</strong> Contact email address</li>
+                        <li><strong>Phone:</strong> Business phone number</li>
+                        <li><strong>Address:</strong> Business address</li>
+                        <li><strong>Currency:</strong> Default currency</li>
+                        <li><strong>Timezone:</strong> Server timezone</li>
+                    </ul>
+                </section>
+
+                <!-- PAYMENT -->
+                <section id="payment">
+                    <h1>Payment Methods</h1>
+
+                    <h2>Configure Payments</h2>
+                    <p>Navigate to Admin → Settings → Payment to set up payment methods.</p>
+
+                    <h2>Available Payment Methods</h2>
+                    <ul>
+                        <li><strong>Cash on Delivery:</strong> Payment on delivery</li>
+                        <li><strong>Stripe:</strong> Credit/Debit cards</li>
+                        <li><strong>bKash:</strong> Mobile banking (Bangladesh)</li>
+                        <li><strong>Nagad:</strong> Mobile banking (Bangladesh)</li>
+                    </ul>
+
+                    <h2>Payment Setup</h2>
                     <ol>
-                        <li>Click "Settings" in the sidebar</li>
-                        <li>Select the specific settings tab</li>
+                        <li>Go to Payment settings</li>
+                        <li>Select payment method to enable</li>
+                        <li>Enter API credentials</li>
+                        <li>Test payment in sandbox mode</li>
+                        <li>Activate for production</li>
+                    </ol>
+                </section>
+
+                <!-- SHIPPING -->
+                <section id="shipping">
+                    <h1>Shipping Configuration</h1>
+
+                    <h2>Shipping Methods</h2>
+                    <p>Navigate to Admin → Settings → Shipping to configure delivery options.</p>
+
+                    <h2>Supported Couriers</h2>
+                    <ul>
+                        <li><strong>Pathao:</strong> Bangladesh courier service</li>
+                        <li><strong>RedX:</strong> Bangladesh courier service</li>
+                        <li><strong>Steadfast:</strong> Bangladesh courier service</li>
+                    </ul>
+
+                    <h2>Setup Shipping</h2>
+                    <ol>
+                        <li>Go to Shipping settings</li>
+                        <li>Select courier service</li>
+                        <li>Enter API credentials</li>
+                        <li>Configure shipping rates</li>
+                        <li>Enable for checkout</li>
+                    </ol>
+                </section>
+
+                <!-- INTEGRATIONS -->
+                <section id="integrations">
+                    <h1>Integrations</h1>
+
+                    <h2>Available Integrations</h2>
+
+                    <h3>AI Content Generation</h3>
+                    <ul>
+                        <li>OpenAI</li>
+                        <li>Claude (Anthropic)</li>
+                        <li>Google Gemini</li>
+                    </ul>
+
+                    <h3>Courier Services</h3>
+                    <ul>
+                        <li>Pathao</li>
+                        <li>RedX</li>
+                        <li>Steadfast</li>
+                    </ul>
+
+                    <h3>SMS Providers</h3>
+                    <ul>
+                        <li>BulkSmsBD</li>
+                        <li>SmsBD</li>
+                        <li>Twilio</li>
+                    </ul>
+
+                    <h2>Setup Integration</h2>
+                    <ol>
+                        <li>Go to Admin → Integrations</li>
+                        <li>Select service to integrate</li>
+                        <li>Enter API credentials</li>
+                        <li>Test connection</li>
+                        <li>Save and enable</li>
+                    </ol>
+                </section>
+
+                <!-- FAQ -->
+                <section id="faq">
+                    <h1>Frequently Asked Questions</h1>
+
+                    <h2>Installation & Setup</h2>
+                    <h3>Q: What PHP version is required?</h3>
+                    <p>A: PHP 8.2 or higher is required. We recommend PHP 8.3 for best performance.</p>
+
+                    <h3>Q: Can I use SQLite instead of MySQL?</h3>
+                    <p>A: SQLite is not recommended for production. Use MySQL 8.0+ or PostgreSQL 12+.</p>
+
+                    <h3>Q: How do I reset the database?</h3>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate:refresh --seed</code></pre>
+
+                    <h2>Admin Panel</h2>
+                    <h3>Q: How do I add a new admin user?</h3>
+                    <p>A: Use the artisan command:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan tinker
+>>> \App\Models\Admin::create(['name' => 'Name', 'email' => 'email@example.com', 'password' => bcrypt('password')]);</code></pre>
+
+                    <h3>Q: How do I export orders?</h3>
+                    <p>A: Go to Orders page and click the Export button. You can export as CSV or Excel.</p>
+
+                    <h2>Products & Inventory</h2>
+                    <h3>Q: How do I manage product variants?</h3>
+                    <p>A: When editing a product, go to the Variants section. Add variants with different options (size, color, etc.).</p>
+
+                    <h3>Q: Can I bulk import products?</h3>
+                    <p>A: Yes, go to Products page and use the Import feature to upload CSV file.</p>
+                </section>
+
+                <!-- TROUBLESHOOTING -->
+                <section id="troubleshooting">
+                    <h1>Troubleshooting</h1>
+
+                    <h2>Database Connection Error</h2>
+                    <p><strong>Error:</strong> "SQLSTATE[HY000]: General error: 1030 Got error"</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check database credentials in <code>.env</code></li>
+                        <li>Ensure database server is running</li>
+                        <li>Verify database user has necessary permissions</li>
                     </ol>
 
-                    <h2>General Store Settings</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Setting</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Store Name</td>
-                                <td>Your store's official name displayed throughout the site</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h2>File Upload Error</h2>
+                    <p><strong>Error:</strong> "The file could not be uploaded"</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check storage folder permissions (should be 775)</li>
+                        <li>Verify PHP max_upload_size in php.ini (minimum 50MB)</li>
+                        <li>Ensure storage directory is writable</li>
+                    </ol>
 
-                    <div class="callout success">
-                        <strong>Tip:</strong> Your documentation is now live on GitHub Pages! Share the link with your team.
+                    <h2>Blank Admin Panel</h2>
+                    <p><strong>Error:</strong> Admin panel shows blank page</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Run: <code>php artisan cache:clear</code></li>
+                        <li>Run: <code>php artisan view:clear</code></li>
+                        <li>Rebuild assets: <code>npm run build</code></li>
+                        <li>Check application logs in <code>storage/logs</code></li>
+                    </ol>
+
+                    <h2>Mail Not Sending</h2>
+                    <p><strong>Error:</strong> Emails not being sent</p>
+                    <p><strong>Solution:</strong></p>
+                    <ol>
+                        <li>Check MAIL_DRIVER in <code>.env</code></li>
+                        <li>Verify SMTP credentials are correct</li>
+                        <li>Ensure mail server is running</li>
+                        <li>Check storage/logs for detailed errors</li>
+                    </ol>
+
+                    <div class="box info">
+                        <strong>Still having issues?</strong>
+                        Check the application logs in storage/logs/laravel.log for detailed error messages.
                     </div>
                 </section>
 
             </div>
         </div>
     </div>
+
+    <script>
+        // Sidebar navigation
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                updateActiveLink(id);
+            }
+        }
+
+        function updateActiveLink(id) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`a[href="#${id}"]`).classList.add('active');
+        }
+
+        // Copy code to clipboard
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Update active link on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            if (current) {
+                updateActiveLink(current);
+            }
+        });
+    </script>
 </body>
 </html>
