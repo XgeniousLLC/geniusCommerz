@@ -312,13 +312,16 @@ export default function Home({ latestPosts, shopCategories, featuredProducts, ne
             </div>
           </div>
 
-          {/* Right: image placeholder */}
-          <div className="av-hero-img-placeholder" style={{ flexShrink: 0, width: 'clamp(200px,32%,420px)', aspectRatio: '3/4', border: '1px dashed rgba(244,239,229,.22)', borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'rgba(244,239,229,.28)' }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
-            </svg>
-            <span style={{ fontFamily: 'var(--av-sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Hero Image</span>
-          </div>
+          {/* Right: placeholder prompting for a hero image — the photograph itself is the
+              full-bleed background above, so this only shows while none is set. */}
+          {!heroImageUrl && (
+            <div className="av-hero-img-placeholder" style={{ flexShrink: 0, width: 'clamp(200px,32%,420px)', aspectRatio: '3/4', border: '1px dashed rgba(244,239,229,.22)', borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'rgba(244,239,229,.28)' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+              </svg>
+              <span style={{ fontFamily: 'var(--av-sans)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Hero Image</span>
+            </div>
+          )}
 
         </div>
       </div>
