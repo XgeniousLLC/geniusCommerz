@@ -22,13 +22,13 @@ interface Props {
   };
 }
 
-const CONFETTI_COLORS = ['#0B1F4F', '#E2136E', '#0F8A5F', '#E8A317', '#1A4F8C', '#C43030'];
+const CONFETTI_COLORS = ['#1f1a15', '#95613a', '#b2904f', '#756a59', '#efe9dc', '#c04e2a'];
 
 export default function OrderConfirmed({ order }: Props) {
   const fmt = usePrice();
 
   const confetti = useMemo(() =>
-    Array.from({ length: 60 }, (_, i) => ({
+    Array.from({ length: 48 }, (_, i) => ({
       left: `${Math.random() * 100}%`,
       background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
       animationDelay: `${(Math.random() * 0.6).toFixed(2)}s`,
@@ -38,6 +38,8 @@ export default function OrderConfirmed({ order }: Props) {
   const paymentLabel = order.payment_method
     .replace(/_/g, ' ')
     .replace(/\b\w/g, c => c.toUpperCase());
+
+  const W = { maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' };
 
   return (
     <Layout>
@@ -50,12 +52,11 @@ export default function OrderConfirmed({ order }: Props) {
         }
       `}</style>
 
-      {/* Confetti layer */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 1 }}>
         {confetti.map((c, i) => (
           <span key={i} style={{
             position: 'absolute',
-            width: 8, height: 14,
+            width: 6, height: 10,
             top: -20,
             left: c.left,
             background: c.background,
@@ -68,64 +69,61 @@ export default function OrderConfirmed({ order }: Props) {
         ))}
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-14" style={{ position: 'relative', zIndex: 2 }}>
+      <div style={{ ...W, maxWidth: 560, paddingTop: 48, paddingBottom: 64, position: 'relative', zIndex: 2 }}>
 
-        {/* Checkmark + heading */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'var(--kb-success-50)', border: '3px solid var(--kb-success)' }}>
-            <svg className="w-10 h-10" style={{ color: 'var(--kb-success)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'grid', placeItems: 'center', margin: '0 auto 18px', background: 'var(--av-paper)', border: '1px solid var(--av-line)', color: 'var(--av-cognac)' }}>
+            <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--kb-ink)' }}>
-            Thank you for your order!
+          <div style={{ fontSize: 10.5, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', fontWeight: 500, marginBottom: 10 }}>Order Confirmed</div>
+          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(26px,4vw,34px)', fontWeight: 400, color: 'var(--av-ink)', margin: '0 0 10px', letterSpacing: '-0.012em', lineHeight: 1.1 }}>
+            Thank you
           </h1>
-          <p className="text-sm leading-relaxed" style={{ color: 'var(--kb-ink-soft)' }}>
+          <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', lineHeight: 1.7, margin: 0 }}>
             Order{' '}
-            <span className="font-mono font-bold" style={{ color: 'var(--kb-primary)' }}>
+            <span style={{ fontWeight: 600, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>
               #{order.order_number}
             </span>
-            {' '}· A confirmation has been sent to{' '}
-            <span className="font-semibold" style={{ color: 'var(--kb-ink)' }}>{order.customer_name}</span>.
+            {' '}· Confirmation sent to{' '}
+            <span style={{ fontWeight: 500, color: 'var(--av-ink)' }}>{order.customer_name}</span>.
           </p>
         </div>
 
-        {/* Meta strip */}
-        <div className="kb-card mb-5" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
-          <div className="p-4 text-center border-r" style={{ borderColor: 'var(--kb-border)' }}>
-            <div className="text-xs mb-1.5" style={{ color: 'var(--kb-ink-soft)' }}>Order total</div>
-            <div className="font-bold text-sm" style={{ color: 'var(--kb-ink)' }}>{fmt(order.total)}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', marginBottom: 16 }}>
+          <div style={{ padding: '16px 12px', textAlign: 'center', borderRight: '1px solid var(--av-line-soft)' }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>Total</div>
+            <div style={{ fontWeight: 500, fontSize: 13.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{fmt(order.total)}</div>
           </div>
-          <div className="p-4 text-center border-r" style={{ borderColor: 'var(--kb-border)' }}>
-            <div className="text-xs mb-1.5" style={{ color: 'var(--kb-ink-soft)' }}>Payment</div>
-            <div className="font-bold text-sm" style={{ color: 'var(--kb-ink)' }}>{paymentLabel}</div>
+          <div style={{ padding: '16px 12px', textAlign: 'center', borderRight: '1px solid var(--av-line-soft)' }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>Payment</div>
+            <div style={{ fontWeight: 500, fontSize: 13.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{paymentLabel}</div>
           </div>
-          <div className="p-4 text-center">
-            <div className="text-xs mb-1.5" style={{ color: 'var(--kb-ink-soft)' }}>Estimated delivery</div>
-            <div className="font-bold text-sm" style={{ color: 'var(--kb-ink)' }}>2–4 business days</div>
+          <div style={{ padding: '16px 12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>Status</div>
+            <div style={{ fontWeight: 500, fontSize: 13.5, color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', textTransform: 'capitalize' }}>{order.status}</div>
           </div>
         </div>
 
-        {/* Ordered items */}
         {order.items && order.items.length > 0 && (
-          <div className="kb-card mb-5 divide-y" style={{ borderColor: 'var(--kb-border)' }}>
+          <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', marginBottom: 16 }}>
             {order.items.map((item, i) => (
-              <div key={i} className="flex items-center justify-between px-4 py-3 gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate" style={{ color: 'var(--kb-ink)' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: 12, borderTop: i ? '1px solid var(--av-line-soft)' : 'none' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 400, color: 'var(--av-ink)', fontFamily: 'var(--av-display)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {item.product_name}
                   </div>
                   {item.variant_label && (
-                    <div className="text-xs mt-0.5" style={{ color: 'var(--kb-ink-soft)' }}>
+                    <div style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 2 }}>
                       {item.variant_label}
                     </div>
                   )}
                 </div>
-                <div className="text-xs shrink-0" style={{ color: 'var(--kb-ink-soft)' }}>
+                <div style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', flexShrink: 0 }}>
                   ×{item.quantity}
                 </div>
-                <div className="text-sm font-semibold shrink-0" style={{ color: 'var(--kb-ink)' }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', flexShrink: 0 }}>
                   {fmt(item.total)}
                 </div>
               </div>
@@ -133,23 +131,18 @@ export default function OrderConfirmed({ order }: Props) {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <Link href="/account/orders"
-            className="kb-btn kb-btn-primary flex-1 justify-center py-3 text-sm font-semibold">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+          <Link href="/account/orders" className="av-btn av-btn-primary av-btn-md av-btn-block" style={{ textDecoration: 'none' }}>
             View my orders
           </Link>
-          <Link href="/shop"
-            className="kb-btn flex-1 justify-center py-3 text-sm font-medium"
-            style={{ border: '1px solid var(--kb-border)', color: 'var(--kb-ink)' }}>
+          <Link href="/shop" className="av-btn av-btn-secondary av-btn-md av-btn-block" style={{ textDecoration: 'none' }}>
             Continue shopping
           </Link>
         </div>
 
-        {/* Help */}
-        <p className="text-center text-xs" style={{ color: 'var(--kb-ink-soft)' }}>
-          Track at any time from your{' '}
-          <Link href="/account" style={{ color: 'var(--kb-primary)', fontWeight: 600 }}>
+        <p style={{ textAlign: 'center', fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>
+          Track anytime from your{' '}
+          <Link href="/account" style={{ color: 'var(--av-ink)', fontWeight: 500, textDecoration: 'underline', textDecorationColor: 'var(--av-line)' }}>
             dashboard
           </Link>.
         </p>

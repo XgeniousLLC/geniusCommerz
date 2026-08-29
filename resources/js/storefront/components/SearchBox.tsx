@@ -102,11 +102,11 @@ export default function SearchBox({ placeholder = 'Search products…', classNam
     <div ref={containerRef} className={`relative ${className}`}>
       <form onSubmit={submit}>
         <div className="relative w-full">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--av-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
           {loading && (
-            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" style={{ color: 'var(--av-muted)' }} fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3V4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
             </svg>
@@ -118,50 +118,54 @@ export default function SearchBox({ placeholder = 'Search products…', classNam
             onChange={e => { setQuery(e.target.value); setActiveIdx(-1); }}
             onKeyDown={handleKey}
             onFocus={() => suggestions.length > 0 && setOpen(true)}
-            className={`kb-input pl-9 pr-4 w-full text-sm h-9 ${inputClassName}`}
-            style={{ borderRadius: 9999 }}
+            className={`av-input pl-9 pr-4 w-full text-sm ${inputClassName}`}
+            style={{ height: 38, borderRadius: 2, fontFamily: 'var(--av-sans)' }}
             autoComplete="off"
+            aria-label="Search products"
           />
         </div>
       </form>
 
       {open && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 overflow-hidden" style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', boxShadow: '0 12px 40px rgba(31,26,21,.12)' }}>
           {suggestions.map((s, i) => (
             <button
               key={s.id}
               type="button"
               onMouseDown={() => navigate(s.slug)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${i === activeIdx ? 'bg-slate-100' : 'hover:bg-slate-50'} ${i > 0 ? 'border-t border-slate-100' : ''}`}
-              style={{ background: 'none', border: i > 0 ? '1px solid #f1f5f9' : 'none', borderLeft: 'none', borderRight: 'none', cursor: 'pointer' }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', textAlign: 'left', cursor: 'pointer',
+                background: i === activeIdx ? 'var(--av-paper-2)' : 'transparent', border: 'none', borderTop: i > 0 ? '1px solid var(--av-line-soft)' : 'none', transition: 'background .15s'
+              }}
+              onMouseEnter={e => { if (i !== activeIdx) (e.currentTarget as HTMLElement).style.background = 'var(--av-paper-2)'; }}
+              onMouseLeave={e => { if (i !== activeIdx) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
             >
               {s.image
-                ? <img src={s.image} alt={s.name} className="w-9 h-9 rounded-lg object-cover shrink-0 border border-slate-100" />
-                : <div className="w-9 h-9 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                ? <img src={s.image} alt={s.name} style={{ width: 36, height: 36, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--av-line-soft)' }} />
+                : <div style={{ width: 36, height: 36, background: 'var(--av-paper-2)', flexShrink: 0, display: 'grid', placeItems: 'center', border: '1px solid var(--av-line-soft)' }}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--av-muted)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
                     </svg>
                   </div>
               }
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-800 font-medium truncate">{s.name}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-xs font-semibold" style={{ color: 'var(--kb-primary)' }}>{formatPrice(s.price)}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>{s.name}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>{formatPrice(s.price)}</span>
                   {s.compare_at_price && s.compare_at_price > s.price && (
-                    <span className="text-xs text-slate-400 line-through">{formatPrice(s.compare_at_price)}</span>
+                    <span style={{ fontSize: 11, color: 'var(--av-muted)', textDecoration: 'line-through', fontFamily: 'var(--av-sans)' }}>{formatPrice(s.compare_at_price)}</span>
                   )}
                 </div>
               </div>
-              <svg className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--av-muted)', flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.4} d="M9 5l7 7-7 7"/>
               </svg>
             </button>
           ))}
-          <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/80">
+          <div style={{ padding: '8px 12px', borderTop: '1px solid var(--av-line-soft)', background: 'var(--av-paper-2)' }}>
             <button type="button" onMouseDown={() => { setOpen(false); router.visit(`/shop?q=${encodeURIComponent(query.trim())}`); }}
-              className="text-xs text-slate-500 hover:text-slate-700 w-full text-left"
-              style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-              See all results for <strong className="text-slate-700">"{query}"</strong>
+              style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', padding: 0 }}>
+              See all results for <strong style={{ color: 'var(--av-ink)' }}>"{query}"</strong>
             </button>
           </div>
         </div>

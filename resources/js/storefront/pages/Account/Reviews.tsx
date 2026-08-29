@@ -5,7 +5,7 @@ interface Review { id: number; rating: number; title: string | null; body: strin
 interface Props { reviews: Review[] }
 
 function Stars({ n }: { n: number }) {
-  return <span style={{ color: '#F59E0B' }}>{Array.from({ length: 5 }, (_, i) => i < n ? '★' : '☆').join('')}</span>;
+  return <span style={{ color: 'var(--av-gold)', fontSize: 13, letterSpacing: 1 }}>{Array.from({ length: 5 }, (_, i) => i < n ? '★' : '☆').join('')}</span>;
 }
 
 export default function Reviews({ reviews }: Props) {
@@ -19,32 +19,32 @@ export default function Reviews({ reviews }: Props) {
       <Head title="My Reviews" />
 
       {reviews.length === 0 ? (
-        <div className="kb-card p-8 text-center">
-          <p className="text-sm" style={{ color: 'var(--kb-ink-soft)' }}>You haven't written any reviews yet.</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--kb-ink-soft)' }}>Reviews can be left from your delivered orders.</p>
-          <Link href="/account/orders" className="kb-btn kb-btn-primary kb-btn-md text-sm mt-4 inline-flex outline-none">View Orders</Link>
+        <div style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: '32px 18px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: 0 }}>You haven't written any reviews yet.</p>
+          <p style={{ fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginTop: 6 }}>Reviews can be left from delivered orders.</p>
+          <Link href="/account/orders" className="av-btn av-btn-primary av-btn-sm" style={{ marginTop: 16, textDecoration: 'none' }}>View orders</Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {reviews.map(r => (
-            <div key={r.id} className="kb-card p-5">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0" style={{ background: 'var(--kb-surface-2)' }}>
-                  {r.product.thumb ? <img src={r.product.thumb} alt={r.product.name} className="w-full h-full object-cover"/> : <div className="w-full h-full"/>}
+            <div key={r.id} style={{ border: '1px solid var(--av-line-soft)', background: 'var(--av-paper)', padding: 18 }}>
+              <div style={{ display: 'flex', gap: 14 }}>
+                <div style={{ width: 48, height: 60, overflow: 'hidden', flexShrink: 0, background: 'var(--av-paper-2)' }}>
+                  {r.product.thumb ? <img src={r.product.thumb} alt={r.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/> : null}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <Link href={`/shop/${r.product.slug}`} className="text-sm font-semibold hover:underline" style={{ color: 'var(--kb-ink)' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Link href={`/shop/${r.product.slug}`} style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--av-ink)', textDecoration: 'none', fontFamily: 'var(--av-sans)' }}>
                     {r.product.name}
                   </Link>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
                     <Stars n={r.rating} />
-                    {!r.is_approved && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#92400E' }}>Pending approval</span>}
+                    {!r.is_approved && <span style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 7px', background: 'var(--av-paper-2)', color: 'var(--av-muted)', border: '1px solid var(--av-line-soft)', fontFamily: 'var(--av-sans)' }}>Pending approval</span>}
                   </div>
-                  {r.title && <p className="text-sm font-medium mt-1.5" style={{ color: 'var(--kb-ink)' }}>{r.title}</p>}
-                  {r.body && <p className="text-sm mt-1" style={{ color: 'var(--kb-ink-soft)' }}>{r.body}</p>}
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs" style={{ color: 'var(--kb-ink-soft)' }}>{r.created_at}</span>
-                    <button onClick={() => del(r.id)} className="text-xs" style={{ color: 'var(--kb-danger)' }}>Delete</button>
+                  {r.title && <p style={{ fontSize: 13, fontWeight: 500, marginTop: 10, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', marginBottom: 0 }}>{r.title}</p>}
+                  {r.body && <p style={{ fontSize: 13, marginTop: 6, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', lineHeight: 1.6 }}>{r.body}</p>}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                    <span style={{ fontSize: 11, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)' }}>{r.created_at}</span>
+                    <button onClick={() => del(r.id)} style={{ fontSize: 11.5, color: '#b94040', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'var(--av-sans)' }}>Delete</button>
                   </div>
                 </div>
               </div>

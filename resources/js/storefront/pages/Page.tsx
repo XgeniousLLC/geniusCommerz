@@ -36,8 +36,8 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
 
   return (
     <div style={{ position: 'sticky', top: 96, display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
-        <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>On this page</h4>
+      <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line-soft)', padding: '16px 20px' }}>
+        <h4 style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', margin: '0 0 12px' }}>On this page</h4>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {items.map((item) => (
             <a key={item.id} href={`#${item.id}`}
@@ -50,14 +50,15 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
                 display: 'block',
                 padding: '6px 10px',
                 paddingLeft: item.level === 3 ? 22 : 10,
-                borderRadius: 6,
                 fontSize: item.level === 3 ? 12 : 13,
-                fontWeight: item.level === 2 ? 600 : 400,
+                fontWeight: item.level === 2 ? 500 : 400,
                 textDecoration: 'none',
                 lineHeight: 1.4,
                 transition: 'color .1s, background .1s',
-                color: active === item.id ? 'var(--kb-primary)' : 'var(--kb-ink-muted)',
-                background: active === item.id ? 'var(--kb-primary-50)' : 'transparent',
+                fontFamily: 'var(--av-sans)',
+                color: active === item.id ? 'var(--av-ink)' : 'var(--av-muted)',
+                background: active === item.id ? 'var(--av-paper-2)' : 'transparent',
+                borderLeft: active === item.id ? '2px solid var(--av-ink)' : '2px solid transparent',
               }}>
               {item.text}
             </a>
@@ -65,13 +66,12 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
         </nav>
       </div>
 
-      <div style={{ background: 'var(--kb-primary-50)', border: '1px solid #C8D6EF', borderRadius: 12, padding: '16px 20px' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--kb-primary)', marginBottom: 6 }}>Questions?</div>
-        <p style={{ fontSize: 13, color: 'var(--kb-ink-muted)', margin: '0 0 12px', lineHeight: 1.5 }}>
-          Our team replies in Bangla and English, usually within 2 hours.
+      <div style={{ background: 'var(--av-paper-2)', border: '1px solid var(--av-line-soft)', padding: '16px 20px' }}>
+        <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--av-ink)', fontFamily: 'var(--av-sans)', marginBottom: 6 }}>Questions?</div>
+        <p style={{ fontSize: 13, color: 'var(--av-muted)', margin: '0 0 12px', lineHeight: 1.6, fontFamily: 'var(--av-sans)' }}>
+          We reply in Bangla and English, usually within 2 hours.
         </p>
-        <Link href="/page/contact"
-          style={{ display: 'inline-flex', alignItems: 'center', height: 34, padding: '0 14px', borderRadius: 7, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 12, textDecoration: 'none' }}>
+        <Link href="/page/contact" className="av-btn av-btn-primary av-btn-sm" style={{ textDecoration: 'none' }}>
           Contact us
         </Link>
       </div>
@@ -97,25 +97,25 @@ export default function Page({ page }: Props) {
       </Head>
 
       {/* Hero */}
-      <div style={{ borderBottom: '1px solid var(--kb-border)', background: '#fff', padding: '28px 0 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', marginBottom: 14 }}>
-            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Home</Link>
+      <div style={{ borderBottom: '1px solid var(--av-line)', background: 'var(--av-paper)', padding: '28px 0 24px' }}>
+        <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' }}>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--av-muted)', fontFamily: 'var(--av-sans)', marginBottom: 14 }}>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
             <span>/</span>
-            <span style={{ color: 'var(--kb-ink)' }}>{page.title}</span>
+            <span style={{ color: 'var(--av-ink)' }}>{page.title}</span>
           </nav>
           {isLegal && (
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-primary)', marginBottom: 10 }}>
-              Legal · klixbd
+            <div style={{ fontSize: 10.5, fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--av-cognac)', fontFamily: 'var(--av-sans)', marginBottom: 10 }}>
+              Legal
             </div>
           )}
-          <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.02em', margin: 0, color: 'var(--kb-ink)', lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: 'var(--av-display)', fontSize: 'clamp(26px,3vw,36px)', fontWeight: 400, letterSpacing: '-0.012em', margin: 0, color: 'var(--av-ink)', lineHeight: 1.1 }}>
             {page.title}
           </h1>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' }}>
         {hasHeadings ? (
           <div className="grid lg:grid-cols-[260px_1fr]" style={{ gap: 48, padding: '40px 0 80px', alignItems: 'start' }}>
             <TocBox contentRef={contentRef} />
@@ -129,14 +129,13 @@ export default function Page({ page }: Props) {
       </div>
 
       {/* Footer CTA */}
-      <div style={{ background: 'var(--kb-ink)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px', display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: 'var(--av-ink)' }}>
+        <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '48px var(--av-gutter)', display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h3 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px', color: '#fff' }}>Have a question we didn't answer?</h3>
-            <p style={{ color: '#B5C4E5', fontSize: 14, margin: 0 }}>Our team replies in Bangla and English, usually within 2 hours.</p>
+            <h3 style={{ fontFamily: 'var(--av-display)', fontSize: 22, fontWeight: 400, letterSpacing: '-0.012em', margin: '0 0 6px', color: 'var(--av-paper)' }}>Have a question?</h3>
+            <p style={{ color: 'rgba(244,239,229,.62)', fontSize: 13.5, margin: 0, fontFamily: 'var(--av-sans)' }}>We reply in Bangla and English, usually within 2 hours.</p>
           </div>
-          <Link href="/page/contact"
-            style={{ display: 'inline-flex', alignItems: 'center', height: 44, padding: '0 24px', borderRadius: 10, background: '#fff', color: 'var(--kb-ink)', fontWeight: 700, fontSize: 14, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link href="/page/contact" className="av-btn av-btn-secondary av-btn-md" style={{ background: 'var(--av-paper)', color: 'var(--av-ink)', textDecoration: 'none' }}>
             Contact us
           </Link>
         </div>

@@ -77,7 +77,7 @@ function AvProductCard({ product }: { product: ProductCard }) {
       price: product.price,
       image_url: product.image_url ?? null,
       slug: product.slug,
-      shipping_included: false,
+      shipping_included: product.shipping_included ?? false,
     });
     openCart();
   }

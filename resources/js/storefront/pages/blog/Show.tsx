@@ -23,55 +23,55 @@ function CommentItem({ comment, blogId }: { comment: Comment; blogId: number }) 
 
   return (
     <div className="flex gap-4" id={`comment-${comment.id}`}>
-      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--av-ink)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
         {comment.name[0].toUpperCase()}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
+        <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: '16px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--kb-ink)' }}>{comment.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--kb-ink-soft)' }}>{comment.created_at}</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--av-ink)' }}>{comment.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--av-muted)' }}>{comment.created_at}</span>
           </div>
-          <p style={{ fontSize: 14, color: 'var(--kb-ink-muted)', lineHeight: 1.55, margin: 0 }}>{comment.body}</p>
+          <p style={{ fontSize: 14, color: 'var(--av-muted)', lineHeight: 1.55, margin: 0 }}>{comment.body}</p>
         </div>
 
         {auth.user ? (
           <div style={{ marginTop: 8 }}>
             <button type="button" onClick={() => setReplyOpen((o) => !o)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--kb-primary)', fontWeight: 600, fontSize: 13, padding: 0 }}>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--av-ink)', fontWeight: 600, fontSize: 13, padding: 0 }}>
               ↳ Reply
             </button>
             {replyOpen && (
               <form onSubmit={submitReply} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <textarea name="body" rows={2} placeholder="Write a reply…" required
                   value={data.body} onChange={(e) => setData('body', e.target.value)}
-                  style={{ width: '100%', fontSize: 14, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--kb-border)', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', fontSize: 14, padding: '10px 12px', borderRadius: 2, border: '1px solid var(--av-line)', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 <button type="submit" disabled={processing}
-                  style={{ alignSelf: 'flex-start', height: 34, padding: '0 16px', borderRadius: 7, background: 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer' }}>
+                  style={{ alignSelf: 'flex-start', height: 34, padding: '0 16px', borderRadius: 2, background: 'var(--av-ink)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer' }}>
                   Post reply
                 </button>
               </form>
             )}
           </div>
         ) : (
-          <p style={{ marginTop: 8, fontSize: 12, color: 'var(--kb-ink-soft)' }}>
-            <Link href="/login" style={{ fontWeight: 600, color: 'var(--kb-primary)', textDecoration: 'none' }}>Sign in</Link> to reply
+          <p style={{ marginTop: 8, fontSize: 12, color: 'var(--av-muted)' }}>
+            <Link href="/login" style={{ fontWeight: 600, color: 'var(--av-ink)', textDecoration: 'none' }}>Sign in</Link> to reply
           </p>
         )}
 
         {comment.replies.length > 0 && (
-          <div style={{ marginTop: 16, paddingLeft: 16, borderLeft: '2px solid var(--kb-border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ marginTop: 16, paddingLeft: 16, borderLeft: '2px solid var(--av-line)', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {comment.replies.map((reply) => (
               <div key={reply.id} style={{ display: 'flex', gap: 12 }} id={`comment-${reply.id}`}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--kb-primary-100)', color: 'var(--kb-primary)', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--av-paper-2)', color: 'var(--av-ink)', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
                   {reply.name[0].toUpperCase()}
                 </div>
-                <div style={{ flex: 1, background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 10, padding: '12px 16px' }}>
+                <div style={{ flex: 1, background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: '12px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--kb-ink)' }}>{reply.name}</span>
-                    <span style={{ fontSize: 11, color: 'var(--kb-ink-soft)' }}>{reply.created_at}</span>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--av-ink)' }}>{reply.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--av-muted)' }}>{reply.created_at}</span>
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--kb-ink-muted)', lineHeight: 1.5, margin: 0 }}>{reply.body}</p>
+                  <p style={{ fontSize: 13, color: 'var(--av-muted)', lineHeight: 1.5, margin: 0 }}>{reply.body}</p>
                 </div>
               </div>
             ))}
@@ -111,8 +111,8 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
   if (!items.length) return null;
 
   return (
-    <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
-      <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Contents</h4>
+    <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: '16px 20px' }}>
+      <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--av-muted)', margin: '0 0 12px' }}>Contents</h4>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {items.map((item) => (
           <a key={item.id} href={`#${item.id}`}
@@ -123,8 +123,8 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
               fontSize: item.level === 3 ? 12 : 13,
               fontWeight: item.level === 2 ? 600 : 400,
               textDecoration: 'none', lineHeight: 1.4,
-              color: active === item.id ? 'var(--kb-primary)' : 'var(--kb-ink-muted)',
-              background: active === item.id ? 'var(--kb-primary-50)' : 'transparent',
+              color: active === item.id ? 'var(--av-ink)' : 'var(--av-muted)',
+              background: active === item.id ? 'var(--av-paper-2)' : 'transparent',
             }}>
             {item.text}
           </a>
@@ -137,17 +137,17 @@ function TocBox({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | n
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, overflow: 'hidden' }}>
       <button type="button" onClick={() => setOpen((o) => !o)}
         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--kb-ink)', paddingRight: 16 }}>{question}</span>
-        <svg style={{ width: 16, height: 16, flexShrink: 0, color: 'var(--kb-ink-soft)', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}
+        <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--av-ink)', paddingRight: 16 }}>{question}</span>
+        <svg style={{ width: 16, height: 16, flexShrink: 0, color: 'var(--av-muted)', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}
           fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {open && (
-        <div style={{ padding: '0 16px 16px', fontSize: 14, color: 'var(--kb-ink-muted)', lineHeight: 1.6 }}>{answer}</div>
+        <div style={{ padding: '0 16px 16px', fontSize: 14, color: 'var(--av-muted)', lineHeight: 1.6 }}>{answer}</div>
       )}
     </div>
   );
@@ -163,9 +163,9 @@ function NewsletterCard() {
   }
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, var(--kb-primary) 0%, var(--kb-primary-600) 100%)', color: '#fff', borderRadius: 12, padding: '16px 20px', border: 'none' }}>
+    <div style={{ background: 'linear-gradient(135deg, var(--av-ink) 0%, var(--av-cognac) 100%)', color: '#fff', borderRadius: 2, padding: '16px 20px', border: 'none' }}>
       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'rgba(255,255,255,.7)', marginBottom: 6 }}>Newsletter</div>
-      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Get the best of klixbd</div>
+      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Get the best of geniusCommerz</div>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,.8)', marginBottom: 14, lineHeight: 1.5 }}>
         Weekly buying guides, sales, and reviews.
       </div>
@@ -175,9 +175,9 @@ function NewsletterCard() {
         <form onSubmit={submit}>
           <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: '100%', height: 38, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.12)', color: '#fff', outline: 'none', marginBottom: 8, fontSize: 13, boxSizing: 'border-box' }} />
+            style={{ width: '100%', height: 38, padding: '0 12px', borderRadius: 2, border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.12)', color: '#fff', outline: 'none', marginBottom: 8, fontSize: 13, boxSizing: 'border-box' }} />
           <button type="submit"
-            style={{ width: '100%', height: 36, borderRadius: 7, border: 'none', background: '#fff', color: 'var(--kb-primary)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            style={{ width: '100%', height: 36, borderRadius: 2, border: 'none', background: 'var(--av-paper)', color: 'var(--av-ink)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
             Subscribe
           </button>
         </form>
@@ -221,15 +221,15 @@ export default function BlogShow({ blog, related, recent, categories, comments }
         )}
       </Head>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 'var(--av-maxw)', margin: '0 auto', padding: '0 var(--av-gutter)' }}>
 
         {/* Breadcrumb */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', padding: '16px 0 8px' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--av-muted)', padding: '16px 0 8px' }}>
           <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Home</Link>
           <span>/</span>
           <Link href="/blog" style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-slate-800">Journal</Link>
           <span>/</span>
-          <span style={{ color: 'var(--kb-ink)' }}>{blog.title.length > 50 ? blog.title.substring(0, 50) + '…' : blog.title}</span>
+          <span style={{ color: 'var(--av-ink)' }}>{blog.title.length > 50 ? blog.title.substring(0, 50) + '…' : blog.title}</span>
         </nav>
 
         <div className="grid lg:grid-cols-[1fr_280px]" style={{ gap: 48, padding: '16px 0', alignItems: 'start' }}>
@@ -238,26 +238,26 @@ export default function BlogShow({ blog, related, recent, categories, comments }
           <article>
             {blog.blogCategory ? (
               <Link href={`/blog/c/${blog.blogCategory.slug}`}
-                style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, textDecoration: 'none', marginBottom: 16 }}>
+                style={{ display: 'inline-block', background: 'var(--av-paper-2)', color: 'var(--av-ink)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, textDecoration: 'none', marginBottom: 16 }}>
                 {blog.category_name}
               </Link>
             ) : blog.category_name ? (
-              <span style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
+              <span style={{ display: 'inline-block', background: 'var(--av-paper-2)', color: 'var(--av-ink)', padding: '5px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
                 {blog.category_name}
               </span>
             ) : null}
 
-            <h1 style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-0.025em', lineHeight: 1.08, margin: '0 0 16px', color: 'var(--kb-ink)' }}>
+            <h1 style={{ fontSize: 36, fontWeight: 400, fontFamily: 'var(--av-display)', letterSpacing: '-0.025em', lineHeight: 1.08, margin: '0 0 16px', color: 'var(--av-ink)' }}>
               {blog.title}
             </h1>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: '16px 0', borderBottom: '1px solid var(--kb-border)', fontSize: 13, color: 'var(--kb-ink-soft)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, padding: '16px 0', borderBottom: '1px solid var(--av-line)', fontSize: 13, color: 'var(--av-muted)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--av-ink)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
                   {blog.author_display_name[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--kb-ink)' }}>{blog.author_display_name}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--av-ink)' }}>{blog.author_display_name}</div>
                 </div>
               </div>
               <span>·</span>
@@ -267,7 +267,7 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             </div>
 
             {blog.cover_url && (
-              <img style={{ width: '100%', borderRadius: 16, marginTop: 24, objectFit: 'cover', maxHeight: 480 }}
+              <img style={{ width: '100%', borderRadius: 2, marginTop: 24, objectFit: 'cover', maxHeight: 480 }}
                 src={blog.cover_url} alt={blog.title} />
             )}
 
@@ -277,7 +277,7 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             {/* FAQs */}
             {blog.faqs && blog.faqs.length > 0 && (
               <div style={{ marginTop: 40 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: 'var(--kb-ink)' }}>Frequently Asked Questions</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16, color: 'var(--av-ink)' }}>Frequently Asked Questions</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {blog.faqs.map((faq, i) => (
                     <FaqItem key={i} question={faq.question} answer={faq.answer} />
@@ -287,18 +287,18 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             )}
 
             {/* Share */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 0', borderTop: '1px solid var(--kb-border)', borderBottom: '1px solid var(--kb-border)', margin: '28px 0' }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--kb-ink-muted)' }}>Share this article</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '20px 0', borderTop: '1px solid var(--av-line)', borderBottom: '1px solid var(--av-line)', margin: '28px 0' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--av-muted)' }}>Share this article</span>
               <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
                 target="_blank" rel="noopener"
-                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--kb-border)', background: '#fff', display: 'grid', placeItems: 'center', color: '#1877F2', textDecoration: 'none' }}>
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--av-line)', background: 'var(--av-paper)', display: 'grid', placeItems: 'center', color: '#1877F2', textDecoration: 'none' }}>
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
                 </svg>
               </a>
               <button
                 onClick={() => typeof navigator !== 'undefined' && navigator.clipboard?.writeText(window.location.href)}
-                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--kb-border)', background: '#fff', display: 'grid', placeItems: 'center', color: 'var(--kb-ink-muted)', cursor: 'pointer' }}
+                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--av-line)', background: 'var(--av-paper)', display: 'grid', placeItems: 'center', color: 'var(--av-muted)', cursor: 'pointer' }}
                 title="Copy link">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -307,27 +307,27 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             </div>
 
             {/* Author card */}
-            <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: 24, display: 'grid', gridTemplateColumns: '56px 1fr', gap: 16, alignItems: 'center', marginBottom: 32 }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 700 }}>
+            <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: 24, display: 'grid', gridTemplateColumns: '56px 1fr', gap: 16, alignItems: 'center', marginBottom: 32 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--av-ink)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 22, fontWeight: 700 }}>
                 {blog.author_display_name[0]?.toUpperCase()}
               </div>
               <div>
-                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--kb-ink)' }}>Written by {blog.author_display_name}</h4>
-                <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--kb-ink-muted)' }}>Writes about the things they actually use.</p>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--av-ink)' }}>Written by {blog.author_display_name}</h4>
+                <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--av-muted)' }}>Writes about the things they actually use.</p>
               </div>
             </div>
 
             {/* Comments */}
             <div id="comments">
               {flash.comment_success && (
-                <div style={{ marginBottom: 24, padding: '12px 16px', borderRadius: 10, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', fontSize: 14, fontWeight: 500 }}>
+                <div style={{ marginBottom: 24, padding: '12px 16px', borderRadius: 2, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', fontSize: 14, fontWeight: 500 }}>
                   {flash.comment_success}
                 </div>
               )}
 
               {comments.length > 0 && (
                 <>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 16px', color: 'var(--kb-ink)' }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 16px', color: 'var(--av-ink)' }}>
                     {comments.length} Comment{comments.length !== 1 ? 's' : ''}
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 32 }}>
@@ -337,39 +337,39 @@ export default function BlogShow({ blog, related, recent, categories, comments }
               )}
 
               {auth.user ? (
-                <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 16, padding: 28 }}>
+                <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: 28 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--kb-primary)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--av-ink)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 700 }}>
                       {auth.user.name[0].toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--kb-ink)' }}>{auth.user.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--kb-ink-soft)' }}>Commenting as yourself</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--av-ink)' }}>{auth.user.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--av-muted)' }}>Commenting as yourself</div>
                     </div>
                   </div>
                   <form onSubmit={submitComment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--kb-ink)' }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--av-ink)' }}>
                         Comment <span style={{ color: '#ef4444' }}>*</span>
                       </label>
                       <textarea name="body" rows={5} placeholder="Share your thoughts…" required
                         value={data.body} onChange={(e) => setData('body', e.target.value)}
-                        style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--kb-border)', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: '#f8fafc', color: 'var(--kb-ink)' }} />
+                        style={{ width: '100%', padding: '10px 14px', borderRadius: 2, border: '1px solid var(--av-line)', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: '#f8fafc', color: 'var(--av-ink)' }} />
                       {errors.body && <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>{errors.body}</div>}
                     </div>
                     <div>
                       <button type="submit" disabled={processing}
-                        style={{ height: 44, padding: '0 24px', borderRadius: 10, background: processing ? 'var(--kb-ink-soft)' : 'var(--kb-primary)', color: '#fff', fontWeight: 600, fontSize: 15, border: 'none', cursor: processing ? 'not-allowed' : 'pointer' }}>
+                        style={{ height: 44, padding: '0 24px', borderRadius: 2, background: processing ? 'var(--av-muted)' : 'var(--av-ink)', color: '#fff', fontWeight: 600, fontSize: 15, border: 'none', cursor: processing ? 'not-allowed' : 'pointer' }}>
                         Post Comment
                       </button>
                     </div>
                   </form>
                 </div>
               ) : (
-                <p style={{ fontSize: 14, color: 'var(--kb-ink-soft)' }}>
-                  <Link href="/login" style={{ fontWeight: 700, color: 'var(--kb-primary)', textDecoration: 'none' }}>Sign in</Link>
+                <p style={{ fontSize: 14, color: 'var(--av-muted)' }}>
+                  <Link href="/login" style={{ fontWeight: 700, color: 'var(--av-ink)', textDecoration: 'none' }}>Sign in</Link>
                   {' or '}
-                  <Link href="/register" style={{ fontWeight: 700, color: 'var(--kb-primary)', textDecoration: 'none' }}>create an account</Link>
+                  <Link href="/register" style={{ fontWeight: 700, color: 'var(--av-ink)', textDecoration: 'none' }}>create an account</Link>
                   {' to leave a comment.'}
                 </p>
               )}
@@ -381,20 +381,20 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             {blog.enable_toc && <TocBox contentRef={contentRef} />}
 
             {categories.length > 0 && (
-              <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
-                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Categories</h4>
+              <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: '16px 20px' }}>
+                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--av-muted)', margin: '0 0 12px' }}>Categories</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {categories.map((cat) => (
                     <Link key={cat.id} href={`/blog/c/${cat.slug}`}
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '8px 10px', borderRadius: 7, fontSize: 13, textDecoration: 'none',
+                        padding: '8px 10px', borderRadius: 2, fontSize: 13, textDecoration: 'none',
                         ...(blog.blog_category_id === cat.id
-                          ? { background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', fontWeight: 600 }
-                          : { color: 'var(--kb-ink-muted)' }),
+                          ? { background: 'var(--av-paper-2)', color: 'var(--av-ink)', fontWeight: 600 }
+                          : { color: 'var(--av-muted)' }),
                       }}>
                       <span>{cat.name}</span>
-                      <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, background: 'var(--kb-surface-2)', color: 'var(--kb-ink-soft)' }}>
+                      <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 999, background: 'var(--av-paper-2)', color: 'var(--av-muted)' }}>
                         {cat.blogs_count}
                       </span>
                     </Link>
@@ -404,28 +404,28 @@ export default function BlogShow({ blog, related, recent, categories, comments }
             )}
 
             {recent.length > 0 && (
-              <div style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, padding: '16px 20px' }}>
-                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--kb-ink-soft)', margin: '0 0 12px' }}>Recent Posts</h4>
+              <div style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, padding: '16px 20px' }}>
+                <h4 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--av-muted)', margin: '0 0 12px' }}>Recent Posts</h4>
                 <div>
                   {recent.map((b, i) => (
                     <Link key={b.id} href={`/blog/${b.slug}`}
                       style={{
                         display: 'flex', gap: 10, alignItems: 'flex-start', textDecoration: 'none',
                         padding: '8px 0',
-                        borderBottom: i < recent.length - 1 ? '1px solid var(--kb-border-2)' : 'none',
+                        borderBottom: i < recent.length - 1 ? '1px solid var(--av-line-soft)' : 'none',
                       }}>
-                      <div style={{ width: 56, height: 56, borderRadius: 8, flexShrink: 0, overflow: 'hidden', background: 'var(--kb-primary-50)' }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 2, flexShrink: 0, overflow: 'hidden', background: 'var(--av-paper-2)' }}>
                         {b.cover_url
                           ? <img src={b.cover_url} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           : null
                         }
                       </div>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.35, color: 'var(--kb-ink)',
+                        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.35, color: 'var(--av-ink)',
                           display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {b.title}
                         </div>
-                        <div style={{ fontSize: 11, color: 'var(--kb-ink-soft)', marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: 'var(--av-muted)', marginTop: 4 }}>
                           {b.published_at} · {b.read_time}
                         </div>
                       </div>
@@ -441,20 +441,20 @@ export default function BlogShow({ blog, related, recent, categories, comments }
 
         {/* Related articles */}
         {related.length > 0 && (
-          <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--kb-border)', paddingBottom: 64 }}>
+          <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid var(--av-line)', paddingBottom: 64 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>
-                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', margin: 0, color: 'var(--kb-ink)' }}>Related Articles</h2>
-                <div style={{ fontSize: 13, color: 'var(--kb-ink-soft)', marginTop: 4 }}>More from the Journal you might like.</div>
+                <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.01em', margin: 0, color: 'var(--av-ink)' }}>Related Articles</h2>
+                <div style={{ fontSize: 13, color: 'var(--av-muted)', marginTop: 4 }}>More from the Journal you might like.</div>
               </div>
-              <Link href="/blog" style={{ fontSize: 13, fontWeight: 600, color: 'var(--kb-primary)', textDecoration: 'none' }}>All articles →</Link>
+              <Link href="/blog" style={{ fontSize: 13, fontWeight: 600, color: 'var(--av-ink)', textDecoration: 'none' }}>All articles →</Link>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3" style={{ gap: 20 }}>
               {related.map((rel) => (
                 <Link key={rel.id} href={`/blog/${rel.slug}`}
-                  style={{ background: '#fff', border: '1px solid var(--kb-border)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none' }}
+                  style={{ background: 'var(--av-paper)', border: '1px solid var(--av-line)', borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column', textDecoration: 'none' }}
                   className="hover:shadow-md hover:-translate-y-0.5 transition-all">
-                  <div style={{ height: 160, background: 'var(--kb-primary-50)', overflow: 'hidden' }}>
+                  <div style={{ height: 160, background: 'var(--av-paper-2)', overflow: 'hidden' }}>
                     {rel.cover_url
                       ? <img src={rel.cover_url} alt={rel.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : null
@@ -462,15 +462,15 @@ export default function BlogShow({ blog, related, recent, categories, comments }
                   </div>
                   <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {rel.category_name && (
-                      <span style={{ display: 'inline-block', background: 'var(--kb-primary-50)', color: 'var(--kb-primary)', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', alignSelf: 'flex-start' }}>
+                      <span style={{ display: 'inline-block', background: 'var(--av-paper-2)', color: 'var(--av-ink)', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', alignSelf: 'flex-start' }}>
                         {rel.category_name}
                       </span>
                     )}
-                    <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, color: 'var(--kb-ink)',
+                    <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.3, color: 'var(--av-ink)',
                       display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {rel.title}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--kb-ink-soft)', marginTop: 'auto' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--av-muted)', marginTop: 'auto' }}>
                       <span>{rel.published_at}</span>
                       <span>·</span>
                       <span>{rel.read_time}</span>

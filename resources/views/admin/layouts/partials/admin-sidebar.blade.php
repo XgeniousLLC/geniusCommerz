@@ -1,5 +1,5 @@
 @php
-    $siteName = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'klixbd'));
+    $siteName = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'geniuscommerz'));
     $logoUrl  = cache()->remember('site_logo_url', 300, function () {
         $id = \App\Models\SiteSetting::get('general.logo_media_id');
         if (!$id) return null;

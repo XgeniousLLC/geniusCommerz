@@ -43,7 +43,7 @@ function AvProductCard({ product }: { product: ProductCard }) {
   function addToCart(e: React.MouseEvent) {
     e.preventDefault();
     if (!product.in_stock || product.has_variants) { router.visit(`/shop/${product.slug}`); return; }
-    addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: false });
+    addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: product.shipping_included ?? false });
     openCart();
   }
 
@@ -114,7 +114,7 @@ function AvListCard({ product }: { product: ProductCard }) {
   function addToCart(e: React.MouseEvent) {
     e.preventDefault();
     if (!product.in_stock || product.has_variants) { router.visit(`/shop/${product.slug}`); return; }
-    addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: false });
+    addItem({ product_id: product.id, variant_id: null, variant_label: null, name: product.name, price: product.price, image_url: product.image_url, slug: product.slug, shipping_included: product.shipping_included ?? false });
     openCart();
   }
 

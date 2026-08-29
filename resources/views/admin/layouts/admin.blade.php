@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @php
-        $siteName   = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'klixbd'));
+        $siteName   = cache()->remember('site_name', 300, fn () => \App\Models\SiteSetting::get('general.site_name', 'geniuscommerz'));
         $faviconUrl = cache()->remember('site_favicon_url', 300, function () {
             $id = \App\Models\SiteSetting::get('general.favicon_media_id');
             if (!$id) return null;
