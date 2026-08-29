@@ -6,6 +6,7 @@ use App\Models\Media;
 use App\Models\MediaFolder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 
@@ -52,6 +53,29 @@ class MediaService
         }
         fclose($fp);
 
+        $media = $this->storeFile($tmpFile, $originalName, $mimeType, $disk, $folderId, $uuid);
+
+        @unlink($tmpFile);
+        $this->cleanupChunks($uuid);
+
+        return $media;
+    }
+
+    /**
+     * Turn a file already on local disk into a Media record, generating the same
+     * conversions an upload gets. Chunked uploads land here once assembled; seeders and
+     * importers call it directly, so there is one owner of "file becomes Media".
+     */
+    public function storeFile(
+        string $tmpFile,
+        string $originalName,
+        string $mimeType,
+        string $disk = 'public',
+        ?int $folderId = null,
+        ?string $uuid = null
+    ): Media {
+        $uuid ??= (string) Str::uuid();
+
         $type = $this->detectType($mimeType);
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION)) ?: 'bin';
         $datePath = now()->format('Y/m');
@@ -69,9 +93,6 @@ class MediaService
         if ($type === 'image' && !$isSvg) {
             [$width, $height, $conversions] = $this->processImage($tmpFile, $uuid, "media/{$datePath}", $disk, $ext);
         }
-
-        @unlink($tmpFile);
-        $this->cleanupChunks($uuid);
 
         return Media::create([
             'uuid'              => $uuid,
