@@ -388,6 +388,8 @@
                 <a href="#settings" class="nav-link" onclick="scrollToSection('settings')">Store Settings</a>
                 <a href="#payment" class="nav-link" onclick="scrollToSection('payment')">Payment</a>
                 <a href="#shipping" class="nav-link" onclick="scrollToSection('shipping')">Shipping</a>
+                <a href="#tax" class="nav-link" onclick="scrollToSection('tax')">Tax</a>
+                <a href="#currencies" class="nav-link" onclick="scrollToSection('currencies')">Currencies</a>
                 <a href="#integrations" class="nav-link" onclick="scrollToSection('integrations')">Integrations</a>
             </div>
 
@@ -410,18 +412,24 @@
                 <!-- HOME -->
                 <section id="home">
                     <h1>Welcome to geniusCommerz</h1>
-                    <p>geniusCommerz is a modern e-commerce platform built with Laravel and React. It provides everything you need to build and manage a successful online store.</p>
+                    <p>geniusCommerz is a modern e-commerce platform built with Laravel and React. It ships with 94 provider integrations &mdash; payments, SMS, fraud screening, shipping carriers, exchange rates and AI &mdash; and handles the parts of selling internationally that are usually painful: per-country addresses, currency conversion recorded per order, destination tax, and shipping zones.</p>
 
                     <h2>Key Features</h2>
                     <ul>
                         <li>Admin panel with Blade + Alpine.js</li>
                         <li>Storefront with Inertia v3 + React 19</li>
-                        <li>Dual authentication (Admin & Customer)</li>
+                        <li>Dual authentication (Admin &amp; Customer)</li>
                         <li>Real-time analytics and reporting</li>
-                        <li>Multi-language and multi-currency support</li>
-                        <li>AI content generation (OpenAI, Claude, Gemini)</li>
-                        <li>Multiple payment gateways</li>
-                        <li>Courier integration (Pathao, RedX, Steadfast)</li>
+                        <li>Sell worldwide &mdash; 213 countries, with address forms and dial codes that adapt per country</li>
+                        <li>Multi-currency, with the rate frozen onto each order and refreshed automatically</li>
+                        <li>Destination-based tax &mdash; VAT, GST and sales tax, inclusive or exclusive</li>
+                        <li>Shipping zones with weight and order-value bands, plus live carrier rates</li>
+                        <li><strong>39 payment gateways</strong> across every major region</li>
+                        <li><strong>20 SMS gateways</strong> &mdash; global, Bangladesh, India, Gulf and Africa</li>
+                        <li><strong>11 fraud checkers</strong> on one shared risk scale</li>
+                        <li><strong>19 shipping carriers</strong> plus 3 Bangladeshi couriers</li>
+                        <li>AI content generation (OpenAI, Claude, Gemini, DeepSeek)</li>
+                        <li>One-click templates for tax and shipping configuration</li>
                     </ul>
                 </section>
 
@@ -1307,98 +1315,295 @@ sudo systemctl restart mysql</code></pre>
                         <li><strong>Email:</strong> Contact email address</li>
                         <li><strong>Phone:</strong> Business phone number</li>
                         <li><strong>Address:</strong> Business address</li>
-                        <li><strong>Currency:</strong> Default currency</li>
+                        <li><strong>Store Country:</strong> Where you ship from &mdash; drives tax, shipping and phone dial-code defaults</li>
+                        <li><strong>Currency:</strong> Base currency. Order totals are recorded in it, and every report sums it</li>
                         <li><strong>Timezone:</strong> Server timezone</li>
                     </ul>
                 </section>
 
                 <!-- PAYMENT -->
                 <section id="payment">
-                    <h1>Payment Methods</h1>
+                    <h1>Payment Gateways</h1>
 
-                    <h2>Configure Payments</h2>
-                    <p>Navigate to Admin → Settings → Payment to set up payment methods.</p>
+                    <p>39 gateways are available, covering every major region. Configure them at
+                    <strong>Admin &rarr; Payment Gateways</strong>, where you enable the ones you want and drag them
+                    into the order customers see at checkout.</p>
 
-                    <h2>Available Payment Methods</h2>
+                    <div class="info">
+                        <strong>Currency gating.</strong> Each gateway declares the currencies and countries it can
+                        actually settle. A gateway is never offered for a payment it would reject &mdash; Midtrans only
+                        appears for IDR orders, Paystack only for NGN, GHS, ZAR and KES.
+                    </div>
+
+                    <h2>Worldwide</h2>
                     <ul>
-                        <li><strong>Cash on Delivery:</strong> Payment on delivery</li>
-                        <li><strong>Stripe:</strong> Credit/Debit cards</li>
-                        <li><strong>bKash:</strong> Mobile banking (Bangladesh)</li>
-                        <li><strong>Nagad:</strong> Mobile banking (Bangladesh)</li>
+                        <li><strong>Stripe:</strong> cards, wallets and roughly 50 local payment methods through one integration</li>
+                        <li><strong>PayPal:</strong> Orders v2, 23 settlement currencies</li>
+                        <li><strong>Adyen:</strong> enterprise coverage via Pay by Link</li>
+                        <li><strong>Authorize.Net:</strong> Accept Hosted, large US install base</li>
+                        <li><strong>Paddle</strong> and <strong>2Checkout:</strong> merchant of record &mdash; they become the seller and remit EU VAT and US sales tax themselves</li>
+                        <li><strong>Cash on Delivery:</strong> a real driver, so checkout has one code path</li>
                     </ul>
 
-                    <h2>Payment Setup</h2>
+                    <h2>Bangladesh</h2>
+                    <ul>
+                        <li><strong>SSLCOMMERZ:</strong> cards, mobile banking and net banking</li>
+                        <li><strong>bKash:</strong> tokenized checkout</li>
+                        <li><strong>Nagad:</strong> RSA-signed two-leg checkout</li>
+                        <li><strong>aamarPay</strong> and <strong>ShurjoPay</strong></li>
+                    </ul>
+
+                    <h2>India and Pakistan</h2>
+                    <ul>
+                        <li><strong>Razorpay, Cashfree, PayU India, PhonePe, Paytm:</strong> cards, UPI and netbanking</li>
+                        <li><strong>Easypaisa</strong> and <strong>JazzCash</strong> for Pakistan</li>
+                    </ul>
+
+                    <h2>Gulf, MENA and Africa</h2>
+                    <ul>
+                        <li><strong>PayTabs, Tap Payments, Moyasar:</strong> KNET, mada, Benefit, Apple Pay, STC Pay</li>
+                        <li><strong>Fawry:</strong> Egypt, including cash at Fawry outlets</li>
+                        <li><strong>Paystack, Flutterwave, Monnify:</strong> Nigeria and pan-African</li>
+                        <li><strong>M-Pesa</strong> (Kenya) and <strong>MTN MoMo:</strong> mobile money approved on the customer's handset</li>
+                        <li><strong>Yoco</strong> and <strong>Peach Payments:</strong> South Africa</li>
+                    </ul>
+
+                    <h2>Europe, LatAm and APAC</h2>
+                    <ul>
+                        <li><strong>Mollie:</strong> iDEAL, Bancontact, SEPA and cards</li>
+                        <li><strong>iyzico</strong> (T&uuml;rkiye), <strong>Vipps MobilePay</strong> (Nordics)</li>
+                        <li><strong>MercadoPago</strong> and <strong>Pagar.me:</strong> LatAm, with Pix as the default Brazilian method</li>
+                        <li><strong>Midtrans, Xendit:</strong> Indonesia and the Philippines</li>
+                        <li><strong>Square</strong> (US, CA, GB, AU, JP), <strong>KakaoPay</strong> (Korea)</li>
+                    </ul>
+
+                    <h2>How payment is settled</h2>
                     <ol>
-                        <li>Go to Payment settings</li>
-                        <li>Select payment method to enable</li>
-                        <li>Enter API credentials</li>
-                        <li>Test payment in sandbox mode</li>
-                        <li>Activate for production</li>
+                        <li>The customer picks a gateway and the order is created as <em>pending</em></li>
+                        <li>They are sent to the gateway &mdash; by redirect, by a signed form post, or by a prompt on their phone</li>
+                        <li>The gateway notifies us by webhook, which is signature-verified before anything is written</li>
+                        <li>Only then is the order marked paid</li>
                     </ol>
+
+                    <div class="warning">
+                        <strong>The return URL never marks an order paid.</strong> When a customer comes back from a
+                        hosted page, that only triggers a server-to-server verify &mdash; the redirect itself proves
+                        nothing. Repeated webhooks are dropped by a unique event index, so an order cannot be paid twice.
+                    </div>
+
+                    <h2>Setting up a gateway</h2>
+                    <ol>
+                        <li>Go to <strong>Admin &rarr; Payment Gateways</strong></li>
+                        <li>Click <strong>Credentials</strong> on the gateway you want</li>
+                        <li>Choose <strong>Sandbox</strong>, enter the test keys and save &mdash; sandbox and live keys are stored separately, so switching back and forth never overwrites the other set</li>
+                        <li>Point the gateway's webhook at <code>https://your-domain/api/payments/webhook/{provider}</code></li>
+                        <li>Place a test order end to end, then switch to <strong>Live</strong> and repeat</li>
+                        <li>Return to Payment Gateways, click <strong>Enable</strong>, and set the checkout order</li>
+                    </ol>
+
+                    <div class="info">
+                        A gateway will refuse to enable while a required credential is missing, rather than appearing at
+                        checkout and failing in front of a customer.
+                    </div>
                 </section>
 
                 <!-- SHIPPING -->
                 <section id="shipping">
-                    <h1>Shipping Configuration</h1>
+                    <h1>Shipping</h1>
 
-                    <h2>Shipping Methods</h2>
-                    <p>Navigate to Admin → Settings → Shipping to configure delivery options.</p>
+                    <p>Shipping is resolved server-side in a fixed order, so the price quoted is always the price charged.</p>
 
-                    <h2>Supported Couriers</h2>
+                    <h2>How a rate is chosen</h2>
+                    <ol>
+                        <li><strong>Live courier quote</strong> &mdash; the Bangladeshi couriers, when zone charging is on</li>
+                        <li><strong>Live carrier rate</strong> &mdash; DHL, Shiprocket, Aramex and the rest; a rating outage falls through rather than blocking checkout</li>
+                        <li><strong>Shipping zone rate</strong> &mdash; your configured weight and order-value bands</li>
+                        <li><strong>Flat rate</strong> &mdash; the final fallback</li>
+                    </ol>
+
+                    <p>Products marked <em>shipping included</em> always ship free. Cart weight is calculated from real
+                    product weights on the server, so it cannot be understated by the browser.</p>
+
+                    <h2>Shipping zones</h2>
+                    <p>Configure at <strong>Admin &rarr; Shipping Zones</strong>. A zone matches on country, then state,
+                    then postal pattern &mdash; the most specific match wins, so a city zone beats a country-wide one.
+                    Each zone holds rates with:</p>
                     <ul>
-                        <li><strong>Pathao:</strong> Bangladesh courier service</li>
-                        <li><strong>RedX:</strong> Bangladesh courier service</li>
-                        <li><strong>Steadfast:</strong> Bangladesh courier service</li>
+                        <li>A base price, and optionally a per-kg charge above the band floor</li>
+                        <li>Weight bands and order-value bands</li>
+                        <li>A free-above threshold</li>
+                        <li>A delivery estimate shown to the customer</li>
                     </ul>
 
-                    <h2>Setup Shipping</h2>
-                    <ol>
-                        <li>Go to Shipping settings</li>
-                        <li>Select courier service</li>
-                        <li>Enter API credentials</li>
-                        <li>Configure shipping rates</li>
-                        <li>Enable for checkout</li>
-                    </ol>
+                    <div class="info">
+                        <strong>Templates.</strong> Rather than building zones by hand, apply a template: domestic flat
+                        rate, domestic weight bands, Europe, North America, Gulf, or a rest-of-world fallback. Applying a
+                        template skips any zone you already have, so it is safe to re-apply after adding countries.
+                    </div>
+
+                    <h2>Carriers (19)</h2>
+                    <ul>
+                        <li><strong>Worldwide:</strong> DHL Express, FedEx, UPS, EasyPost, Shippo</li>
+                        <li><strong>India:</strong> Delhivery, Shiprocket, Blue Dart</li>
+                        <li><strong>Nigeria and Africa:</strong> Sendbox, GIG Logistics, Kwik Delivery, Bob Go</li>
+                        <li><strong>Brazil:</strong> Melhor Envio, Correios, Loggi</li>
+                        <li><strong>Gulf:</strong> Aramex, SMSA Express, Naqel Express, Torod</li>
+                    </ul>
+
+                    <h2>Bangladeshi couriers (3)</h2>
+                    <p><strong>Pathao</strong>, <strong>RedX</strong> and <strong>Steadfast</strong> use a separate
+                    contract built around their city &rarr; zone &rarr; area location tree, which is how they actually
+                    price. They are dispatched from the order detail page.</p>
+
+                    <div class="warning">
+                        <strong>Live carrier rates need a ship-from address.</strong> Set it on the Shipping Zones page.
+                        Without it, carriers cannot rate and the system falls through to your zone rates.
+                    </div>
+                </section>
+
+                <!-- TAX -->
+                <section id="tax">
+                    <h1>Tax</h1>
+
+                    <p>Tax is calculated from the shipping address at <strong>Admin &rarr; Tax Zones</strong>. It is off
+                    by default; enable it once your zones are in place.</p>
+
+                    <h2>How zones match</h2>
+                    <p>Country, then state, then postal pattern &mdash; most specific wins. A San Francisco postal zone
+                    beats a statewide California zone, which beats a country-wide US zone. Several rates can apply in one
+                    zone and are added together, which is how US state plus county and Canadian GST plus PST are
+                    actually charged.</p>
+
+                    <h2>Tax classes</h2>
+                    <p>Each product carries a class &mdash; <strong>standard</strong>, <strong>reduced</strong> or
+                    <strong>zero</strong> &mdash; because EU rates differ for food, books and children's clothing. A zone
+                    that says nothing about a class does not tax it, which is what makes zero-rated goods genuinely zero.</p>
+
+                    <h2>Inclusive or exclusive pricing</h2>
+                    <p>With <em>prices include tax</em> off, tax is added to the total. With it on, the customer pays the
+                    listed price and the tax is the portion of it owed &mdash; extracted, not added again.</p>
+
+                    <div class="info">
+                        <strong>Templates.</strong> EU VAT (27 member states), UK VAT, US sales tax (46 state base
+                        rates), Canada GST/HST/PST, and single-rate countries covering the Gulf, APAC and Africa.
+                        Applying a template skips zones you already have, so your tuned rates survive a re-apply.
+                    </div>
+
+                    <div class="warning">
+                        <strong>Templates are a starting point, not tax advice.</strong> Rates change, and you are
+                        responsible for confirming them against your own registrations. The US template carries state
+                        base rates only &mdash; counties and cities add their own, and nexus rules decide where you must
+                        collect at all. EU B2B reverse charge is not implemented; if you sell B2B into the EU, use a
+                        merchant-of-record gateway such as Paddle or 2Checkout.
+                    </div>
+
+                    <h2>Invoices</h2>
+                    <p>The tax breakdown is frozen onto the order when it is placed, and the invoice reads that stored
+                    figure rather than recalculating. The invoice and the amount charged therefore cannot disagree, even
+                    after you change a rate.</p>
+                </section>
+
+                <!-- CURRENCIES -->
+                <section id="currencies">
+                    <h1>Currencies</h1>
+
+                    <p>Set your base currency at <strong>Admin &rarr; Settings &rarr; General</strong>. Additional
+                    currencies and their rates live at <strong>Admin &rarr; Currencies</strong>.</p>
+
+                    <h2>How money is recorded</h2>
+                    <p>Every order stores money twice: once in your base currency, which every report sums, and once in
+                    the currency the customer actually saw, alongside the exchange rate used. The rate is frozen at order
+                    time, so the figures stay reconstructible years later after rates move.</p>
+
+                    <h2>Automatic rates</h2>
+                    <ul>
+                        <li>Set a currency's source to <strong>Auto</strong> for it to be refreshed hourly</li>
+                        <li>A free keyless provider is used by default; ExchangeRate-API is available for paid tiers</li>
+                        <li>A rate that moves more than 15% in one refresh is rejected and flagged rather than applied</li>
+                        <li>A failed fetch keeps the previous rate &mdash; it never zeroes one</li>
+                        <li>Add a markup percentage per currency to cover FX spread and cross-currency fees</li>
+                    </ul>
+
+                    <p>Rates are also pinned per browsing session, so a scheduled refresh cannot change a customer's
+                    total mid-visit. If a rate has moved by the time they submit, checkout re-quotes rather than
+                    silently charging the new one.</p>
+
+                    <div class="warning">
+                        <strong>Changing base currency.</strong> Existing orders keep the base currency they were placed
+                        in, which is correct &mdash; but reports that sum order totals will mix currencies afterwards.
+                        Plan for that if you switch.
+                    </div>
+
+                    <p>Automatic refresh needs the scheduler running:</p>
+                    <pre><code>* * * * * cd /path/to/app &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1</code></pre>
                 </section>
 
                 <!-- INTEGRATIONS -->
                 <section id="integrations">
                     <h1>Integrations</h1>
 
-                    <h2>Available Integrations</h2>
+                    <p>94 providers across seven groups, all managed from <strong>Admin &rarr; Integrations</strong> or
+                    their own dedicated pages. Credentials are encrypted at rest and stored separately per environment,
+                    so sandbox testing can never overwrite your live keys.</p>
 
-                    <h3>AI Content Generation</h3>
+                    <h2>SMS gateways (20)</h2>
+                    <p>Managed at <strong>Admin &rarr; SMS Gateways</strong>, where you can also send a test message and
+                    check your balance.</p>
                     <ul>
-                        <li>OpenAI</li>
-                        <li>Claude (Anthropic)</li>
-                        <li>Google Gemini</li>
+                        <li><strong>Worldwide:</strong> Twilio, Vonage, MessageBird, Plivo, Amazon SNS, Infobip, Sinch, Telnyx</li>
+                        <li><strong>Bangladesh:</strong> BulkSMSBD, SMS.BD, MRAM</li>
+                        <li><strong>India:</strong> MSG91, Gupshup, Fast2SMS</li>
+                        <li><strong>Gulf and MENA:</strong> Unifonic, Taqnyat, Cequens</li>
+                        <li><strong>Africa:</strong> Africa's Talking, Termii, Clickatell</li>
                     </ul>
+                    <p>Numbers are normalised to international format once, and each gateway reshapes from there &mdash;
+                    Bangladeshi gateways receive a local <code>01&hellip;</code> number, Fast2SMS a bare 10-digit Indian
+                    number, and most others E.164.</p>
 
-                    <h3>Courier Services</h3>
+                    <div class="warning">
+                        <strong>Sender IDs need registering with the provider.</strong> India requires DLT-approved
+                        sender IDs and templates; Saudi Arabia requires locally-registered sender names. That happens
+                        with the provider, not here.
+                    </div>
+
+                    <h2>Fraud checks (11)</h2>
+                    <p>Managed at <strong>Admin &rarr; Fraud Checks</strong>, where you can run a live check on any
+                    number and see recent results.</p>
                     <ul>
-                        <li>Pathao</li>
-                        <li>RedX</li>
-                        <li>Steadfast</li>
+                        <li><strong>Worldwide:</strong> IPQualityScore, SEON, Sift, MaxMind minFraud</li>
+                        <li><strong>Europe:</strong> Ravelin</li>
+                        <li><strong>India:</strong> Bureau &mdash; mobile tenure and porting history</li>
+                        <li><strong>Gulf:</strong> Uqudo</li>
+                        <li><strong>Africa:</strong> Smile ID, Youverify</li>
+                        <li><strong>Bangladesh:</strong> FraudBD, BDCourier &mdash; courier delivery history</li>
                     </ul>
+                    <p>Every provider is reduced to one risk vocabulary &mdash; safe, low, mid or high risk with a score
+                    out of 100 &mdash; so the admin reads the same whichever you use. A checker is skipped entirely when
+                    it does not serve the destination country: a Bangladeshi courier-history service cannot score a US
+                    order, and sending it that customer's number would be pointless.</p>
 
-                    <h3>SMS Providers</h3>
-                    <ul>
-                        <li>BulkSmsBD</li>
-                        <li>SmsBD</li>
-                        <li>Twilio</li>
-                    </ul>
+                    <h2>AI providers (4)</h2>
+                    <p>OpenAI, Anthropic Claude, Google Gemini and DeepSeek, configured at
+                    <strong>Admin &rarr; AI Settings</strong>. Used for product descriptions, blog content, meta
+                    descriptions, content translation and price suggestions.</p>
 
-                    <h2>Setup Integration</h2>
+                    <h2>Exchange rates (2)</h2>
+                    <p>A free keyless provider and ExchangeRate-API, managed from the Currencies page.</p>
+
+                    <h2>Setting up any integration</h2>
                     <ol>
-                        <li>Go to Admin → Integrations</li>
-                        <li>Select service to integrate</li>
-                        <li>Enter API credentials</li>
-                        <li>Test connection</li>
-                        <li>Save and enable</li>
+                        <li>Go to <strong>Admin &rarr; Integrations</strong> and pick the provider</li>
+                        <li>Enter its credentials &mdash; the form shows exactly which fields that provider needs, with a link to its documentation</li>
+                        <li>Choose sandbox or live, if the provider supports both</li>
+                        <li>Save, then activate it</li>
+                        <li>For SMS and fraud, set one as the default; for payments, enable as many as you like and order them</li>
                     </ol>
+
+                    <div class="info">
+                        Nothing needs seeding. A provider's record is created the first time you save its credentials.
+                    </div>
                 </section>
 
-                <!-- FAQ -->
                 <section id="faq">
                     <h1>Frequently Asked Questions</h1>
 
