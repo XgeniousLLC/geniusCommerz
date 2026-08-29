@@ -374,6 +374,16 @@
             </div>
 
             <div class="nav-section">
+                <div class="nav-section-title">Deployment</div>
+                <a href="#deployment" class="nav-link" onclick="scrollToSection('deployment')">Deployment Guide</a>
+                <a href="#aws" class="nav-link" onclick="scrollToSection('aws')">AWS EC2</a>
+                <a href="#digitalocean" class="nav-link" onclick="scrollToSection('digitalocean')">DigitalOcean</a>
+                <a href="#cpanel" class="nav-link" onclick="scrollToSection('cpanel')">cPanel</a>
+                <a href="#docker" class="nav-link" onclick="scrollToSection('docker')">Docker</a>
+                <a href="#vps" class="nav-link" onclick="scrollToSection('vps')">Custom VPS</a>
+            </div>
+
+            <div class="nav-section">
                 <div class="nav-section-title">Configuration</div>
                 <a href="#settings" class="nav-link" onclick="scrollToSection('settings')">Store Settings</a>
                 <a href="#payment" class="nav-link" onclick="scrollToSection('payment')">Payment</a>
@@ -682,6 +692,605 @@ chmod -R 775 bootstrap/cache</code></pre>
                         <li>Set parent category if needed</li>
                         <li>Click "Save"</li>
                     </ol>
+                </section>
+
+                <!-- DEPLOYMENT -->
+                <section id="deployment">
+                    <h1>Deployment Guide</h1>
+                    <p>Choose your deployment platform below for step-by-step instructions.</p>
+
+                    <h2>Supported Platforms</h2>
+                    <ul>
+                        <li><strong>AWS EC2:</strong> Scalable cloud hosting</li>
+                        <li><strong>DigitalOcean:</strong> Affordable VPS hosting</li>
+                        <li><strong>cPanel:</strong> Shared hosting with control panel</li>
+                        <li><strong>Docker:</strong> Containerized deployment</li>
+                        <li><strong>Custom VPS:</strong> Linode, Vultr, Hetzner, etc.</li>
+                    </ul>
+
+                    <h2>Pre-Deployment Checklist</h2>
+                    <ul>
+                        <li>Domain name registered and pointing to server</li>
+                        <li>SSL certificate (free with Let's Encrypt)</li>
+                        <li>Database backups configured</li>
+                        <li>Email service configured</li>
+                        <li>Payment gateway credentials ready</li>
+                        <li>Storage space for uploads (50GB+ recommended)</li>
+                    </ul>
+                </section>
+
+                <!-- AWS EC2 -->
+                <section id="aws">
+                    <h1>Deploy on AWS EC2</h1>
+
+                    <h2>Step 1: Launch EC2 Instance</h2>
+                    <ol>
+                        <li>Go to AWS Console → EC2 → Instances</li>
+                        <li>Click "Launch Instances"</li>
+                        <li>Choose Ubuntu 22.04 LTS AMI</li>
+                        <li>Select instance type: <code>t3.medium</code> or higher</li>
+                        <li>Configure security group (open ports 80, 443, 22)</li>
+                        <li>Create/select key pair for SSH access</li>
+                        <li>Launch instance</li>
+                    </ol>
+
+                    <h2>Step 2: Connect to Instance</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh -i your-key.pem ubuntu@your-instance-ip</code></pre>
+
+                    <h2>Step 3: Install Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt update
+sudo apt install -y php8.3 php8.3-{fpm,mysql,zip,gd,mbstring,curl,xml}
+sudo apt install -y mysql-server nginx
+sudo apt install -y nodejs npm
+sudo apt install -y git composer</code></pre>
+
+                    <h2>Step 4: Configure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mysql_secure_installation
+sudo mysql -u root -p
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'strong_password';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 5: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd /var/www
+sudo git clone https://github.com/XgeniousLLC/geniusCommerz.git
+sudo chown -R ubuntu:ubuntu geniusCommerz
+cd geniusCommerz</code></pre>
+
+                    <h2>Step 6: Setup Application</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>composer install
+cp .env.example .env
+php artisan key:generate
+npm install
+npm run build</code></pre>
+
+                    <h2>Step 7: Configure .env</h2>
+                    <p>Edit <code>.env</code> with your database credentials:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_URL=https://yourdomain.com
+DB_HOST=localhost
+DB_DATABASE=geniuscommerz
+DB_USERNAME=appuser
+DB_PASSWORD=strong_password
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password</code></pre>
+
+                    <h2>Step 8: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed</code></pre>
+
+                    <h2>Step 9: Configure Nginx</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/nginx/sites-available/default</code></pre>
+
+                    <p>Replace with this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com;
+    root /var/www/geniusCommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}</code></pre>
+
+                    <h2>Step 10: Enable SSL with Let's Encrypt</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com</code></pre>
+
+                    <h2>Step 11: Set Permissions</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo chown -R www-data:www-data /var/www/geniusCommerz
+chmod -R 775 /var/www/geniusCommerz/storage
+chmod -R 775 /var/www/geniusCommerz/bootstrap/cache</code></pre>
+
+                    <h2>Step 12: Start Services</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo systemctl restart nginx
+sudo systemctl restart php8.3-fpm
+sudo systemctl restart mysql</code></pre>
+
+                    <div class="box success">
+                        <strong>Deployment Complete</strong>
+                        Your app should now be accessible at https://yourdomain.com
+                    </div>
+                </section>
+
+                <!-- DIGITALOCEAN -->
+                <section id="digitalocean">
+                    <h1>Deploy on DigitalOcean</h1>
+
+                    <h2>Step 1: Create Droplet</h2>
+                    <ol>
+                        <li>Go to DigitalOcean Console → Create → Droplets</li>
+                        <li>Choose Ubuntu 22.04 LTS</li>
+                        <li>Select plan: $12/month (2GB RAM) or higher</li>
+                        <li>Select region closest to your users</li>
+                        <li>Add SSH key</li>
+                        <li>Create Droplet</li>
+                    </ol>
+
+                    <h2>Step 2: Connect via SSH</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh root@your-droplet-ip</code></pre>
+
+                    <h2>Step 3: Update System</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>apt update
+apt upgrade -y</code></pre>
+
+                    <h2>Step 4: Install Stack</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>apt install -y php8.3 php8.3-{fpm,mysql,zip,gd,mbstring,curl,xml}
+apt install -y mysql-server nginx
+apt install -y nodejs npm git composer
+apt install -y certbot python3-certbot-nginx</code></pre>
+
+                    <h2>Step 5: Configure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>mysql -u root
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'strong_password';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 6: Clone & Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd /var/www
+git clone https://github.com/XgeniousLLC/geniusCommerz.git
+cd geniusCommerz
+composer install
+npm install
+npm run build
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed</code></pre>
+
+                    <h2>Step 7: Configure Nginx</h2>
+                    <p>Create nginx config file:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>nano /etc/nginx/sites-available/geniuscommerz</code></pre>
+
+                    <p>Add this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com;
+    root /var/www/geniusCommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</code></pre>
+
+                    <h2>Step 8: Enable Site</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ln -s /etc/nginx/sites-available/geniuscommerz /etc/nginx/sites-enabled/
+nginx -t
+systemctl restart nginx</code></pre>
+
+                    <h2>Step 9: Setup SSL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>certbot --nginx -d yourdomain.com</code></pre>
+
+                    <h2>Step 10: Fix Permissions & Start</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chown -R www-data:www-data /var/www/geniusCommerz
+chmod -R 775 /var/www/geniusCommerz/storage
+systemctl restart php8.3-fpm mysql nginx</code></pre>
+                </section>
+
+                <!-- CPANEL -->
+                <section id="cpanel">
+                    <h1>Deploy on cPanel Shared Hosting</h1>
+
+                    <h2>Requirements</h2>
+                    <ul>
+                        <li>PHP 8.2+ installed</li>
+                        <li>MySQL database</li>
+                        <li>SSH access enabled</li>
+                        <li>Composer installed</li>
+                        <li>Node.js support (if available)</li>
+                    </ul>
+
+                    <h2>Step 1: Upload Files</h2>
+                    <ol>
+                        <li>Using File Manager or FTP, upload all files to <code>public_html</code></li>
+                        <li>The <code>public</code> folder contents go to <code>public_html</code></li>
+                        <li>Other folders go one level above public_html (usually root home)</li>
+                    </ol>
+
+                    <h2>Step 2: Create Database</h2>
+                    <ol>
+                        <li>Go to cPanel → MySQL Databases</li>
+                        <li>Create new database: <code>username_geniuscommerz</code></li>
+                        <li>Create user and assign to database</li>
+                        <li>Note the credentials</li>
+                    </ol>
+
+                    <h2>Step 3: Configure .env</h2>
+                    <p>Via SSH or File Manager, edit <code>.env</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_URL=https://yourdomain.com
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_DATABASE=username_geniuscommerz
+DB_USERNAME=username_user
+DB_PASSWORD=password</code></pre>
+
+                    <h2>Step 4: Run via SSH</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cd public_html
+php artisan migrate
+php artisan db:seed
+php artisan cache:clear
+php artisan config:cache</code></pre>
+
+                    <h2>Step 5: Fix File Ownership</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>chmod 755 storage
+chmod 755 bootstrap/cache
+find storage -type f -exec chmod 644 {} \;
+find bootstrap/cache -type f -exec chmod 644 {} \;</code></pre>
+
+                    <h2>Step 6: Configure Document Root</h2>
+                    <ol>
+                        <li>Go to cPanel → Addon Domains or Domains</li>
+                        <li>Set document root to <code>public_html/public</code></li>
+                        <li>Update DNS to point to your server</li>
+                    </ol>
+
+                    <h2>Step 7: Setup SSL</h2>
+                    <ol>
+                        <li>Go to cPanel → SSL/TLS</li>
+                        <li>Click "Auto-configure"</li>
+                        <li>Choose your domain</li>
+                        <li>Install Let's Encrypt certificate</li>
+                    </ol>
+
+                    <div class="box warning">
+                        <strong>Note:</strong> cPanel may not support Node.js build. Build assets locally and upload compiled files, or use a provider that supports Node.js.
+                    </div>
+                </section>
+
+                <!-- DOCKER -->
+                <section id="docker">
+                    <h1>Deploy with Docker</h1>
+
+                    <h2>Prerequisites</h2>
+                    <ul>
+                        <li>Docker installed</li>
+                        <li>Docker Compose installed</li>
+                        <li>Docker Hub account (optional)</li>
+                    </ul>
+
+                    <h2>Step 1: Create Dockerfile</h2>
+                    <p>Create <code>Dockerfile</code> in project root:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>FROM php:8.3-fpm
+
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    mysql-client
+
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+WORKDIR /app
+
+COPY . .
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN composer install
+
+RUN chown -R www-data:www-data /app
+
+EXPOSE 9000
+
+CMD ["php-fpm"]</code></pre>
+
+                    <h2>Step 2: Create Docker Compose</h2>
+                    <p>Create <code>docker-compose.yml</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: geniuscommerz_app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    networks:
+      - geniuscommerz
+
+  mysql:
+    image: mysql:8.0
+    container_name: geniuscommerz_mysql
+    environment:
+      MYSQL_DATABASE: geniuscommerz
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_PASSWORD: app_password
+      MYSQL_USER: appuser
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - geniuscommerz
+
+  nginx:
+    image: nginx:latest
+    container_name: geniuscommerz_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/app
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - geniuscommerz
+
+networks:
+  geniuscommerz:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local</code></pre>
+
+                    <h2>Step 3: Create Nginx Configuration</h2>
+                    <p>Create <code>nginx.conf</code>:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name localhost;
+    root /app/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}</code></pre>
+
+                    <h2>Step 4: Build & Run</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose up -d --build</code></pre>
+
+                    <h2>Step 5: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose exec app php artisan migrate --seed</code></pre>
+
+                    <h2>Step 6: Build Assets</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>docker-compose exec app npm install
+docker-compose exec app npm run build</code></pre>
+
+                    <h2>Useful Docker Commands</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code># View logs
+docker-compose logs app
+
+# Access shell
+docker-compose exec app bash
+
+# Run artisan commands
+docker-compose exec app php artisan cache:clear
+
+# Stop containers
+docker-compose down
+
+# Rebuild
+docker-compose up -d --build</code></pre>
+                </section>
+
+                <!-- CUSTOM VPS -->
+                <section id="vps">
+                    <h1>Deploy on Custom VPS</h1>
+                    <p>Works with Linode, Vultr, Hetzner, OVH, and other VPS providers</p>
+
+                    <h2>Step 1: Choose OS & Create VPS</h2>
+                    <ul>
+                        <li>Recommended: Ubuntu 22.04 LTS (2GB RAM minimum)</li>
+                        <li>Choose region close to your audience</li>
+                        <li>Enable SSH key (not password)</li>
+                    </ul>
+
+                    <h2>Step 2: Initial Server Setup</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>ssh root@your-vps-ip
+
+# Update system
+apt update && apt upgrade -y
+
+# Install curl and wget
+apt install -y curl wget
+
+# Create non-root user
+adduser deployer
+usermod -aG sudo deployer
+
+# Copy SSH key to new user
+su - deployer
+mkdir -p ~/.ssh
+echo "your-public-key" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+exit
+
+# Disable root SSH login
+sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl restart sshd</code></pre>
+
+                    <h2>Step 3: Install Dependencies</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo apt install -y \
+  php8.3 \
+  php8.3-fpm \
+  php8.3-mysql \
+  php8.3-zip \
+  php8.3-gd \
+  php8.3-mbstring \
+  php8.3-curl \
+  php8.3-xml \
+  php8.3-bcmath \
+  nginx \
+  mysql-server \
+  nodejs \
+  npm \
+  git \
+  composer \
+  certbot \
+  python3-certbot-nginx</code></pre>
+
+                    <h2>Step 4: Secure MySQL</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mysql_secure_installation
+sudo mysql -u root -p
+
+CREATE DATABASE geniuscommerz;
+CREATE USER 'appuser'@'localhost' IDENTIFIED BY 'VeryStrongPassword123!';
+GRANT ALL PRIVILEGES ON geniuscommerz.* TO 'appuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre>
+
+                    <h2>Step 5: Setup Web Directory</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo mkdir -p /var/www/geniuscommerz
+sudo chown deployer:deployer /var/www/geniuscommerz
+cd /var/www/geniuscommerz</code></pre>
+
+                    <h2>Step 6: Clone Repository</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/XgeniousLLC/geniusCommerz.git .
+composer install --no-dev
+npm install
+npm run build</code></pre>
+
+                    <h2>Step 7: Configure Application</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>cp .env.example .env
+php artisan key:generate
+
+# Edit .env with your details
+nano .env</code></pre>
+
+                    <p>Required .env settings:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=geniuscommerz
+DB_USERNAME=appuser
+DB_PASSWORD=VeryStrongPassword123!</code></pre>
+
+                    <h2>Step 8: Run Migrations</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>php artisan migrate
+php artisan db:seed
+php artisan cache:clear
+php artisan config:cache
+php artisan route:cache</code></pre>
+
+                    <h2>Step 9: Configure Nginx</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/nginx/sites-available/geniuscommerz</code></pre>
+
+                    <p>Add this configuration:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    root /var/www/geniuscommerz/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}</code></pre>
+
+                    <h2>Step 10: Enable Site</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo ln -s /etc/nginx/sites-available/geniuscommerz /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx</code></pre>
+
+                    <h2>Step 11: Setup SSL with Let's Encrypt</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo systemctl restart nginx</code></pre>
+
+                    <h2>Step 12: Set Permissions</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo chown -R www-data:www-data /var/www/geniuscommerz
+sudo chmod -R 775 /var/www/geniuscommerz/storage
+sudo chmod -R 775 /var/www/geniuscommerz/bootstrap/cache</code></pre>
+
+                    <h2>Step 13: Configure PHP</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo nano /etc/php/8.3/fpm/php.ini</code></pre>
+
+                    <p>Update these settings:</p>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>upload_max_filesize = 100M
+post_max_size = 100M
+max_execution_time = 300
+memory_limit = 512M</code></pre>
+
+                    <h2>Step 14: Restart Services</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo systemctl restart php8.3-fpm
+sudo systemctl restart nginx
+sudo systemctl restart mysql</code></pre>
+
+                    <h2>Step 15: Setup Automated Backups (Optional)</h2>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>sudo crontab -e
+
+# Add this line for daily backups at 2 AM
+0 2 * * * mysqldump -u appuser -p'VeryStrongPassword123!' geniuscommerz | gzip > /backups/geniuscommerz_$(date +\%Y\%m\%d).sql.gz</code></pre>
+
+                    <div class="box success">
+                        <strong>Deployment Complete!</strong>
+                        Your application should be live at https://yourdomain.com
+                    </div>
                 </section>
 
                 <!-- SETTINGS -->
