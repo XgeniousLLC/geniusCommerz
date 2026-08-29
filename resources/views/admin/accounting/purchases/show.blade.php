@@ -25,15 +25,15 @@ $statusColors = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'=>
 <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px">
     <div class="card lift stat">
         <span class="tile t-info"><span class="ico" data-ico="package"></span></span>
-        <div><div class="num">৳{{ number_format($purchase->totalCost(), 0) }}</div><div class="lbl">Product Cost</div></div>
+        <div><div class="num">{{ money($purchase->totalCost(), 0) }}</div><div class="lbl">Product Cost</div></div>
     </div>
     <div class="card lift stat">
         <span class="tile t-violet"><span class="ico" data-ico="truck"></span></span>
-        <div><div class="num">৳{{ number_format($purchase->totalShipment(), 0) }}</div><div class="lbl">Shipment Cost</div></div>
+        <div><div class="num">{{ money($purchase->totalShipment(), 0) }}</div><div class="lbl">Shipment Cost</div></div>
     </div>
     <div class="card lift stat">
         <span class="tile t-accent"><span class="ico" data-ico="wallet"></span></span>
-        <div><div class="num">৳{{ number_format($purchase->landedCost(), 0) }}</div><div class="lbl">Landed Cost</div></div>
+        <div><div class="num">{{ money($purchase->landedCost(), 0) }}</div><div class="lbl">Landed Cost</div></div>
     </div>
 </div>
 
@@ -64,8 +64,8 @@ $statusColors = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'=>
                         <td style="font-weight:600;font-size:13.5px">{{ $item->product?->name ?? 'Deleted' }}</td>
                         <td class="muted" style="font-size:13px">{{ $item->variant?->label() ?? '—' }}</td>
                         <td style="text-align:right" class="tnum">{{ $item->quantity }}</td>
-                        <td style="text-align:right" class="tnum">৳{{ number_format($item->unit_cost, 2) }}</td>
-                        <td style="text-align:right" class="tnum"><b>৳{{ number_format($item->lineTotal(), 0) }}</b></td>
+                        <td style="text-align:right" class="tnum">{{ money($item->unit_cost, 2) }}</td>
+                        <td style="text-align:right" class="tnum"><b>{{ money($item->lineTotal(), 0) }}</b></td>
                         <td style="text-align:right">
                             <span style="font-weight:700;font-size:13px;color:{{ $item->received_qty >= $item->quantity ? 'var(--success)' : 'var(--warning)' }}">
                                 {{ $item->received_qty }} / {{ $item->quantity }}
@@ -91,7 +91,7 @@ $statusColors = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'=>
                     <div style="font-weight:600;font-size:13.5px">{{ $s->description }}</div>
                     <div class="faint" style="font-size:12px">{{ $s->shipment_date->format('d M Y') }}</div>
                 </div>
-                <div style="font-weight:700;font-size:15px;color:var(--violet)">৳{{ number_format($s->amount, 0) }}</div>
+                <div style="font-weight:700;font-size:15px;color:var(--violet)">{{ money($s->amount, 0) }}</div>
             </div>
             @endforeach
         </div>

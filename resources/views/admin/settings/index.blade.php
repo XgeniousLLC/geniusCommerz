@@ -121,6 +121,18 @@ $sidebarTabs = [
                         value="{{ old('general.phone', $settings->get('general.phone')?->value ?? '') }}">
                 </div>
                 <div class="field">
+                    <span class="lbl">Store Country</span>
+                    @php $selectedCountry = old('general.store_country', $settings->get('general.store_country')?->value ?? 'BD'); @endphp
+                    <select class="input" name="settings[general.store_country]">
+                        @foreach(\App\Support\Countries::options() as $country)
+                        <option value="{{ $country['code'] }}" {{ $selectedCountry === $country['code'] ? 'selected' : '' }}>
+                            {{ $country['name'] }}
+                        </option>
+                        @endforeach
+                    </select>
+                    <p class="hint">Where you ship from. Used for tax and shipping-zone defaults.</p>
+                </div>
+                <div class="field">
                     <span class="lbl">Timezone</span>
                     @php $selectedTz = old('general.timezone', $settings->get('general.timezone')?->value ?? 'Asia/Dhaka'); @endphp
                     <select class="input" name="settings[general.timezone]">
@@ -533,111 +545,26 @@ $sidebarTabs = [
 
 {{-- ═══════════════════ PAYMENT ═══════════════════ --}}
 @if($tab === 'payment')
-<form method="POST" action="{{ route('admin.settings.update', 'payment') }}">
-    @csrf
-    <div class="col-gap">
-
-        <div class="card pad">
-            <div class="card-head">
-                <span class="tile sm t-success"><span class="ico" data-ico="card" style="width:18px;height:18px"></span></span>
-                <div class="ct"><h3>Accepted Payment Methods</h3><div class="sub">Enable the methods you accept. These appear in checkout and footer.</div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                @foreach([
-                    'payment.cod_enabled'         => ['label' => 'Cash on Delivery',   'desc' => 'Customer pays when order is delivered'],
-                    'payment.bkash_enabled'        => ['label' => 'bKash',              'desc' => 'bKash mobile banking'],
-                    'payment.nagad_enabled'        => ['label' => 'Nagad',              'desc' => 'Nagad mobile banking'],
-                    'payment.rocket_enabled'       => ['label' => 'Rocket',             'desc' => 'Dutch-Bangla Rocket'],
-                    'payment.sslcommerz_enabled'   => ['label' => 'SSLCOMMERZ',         'desc' => 'Cards & internet banking via SSLCOMMERZ'],
-                    'payment.stripe_enabled'       => ['label' => 'Stripe',             'desc' => 'International cards via Stripe'],
-                ] as $key => $info)
-                <label class="check-card">
-                    <input type="hidden" name="settings[{{ $key }}]" value="0">
-                    <input type="checkbox" name="settings[{{ $key }}]" value="1"
-                        {{ old($key, $settings->get($key)?->value) ? 'checked' : '' }}
-                        style="margin-top:2px;width:15px;height:15px;flex-shrink:0">
-                    <span>
-                        <span style="display:block;font-weight:700;font-size:14px">{{ $info['label'] }}</span>
-                        <span class="faint" style="display:block;font-size:12px">{{ $info['desc'] }}</span>
-                    </span>
-                </label>
-                @endforeach
+<div class="col-gap">
+    <div class="card pad">
+        <div class="card-head">
+            <span class="tile sm t-success"><span class="ico" data-ico="card" style="width:18px;height:18px"></span></span>
+            <div class="ct">
+                <h3>Payment Gateways</h3>
+                <div class="sub">Gateways, credentials and checkout order now live on their own page.</div>
             </div>
         </div>
-
-        <div class="card pad">
-            <div class="card-head">
-                <span class="tile sm t-teal"><span class="ico" data-ico="wallet" style="width:18px;height:18px"></span></span>
-                <div class="ct"><h3>Mobile Banking Numbers</h3><div class="sub">Merchant numbers shown to customers during checkout</div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-                <div class="field">
-                    <span class="lbl">bKash Merchant Number</span>
-                    <input class="input" type="text" name="settings[payment.bkash_number]"
-                        value="{{ old('payment.bkash_number', $settings->get('payment.bkash_number')?->value ?? '') }}"
-                        placeholder="01XXXXXXXXX">
-                </div>
-                <div class="field">
-                    <span class="lbl">Nagad Merchant Number</span>
-                    <input class="input" type="text" name="settings[payment.nagad_number]"
-                        value="{{ old('payment.nagad_number', $settings->get('payment.nagad_number')?->value ?? '') }}"
-                        placeholder="01XXXXXXXXX">
-                </div>
-                <div class="field">
-                    <span class="lbl">Rocket Account Number</span>
-                    <input class="input" type="text" name="settings[payment.rocket_number]"
-                        value="{{ old('payment.rocket_number', $settings->get('payment.rocket_number')?->value ?? '') }}"
-                        placeholder="01XXXXXXXXX-X">
-                </div>
-            </div>
-        </div>
-
-        <div class="card pad">
-            <div class="card-head">
-                <span class="tile sm t-info"><span class="ico" data-ico="lock" style="width:18px;height:18px"></span></span>
-                <div class="ct"><h3>SSLCOMMERZ / Stripe</h3><div class="sub">API credentials for card payment gateways</div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-                <div class="field">
-                    <span class="lbl">SSLCOMMERZ Store ID</span>
-                    <input class="input" type="text" name="settings[payment.sslcommerz_store_id]"
-                        value="{{ old('payment.sslcommerz_store_id', $settings->get('payment.sslcommerz_store_id')?->value ?? '') }}">
-                </div>
-                <div class="field">
-                    <span class="lbl">SSLCOMMERZ Store Password</span>
-                    <input class="input" type="password" name="settings[payment.sslcommerz_store_password]"
-                        value="{{ old('payment.sslcommerz_store_password', $settings->get('payment.sslcommerz_store_password')?->value ?? '') }}">
-                </div>
-                <div class="field">
-                    <span class="lbl">Stripe Publishable Key</span>
-                    <input class="input" type="text" name="settings[payment.stripe_pk]"
-                        value="{{ old('payment.stripe_pk', $settings->get('payment.stripe_pk')?->value ?? '') }}"
-                        placeholder="pk_live_...">
-                </div>
-                <div class="field">
-                    <span class="lbl">Stripe Secret Key</span>
-                    <input class="input" type="password" name="settings[payment.stripe_sk]"
-                        value="{{ old('payment.stripe_sk', $settings->get('payment.stripe_sk')?->value ?? '') }}"
-                        placeholder="sk_live_...">
-                </div>
-            </div>
-            <div class="set-row" x-data="{on: {{ old('payment.sslcommerz_sandbox', $settings->get('payment.sslcommerz_sandbox')?->value) ? 'true' : 'false' }}}">
-                <div class="grow">
-                    <div style="font-weight:700;font-size:14px">SSLCOMMERZ Sandbox</div>
-                    <div class="faint" style="font-size:12.5px">Use test mode for SSLCOMMERZ (disable in production)</div>
-                </div>
-                <span :class="on ? 'toggle on' : 'toggle'" @click="on=!on"><span class="knob"></span></span>
-                <input type="hidden" name="settings[payment.sslcommerz_sandbox]" :value="on ? '1' : '0'">
-            </div>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end">
-            <button class="btn btn-primary" type="submit">
-                <span class="ico" data-ico="check" style="width:17px;height:17px"></span>Save Payment Settings
-            </button>
-        </div>
+        <p style="font-size:13.5px;color:var(--text-muted);margin:0 0 16px;max-width:60ch">
+            Credentials used to be stored here in plain text as well as in Integrations, and
+            re-saving this tab with the password fields empty wiped them. They are now kept
+            in one place, encrypted, alongside every other provider.
+        </p>
+        <a href="{{ route('admin.payment-gateways.index') }}" class="btn btn-primary">
+            <span class="ico" data-ico="card" style="width:16px;height:16px"></span>
+            Manage payment gateways
+        </a>
     </div>
-</form>
+</div>
 @endif
 
 {{-- ═══════════════════ SHIPPING ═══════════════════ --}}
@@ -655,7 +582,7 @@ $sidebarTabs = [
                 <div class="field">
                     <span class="lbl">Flat Rate Charge</span>
                     <div class="input-prefix">
-                        <span>৳</span>
+                        <span>{{ currency_symbol() }}</span>
                         <input class="input" type="number" name="settings[shipping.flat_rate]" min="0" step="0.01"
                             value="{{ old('shipping.flat_rate', $settings->get('shipping.flat_rate')?->value ?? '0') }}"
                             style="padding-left:36px">
@@ -665,7 +592,7 @@ $sidebarTabs = [
                 <div class="field">
                     <span class="lbl">Free Shipping Threshold</span>
                     <div class="input-prefix">
-                        <span>৳</span>
+                        <span>{{ currency_symbol() }}</span>
                         <input class="input" type="number" name="settings[shipping.free_above]" min="0" step="0.01"
                             value="{{ old('shipping.free_above', $settings->get('shipping.free_above')?->value ?? '') }}"
                             placeholder="Leave blank to disable"
@@ -673,35 +600,12 @@ $sidebarTabs = [
                     </div>
                     <p class="hint">Orders above this amount get free shipping.</p>
                 </div>
-                <div class="field">
-                    <span class="lbl">Inside Dhaka Rate</span>
-                    <div class="input-prefix">
-                        <span>৳</span>
-                        <input class="input" type="number" name="settings[shipping.rate_inside_dhaka]" min="0" step="0.01"
-                            value="{{ old('shipping.rate_inside_dhaka', $settings->get('shipping.rate_inside_dhaka')?->value ?? '60') }}"
-                            style="padding-left:36px">
-                    </div>
-                </div>
-                <div class="field">
-                    <span class="lbl">Outside Dhaka Rate</span>
-                    <div class="input-prefix">
-                        <span>৳</span>
-                        <input class="input" type="number" name="settings[shipping.rate_outside_dhaka]" min="0" step="0.01"
-                            value="{{ old('shipping.rate_outside_dhaka', $settings->get('shipping.rate_outside_dhaka')?->value ?? '120') }}"
-                            style="padding-left:36px">
-                    </div>
-                </div>
-                <div class="field">
-                    <span class="lbl">Inside Dhaka ETA</span>
-                    <input class="input" type="text" name="settings[shipping.delivery_inside_dhaka]"
-                        value="{{ old('shipping.delivery_inside_dhaka', $settings->get('shipping.delivery_inside_dhaka')?->value ?? '1-2 business days') }}"
-                        placeholder="e.g. 1-2 business days">
-                </div>
-                <div class="field">
-                    <span class="lbl">Outside Dhaka ETA</span>
-                    <input class="input" type="text" name="settings[shipping.delivery_outside_dhaka]"
-                        value="{{ old('shipping.delivery_outside_dhaka', $settings->get('shipping.delivery_outside_dhaka')?->value ?? '3-5 business days') }}"
-                        placeholder="e.g. 3-5 business days">
+                <div class="field" style="grid-column:1/-1">
+                    <p class="hint" style="margin:0">
+                        Per-destination rates by weight and order value are configured under
+                        <a href="{{ route('admin.shipping.index') }}" class="link-btn">Shipping Zones</a>.
+                        The flat rate above is the fallback used when no zone matches.
+                    </p>
                 </div>
             </div>
             <div class="set-row" x-data="{on: {{ old('shipping.courier_location_charges', $settings->get('shipping.courier_location_charges')?->value) ? 'true' : 'false' }}}">
@@ -763,7 +667,7 @@ $sidebarTabs = [
             <div class="field" style="max-width:220px">
                 <span class="lbl">Free shipping above</span>
                 <div class="input-prefix">
-                    <span>৳</span>
+                    <span>{{ currency_symbol() }}</span>
                     <input class="input" type="number" name="settings[shipping.free_above]" min="0" step="0.01"
                         value="{{ old('shipping.free_above', \App\Models\SiteSetting::get('shipping.free_above', 0)) }}"
                         placeholder="e.g. 1000"
@@ -776,14 +680,14 @@ $sidebarTabs = [
         <div class="card pad">
             <div class="card-head">
                 <span class="tile sm t-accent"><span class="ico" data-ico="star" style="width:18px;height:18px"></span></span>
-                <div class="ct"><h3>Cart Goals / Progress Milestones</h3><div class="sub">Show a progress bar in the cart drawer: "Add ৳X more to get Y"</div></div>
+                <div class="ct"><h3>Cart Goals / Progress Milestones</h3><div class="sub">Show a progress bar in the cart drawer: "Add {{ currency_symbol() }}X more to get Y"</div></div>
             </div>
 
             <div class="col-gap" style="margin-bottom:16px;--gap:10px">
                 <template x-for="(goal, i) in goals" :key="i">
                     <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;padding:13px 15px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)">
                         <div class="field" style="min-width:120px">
-                            <span class="lbl" style="font-size:12px">Cart Amount (৳)</span>
+                            <span class="lbl" style="font-size:12px">Cart Amount ({{ currency_symbol() }})</span>
                             <input class="input" type="number" x-model="goal.amount" min="0" step="1">
                         </div>
                         <div class="field" style="min-width:160px">
@@ -791,7 +695,7 @@ $sidebarTabs = [
                             <select class="input" x-model="goal.reward">
                                 <option value="free_shipping">Free Shipping</option>
                                 <option value="discount_pct">% Discount</option>
-                                <option value="discount_fixed">Fixed Discount (৳)</option>
+                                <option value="discount_fixed">Fixed Discount ({{ currency_symbol() }})</option>
                             </select>
                         </div>
                         <div class="field" style="min-width:90px" x-show="goal.reward !== 'free_shipping'">
@@ -819,7 +723,7 @@ $sidebarTabs = [
                 <div style="padding:12px 14px;background:var(--accent-soft);border-radius:10px;font-size:12.5px;color:var(--accent)">
                     <strong>Preview:</strong>
                     <template x-for="(g, i) in goals.slice().sort((a,b)=>a.amount-b.amount)" :key="i">
-                        <span x-text="`৳${g.amount} → ${g.reward === 'free_shipping' ? 'free shipping' : (g.label || (g.reward === 'discount_pct' ? g.value+'% off' : '৳'+g.value+' off'))}`"
+                        <span x-text="`{{ currency_symbol() }}${g.amount} → ${g.reward === 'free_shipping' ? 'free shipping' : (g.label || (g.reward === 'discount_pct' ? g.value+'% off' : '{{ currency_symbol() }}'+g.value+' off'))}`"
                               style="margin-left:8px;display:inline-block;background:rgba(255,255,255,.6);padding:2px 8px;border-radius:99px"></span>
                     </template>
                 </div>

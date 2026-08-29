@@ -5,7 +5,7 @@
 php artisan migrate
 php artisan db:seed                               # all seeders
 php artisan db:seed --class=AdminSeeder           # admin@example.com / password
-php artisan db:seed --class=IntegrationSeeder     # AI + payment + courier + SMS rows
+php artisan db:seed --class=IntegrationSeeder     # re-sync group/label onto existing rows (rows are created lazily on first save)
 
 # Cache
 php artisan view:clear && php artisan cache:clear

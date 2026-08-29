@@ -141,7 +141,7 @@
                             × {{ $item->quantity }}
                         </p>
                     </div>
-                    <span class="font-bold flex-shrink-0" style="color:var(--kb-ink)">৳{{ number_format($item->total, 2) }}</span>
+                    <span class="font-bold flex-shrink-0" style="color:var(--kb-ink)">{{ money($item->total, 2) }}</span>
                 </div>
                 @endforeach
             </div>
@@ -150,24 +150,24 @@
             <div class="mt-4 space-y-1.5 text-sm">
                 <div class="flex justify-between" style="color:var(--kb-ink-muted)">
                     <span>Subtotal</span>
-                    <span>৳{{ number_format($order->subtotal, 2) }}</span>
+                    <span>{{ money($order->subtotal, 2) }}</span>
                 </div>
                 @if($order->shipping_cost > 0)
                 <div class="flex justify-between" style="color:var(--kb-ink-muted)">
                     <span>Shipping</span>
-                    <span>৳{{ number_format($order->shipping_cost, 2) }}</span>
+                    <span>{{ money($order->shipping_cost, 2) }}</span>
                 </div>
                 @endif
                 @if($order->discount_amount > 0)
                 <div class="flex justify-between" style="color:#16a34a">
                     <span>Discount @if($order->coupon_code)({{ $order->coupon_code }})@endif</span>
-                    <span>−৳{{ number_format($order->discount_amount, 2) }}</span>
+                    <span>−{{ money($order->discount_amount, 2) }}</span>
                 </div>
                 @endif
                 <div class="flex justify-between pt-2 font-bold text-base"
                      style="border-top:2px solid var(--kb-ink);color:var(--kb-ink)">
                     <span>Total</span>
-                    <span>৳{{ number_format($order->total, 2) }}</span>
+                    <span>{{ money($order->total, 2) }}</span>
                 </div>
             </div>
         </div>

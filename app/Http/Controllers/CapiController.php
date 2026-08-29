@@ -31,7 +31,7 @@ class CapiController extends Controller
         ]);
 
         $customData = array_filter([
-            'currency'     => $request->input('currency', 'BDT'),
+            'currency'     => $request->input('currency') ?: \App\Models\SiteSetting::get('general.currency', 'BDT'),
             'value'        => $request->input('value') ? (float) $request->input('value') : null,
             'content_ids'  => $request->input('content_ids'),
             'content_type' => $request->input('content_type', 'product'),

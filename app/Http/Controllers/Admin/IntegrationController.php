@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Integrations\ProviderRegistry;
 use App\Models\Integration;
 use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
@@ -11,68 +12,137 @@ use Illuminate\View\View;
 
 class IntegrationController extends Controller
 {
+    /**
+     * Presentation only — the provider lists themselves come from the registry, so
+     * adding a provider never means editing this.
+     */
+    private const GROUP_META = [
+        'payment' => ['label' => 'Payments',      'icon' => 'card',    'color' => 't-teal',    'hint' => 'Enable as many as you like — customers choose at checkout'],
+        'ai'      => ['label' => 'AI Providers',  'icon' => 'spark',   'color' => 't-violet',  'hint' => 'Only one AI provider can be the default'],
+        'courier' => ['label' => 'Couriers',      'icon' => 'truck',   'color' => 't-warning', 'hint' => 'Only one courier can be the default'],
+        'carrier' => ['label' => 'Carriers',      'icon' => 'truck',   'color' => 't-info',    'hint' => 'Global carriers rated by weight and destination'],
+        'sms'     => ['label' => 'SMS Gateways',  'icon' => 'message', 'color' => 't-pop',     'hint' => 'Only one gateway can be the default'],
+        'fraud'   => ['label' => 'Fraud Checks',  'icon' => 'shield',  'color' => 't-info',    'hint' => 'Only one fraud checker can be the default'],
+        'fx'      => ['label' => 'Exchange Rates', 'icon' => 'refresh', 'color' => 't-info',   'hint' => 'Only one rate source can be the default'],
+    ];
+
+    public function __construct(private readonly ProviderRegistry $registry) {}
+
     public function index(): View
     {
-        $integrations = Integration::orderBy('provider')->get();
+        $groups = [];
 
-        return view('admin.integrations.index', compact('integrations'));
+        foreach (self::GROUP_META as $group => $meta) {
+            $cards = $this->cards($group);
+
+            if ($cards !== []) {
+                $groups[$group] = $meta + ['cards' => $cards];
+            }
+        }
+
+        $configured = Integration::where('is_active', true)->count();
+        $total      = count($this->registry->all());
+
+        return view('admin.integrations.index', compact('groups', 'configured', 'total'));
     }
 
     public function aiSettings(): View
     {
-        $integrations = Integration::whereIn('provider', Integration::AI_PROVIDERS)
-            ->orderByDesc('is_default')
-            ->orderBy('provider')
-            ->get();
-
-        return view('admin.ai-settings.index', compact('integrations'));
+        return view('admin.ai-settings.index', ['cards' => $this->cards('ai')]);
     }
 
-    public function edit(Integration $integration): View
+    public function edit(string $provider): View
     {
-        return view('admin.integrations.edit', compact('integration'));
+        [$definition, $integration] = $this->resolve($provider);
+
+        return view('admin.integrations.edit', compact('definition', 'integration'));
     }
 
-    public function update(Request $request, Integration $integration): RedirectResponse
+    public function update(Request $request, string $provider): RedirectResponse
     {
-        // Strip blanks BEFORE merging — blank password fields must not wipe existing saved values
-        $credentials = array_filter(
-            $request->input('credentials', []),
-            fn ($v) => $v !== null && $v !== '',
-        );
+        [$definition, $integration] = $this->resolve($provider);
 
-        $existing = $integration->credentials ?? [];
-        $merged   = array_merge($existing, $credentials);
+        $environment = $definition->supportsEnvironments()
+            ? $request->input('environment', 'sandbox')
+            : ($definition->environments[0] ?? 'live');
 
-        $integration->update([
-            'credentials' => $merged,
+        if (! in_array($environment, $definition->environments, true)) {
+            $environment = $definition->environments[0] ?? 'sandbox';
+        }
+
+        // Which fields are stored per environment vs shared. Secrets are environment-scoped
+        // by default so live keys survive a switch to sandbox.
+        $scoped = [];
+        foreach ($definition->fields as $field) {
+            $scoped[$field->key] = $field->environment !== null || $field->isSecret();
+        }
+
+        $integration->fill([
+            'group'       => $definition->group,
+            'label'       => $definition->label,
+            'environment' => $environment,
             'is_active'   => $request->boolean('is_active'),
-            'environment' => $request->input('environment', 'sandbox'),
             'notes'       => $request->input('notes'),
         ]);
 
-        $redirect = in_array($integration->provider, Integration::AI_PROVIDERS)
+        // Blank values are skipped inside mergeCredentials, so an untouched password
+        // field never wipes the stored secret.
+        $integration->mergeCredentials(
+            array_intersect_key($request->input('credentials', []), $scoped),
+            $scoped,
+            $environment,
+        );
+
+        $integration->save();
+
+        $redirect = $definition->group === 'ai'
+            ? route('admin.ai-settings.index')
+            : route('admin.integrations.index');
+
+        return redirect($redirect)->with('success', "{$definition->label} credentials saved.");
+    }
+
+    public function setDefault(string $provider): RedirectResponse
+    {
+        [$definition, $integration] = $this->resolve($provider);
+
+        if (! $integration->exists || ! $integration->is_active) {
+            return back()->with('error', "Please activate {$definition->label} before setting it as default.");
+        }
+
+        if (! $integration->supportsDefault()) {
+            return back()->with('error', 'This integration does not support default selection.');
+        }
+
+        $integration->setAsDefault();
+
+        $redirect = $definition->group === 'ai'
             ? route('admin.ai-settings.index')
             : route('admin.integrations.index');
 
         return redirect($redirect)
-            ->with('success', "{$integration->label} credentials saved.");
+            ->with('success', "{$definition->label} is now the default {$definition->group}.");
     }
 
-    public function testSms(Request $request, Integration $integration): RedirectResponse
+    public function testSms(Request $request, string $provider): RedirectResponse
     {
         $request->validate([
             'phone'   => ['required', 'string'],
             'message' => ['required', 'string', 'max:160'],
         ]);
 
-        if (! in_array($integration->provider, Integration::SMS_PROVIDERS)) {
+        [$definition] = $this->resolve($provider);
+
+        if ($definition->group !== 'sms') {
             return back()->with('error', 'Not an SMS provider.');
         }
 
         try {
-            $sent = app(SmsService::class)->driver($integration->provider)->send(
-                $request->input('phone'),
+            $sms  = app(SmsService::class);
+            $sent = $sms->driver($definition->slug)->send(
+                // Normalised the same way a real order would be, so the test proves the
+                // path that customers actually take.
+                $sms->normalise($request->input('phone')),
                 $request->input('message'),
             );
 
@@ -81,52 +151,60 @@ class IntegrationController extends Controller
                 $sent ? 'Test SMS sent.' : 'Gateway returned failure — check credentials.',
             );
         } catch (\Throwable $e) {
-            return back()->with('error', 'SMS failed: ' . $e->getMessage());
+            return back()->with('error', 'SMS failed: '.$e->getMessage());
         }
     }
 
-    public function smsBalance(Integration $integration): RedirectResponse
+    public function smsBalance(string $provider): RedirectResponse
     {
-        if (! in_array($integration->provider, Integration::SMS_PROVIDERS)) {
+        [$definition] = $this->resolve($provider);
+
+        if ($definition->group !== 'sms') {
             return back()->with('error', 'Not an SMS provider.');
         }
 
         try {
-            $balance = app(SmsService::class)->driver($integration->provider)->balance();
+            $balance = app(SmsService::class)->driver($definition->slug)->balance();
 
             return $balance === null
-                ? back()->with('info', "{$integration->label} does not report a balance.")
-                : back()->with('success', "{$integration->label} balance: {$balance}");
+                ? back()->with('info', "{$definition->label} does not report a balance.")
+                : back()->with('success', "{$definition->label} balance: {$balance}");
         } catch (\Throwable $e) {
-            return back()->with('error', 'Balance check failed: ' . $e->getMessage());
+            return back()->with('error', 'Balance check failed: '.$e->getMessage());
         }
     }
 
-    public function setDefault(Integration $integration): RedirectResponse
+    /**
+     * Every provider in a group, paired with its saved row where one exists.
+     *
+     * @return list<array{definition: \App\Integrations\ProviderDefinition, row: Integration}>
+     */
+    private function cards(string $group): array
     {
-        $group = in_array($integration->provider, Integration::COURIER_PROVIDERS)
-            ? 'courier'
-            : (in_array($integration->provider, Integration::SMS_PROVIDERS)
-                ? 'sms'
-                : (in_array($integration->provider, Integration::AI_PROVIDERS)
-                    ? 'ai'
-                    : (in_array($integration->provider, Integration::FRAUD_PROVIDERS) ? 'fraud checker' : null)));
+        $definitions = $this->registry->group($group);
 
-        if (! $group) {
-            return back()->with('error', 'This integration does not support default selection.');
+        if ($definitions === []) {
+            return [];
         }
 
-        if (! $integration->is_active) {
-            return back()->with('error', "Please activate {$integration->label} before setting it as default.");
+        $rows = Integration::whereIn('provider', array_keys($definitions))->get()->keyBy('provider');
+
+        $cards = [];
+        foreach ($definitions as $slug => $definition) {
+            $cards[] = [
+                'definition' => $definition,
+                'row'        => $rows->get($slug) ?? Integration::forSlug($slug),
+            ];
         }
 
-        $integration->setAsDefault();
+        return $cards;
+    }
 
-        $redirect = $group === 'ai'
-            ? route('admin.ai-settings.index')
-            : route('admin.integrations.index');
+    /** @return array{0: \App\Integrations\ProviderDefinition, 1: Integration} */
+    private function resolve(string $provider): array
+    {
+        $definition = $this->registry->find($provider) ?? abort(404, 'Unknown provider.');
 
-        return redirect($redirect)
-            ->with('success', "{$integration->label} is now the default {$group}.");
+        return [$definition, Integration::forSlug($provider)];
     }
 }

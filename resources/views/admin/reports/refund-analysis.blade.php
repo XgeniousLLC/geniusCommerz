@@ -50,7 +50,7 @@
     </div>
     <div class="card lift stat">
         <span class="tile sm t-danger"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($stats['total_refunded'],0) }}</div>
+        <div class="num">{{ money($stats['total_refunded'], 0) }}</div>
         <div class="lbl">Total Refunded</div>
     </div>
     <div class="card lift stat">
@@ -70,7 +70,7 @@
                 <span class="pill sm {{ $statusPills[$s] ?? 't-teal' }}" style="text-transform:capitalize">{{ $s }}</span>
                 <div style="text-align:right">
                     <strong style="font-size:14px">{{ $cnt }}</strong>
-                    <span style="font-size:12px;color:var(--text-muted);margin-left:8px">৳{{ number_format($amt,0) }}</span>
+                    <span style="font-size:12px;color:var(--text-muted);margin-left:8px">{{ money($amt, 0) }}</span>
                 </div>
             </div>
             @endforeach
@@ -94,7 +94,7 @@
                 <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                     <div style="width:{{ $pct }}%;height:6px;background:var(--danger);border-radius:4px;opacity:.7"></div>
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">৳{{ number_format($row->total_amount,0) }} total</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ money($row->total_amount, 0) }} total</div>
             </div>
             @endforeach
         </div>
@@ -120,7 +120,7 @@
                 <td><a href="{{ route('admin.refunds.show',$r->id) }}" style="font-family:monospace;font-size:12px;color:var(--accent);text-decoration:none">#{{ $r->order_number }}</a></td>
                 <td>{{ $r->customer_name }}</td>
                 <td style="text-transform:capitalize;color:var(--text-muted)">{{ str_replace('_',' ',$r->reason) }}</td>
-                <td style="text-align:right">{{ $r->amount ? '৳'.number_format($r->amount,0) : '—' }}</td>
+                <td style="text-align:right">{{ $r->amount ? money($r->amount, 0) : '—' }}</td>
                 <td><span class="pill sm {{ $statusPills[$r->status] ?? 't-teal' }}" style="text-transform:capitalize">{{ $r->status }}</span></td>
                 <td style="text-align:right;font-size:12px;color:var(--text-muted)">{{ \Carbon\Carbon::parse($r->created_at)->format('d M Y') }}</td>
             </tr>

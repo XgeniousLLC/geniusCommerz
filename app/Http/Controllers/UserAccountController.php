@@ -6,10 +6,14 @@ use App\Models\LoyaltyPoint;
 use App\Models\Order;
 use App\Models\ProductReview;
 use App\Models\Refund;
+use App\Models\SiteSetting;
 use App\Models\UserAddress;
+use App\Rules\Phone;
+use App\Support\Countries;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -105,8 +109,10 @@ class UserAccountController extends Controller
         $addresses = $user->addresses()->orderByDesc('is_default')->orderBy('created_at')->get();
 
         return Inertia::render('Account/Address', [
-            'addresses' => $addresses,
-            'profile'   => ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone],
+            'addresses'    => $addresses,
+            'profile'      => ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone],
+            'countries'    => Countries::options(),
+            'storeCountry' => SiteSetting::get('general.store_country', 'BD'),
         ]);
     }
 
@@ -129,16 +135,34 @@ class UserAccountController extends Controller
         return back()->with('success', 'Profile updated.');
     }
 
+    /**
+     * Address rules are shared by store and update. The postal-code requirement is
+     * per-country because several countries (UAE, Hong Kong, Qatar, Panama) have no
+     * postal system at all.
+     */
+    private function addressRules(Request $request): array
+    {
+        return [
+            'label'          => 'required|string|max:50',
+            'name'           => 'required|string|max:255',
+            'company'        => 'nullable|string|max:255',
+            'phone'          => ['required', 'string', 'max:50', new Phone($request->input('country'))],
+            'country'        => ['required', 'string', 'size:2', Rule::in(array_keys(Countries::all()))],
+            'address'        => 'required|string|max:500',
+            'address_line_2' => 'nullable|string|max:255',
+            'city'           => 'required|string|max:100',
+            'state'          => 'nullable|string|max:100',
+            'postal_code'    => [
+                'nullable', 'string', 'max:20',
+                Rule::requiredIf(fn () => Countries::requiresPostalCode((string) $request->input('country', ''))),
+            ],
+            'is_default'     => 'boolean',
+        ];
+    }
+
     public function storeAddress(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'label'      => 'required|string|max:50',
-            'name'       => 'required|string|max:255',
-            'phone'      => 'required|string|max:50',
-            'address'    => 'required|string|max:500',
-            'city'       => 'required|string|max:100',
-            'is_default' => 'boolean',
-        ]);
+        $data = $request->validate($this->addressRules($request));
 
         $user = auth()->user();
 
@@ -160,14 +184,7 @@ class UserAccountController extends Controller
     {
         abort_unless($address->user_id === auth()->id(), 403);
 
-        $data = $request->validate([
-            'label'      => 'required|string|max:50',
-            'name'       => 'required|string|max:255',
-            'phone'      => 'required|string|max:50',
-            'address'    => 'required|string|max:500',
-            'city'       => 'required|string|max:100',
-            'is_default' => 'boolean',
-        ]);
+        $data = $request->validate($this->addressRules($request));
 
         if (! empty($data['is_default'])) {
             auth()->user()->addresses()->update(['is_default' => false]);
@@ -176,6 +193,20 @@ class UserAccountController extends Controller
         $address->update($data);
 
         return back()->with('success', 'Address updated.');
+    }
+
+    /**
+     * Promote an address to default. Separate from updateAddress so the client does not
+     * have to round-trip a whole valid address just to flip one boolean.
+     */
+    public function setDefaultAddress(UserAddress $address): RedirectResponse
+    {
+        abort_unless($address->user_id === auth()->id(), 403);
+
+        auth()->user()->addresses()->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        return back()->with('success', 'Default address updated.');
     }
 
     public function destroyAddress(UserAddress $address): RedirectResponse

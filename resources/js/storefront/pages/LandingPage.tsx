@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState, useMemo, useRef } from 'react';
+import { type Country, findCountry, postalLabel } from '../countries';
 
 interface Variant {
   id: number;
@@ -35,7 +36,7 @@ interface ConfirmedOrder {
   payment_method: string;
   items: Array<{ product_name: string; variant_label: string | null; quantity: number; unit_price: number; total: number }>;
 }
-interface Props { product: Product; paymentMethods: Record<string, string>; prefill?: Prefill | null; confirmedOrder?: ConfirmedOrder | null }
+interface Props { product: Product; paymentMethods: Record<string, string>; prefill?: Prefill | null; confirmedOrder?: ConfirmedOrder | null; countries: Country[]; storeCountry: string }
 
 /* ── Design tokens ── */
 const T = {
@@ -114,7 +115,7 @@ const TRUST = [
   { label: 'Secure Payment',  icon: <svg width={13} height={13} fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> },
 ];
 
-export default function LandingPage({ product, paymentMethods, prefill, confirmedOrder }: Props) {
+export default function LandingPage({ product, paymentMethods, prefill, confirmedOrder, countries = [], storeCountry = 'BD' }: Props) {
   const [imgIdx, setImgIdx]   = useState(0);
   const formRef               = useRef<HTMLDivElement>(null);
 
@@ -142,10 +143,16 @@ export default function LandingPage({ product, paymentMethods, prefill, confirme
     customer_name:  prefill?.name    ?? '',
     customer_phone: prefill?.phone   ?? '',
     customer_email: prefill?.email   ?? '',
+    country:        storeCountry,
     address:        prefill?.address ?? '',
     city:           prefill?.city    ?? '',
+    postal_code:    '',
     payment_method: firstMethod,
   });
+
+  const lpCountry     = findCountry(countries, form.country);
+  const lpShowPostal  = lpCountry ? lpCountry.postal !== 'none' : true;
+  const lpPostalReq   = lpCountry?.postal === 'required';
   const [errors, setErrors]         = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -439,8 +446,30 @@ export default function LandingPage({ product, paymentMethods, prefill, confirme
                   <label style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 600, color: T.muted, display: 'block', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                     City / District <span style={{ color: T.cognac }}>*</span>
                   </label>
-                  <Inp value={form.city} onChange={set('city')} placeholder="e.g. Dhaka" required />
+                  <Inp value={form.city} onChange={set('city')} placeholder="City" required />
                   {errors.city && <p style={{ fontFamily: T.sans, fontSize: 11, color: T.danger, marginTop: 3 }}>{errors.city}</p>}
+                </div>
+
+                {lpShowPostal && (
+                  <div>
+                    <label style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 600, color: T.muted, display: 'block', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      {postalLabel(form.country)} {lpPostalReq && <span style={{ color: T.cognac }}>*</span>}
+                    </label>
+                    <Inp value={form.postal_code} onChange={set('postal_code')} placeholder={lpPostalReq ? '' : 'Optional'} required={lpPostalReq} />
+                    {errors.postal_code && <p style={{ fontFamily: T.sans, fontSize: 11, color: T.danger, marginTop: 3 }}>{errors.postal_code}</p>}
+                  </div>
+                )}
+
+                <div>
+                  <label style={{ fontFamily: T.sans, fontSize: 11, fontWeight: 600, color: T.muted, display: 'block', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Country <span style={{ color: T.cognac }}>*</span>
+                  </label>
+                  <select value={form.country}
+                    onChange={e => setForm(f => ({ ...f, country: e.target.value, postal_code: '' }))}
+                    style={{ width: '100%', fontFamily: T.sans, fontSize: 14, padding: '10px 12px', border: `1px solid ${T.line}`, background: T.paper, color: T.ink, borderRadius: 0 }}>
+                    {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                  </select>
+                  {errors.country && <p style={{ fontFamily: T.sans, fontSize: 11, color: T.danger, marginTop: 3 }}>{errors.country}</p>}
                 </div>
 
                 {/* Payment method */}

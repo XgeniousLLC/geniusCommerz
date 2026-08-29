@@ -47,7 +47,7 @@
     </div>
     <div class="card lift stat">
         <span class="tile sm t-danger"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($stats['total_discount_given'],0) }}</div>
+        <div class="num">{{ money($stats['total_discount_given'], 0) }}</div>
         <div class="lbl">Total Discount Given</div>
     </div>
     <div class="card lift stat">
@@ -76,9 +76,9 @@
             <tr>
                 <td><span style="font-family:monospace;font-weight:700;color:var(--accent)">{{ $row->coupon_code }}</span></td>
                 <td style="text-align:right;font-weight:600">{{ number_format($row->times_used) }}</td>
-                <td style="text-align:right;color:var(--danger)">৳{{ number_format($row->total_discount,0) }}</td>
-                <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue_after_discount,0) }}</td>
-                <td style="text-align:right;color:var(--text-muted)">৳{{ number_format($row->avg_order,0) }}</td>
+                <td style="text-align:right;color:var(--danger)">{{ money($row->total_discount, 0) }}</td>
+                <td style="text-align:right;font-weight:600">{{ money($row->revenue_after_discount, 0) }}</td>
+                <td style="text-align:right;color:var(--text-muted)">{{ money($row->avg_order, 0) }}</td>
                 <td style="text-align:right;color:var(--text-muted)">৳{{ $row->times_used > 0 ? number_format($row->total_discount / $row->times_used, 0) : '0' }}</td>
             </tr>
             @endforeach

@@ -32,7 +32,7 @@
             @endif
         </div>
         <div>
-            <div class="num" style="font-size:28px">৳{{ number_format($stats['revenue_30d'], 0) }}</div>
+            <div class="num" style="font-size:28px">{{ money($stats['revenue_30d'], 0) }}</div>
             <div class="lbl">Revenue · last 30 days</div>
         </div>
     </div>
@@ -53,7 +53,7 @@
             <span class="tile t-violet"><span class="ico" data-ico="receipt"></span></span>
         </div>
         <div>
-            <div class="num" style="font-size:28px">৳{{ number_format($stats['aov'], 0) }}</div>
+            <div class="num" style="font-size:28px">{{ money($stats['aov'], 0) }}</div>
             <div class="lbl">Average order value</div>
         </div>
     </div>
@@ -126,7 +126,7 @@
                             @endphp
                             <span class="pill sm {{ $pillClass }}"><span class="dot"></span>{{ ucfirst($order->status) }}</span>
                         </td>
-                        <td style="text-align:right" class="tnum"><b>৳{{ number_format($order->total, 0) }}</b></td>
+                        <td style="text-align:right" class="tnum"><b>{{ money($order->total, 0) }}</b></td>
                     </tr>
                     @empty
                     <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-faint)">No orders yet</td></tr>

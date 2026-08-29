@@ -68,11 +68,11 @@ $expired = \App\Models\Coupon::where('is_active', true)->whereNotNull('expires_a
                             @if($coupon->type === 'percent')
                                 {{ $coupon->value }}% off
                             @else
-                                ৳{{ number_format($coupon->value, 2) }} off
+                                {{ money($coupon->value, 2) }} off
                             @endif
                         </span>
                         @if($coupon->minimum_order)
-                        <div class="faint" style="font-size:12px">Min ৳{{ number_format($coupon->minimum_order, 2) }}</div>
+                        <div class="faint" style="font-size:12px">Min {{ money($coupon->minimum_order, 2) }}</div>
                         @endif
                     </td>
                     <td class="tnum" style="font-size:13px">

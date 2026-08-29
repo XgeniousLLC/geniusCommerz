@@ -3,25 +3,19 @@
 namespace App\Services\Sms;
 
 use App\Contracts\SmsInterface;
-use App\Models\Integration;
+use App\Services\ProviderDriver;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Http;
 
-class BulkSmsBdGateway implements SmsInterface
+class BulkSmsBdGateway extends ProviderDriver implements SmsInterface
 {
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('bulksmsbd')
-            ?? new Integration(['credentials' => []]);
-    }
 
     public function send(string $to, string $message): bool
     {
         $response = Http::get($this->baseUrl(), [
             'api_key'   => $this->integration->getCredential('api_key'),
             'senderid'  => $this->integration->getCredential('sender_id'),
-            'number'    => $to,
+            'number'    => PhoneNumber::national($to, 'BD') ?? $to,
             'message'   => $message,
         ]);
 

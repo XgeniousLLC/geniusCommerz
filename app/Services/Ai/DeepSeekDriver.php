@@ -3,18 +3,11 @@
 namespace App\Services\Ai;
 
 use App\Contracts\AiInterface;
-use App\Models\Integration;
+use App\Services\ProviderDriver;
 use Illuminate\Support\Facades\Http;
 
-class DeepSeekDriver implements AiInterface
+class DeepSeekDriver extends ProviderDriver implements AiInterface
 {
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('deepseek')
-            ?? new Integration(['credentials' => []]);
-    }
 
     public function complete(string $prompt, array $options = []): string
     {

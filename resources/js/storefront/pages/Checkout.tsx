@@ -4,13 +4,20 @@ import Layout from '../layouts/Layout';
 import { useCartDerived, useCartStore } from '../store/cartStore';
 import { usePrice } from '../usePrice';
 import type { SharedProps } from '../types';
+import { type Country, findCountry, postalLabel, stateLabel, stateOptions } from '../countries';
 
 interface LocationOption { id: number; name: string; }
-interface Prefill { name: string; email: string; phone: string; address: string; city: string; }
+interface Prefill {
+  name: string; email: string; phone: string; country: string;
+  address: string; address_line_2: string; city: string; state: string; postal_code: string;
+}
 interface Props {
   shippingCost: number; freeAbove: number; paymentMethods: Record<string, string>;
-  loyaltyEnabled?: boolean; loyaltyBalance?: number; loyaltyTaka?: number;
+  loyaltyEnabled?: boolean; loyaltyBalance?: number; loyaltyValue?: number;
   courierLocationEnabled?: boolean; prefill?: Prefill | null;
+  countries: Country[]; storeCountry: string;
+  /** The rate this page was rendered with; posted back so the server can detect drift. */
+  fxRate?: number;
 }
 
 const PAYMENT_META: Record<string, string> = {
@@ -75,7 +82,7 @@ function SectionEyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Checkout({ shippingCost, freeAbove, paymentMethods, loyaltyEnabled = false, loyaltyBalance = 0, loyaltyTaka = 0, courierLocationEnabled = false, prefill = null }: Props) {
+export default function Checkout({ shippingCost, freeAbove, paymentMethods, loyaltyEnabled = false, loyaltyBalance = 0, loyaltyValue = 0, courierLocationEnabled = false, prefill = null, countries = [], storeCountry = 'BD', fxRate }: Props) {
   const { auth, site } = usePage<SharedProps>().props;
   const items        = useCartStore(s => s.items);
   const coupon       = useCartStore(s => s.coupon);
@@ -121,7 +128,7 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
 
   const fetchCharge = (c: number, z: number, a: number | null) => {
     setLoadingCharge(true);
-    fetch('/api/courier/charge', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '' }, body: JSON.stringify({ city_id: c, zone_id: z, area_id: a, item_weight: 0.5 }) })
+    fetch('/api/courier/charge', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '' }, body: JSON.stringify({ city_id: c, zone_id: z, area_id: a, items: items.map(i => ({ product_id: i.product_id, variant_id: i.variant_id, quantity: i.quantity })) }) })
       .then(r => r.json()).then(d => setCourierCharge(d.charge !== null && d.charge !== undefined ? Number(d.charge) : null)).catch(() => setCourierCharge(null)).finally(() => setLoadingCharge(false));
   };
 
@@ -143,10 +150,30 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
   })();
 
   const [redeemPoints, setRedeemPoints] = useState(false);
-  const loyaltyDiscount = redeemPoints ? loyaltyTaka : 0;
+  const loyaltyDiscount = redeemPoints ? loyaltyValue : 0;
   const total = Math.max(0, subtotal - discount - loyaltyDiscount + effectiveShipping);
 
-  const [form, setForm] = useState({ customer_name: prefill?.name ?? '', customer_phone: prefill?.phone ?? '', customer_email: prefill?.email ?? '', address: prefill?.address ?? '', city: prefill?.city ?? '', notes: '', payment_method: Object.keys(paymentMethods)[0] ?? 'cod' });
+  const [form, setForm] = useState({
+    customer_name: prefill?.name ?? '', customer_phone: prefill?.phone ?? '', customer_email: prefill?.email ?? '',
+    country: prefill?.country || storeCountry,
+    address: prefill?.address ?? '', address_line_2: prefill?.address_line_2 ?? '',
+    city: prefill?.city ?? '', state: prefill?.state ?? '', postal_code: prefill?.postal_code ?? '',
+    notes: '', payment_method: Object.keys(paymentMethods)[0] ?? 'cod',
+  });
+
+  const selectedCountry = findCountry(countries, form.country);
+  const states          = stateOptions(selectedCountry);
+  const showPostal      = selectedCountry ? selectedCountry.postal !== 'none' : true;
+  const postalRequired  = selectedCountry?.postal === 'required';
+  // The courier cascade is Pathao's Bangladesh city/zone/area tree — it is meaningless
+  // for any other destination, so it only appears when shipping within Bangladesh.
+  const useCourierCascade = courierLocationEnabled && form.country === 'BD';
+
+  // Clear a stale subdivision when the country changes, otherwise a US "CA" would
+  // silently persist after switching to Canada.
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setForm(f => ({ ...f, country: e.target.value, state: '', postal_code: '' }));
+  };
   const [errors, setErrors]             = useState<Record<string, string>>({});
   const [couponInput, setCouponInput]   = useState('');
   const [couponError, setCouponError]   = useState('');
@@ -171,7 +198,7 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); if (items.length === 0) return;
     setSubmitting(true); setErrors({});
-    router.post('/checkout', { ...form, coupon_code: coupon?.code ?? '', loyalty_points_redeem: redeemPoints ? loyaltyBalance : 0, courier_city_id: cityId, courier_zone_id: zoneId, courier_area_id: areaId, items: items.map(i => ({ product_id: i.product_id, variant_id: i.variant_id, name: i.name, sku: null, variant_label: i.variant_label, price: i.price, quantity: i.quantity })) },
+    router.post('/checkout', { ...form, fx_rate: fxRate, coupon_code: coupon?.code ?? '', loyalty_points_redeem: redeemPoints ? loyaltyBalance : 0, courier_city_id: cityId, courier_zone_id: zoneId, courier_area_id: areaId, items: items.map(i => ({ product_id: i.product_id, variant_id: i.variant_id, name: i.name, sku: null, variant_label: i.variant_label, price: i.price, quantity: i.quantity })) },
       { onSuccess: () => clearCart(), onError: errs => { setErrors(errs); setSubmitting(false); }, onFinish: () => setSubmitting(false) });
   }
 
@@ -236,7 +263,8 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
                   </div>
                   <div>
                     <Lbl required>Phone</Lbl>
-                    <Inp value={form.customer_phone} onChange={set('customer_phone')} placeholder="01XXXXXXXXX" required />
+                    <Inp value={form.customer_phone} onChange={set('customer_phone')}
+                      placeholder={selectedCountry ? `+${selectedCountry.dial} …` : 'Phone number'} required />
                     <Err msg={errors.customer_phone} />
                   </div>
                   <div style={{ gridColumn: '1/-1' }}>
@@ -252,6 +280,14 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
                 <SectionEyebrow>Delivery address</SectionEyebrow>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <div>
+                    <Lbl required>Country</Lbl>
+                    <Sel value={form.country} onChange={handleCountryChange} required>
+                      {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                    </Sel>
+                    <Err msg={errors.country} />
+                  </div>
+
+                  <div>
                     <Lbl required>Street address</Lbl>
                     <textarea value={form.address} onChange={set('address')} placeholder="House, road, block, area" required rows={2}
                       style={{ ...inp, height: 'auto', padding: '10px 0', resize: 'none', borderBottom: '1px solid var(--av-line)' }}
@@ -260,7 +296,13 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
                     <Err msg={errors.address} />
                   </div>
 
-                  {courierLocationEnabled ? (
+                  <div>
+                    <Lbl>Apartment, suite, unit</Lbl>
+                    <Inp value={form.address_line_2} onChange={set('address_line_2')} placeholder="Optional" />
+                    <Err msg={errors.address_line_2} />
+                  </div>
+
+                  {useCourierCascade ? (
                     <>
                       <div>
                         <Lbl required>City / District</Lbl>
@@ -296,11 +338,36 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
                       <input type="hidden" name="city" value={cities.find(c => c.id === cityId)?.name ?? ''} />
                     </>
                   ) : (
-                    <div>
-                      <Lbl required>City / District</Lbl>
-                      <Inp value={form.city} onChange={set('city')} placeholder="e.g. Dhaka" required />
-                      <Err msg={errors.city} />
-                    </div>
+                    <>
+                      <div>
+                        <Lbl required>City</Lbl>
+                        <Inp value={form.city} onChange={set('city')} placeholder="City" required />
+                        <Err msg={errors.city} />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: showPostal ? '1fr 1fr' : '1fr', gap: '20px 24px' }} className="av-co-fields">
+                        <div>
+                          <Lbl>{stateLabel(form.country)}</Lbl>
+                          {states.length > 0 ? (
+                            <Sel value={form.state} onChange={set('state')}>
+                              <option value="">Select {stateLabel(form.country).toLowerCase()}</option>
+                              {states.map(st => <option key={st.code} value={st.code}>{st.name}</option>)}
+                            </Sel>
+                          ) : (
+                            <Inp value={form.state} onChange={set('state')} placeholder="Optional" />
+                          )}
+                          <Err msg={errors.state} />
+                        </div>
+
+                        {showPostal && (
+                          <div>
+                            <Lbl required={postalRequired}>{postalLabel(form.country)}</Lbl>
+                            <Inp value={form.postal_code} onChange={set('postal_code')} placeholder={postalRequired ? '' : 'Optional'} required={postalRequired} />
+                            <Err msg={errors.postal_code} />
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
 
                   <div>
@@ -314,14 +381,14 @@ export default function Checkout({ shippingCost, freeAbove, paymentMethods, loya
               </div>
 
               {/* Loyalty */}
-              {loyaltyEnabled && loyaltyTaka > 0 && (
+              {loyaltyEnabled && loyaltyValue > 0 && (
                 <div>
                   <SectionEyebrow>Loyalty rewards</SectionEyebrow>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '14px 16px', border: '1px solid var(--av-line)', background: redeemPoints ? 'rgba(149,97,58,.06)' : 'transparent' }}>
                     <input type="checkbox" checked={redeemPoints} onChange={e => setRedeemPoints(e.target.checked)}
                       style={{ width: 14, height: 14, accentColor: 'var(--av-ink)', cursor: 'pointer', flexShrink: 0 }} />
                     <span style={{ fontSize: 13.5, color: 'var(--av-ink)', fontFamily: 'var(--av-sans)' }}>
-                      Use <strong>{loyaltyBalance.toLocaleString()}</strong> points → save <strong style={{ color: 'var(--av-cognac)' }}>{fmt(loyaltyTaka)}</strong>
+                      Use <strong>{loyaltyBalance.toLocaleString()}</strong> points → save <strong style={{ color: 'var(--av-cognac)' }}>{fmt(loyaltyValue)}</strong>
                     </span>
                   </label>
                 </div>

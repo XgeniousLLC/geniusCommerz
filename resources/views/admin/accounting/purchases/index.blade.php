@@ -36,11 +36,11 @@ $statusColors   = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'
     </div>
     <div class="card lift stat">
         <span class="tile t-warning"><span class="ico" data-ico="wallet"></span></span>
-        <div><div class="num">৳{{ number_format($committedSpend, 0) }}</div><div class="lbl">Committed spend</div></div>
+        <div><div class="num">{{ money($committedSpend, 0) }}</div><div class="lbl">Committed spend</div></div>
     </div>
     <div class="card lift stat">
         <span class="tile t-success"><span class="ico" data-ico="package"></span></span>
-        <div><div class="num">৳{{ number_format($receivedRecent, 0) }}</div><div class="lbl">Received (30d)</div></div>
+        <div><div class="num">{{ money($receivedRecent, 0) }}</div><div class="lbl">Received (30d)</div></div>
     </div>
 </div>
 
@@ -86,7 +86,7 @@ $statusColors   = ['draft'=>'','ordered'=>'info','partial'=>'warning','received'
                     </td>
                     <td style="font-size:13px;font-weight:600">{{ $po->order_date->format('d M Y') }}</td>
                     <td style="text-align:right" class="tnum">{{ $po->items_count }}</td>
-                    <td style="text-align:right" class="tnum"><b>৳{{ number_format($po->totalCost(), 2) }}</b></td>
+                    <td style="text-align:right" class="tnum"><b>{{ money($po->totalCost(), 2) }}</b></td>
                     <td>
                         <span class="pill sm {{ $statusColors[$po->status] ?? '' }}">
                             <span class="dot"></span>{{ ucfirst($po->status) }}

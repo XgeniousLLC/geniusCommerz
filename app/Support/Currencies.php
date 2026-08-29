@@ -169,30 +169,69 @@ class Currencies
         return self::LIST;
     }
 
+    /**
+     * ISO 4217 minor-unit exponents that are not 2. Everything absent from this map has
+     * two decimal places. Gateways demand integer minor units, so getting this wrong
+     * charges a JPY customer 100x or silently truncates a KWD amount.
+     *
+     * @var array<string, int>
+     */
+    private const EXPONENTS = [
+        // zero-decimal
+        'BIF' => 0, 'CLP' => 0, 'DJF' => 0, 'GNF' => 0, 'ISK' => 0, 'JPY' => 0,
+        'KMF' => 0, 'KRW' => 0, 'PYG' => 0, 'RWF' => 0, 'UGX' => 0, 'VND' => 0,
+        'VUV' => 0, 'XAF' => 0, 'XOF' => 0, 'XPF' => 0,
+        // three-decimal
+        'BHD' => 3, 'IQD' => 3, 'JOD' => 3, 'KWD' => 3, 'LYD' => 3, 'OMR' => 3, 'TND' => 3,
+    ];
+
     /** @return array{name: string, symbol: string, position: string}|null */
     public static function find(string $code): ?array
     {
         return self::LIST[strtoupper($code)] ?? null;
     }
 
+    /** Number of decimal places this currency uses (ISO 4217 minor-unit exponent). */
+    public static function exponent(string $code): int
+    {
+        return self::EXPONENTS[strtoupper($code)] ?? 2;
+    }
+
+    /** Convert a decimal amount to the integer minor units gateways expect. */
+    public static function toMinor(int|float|string $amount, string $code): int
+    {
+        return (int) round(((float) $amount) * (10 ** self::exponent($code)));
+    }
+
+    /** Convert integer minor units back to a decimal amount. */
+    public static function fromMinor(int $minor, string $code): float
+    {
+        return $minor / (10 ** self::exponent($code));
+    }
+
     /**
      * Format a monetary amount using the correct symbol and position for the given currency code.
      *
-     * Pass $fromMinorUnit = true when the amount is stored in the minor unit (e.g. paisa for BDT,
-     * cents for USD). The value will be divided by 100 before formatting.
+     * Pass $fromMinorUnit = true when the amount is stored in the minor unit (cents for
+     * USD, paisa for BDT). Scaling and decimal places both follow the currency's ISO 4217 exponent,
+     * so JPY (0dp) and KWD (3dp) format correctly rather than being divided by a flat 100.
+     *
+     * $decimals defaults to the currency's own exponent; pass an int only to override it.
      */
     public static function format(
         int|float $amount,
-        string $code = 'BDT',
-        int $decimals = 2,
+        string $code = 'USD',
+        ?int $decimals = null,
         bool $fromMinorUnit = false,
     ): string {
         $currency = self::find($code);
         $symbol = $currency['symbol'] ?? $code;
         $position = $currency['position'] ?? 'left';
+        $exponent = self::exponent($code);
+        $decimals ??= $exponent;
 
         if ($fromMinorUnit) {
-            $amount = $amount / 100;
+            $amount = $amount / (10 ** $exponent);
         }
 
         $formatted = number_format((float) $amount, $decimals);

@@ -14,7 +14,7 @@ class FraudController extends Controller
 {
     private const TTL_DAYS = 7;
 
-    public function check(Request $request, BdCourierFraudService $bdCourier, FraudBdService $fraudBd): JsonResponse
+    public function check(Request $request, \App\Services\FraudService $fraud): JsonResponse
     {
         $request->validate(['phone' => 'required|string|max:20']);
 
@@ -44,10 +44,30 @@ class FraudController extends Controller
             }
         }
 
-        // Live API call
-        $result = $bdCourier->isConfigured()
-            ? FraudScorer::scoreBdCourier($bdCourier->check($phone))
-            : FraudScorer::fromFraudBd($fraudBd->check($phone));
+        // Live API call against the merchant's chosen default, rather than always
+        // preferring BDCourier and ignoring Integration::defaultFraud().
+        $driver = $fraud->active();
+
+        if (! $driver) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No fraud checker is configured. Set one as default in Integrations.',
+            ], 422);
+        }
+
+        $raw = $driver->check($phone, [
+            'email'   => $request->input('email'),
+            'ip'      => $request->ip(),
+            'country' => $request->input('country'),
+        ]);
+
+        $result = match (true) {
+            isset($raw['error'])                => $raw,
+            $driver instanceof BdCourierFraudService => FraudScorer::scoreBdCourier($raw),
+            $driver instanceof FraudBdService        => FraudScorer::fromFraudBd($raw),
+            // Other drivers normalise themselves.
+            default                             => $raw,
+        };
 
         if (isset($result['error'])) {
             return response()->json(['success' => false, 'message' => $result['error']], 422);
@@ -57,7 +77,7 @@ class FraudController extends Controller
         FraudCheckCache::updateOrCreate(
             ['phone' => $phone],
             [
-                'provider'           => $result['provider'] ?? ($bdCourier->isConfigured() ? 'bdcourier' : 'fraudbd'),
+                'provider'           => $result['provider'] ?? $driver->name(),
                 'risk_level'         => $result['risk_level'],
                 'risk_score'         => $result['risk_score'],
                 'fraud_report_count' => count($result['reports'] ?? []),

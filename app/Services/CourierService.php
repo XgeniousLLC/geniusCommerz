@@ -3,27 +3,26 @@
 namespace App\Services;
 
 use App\Contracts\CourierInterface;
-use App\Models\Integration;
 
-class CourierService
+class CourierService extends ProviderManager
 {
-    public function driver(?string $provider = null): CourierInterface
+    protected function group(): string
     {
-        if ($provider === null) {
-            $integration = Integration::defaultCourier();
-            $provider    = $integration?->provider;
-        }
-
-        return match ($provider) {
-            'pathao'    => app(Couriers\PathaoService::class),
-            'redx'      => app(Couriers\RedxService::class),
-            'steadfast' => app(Couriers\SteadfastService::class),
-            default     => throw new \RuntimeException("No active default courier is configured. Go to Admin → Integrations to set one."),
-        };
+        return 'courier';
     }
 
-    public function hasDefault(): bool
+    protected function contract(): string
     {
-        return Integration::defaultCourier() !== null;
+        return CourierInterface::class;
+    }
+
+    protected function missingDefaultMessage(): string
+    {
+        return 'No active default courier is configured. Go to Admin → Integrations to set one.';
+    }
+
+    public function driver(?string $provider = null): CourierInterface
+    {
+        return parent::driver($provider);
     }
 }

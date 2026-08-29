@@ -34,7 +34,7 @@ class LoyaltyPageController extends Controller
         if ($user && $enabled) {
             $balance     = $service->getBalance($user);
             $tier        = $service->getTier($user);
-            $takaValue   = $service->pointsToTaka($balance);
+            $currencyValue   = $service->pointsToCurrency($balance);
             $tiers       = $settings['tiers'];
             $tierIdx     = array_search($tier['name'], array_column($tiers, 'name'));
             $nextTier    = ($tierIdx !== false && isset($tiers[$tierIdx + 1])) ? $tiers[$tierIdx + 1] : null;
@@ -56,7 +56,7 @@ class LoyaltyPageController extends Controller
 
             $userProps = [
                 'balance'       => $balance,
-                'taka_value'    => $takaValue,
+                'taka_value'    => $currencyValue,
                 'tier'          => $tier,
                 'next_tier'     => $nextTier,
                 'total_earned'  => $totalEarned,

@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Contracts\FraudInterface;
 use App\Models\Integration;
 use Illuminate\Support\Facades\Http;
 
-class BdCourierFraudService
+class BdCourierFraudService implements FraudInterface
 {
     private const BASE_URL = 'https://api.bdcourier.com';
 
@@ -24,7 +25,12 @@ class BdCourierFraudService
         return $this->configured;
     }
 
-    public function check(string $phone): array
+    public function name(): string
+    {
+        return 'BDCourier';
+    }
+
+    public function check(string $phone, array $context = []): array
     {
         $phone = $this->normalisePhone($phone);
 

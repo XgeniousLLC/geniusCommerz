@@ -21,7 +21,7 @@
     </div>
     <div class="stat" style="flex:1;min-width:140px">
         <div class="lbl">Total Spent</div>
-        <div class="num">৳{{ number_format($totalSpent,0) }}</div>
+        <div class="num">{{ money($totalSpent, 0) }}</div>
     </div>
     <div class="stat" style="flex:1;min-width:140px">
         <div class="lbl">Refunds</div>
@@ -94,9 +94,9 @@
                         </td>
                         <td>
                             @if($item['type']==='order')
-                                ৳{{ number_format($item['data']->total,0) }}
+                                {{ money($item['data']->total, 0) }}
                             @elseif($item['type']==='refund')
-                                ৳{{ number_format($item['data']->amount ?? 0,0) }}
+                                {{ money($item['data']->amount ?? 0, 0) }}
                             @else
                                 @if($item['data']->type==='earned')
                                     <span style="color:var(--success)">+{{ $item['data']->points }}</span>

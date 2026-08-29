@@ -66,7 +66,7 @@ $reasons = \App\Models\Refund::REASONS;
                     <td style="font-weight:600;font-size:13.5px">{{ $refund->user->name }}</td>
                     <td class="muted" style="font-size:13px">{{ $reasons[$refund->reason] ?? $refund->reason }}</td>
                     <td style="text-align:right;font-weight:700" class="tnum">
-                        @if($refund->amount) ৳{{ number_format($refund->amount, 0) }} @else — @endif
+                        @if($refund->amount) {{ money($refund->amount, 0) }} @else — @endif
                     </td>
                     <td>
                         <span class="pill sm {{ $statusColors[$refund->status] ?? '' }}">

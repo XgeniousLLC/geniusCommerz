@@ -1,358 +1,422 @@
-# Laravel Admin Panel
+# geniusCommerz
 
-An advanced Laravel Admin Panel with comprehensive meta information management, SEO analysis, and dual authentication system.
+A globally-capable Laravel 12 e-commerce platform. Admin panel in Blade + Alpine.js, storefront in Inertia v3 + React 19 + TypeScript, with dual authentication (`admin` / `web`) guards.
 
-## Features
+Originally built for the Bangladeshi market, the platform now sells worldwide: country-aware checkout, destination-based tax, shipping zones with live carrier rates, and **94 provider integrations** spanning payments, SMS, fraud, shipping, exchange rates and AI.
 
-### Authentication System
-- **Dual Authentication**: Separate admin and user authentication guards
-- **Admin Login**: Custom admin authentication with middleware protection
-- **Profile Management**: Update profile, change password functionality
-- **Security**: Active user validation, secure password hashing
+---
 
-### Page Management
-- **CRUD Operations**: Complete page management system
-- **Meta Information**: Comprehensive SEO meta data support
-- **Polymorphic Relations**: Flexible meta information system
-- **Status Management**: Draft/Published page states
-- **User Attribution**: Track page creators and editors
+## Contents
 
-### SEO & Meta Information
-- **Advanced Meta Fields**:
-  - Basic Meta (title, description, keywords)
-  - Open Graph (Facebook sharing)
-  - Twitter Cards (Twitter sharing)
-  - Canonical URLs, Robots meta
-- **Real-time SEO Analysis**: Live scoring and optimization suggestions
-- **Meta Previews**: Google, Facebook, Twitter preview components
-- **Character Counters**: Color-coded optimization hints
+- [At a glance](#at-a-glance)
+- [Getting started](#getting-started)
+- [Architecture](#architecture)
+- [Integrations](#integrations)
+- [Commerce features](#commerce-features)
+- [Admin panel](#admin-panel)
+- [Storefront](#storefront)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Before you go live](#before-you-go-live)
 
-### UI Components
-- **Shadcn-inspired Design**: Modern, clean interface
-- **Responsive Layout**: Mobile-first design approach
-- **Interactive Components**: Modals, dropdowns, alerts
-- **Real-time Features**: Character counting, SEO scoring
-- **Accessibility**: Proper ARIA labels and keyboard navigation
+---
 
-## Project Structure
+## At a glance
 
-```
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/
-│   │   │   │   ├── AuthController.php      # Admin authentication
-│   │   │   │   ├── DashboardController.php # Admin dashboard
-│   │   │   │   └── PageController.php      # Page management
-│   │   │   └── HomeController.php          # Frontend controller
-│   │   └── Middleware/
-│   │       └── AdminAuth.php               # Admin route protection
-│   ├── Models/
-│   │   ├── Admin.php                       # Admin user model
-│   │   ├── Page.php                        # Page model
-│   │   ├── MetaInformation.php             # Meta information model
-│   │   └── SiteSetting.php                 # Site settings model
-│   └── Services/
-│       └── SEOAnalyzerService.php          # SEO analysis service
-├── database/
-│   ├── factories/
-│   │   ├── AdminFactory.php                # Admin test data factory
-│   │   ├── PageFactory.php                 # Page test data factory
-│   │   └── MetaInformationFactory.php      # Meta test data factory
-│   ├── migrations/
-│   │   ├── create_admins_table.php         # Admin users table
-│   │   ├── create_pages_table.php          # Pages table
-│   │   ├── create_meta_information_table.php # Meta information table
-│   │   └── create_site_settings_table.php  # Site settings table
-│   └── seeders/
-│       └── AdminSeeder.php                 # Default admin user
-├── resources/
-│   └── views/
-│       ├── admin/                          # Admin panel views
-│       │   ├── layouts/
-│       │   │   └── admin.blade.php         # Admin master layout
-│       │   ├── auth/
-│       │   │   └── login.blade.php         # Admin login form
-│       │   ├── dashboard.blade.php         # Admin dashboard
-│       │   └── pages/                      # Page management views
-│       ├── components/
-│       │   └── admin/                      # Reusable admin components
-│       │       ├── button.blade.php        # Button component
-│       │       ├── card.blade.php          # Card component
-│       │       ├── input.blade.php         # Input component
-│       │       ├── character-counter.blade.php # Character counter
-│       │       ├── seo-score.blade.php     # SEO score widget
-│       │       └── meta-preview.blade.php  # Meta preview components
-│       └── home.blade.php                  # Custom homepage
-└── tests/
-    ├── Feature/                            # Feature tests
-    │   ├── AdminAuthTest.php               # Admin authentication tests
-    │   ├── AdminDashboardTest.php          # Dashboard functionality tests
-    │   └── PageManagementTest.php          # Page CRUD tests
-    └── Unit/                               # Unit tests
-        ├── ModelTest.php                   # Model relationship tests
-        └── SEOAnalyzerTest.php             # SEO service tests
-```
+| Area | Providers |
+|---|---:|
+| Payment gateways | **39** |
+| SMS gateways | **20** |
+| Fraud checkers | **11** |
+| Shipping carriers | **19** |
+| Bangladeshi couriers | **3** |
+| Exchange-rate sources | **2** |
+| AI providers | **4** |
 
-## Installation & Setup
+**Core capabilities**
 
-### Prerequisites
-- PHP 8.2 or higher
-- Composer
-- SQLite (default) or MySQL/PostgreSQL
-- Node.js & npm (for frontend assets)
+- Sell into any country: 213 countries with dial codes, subdivisions and postal rules
+- Multi-currency with per-order rate freezing and scheduled refresh
+- Destination tax zones (VAT / GST / sales tax), inclusive or exclusive pricing
+- Shipping zones with weight and order-value bands, plus live carrier rates
+- Payment settlement that only ever trusts a verified webhook or server-side verify
+- E.164 phone normalisation across every SMS gateway
+- Region-aware fraud screening with one shared risk vocabulary
+- One-click templates for tax and shipping configuration
 
-### Step 1: Clone & Install Dependencies
+---
+
+## Getting started
+
+### Requirements
+
+PHP 8.2+ · MySQL 8 · Node 18+ · Composer
+
+### Install
+
 ```bash
-git clone <repository-url>
-cd laravel-admin-panel
 composer install
 npm install
-```
 
-### Step 2: Environment Configuration
-```bash
 cp .env.example .env
 php artisan key:generate
-```
 
-Update `.env` file:
-```env
-APP_NAME="Admin Panel"
-DB_CONNECTION=sqlite
-DB_DATABASE=/absolute/path/to/database/database.sqlite
-```
-
-### Step 3: Database Setup
-```bash
-# Create SQLite database file (if not exists)
-touch database/database.sqlite
-
-# Run migrations
+# configure DB_* in .env, then:
 php artisan migrate
+php artisan db:seed
 
-# Seed default admin user
-php artisan db:seed --class=AdminSeeder
+npm run build          # or: npm run dev
 ```
 
-### Step 4: Build Frontend Assets
+Default admin from `AdminSeeder`: `admin@example.com` / `password`.
+
+### Scheduler
+
+Exchange-rate refresh runs on Laravel's scheduler. Add the usual cron entry:
+
+```
+* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Common commands
+
 ```bash
-npm run build
-# or for development
-npm run dev
+php artisan migrate                                  # run migrations
+php artisan db:seed --class=AdminSeeder              # admin user
+php artisan db:seed --class=GeneralSettingsSeeder    # store defaults
+php artisan currency:refresh-rates                   # refresh FX rates now
+php artisan view:clear && php artisan cache:clear
+./vendor/bin/pest                                    # test suite
+npm run build                                        # storefront assets
 ```
 
-### Step 5: Start Development Server
-```bash
-php artisan serve
+---
+
+## Architecture
+
+### Provider registry
+
+Every integration — payment, SMS, fraud, carrier, courier, FX, AI — is described by a
+**definition class** discovered from `app/Integrations/Definitions/`. The definition is the
+single source of truth driving the admin cards, the credential form, driver resolution,
+and checkout availability.
+
+```
+app/Integrations/
+  ProviderDefinition.php     slug, group, label, driver, fields, capabilities,
+                             currencies, countries, environments, docs
+  CredentialField.php        one input on the credential form
+  Capability.php             HostedRedirect | DirectCharge | Webhook | Refund | PartialRefund
+  ProviderRegistry.php       discovery, lookup, driver resolution, checkout filtering
+  Definitions/{Payment,Sms,Fraud,Carrier,Courier,Fx,Ai}/
 ```
 
-Visit `http://localhost:8000` to see the custom homepage.
+**Adding a provider is two files** — a definition and a driver. Resolution is a hash
+lookup (`app()->makeWith(...)`), so it costs the same at 5 providers as at 50.
 
-## Default Credentials
+A definition declares the currencies and countries it can actually serve, so a gateway is
+never offered for a payment it would reject at the API.
 
-### Admin Login
-- **URL**: `/admin/login`
-- **Email**: `admin@example.com`
-- **Password**: `password`
+### Credentials
 
-## Available Models & Relationships
+Stored encrypted (`Crypt::encryptString`) and **scoped per environment**:
 
-### Admin Model
-```php
-// Relationships
-- hasMany(Page::class, 'created_by')
-- hasMany(Page::class, 'updated_by')
-
-// Key Features
-- Multi-guard authentication
-- Active status management
-- Role-based access
+```json
+{ "shared": {…}, "sandbox": {"secret_key": "sk_test_…"}, "live": {"secret_key": "sk_live_…"} }
 ```
 
-### Page Model
-```php
-// Relationships
-- belongsTo(Admin::class, 'created_by')
-- belongsTo(Admin::class, 'updated_by')
-- morphOne(MetaInformation::class, 'metable')
+Switching to sandbox to debug cannot destroy live keys. A blank field on save never wipes
+a stored secret. Rows are created lazily on first save, so nothing needs seeding.
 
-// Key Features
-- Auto-generated slugs
-- Draft/Published status
-- Breadcrumb control
-- SEO integration
+### Money
+
+Every order records money twice:
+
+| Columns | Meaning |
+|---|---|
+| `subtotal`, `shipping_cost`, `tax`, `total` | **Base currency** — what every report sums |
+| `presentment_*` + `presentment_currency` + `exchange_rate` | **What the customer was charged** |
+
+`base_currency` is snapshotted per order, so history stays interpretable if the store ever
+changes its base currency. Presentment totals are stored, never recomputed from the rate —
+rounding is per-line and non-invertible, so a recomputed figure would not reproduce the
+invoice the customer agreed to.
+
+Money columns are `decimal(12,4)`. Gateways receive **integer minor units** via
+`Currencies::toMinor()`, which reads each currency's ISO 4217 exponent — so JPY (0 dp) and
+KWD (3 dp) are correct, not 100× wrong.
+
+`App\Services\PriceBook` is the only place a rate is applied to money that will be charged.
+The browser converts for display only.
+
+### Payments
+
+```
+Checkout → PaymentService::begin() → driver->charge()
+                                       ├─ Redirect     → gateway hosted page
+                                       ├─ form POST    → auto-submitting bridge page
+                                       ├─ Pending      → handset push (M-Pesa, MoMo…)
+                                       └─ Deferred     → cash on delivery
+                    ↓
+        webhook (signature-verified) ── or ── return URL (server-side verify)
+                    ↓
+             PaymentService::apply()  → order marked paid
 ```
 
-### MetaInformation Model
-```php
-// Relationships
-- morphTo('metable') // Polymorphic relationship
+Two rules are enforced structurally:
 
-// Key Features
-- Complete SEO meta support
-- Open Graph integration
-- Twitter Cards support
-- Canonical URL management
-```
+1. **An order is only marked paid from a verified gateway response.** The browser return
+   URL triggers a server-to-server verify and nothing else.
+2. **Settlement is idempotent.** `webhook_events` has a unique `(provider, event_id)`
+   index; claiming that row *is* the replay guard. A later failed attempt cannot un-pay a
+   settled order.
 
-### SiteSetting Model
-```php
-// Key Features
-- Default meta values
-- Site-wide configuration
-- SEO defaults
-```
+`payments` records one row per *attempt*, so a declined card, a retry and a success are all
+preserved for reconciliation.
 
-## API Routes
+### Tax
 
-### Admin Routes (Protected by admin middleware)
-```php
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Authentication
-    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-    
-    // Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    // Pages Management
-    Route::resource('pages', PageController::class);
-});
-```
+`tax_zones` match **country → state → postal pattern**, most specific first — a San
+Francisco postal zone beats a statewide California zone. `tax_rates` are additive within a
+zone, which is what US state+county and Canadian GST+PST both need.
 
-### Frontend Routes
-```php
-Route::get('/', [HomeController::class, 'index'])->name('home');
-```
+Products carry a `tax_class` (`standard` / `reduced` / `zero`), because EU rates differ by
+goods type. Discounts are spread across lines before tax. Tax-inclusive pricing *extracts*
+rather than adds. The breakdown is frozen on the order and read back by the invoice, so the
+invoice and the charged amount cannot disagree.
+
+### Shipping
+
+Precedence, highest first:
+
+1. Live courier quote (Bangladeshi city→zone→area couriers)
+2. Live carrier rate (EasyPost, DHL, Shiprocket, …) — falls through on a rating outage
+3. Configured shipping zone rate (weight and order-value bands, per-kg, free-above)
+4. Global flat rate
+
+Weight is derived server-side from real product weights — a client cannot understate it.
+Products marked *shipping included* always ship free.
+
+Two contracts, deliberately separate:
+
+- `CourierInterface` — Pathao's Bangladeshi `city → zone → area` tree
+- `ShippingRateInterface` — `rates` / `buyLabel` / `track`, for global carriers
+
+Forcing both through one interface would distort each.
+
+---
+
+## Integrations
+
+### Payment gateways (39)
+
+| Region | Gateways |
+|---|---|
+| **Worldwide** | Stripe · PayPal · Adyen · Paddle¹ · 2Checkout¹ · Authorize.Net · Cash on Delivery |
+| **Bangladesh** | SSLCOMMERZ · bKash · Nagad · aamarPay · ShurjoPay |
+| **India** | Razorpay · Cashfree · PayU India · PhonePe · Paytm |
+| **Pakistan** | Easypaisa² · JazzCash |
+| **Gulf / MENA** | PayTabs · Tap Payments · Moyasar · Fawry (Egypt) |
+| **Africa** | Paystack · Flutterwave · Monnify · M-Pesa² · MTN MoMo² · Yoco · Peach Payments |
+| **Europe** | Mollie · iyzico (Türkiye) · Vipps MobilePay (Nordics) |
+| **LatAm** | MercadoPago · Pagar.me (Pix) |
+| **SE Asia** | Midtrans · Xendit |
+| **North America / APAC** | Square · KakaoPay (Korea) |
+
+¹ Merchant of record — they become the seller and remit EU VAT / US sales tax themselves.
+² Handset push, not a redirect: the customer approves on their phone and the order settles from the callback.
+
+**Notes.** Stripe alone exposes ~50 local payment methods. JazzCash, Authorize.Net,
+2Checkout and Paytm require a signed browser form POST, handled by an auto-submitting
+bridge page. bKash and KakaoPay publish no webhook and declare no `Webhook` capability
+rather than implying a signature check that cannot exist.
+
+### SMS gateways (20)
+
+| Region | Gateways |
+|---|---|
+| **Worldwide** | Twilio · Vonage · MessageBird · Plivo · Amazon SNS · Infobip · Sinch · Telnyx |
+| **Bangladesh** | BulkSMSBD · SMS.BD · MRAM |
+| **India** | MSG91 · Gupshup · Fast2SMS |
+| **Gulf / MENA** | Unifonic · Taqnyat · Cequens |
+| **Africa** | Africa's Talking · Termii · Clickatell |
+
+Numbers are normalised to **E.164 once, at the boundary**. Each driver reshapes from there:
+Bangladeshi gateways want local `01…`, Fast2SMS wants a bare 10-digit Indian number, most
+want E.164 without the `+`, Africa's Talking and Telnyx want it with.
+
+### Fraud checkers (11)
+
+| Region | Checkers |
+|---|---|
+| **Worldwide** | IPQualityScore · SEON · Sift · MaxMind minFraud |
+| **Europe** | Ravelin |
+| **India** | Bureau |
+| **Gulf** | Uqudo |
+| **Africa** | Smile ID · Youverify |
+| **Bangladesh** | FraudBD · BDCourier (courier delivery history) |
+
+Every provider is normalised onto one vocabulary — `safe` / `low_risk` / `mid_risk` /
+`high_risk` / `unknown` plus a 0–100 score — so the admin UI works unchanged for any of
+them. A checker is skipped entirely when it does not serve the destination country: a
+Bangladeshi courier-history service cannot score a US order.
+
+*Gulf-native fraud vendors are genuinely scarce; most Gulf merchants run SEON, Sift or
+IPQualityScore, all of which cover the region.*
+
+### Shipping carriers (19) and couriers (3)
+
+| Region | Carriers |
+|---|---|
+| **Worldwide** | DHL Express · FedEx · UPS · EasyPost · Shippo |
+| **India** | Delhivery · Shiprocket · Blue Dart |
+| **Nigeria / Africa** | Sendbox · GIG Logistics · Kwik Delivery · Bob Go (South Africa) |
+| **Brazil** | Melhor Envio · Correios · Loggi |
+| **Gulf** | Aramex · SMSA Express · Naqel Express · Torod |
+| **Bangladesh** (couriers) | Pathao · RedX · Steadfast |
+
+Aggregators return several rates you buy by id. Direct carriers quote once and book in one
+step — for those, `buyLabel()` throws with a clear message rather than returning a
+fabricated tracking code.
+
+### Exchange rates (2) and AI (4)
+
+- **FX:** open.er-api.com (free, keyless) · ExchangeRate-API
+- **AI:** OpenAI · Google Gemini · Anthropic Claude · DeepSeek — product descriptions, blog
+  content, meta descriptions, translation and price suggestions
+
+---
+
+## Commerce features
+
+**Catalogue** — products with variants, attributes, brands, categories, media library with
+conversions, tax classes, weights, dimensions, HS codes and country of origin.
+
+**Orders** — full lifecycle, activity timeline, refunds, printable invoices and packing
+slips, courier dispatch, bulk actions, admin order creation.
+
+**Customers** — accounts, saved addresses with country/state/postal, order history,
+wishlist, reviews, loyalty points with earn and redeem.
+
+**Marketing** — coupons, loyalty programme, cart goals, landing pages, blog with
+categories and comments, SEO analysis scoring, sitemap, Google Merchant and Facebook
+catalogue feeds.
+
+**Tracking** — GTM, Meta Pixel + Conversions API, GA4 Measurement Protocol, TikTok Pixel +
+Events API, with a pixel event log and a fraud gate that can suppress purchase events.
+
+**Accounting** — purchase orders, ad spend, profit reports, sourcing.
+
+**Localisation** — multi-language with polymorphic content translations, multi-currency,
+per-country address forms and dial codes.
+
+---
+
+## Admin panel
+
+Cobalt design system (`public/admin/css/cobalt.css` + `public/admin/js/`).
+
+| Page | Purpose |
+|---|---|
+| **Payment Gateways** | Enable gateways, set checkout order, per-gateway credentials |
+| **SMS Gateways** | Enable, set default, send a test message, check balance |
+| **Fraud Checks** | Enable, set default, run a live check, recent check history |
+| **Shipping Zones** | Zones and rates, ship-from origin, **templates** |
+| **Tax Zones** | Zones and rates, inclusive pricing toggle, **templates** |
+| **Currencies** | Currencies, rate sources, manual/auto per currency, refresh now |
+| **Integrations** | Every provider group in one catalogue |
+| **Settings** | General, meta, social, storefront, shipping, cart, legal, tracking, feeds, accounting, storage, notifications |
+
+### Configuration templates
+
+Setting up tax and shipping country by country is the slowest part of going live, so both
+pages ship with one-click templates:
+
+**Tax** — EU VAT (27 states) · UK VAT · US sales tax (46 state base rates) · Canada
+GST/HST/PST · single-rate countries (Gulf, APAC, Africa and more)
+
+**Shipping** — domestic flat rate · domestic weight bands · Europe · North America · Gulf ·
+rest-of-world fallback
+
+Applying a template **skips zones that already exist**, so it can be re-applied later
+without duplicating anything or discarding rates you have tuned. Tax rates are a starting
+point, not advice — verify them against your own registrations. Shipping prices are
+placeholders.
+
+---
+
+## Storefront
+
+Inertia v3 + React 19 + TypeScript, built with Vite.
+
+Home · shop listing with filters · product detail · cart drawer · country-aware checkout ·
+order confirmation · order tracking · blog · wishlist · loyalty · account dashboard,
+orders, addresses, refunds and reviews · auth with password or phone OTP.
+
+Shared Inertia props carry locale, translated strings, currencies, active currency, site
+settings and the authenticated user.
+
+---
+
+## Configuration
+
+Key settings (Admin → Settings, stored in `site_settings`):
+
+| Setting | Meaning |
+|---|---|
+| `general.store_country` | Where you ship from — drives tax, shipping and dial-code defaults |
+| `general.currency` / `general.currency_symbol` | Base currency |
+| `general.timezone` | Applied at boot |
+| `currencies.enabled` | Multi-currency on the storefront |
+| `tax.enabled` | Master switch for tax calculation |
+| `accounting.prices_include_tax` | Catalogue prices are gross rather than net |
+| `shipping.flat_rate` / `shipping.free_above` | Fallback when no zone matches |
+| `shipping.origin_*` | Ship-from address, required for live carrier rates |
+
+Provider credentials live in **Integrations**, encrypted — never in `.env`.
+
+---
 
 ## Testing
 
-### Run Tests
 ```bash
-# Run all tests
-./vendor/bin/pest
-
-# Run specific test suite
-./vendor/bin/pest tests/Feature/
-./vendor/bin/pest tests/Unit/
-
-# Run with coverage
-./vendor/bin/pest --coverage
+./vendor/bin/pest                      # full suite
+./vendor/bin/pest --filter=PaymentFlow # one file
 ```
 
-### Test Coverage
-- **Feature Tests**: Admin authentication, dashboard, page management
-- **Unit Tests**: Model relationships, SEO analyzer service
-- **Factory Support**: Test data generation for all models
+Tests run against in-memory SQLite, so your development database is untouched.
 
-## SEO Analyzer Service
+Coverage focuses on the parts that fail expensively: webhook signature rejection across
+every gateway, replayed-webhook idempotency, browser-return-URL never marking an order
+paid, minor-unit conversion per currency, the tax matrix (UK, Germany, US state vs
+district, zero/reduced classes, inclusive extraction), shipping band selection, E.164
+reshaping per SMS gateway, and cross-provider fraud score normalisation.
 
-### Features
-- **Title Analysis**: Optimal length checking (50-60 characters)
-- **Description Analysis**: Meta description optimization (150-160 characters)
-- **Content Analysis**: Word count and quality assessment
-- **Keyword Analysis**: Keyword density and count validation
-- **Readability Check**: Sentence length analysis
-- **Scoring System**: 0-100 point scoring with grades
+---
 
-### Usage Example
-```php
-$seoAnalyzer = new SEOAnalyzerService();
-$result = $seoAnalyzer->analyzePage($title, $description, $content, $keywords);
+## Before you go live
 
-// Result structure:
-[
-    'score' => 85,
-    'grade' => 'good',
-    'checks' => [...],
-    'suggestions' => [...]
-]
-```
+**Verify each integration in its sandbox first.** Only Stripe, PayPal and cash on delivery
+have end-to-end webhook coverage in the test suite. The remaining integrations are written
+against documented APIs and tested for structure — request shapes, signature schemes,
+currency gating — but not against live accounts. **Webhook signature paths especially fail
+open if a field name is wrong**, so test those first. The most intricate schemes are Nagad
+(RSA), Paytm (AES checksum), Adyen (per-item HMAC) and 2Checkout (length-prefixed HMAC).
 
-## Component Library
+**Sender IDs and templates need registration.** India requires DLT-approved sender IDs and
+templates; Saudi requires locally-registered sender names. That happens with the provider,
+not here.
 
-### Available Components
-- `<x-admin.button>` - Styled buttons with variants
-- `<x-admin.card>` - Content cards with headers
-- `<x-admin.input>` - Form inputs with validation
-- `<x-admin.select>` - Dropdown selectors
-- `<x-admin.alert>` - Status messages
-- `<x-admin.character-counter>` - Character counting with optimization hints
-- `<x-admin.seo-score>` - Real-time SEO scoring widget
-- `<x-admin.meta-preview>` - Social media preview components
+**Tax rates change.** The templates are a starting point. Confirm them against your own
+registrations, and note that US templates carry state base rates only — counties and cities
+add on top, and nexus rules decide where you must collect at all.
 
-### Usage Example
-```blade
-<x-admin.character-counter 
-    :current="strlen($title)" 
-    :min="50" 
-    :max="60" 
-    :optimal-min="50" 
-    :optimal-max="60" 
-/>
-```
+**EU B2B reverse charge is not implemented.** If you sell B2B into the EU you will need
+VAT-number capture and reverse-charge handling, or use a merchant-of-record gateway
+(Paddle, 2Checkout) which handles it for you.
 
-## Development Commands
+---
 
-### Useful Laravel Commands
-```bash
-# Generate new migration
-php artisan make:migration create_table_name
+## Licence
 
-# Generate new model with factory
-php artisan make:model ModelName -mf
-
-# Generate new controller
-php artisan make:controller Admin/ControllerName
-
-# Clear application cache
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-
-# Generate application key
-php artisan key:generate
-```
-
-### Database Commands
-```bash
-# Reset database and re-run migrations
-php artisan migrate:fresh
-
-# Run migrations with seeders
-php artisan migrate:fresh --seed
-
-# Run specific seeder
-php artisan db:seed --class=AdminSeeder
-```
-
-## Security Features
-
-- **CSRF Protection**: All forms include CSRF tokens
-- **Password Hashing**: Bcrypt password encryption
-- **Input Validation**: Server-side validation for all inputs
-- **XSS Protection**: Blade template escaping
-- **Admin Middleware**: Route protection for admin areas
-- **Active User Check**: Only active admins can access system
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push to branch (`git push origin feature/new-feature`)
-5. Create Pull Request
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Support
-
-For support and questions:
-- Check the documentation above
-- Review the code comments in the source files
-- Examine the test files for usage examples
-- Check Laravel documentation for framework-specific questions
+Proprietary — © Xgenious.

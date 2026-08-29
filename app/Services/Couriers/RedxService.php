@@ -3,20 +3,13 @@
 namespace App\Services\Couriers;
 
 use App\Contracts\CourierInterface;
-use App\Models\Integration;
 use App\Models\Order;
+use App\Services\ProviderDriver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
-class RedxService implements CourierInterface
+class RedxService extends ProviderDriver implements CourierInterface
 {
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('redx')
-            ?? new Integration(['credentials' => [], 'environment' => 'live']);
-    }
 
     public function createOrder(Order $order, array $extra = []): array
     {
@@ -27,7 +20,7 @@ class RedxService implements CourierInterface
             'phone'              => $order->customer_phone,
             'address'            => $shipping['address'] ?? ($shipping['line1'] ?? ''),
             'merchant_invoice_id'=> $order->order_number,
-            'cash_collection_amount' => (float) ($extra['amount_to_collect'] ?? $order->total),
+            'cash_collection_amount' => (float) ($extra['cod_amount'] ?? $extra['amount_to_collect'] ?? $order->total),
             'delivery_area'      => $extra['area'] ?? ($shipping['area'] ?? ''),
             'delivery_area_id'   => $extra['area_id'] ?? null,
             'parcel_weight'      => $extra['parcel_weight'] ?? 500,

@@ -2,42 +2,46 @@
 
 namespace Database\Seeders;
 
+use App\Integrations\ProviderRegistry;
 use App\Models\Integration;
 use Illuminate\Database\Seeder;
 
+/**
+ * Integration rows are no longer seeded.
+ *
+ * The provider catalog lives in App\Integrations\Definitions and a row is created lazily
+ * the first time a merchant saves credentials — pre-seeding a row per provider is what
+ * forced every new provider to be registered in six places, and it does not scale to a
+ * large gateway catalog.
+ *
+ * This seeder now only re-syncs the denormalised group/label columns onto rows that
+ * already exist, so it stays safe to run at any time.
+ */
 class IntegrationSeeder extends Seeder
 {
-    public const PROVIDERS = [
-        // Payments
-        ['provider' => 'bkash',       'label' => 'bKash Tokenized API'],
-        ['provider' => 'nagad',        'label' => 'Nagad PGW'],
-        ['provider' => 'sslcommerz',   'label' => 'SSLCOMMERZ v4'],
-        // Couriers
-        ['provider' => 'pathao',       'label' => 'Pathao Courier'],
-        ['provider' => 'steadfast',    'label' => 'Steadfast Courier'],
-        ['provider' => 'redx',         'label' => 'RedX Courier'],
-        // Fraud screening
-        ['provider' => 'fraudbd',      'label' => 'FraudBD'],
-        ['provider' => 'bdcourier',    'label' => 'BDCourier'],
-        // SMS Gateways
-        ['provider' => 'bulksmsbd',    'label' => 'BulkSMSBD'],
-        ['provider' => 'smsbd',        'label' => 'SMS.BD'],
-        ['provider' => 'mram',         'label' => 'MRAM SMS'],
-        ['provider' => 'twilio',       'label' => 'Twilio'],
-        // AI Providers
-        ['provider' => 'openai',       'label' => 'OpenAI'],
-        ['provider' => 'gemini',       'label' => 'Google Gemini'],
-        ['provider' => 'claude',       'label' => 'Anthropic Claude'],
-        ['provider' => 'deepseek',     'label' => 'DeepSeek'],
-    ];
-
     public function run(): void
     {
-        foreach (self::PROVIDERS as $provider) {
-            Integration::firstOrCreate(
-                ['provider' => $provider['provider']],
-                ['label' => $provider['label'], 'credentials' => [], 'is_active' => false]
-            );
+        $registry = app(ProviderRegistry::class);
+        $synced   = 0;
+
+        foreach (Integration::all() as $integration) {
+            $definition = $registry->find($integration->provider);
+
+            if (! $definition) {
+                continue;
+            }
+
+            $integration->fill([
+                'group' => $definition->group,
+                'label' => $definition->label,
+            ]);
+
+            if ($integration->isDirty()) {
+                $integration->save();
+                $synced++;
+            }
         }
+
+        $this->command?->info("Integrations synced from registry: {$synced} updated, ".count($registry->all()).' providers available.');
     }
 }

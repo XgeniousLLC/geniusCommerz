@@ -23,7 +23,8 @@ class Product extends Model
         'preorder_enabled', 'preorder_message', 'preorder_expected_date',
         'faqs',
         'trust_badges',
-    ];
+    
+        'tax_class',];
 
     /** @var array<string, string> */
     protected $casts = [

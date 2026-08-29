@@ -2,30 +2,44 @@
 
 namespace App\Services;
 
+use App\Contracts\FraudInterface;
 use App\Models\Integration;
 use Illuminate\Support\Facades\Http;
 
-class FraudBdService
+class FraudBdService implements FraudInterface
 {
     private const BASE_URL    = 'https://fraudbd.com/api';
-    private const SANDBOX_KEY = '1302e523911213bc507c3c6dd35ebdb908044b42982345012452ac8f86406cc9';
 
     private string $apiKey;
     private bool   $sandbox;
 
     public function __construct()
     {
-        $integration  = Integration::forProvider('fraudbd');
-        $this->apiKey = $integration?->getCredential('api_key') ?? '';
-        $this->sandbox = ! $integration?->is_active || empty($this->apiKey);
-
-        if ($this->sandbox) {
-            $this->apiKey = self::SANDBOX_KEY;
-        }
+        $integration   = Integration::forProvider('fraudbd');
+        $this->apiKey  = $integration?->getCredential('api_key') ?? '';
+        // Previously fell back to an API key committed to this file. An unconfigured
+        // provider now simply reports as unconfigured rather than borrowing a shared key.
+        $this->sandbox = ! $integration?->is_active || $this->apiKey === '';
     }
 
-    public function check(string $phone): array
+    public function isConfigured(): bool
     {
+        return ! $this->sandbox;
+    }
+
+    public function name(): string
+    {
+        return 'FraudBD';
+    }
+
+    public function check(string $phone, array $context = []): array
+    {
+        // Without a key there is nothing to call — say so rather than firing a request
+        // that is guaranteed to 401.
+        if (! $this->isConfigured()) {
+            return ['error' => 'FraudBD is not configured. Add an API key in Integrations → FraudBD.'];
+        }
+
         $phone = $this->normalisePhone($phone);
 
         $response = Http::timeout(10)

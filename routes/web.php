@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/address', [UserAccountController::class, 'address'])->name('address');
         Route::post('/address', [UserAccountController::class, 'storeAddress'])->name('address.store');
         Route::put('/address/{address}', [UserAccountController::class, 'updateAddress'])->name('address.update');
+        Route::put('/address/{address}/default', [UserAccountController::class, 'setDefaultAddress'])->name('address.default');
         Route::delete('/address/{address}', [UserAccountController::class, 'destroyAddress'])->name('address.destroy');
         Route::post('/profile', [UserAccountController::class, 'updateProfile'])->name('profile.update');
         Route::get('/refunds', [UserAccountController::class, 'refunds'])->name('refunds');
@@ -77,6 +78,12 @@ Route::get('/loyalty', [\App\Http\Controllers\LoyaltyPageController::class, 'sho
 
 Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+// Gateway return legs. Visiting these only triggers a server-side verify — they never
+// mark an order paid on their own.
+Route::get('/payment/return/{reference}', [\App\Http\Controllers\PaymentReturnController::class, 'return'])->name('payment.return');
+Route::get('/payment/form/{reference}', [\App\Http\Controllers\PaymentReturnController::class, 'form'])->name('payment.form');
+Route::get('/payment/cancel/{reference}', [\App\Http\Controllers\PaymentReturnController::class, 'cancel'])->name('payment.cancel');
+
 Route::get('/order/confirmed/{orderNumber}', function (string $orderNumber) {
     $order = \App\Models\Order::with('items')->where('order_number', $orderNumber)->firstOrFail();
     return inertia('OrderConfirmed', ['order' => [

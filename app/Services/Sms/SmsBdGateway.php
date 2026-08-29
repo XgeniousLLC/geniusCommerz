@@ -3,18 +3,12 @@
 namespace App\Services\Sms;
 
 use App\Contracts\SmsInterface;
-use App\Models\Integration;
+use App\Services\ProviderDriver;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Http;
 
-class SmsBdGateway implements SmsInterface
+class SmsBdGateway extends ProviderDriver implements SmsInterface
 {
-    private Integration $integration;
-
-    public function __construct()
-    {
-        $this->integration = Integration::forProvider('smsbd')
-            ?? new Integration(['credentials' => []]);
-    }
 
     public function send(string $to, string $message): bool
     {
@@ -23,7 +17,7 @@ class SmsBdGateway implements SmsInterface
             'sender-id' => $this->integration->getCredential('sender_id'),
         ])->post($this->baseUrl(), [
             'message' => $message,
-            'msisdn'  => $to,
+            'msisdn'  => PhoneNumber::national($to, 'BD') ?? $to,
         ]);
 
         return $response->successful() && ($response->json('status') === 'success' || $response->status() === 200);

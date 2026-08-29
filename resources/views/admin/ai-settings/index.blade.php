@@ -10,7 +10,9 @@ $providerMeta = [
     'claude'   => ['name' => 'Anthropic Claude', 'logo' => '/images/ai/claude.svg',   'hint' => 'claude-haiku-4-5-20251001, claude-sonnet-4-6',   'color' => '#D97757'],
     'deepseek' => ['name' => 'DeepSeek',         'logo' => '/images/ai/deepseek.svg', 'hint' => 'deepseek-chat, deepseek-reasoner',               'color' => '#4D6BFE'],
 ];
-$defaultAi = $integrations->firstWhere('is_default', true);
+$defaultCard = collect($cards)->first(fn ($c) => $c['row']->exists && $c['row']->is_default);
+$defaultAi   = $defaultCard['row'] ?? null;
+$defaultDef  = $defaultCard['definition'] ?? null;
 @endphp
 
 <div class="page-head">
@@ -20,7 +22,7 @@ $defaultAi = $integrations->firstWhere('is_default', true);
     </div>
     @if($defaultAi)
     <div>
-        <span class="pill sm success"><span class="dot"></span>{{ $defaultAi->label }}</span>
+        <span class="pill sm success"><span class="dot"></span>{{ $defaultDef->label }}</span>
         <div class="faint" style="font-size:12px;margin-top:4px;text-align:right">active provider</div>
     </div>
     @endif
@@ -28,16 +30,16 @@ $defaultAi = $integrations->firstWhere('is_default', true);
 
 {{-- Default provider banner --}}
 @if($defaultAi)
-@php $defaultModel = $defaultAi->credentials['model'] ?? null; @endphp
+@php $defaultModel = $defaultAi->getCredential('model'); @endphp
 <div class="row" style="gap:12px;padding:14px 18px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--border);margin-bottom:22px">
     <span class="tile sm t-accent"><span class="ico" data-ico="check" style="width:18px;height:18px"></span></span>
     <div style="font-size:13.5px;font-weight:600">
-        Default provider: <strong>{{ $defaultAi->label }}</strong>
+        Default provider: <strong>{{ $defaultDef->label }}</strong>
         @if($defaultModel)
         — model: <code style="background:var(--surface-2);padding:1px 7px;border-radius:5px;font-family:monospace;font-size:12.5px">{{ $defaultModel }}</code>
         @endif
     </div>
-    <a href="{{ route('admin.integrations.edit', $defaultAi) }}" class="link-btn" style="margin-left:auto">
+    <a href="{{ route('admin.integrations.edit', $defaultDef->slug) }}" class="link-btn" style="margin-left:auto">
         <span class="ico" data-ico="gear" style="width:15px;height:15px"></span>Configure
     </a>
 </div>
@@ -63,12 +65,14 @@ $defaultAi = $integrations->firstWhere('is_default', true);
             </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
-            @foreach($integrations as $integration)
+            @foreach($cards as $card)
             @php
-            $meta     = $providerMeta[$integration->provider] ?? ['name' => $integration->label, 'logo' => '', 'hint' => '', 'color' => 'var(--text-muted)'];
-            $hasKey   = !empty($integration->credentials['api_key']);
-            $model    = $integration->credentials['model'] ?? null;
-            $isDefault = $integration->is_default;
+            $def         = $card['definition'];
+            $integration = $card['row'];
+            $meta        = $providerMeta[$def->slug] ?? ['name' => $def->label, 'logo' => '', 'hint' => '', 'color' => 'var(--text-muted)'];
+            $hasKey      = $integration->exists && $integration->getCredential('api_key');
+            $model       = $integration->exists ? $integration->getCredential('model') : null;
+            $isDefault   = $integration->exists && $integration->is_default;
             @endphp
             <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:13px;
                 {{ $isDefault ? 'border:1.5px solid var(--accent);background:var(--accent-soft)' : 'background:var(--surface-2)' }}">
@@ -97,7 +101,7 @@ $defaultAi = $integrations->firstWhere('is_default', true);
                             @endif
                         </div>
                     </div>
-                    <a href="{{ route('admin.integrations.edit', $integration) }}" class="btn btn-outline btn-sm">
+                    <a href="{{ route('admin.integrations.edit', $def->slug) }}" class="btn btn-outline btn-sm">
                         <span class="ico" data-ico="gear" style="width:15px;height:15px"></span>Configure
                     </a>
                 </div>
@@ -109,12 +113,12 @@ $defaultAi = $integrations->firstWhere('is_default', true);
                         All AI features use this provider
                     </span>
                     @elseif(!$hasKey)
-                    <a href="{{ route('admin.integrations.edit', $integration) }}" style="color:var(--warning);font-weight:600;font-size:13px;text-decoration:none">
+                    <a href="{{ route('admin.integrations.edit', $def->slug) }}" style="color:var(--warning);font-weight:600;font-size:13px;text-decoration:none">
                         <span class="ico" data-ico="shield" style="width:14px;height:14px;vertical-align:-2px"></span>
                         Add API key to activate
                     </a>
                     @elseif($integration->is_active)
-                    <form method="POST" action="{{ route('admin.integrations.set-default', $integration) }}">
+                    <form method="POST" action="{{ route('admin.integrations.set-default', $def->slug) }}">
                         @csrf
                         <button type="submit" class="link-btn" style="font-size:13px;font-weight:600">
                             Set as default

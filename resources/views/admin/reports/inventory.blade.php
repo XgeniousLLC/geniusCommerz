@@ -31,7 +31,7 @@
     </div>
     <div class="card lift stat">
         <span class="tile sm t-success"><span class="ico" data-ico="dollar" style="width:18px;height:18px"></span></span>
-        <div class="num">৳{{ number_format($summary['total_stock_value'], 0) }}</div>
+        <div class="num">{{ money($summary['total_stock_value'], 0) }}</div>
         <div class="lbl">Total Stock Value</div>
     </div>
 </div>
@@ -82,7 +82,7 @@
                 <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $p->name }}</td>
                 <td style="font-family:monospace;font-size:12px;color:var(--text-muted)">{{ $p->sku ?? '—' }}</td>
                 <td style="color:var(--text-muted)">{{ $p->has_variants ? 'Variants' : 'Simple' }}</td>
-                <td style="text-align:right">৳{{ number_format($p->price, 0) }}</td>
+                <td style="text-align:right">{{ money($p->price, 0) }}</td>
                 <td style="text-align:right;font-weight:700;color:{{ $stock === 0 ? 'var(--danger)' : ($stock <= $summary['low_stock_threshold'] ? 'var(--warning)' : 'var(--text)') }}">
                     {{ number_format($stock) }}
                 </td>

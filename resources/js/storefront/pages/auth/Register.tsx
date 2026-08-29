@@ -47,7 +47,9 @@ function focusOff(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
   e.currentTarget.style.boxShadow = 'none';
 }
 
-export default function Register() {
+interface DialCode { code: string; name: string; dial: string }
+
+export default function Register({ dialCodes = [], storeCountry = 'BD' }: { dialCodes?: DialCode[]; storeCountry?: string }) {
   const { site } = usePage<SharedProps>().props;
   const { data, setData, post, processing, errors } = useForm({
     name: '', email: '', phone: '', password: '', password_confirmation: '',
@@ -55,6 +57,9 @@ export default function Register() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName]   = useState('');
   const [showPwd, setShowPwd]     = useState(false);
+  const [dial, setDial]           = useState(
+    dialCodes.find(c => c.code === storeCountry)?.dial ?? dialCodes[0]?.dial ?? '',
+  );
   const [agreed, setAgreed]       = useState(false);
 
   const strength = getStrength(data.password);
@@ -70,6 +75,10 @@ export default function Register() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    // Combine the dial code with the local number so the stored phone is unambiguous.
+    if (data.phone) {
+      setData('phone', `+${dial}${data.phone.replace(/\D/g, '').replace(/^0+/, '')}`);
+    }
     post('/register');
   }
 
@@ -151,13 +160,14 @@ export default function Register() {
               <div style={fieldWrap}>
                 <label style={labelStyle}>Phone number</label>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <select style={{ ...inputStyle, width: 110, flexShrink: 0 }} onFocus={focusOn} onBlur={focusOff}>
-                    <option>🇧🇩 +880</option>
+                  <select value={dial} onChange={e => setDial(e.target.value)}
+                    style={{ ...inputStyle, width: 130, flexShrink: 0 }} onFocus={focusOn} onBlur={focusOff}>
+                    {dialCodes.map(c => <option key={c.code} value={c.dial}>{c.code} +{c.dial}</option>)}
                   </select>
                   <input type="tel" value={data.phone} onChange={e => setData('phone', e.target.value)}
                     placeholder="1712 345 678" style={{ ...inputStyle, flex: 1 }} onFocus={focusOn} onBlur={focusOff}/>
                 </div>
-                <div style={{ fontSize: 11.5, color: 'var(--av-muted)', marginTop: 6, fontFamily: 'var(--av-sans)' }}>We'll send order updates here. Bangla SMS supported.</div>
+                <div style={{ fontSize: 11.5, color: 'var(--av-muted)', marginTop: 6, fontFamily: 'var(--av-sans)' }}>We'll send order updates here.</div>
               </div>
 
               {/* Password */}

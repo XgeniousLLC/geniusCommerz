@@ -24,25 +24,56 @@ class UserAuthController extends Controller
             return redirect('/');
         }
         $loginMethod = SiteSetting::get('auth.login_method', 'email_password');
-        return Inertia::render('auth/Login', ['loginMethod' => $loginMethod]);
+        return Inertia::render('auth/Login', [
+            'loginMethod'  => $loginMethod,
+            'dialCodes'    => $this->dialCodes(),
+            'storeCountry' => \App\Models\SiteSetting::get('general.store_country', 'BD'),
+        ]);
+    }
+
+    /**
+     * Find an account by phone in either shape.
+     *
+     * Numbers are normalised to E.164 on write now, but accounts created before that
+     * still hold a local number like 01XXXXXXXXX — matching only one form would lock
+     * those customers out of OTP login.
+     */
+    private function userByPhone(?string $raw, ?string $country): ?User
+    {
+        $country ??= \App\Models\SiteSetting::get('general.store_country', 'BD');
+
+        $candidates = array_unique(array_filter([
+            $raw,
+            \App\Support\PhoneNumber::toE164($raw, $country),
+            \App\Support\PhoneNumber::national($raw, $country),
+        ]));
+
+        return $candidates
+            ? User::whereIn('phone', $candidates)->where('is_active', true)->first()
+            : null;
     }
 
     public function sendOtp(Request $request): JsonResponse
     {
-        $request->validate(['phone' => 'required|string|max:20']);
+        $request->validate(['phone' => ['required', 'string', 'max:20']]);
 
-        $phone = $request->input('phone');
-        $user  = User::where('phone', $phone)->where('is_active', true)->first();
+        $country = $request->input('country');
+        $user    = $this->userByPhone($request->input('phone'), $country);
 
         if (! $user) {
             return response()->json(['message' => 'No account found with this phone number.'], 422);
         }
 
+        // Send to the normalised number even when the account stores a local one.
+        $phone = \App\Support\PhoneNumber::toE164($request->input('phone'), $country)
+            ?? $request->input('phone');
+
         $otp = $user->generateOtp();
 
         try {
             $sms = app(SmsService::class);
-            $sms->send($phone, "Your klixbd login OTP is: {$otp}. Valid for 5 minutes.");
+            $siteName = \App\Models\SiteSetting::get('general.site_name', config('app.name'));
+            $sms->send($phone, "Your {$siteName} login OTP is: {$otp}. Valid for 5 minutes.", $country);
         } catch (\Throwable $e) {
             // If SMS fails in non-production, surface the OTP for testing
             if (app()->environment('local', 'testing')) {
@@ -61,7 +92,7 @@ class UserAuthController extends Controller
             'otp'   => 'required|string|size:6',
         ]);
 
-        $user = User::where('phone', $request->input('phone'))->where('is_active', true)->first();
+        $user = $this->userByPhone($request->input('phone'), $request->input('country'));
 
         if (! $user || ! $user->isOtpValid($request->input('otp'))) {
             return response()->json(['message' => 'Invalid or expired OTP.'], 422);
@@ -94,7 +125,10 @@ class UserAuthController extends Controller
         if (Auth::check()) {
             return redirect('/');
         }
-        return Inertia::render('auth/Register');
+        return Inertia::render('auth/Register', [
+            'dialCodes'    => $this->dialCodes(),
+            'storeCountry' => \App\Models\SiteSetting::get('general.store_country', 'BD'),
+        ]);
     }
 
     public function register(Request $request): RedirectResponse
@@ -185,5 +219,19 @@ class UserAuthController extends Controller
         }
 
         return back()->withErrors(['email' => __($status)])->withInput();
+    }
+
+    /**
+     * Dial codes for the phone prefix picker. Sent per-page rather than shared globally
+     * so the payload only loads on the two pages that need it.
+     *
+     * @return list<array{code: string, name: string, dial: string}>
+     */
+    private function dialCodes(): array
+    {
+        return array_map(
+            fn (array $c) => ['code' => $c['code'], 'name' => $c['name'], 'dial' => $c['dial']],
+            \App\Support\Countries::options(),
+        );
     }
 }

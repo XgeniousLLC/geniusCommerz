@@ -235,7 +235,7 @@
         </div>
     </div>
     <div class="border-t py-4 text-center text-xs text-slate-500" style="border-color:rgba(255,255,255,.08)">
-        © {{ date('Y') }} {{ $siteName }} · Bangladesh
+        © {{ date('Y') }} {{ $siteName }}
     </div>
 </footer>
 

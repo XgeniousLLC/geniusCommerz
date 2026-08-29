@@ -46,12 +46,12 @@
             <div>
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
                     <span style="font-weight:600;text-transform:capitalize">{{ str_replace('_',' ',$row->method) }}</span>
-                    <span>৳{{ number_format($row->revenue,0) }} <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
+                    <span>{{ money($row->revenue, 0) }} <span style="font-size:11px;color:var(--text-muted)">({{ $pct }}%)</span></span>
                 </div>
                 <div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden">
                     <div style="width:{{ $pct }}%;height:6px;background:var(--accent);border-radius:4px"></div>
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ number_format($row->orders) }} orders · AOV: ৳{{ number_format($row->avg_order,0) }}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{ number_format($row->orders) }} orders · AOV: {{ money($row->avg_order, 0) }}</div>
             </div>
             @endforeach
         </div>
@@ -72,7 +72,7 @@
                 <div style="text-align:right">
                     <strong>{{ number_format($row->count) }}</strong>
                     <span style="font-size:11px;color:var(--text-muted);margin-left:4px">({{ $pct }}%)</span>
-                    <div style="font-size:11px;color:var(--text-muted)">৳{{ number_format($row->revenue,0) }}</div>
+                    <div style="font-size:11px;color:var(--text-muted)">{{ money($row->revenue, 0) }}</div>
                 </div>
             </div>
             @endforeach
@@ -101,9 +101,9 @@
                 <td style="font-weight:600;text-transform:capitalize">{{ str_replace('_',' ',$row->method) }}</td>
                 <td style="text-align:right">{{ number_format($row->orders) }}</td>
                 <td style="text-align:right;color:var(--text-muted)">{{ $orderPct }}%</td>
-                <td style="text-align:right;font-weight:600">৳{{ number_format($row->revenue,0) }}</td>
+                <td style="text-align:right;font-weight:600">{{ money($row->revenue, 0) }}</td>
                 <td style="text-align:right;color:var(--text-muted)">{{ $revPct }}%</td>
-                <td style="text-align:right;color:var(--text-muted)">৳{{ number_format($row->avg_order,0) }}</td>
+                <td style="text-align:right;color:var(--text-muted)">{{ money($row->avg_order, 0) }}</td>
             </tr>
             @endforeach
         </tbody>

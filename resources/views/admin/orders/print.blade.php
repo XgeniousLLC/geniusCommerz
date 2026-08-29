@@ -197,18 +197,23 @@
                 <td>-{{ $site['currency_symbol'] }}{{ number_format($order->discount_amount, 2) }}</td>
             </tr>
             @endif
-            @if($site['tax_rate'] > 0)
-            @php
-                $taxBase = $site['prices_include_tax']
-                    ? $order->subtotal / (1 + $site['tax_rate'] / 100)
-                    : $order->subtotal;
-                $taxAmt  = $taxBase * $site['tax_rate'] / 100;
-            @endphp
+            {{-- Read from the order, never recomputed: a recomputed figure drifts from
+                 what was actually charged as soon as a rate changes. --}}
+            @forelse($order->tax_breakdown ?? [] as $line)
             <tr>
-                <td style="color:#555">Tax ({{ $site['tax_rate'] }}%{{ $site['prices_include_tax'] ? ' incl.' : '' }})</td>
-                <td>{{ $site['currency_symbol'] }}{{ number_format($taxAmt, 2) }}</td>
+                <td style="color:#555">
+                    {{ $line['name'] }} ({{ rtrim(rtrim(number_format($line['rate'], 2), '0'), '.') }}%{{ $order->prices_include_tax ? ' incl.' : '' }})
+                </td>
+                <td>{{ $site['currency_symbol'] }}{{ number_format($line['amount'], 2) }}</td>
             </tr>
-            @endif
+            @empty
+                @if((float) $order->tax > 0)
+                <tr>
+                    <td style="color:#555">Tax{{ $order->prices_include_tax ? ' (incl.)' : '' }}</td>
+                    <td>{{ $site['currency_symbol'] }}{{ number_format($order->tax, 2) }}</td>
+                </tr>
+                @endif
+            @endforelse
             <tr class="grand-total">
                 <td>Total</td>
                 <td>{{ $site['currency_symbol'] }}{{ number_format($order->total, 2) }}</td>

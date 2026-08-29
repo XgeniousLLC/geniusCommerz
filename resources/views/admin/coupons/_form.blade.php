@@ -21,7 +21,7 @@
         <div class="field" style="margin:0">
             <span class="lbl">Type <span style="color:var(--danger)">*</span></span>
             <select class="input" name="type" required>
-                <option value="fixed"   {{ old('type', $coupon->type ?? 'fixed') === 'fixed'   ? 'selected' : '' }}>Fixed amount (৳)</option>
+                <option value="fixed"   {{ old('type', $coupon->type ?? 'fixed') === 'fixed'   ? 'selected' : '' }}>Fixed amount ({{ currency_symbol() }})</option>
                 <option value="percent" {{ old('type', $coupon->type ?? '')      === 'percent' ? 'selected' : '' }}>Percentage (%)</option>
             </select>
             @error('type')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
@@ -36,13 +36,13 @@
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
         <div class="field" style="margin:0">
-            <span class="lbl">Minimum Order (৳)</span>
+            <span class="lbl">Minimum Order ({{ currency_symbol() }})</span>
             <input class="input" type="number" name="minimum_order" value="{{ old('minimum_order', $coupon->minimum_order ?? '') }}"
                 placeholder="No minimum" min="0" step="0.01">
             @error('minimum_order')<p class="hint" style="color:var(--danger)">{{ $message }}</p>@enderror
         </div>
         <div class="field" style="margin:0">
-            <span class="lbl">Maximum Discount (৳)</span>
+            <span class="lbl">Maximum Discount ({{ currency_symbol() }})</span>
             <input class="input" type="number" name="maximum_discount" value="{{ old('maximum_discount', $coupon->maximum_discount ?? '') }}"
                 placeholder="No cap" min="0" step="0.01">
             <p class="hint">Applies to percent-type coupons</p>

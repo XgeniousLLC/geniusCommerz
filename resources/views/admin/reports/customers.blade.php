@@ -53,7 +53,7 @@
                     <div style="font-size:11px;color:var(--text-muted)">{{ $c->email }}</div>
                 </td>
                 <td style="text-align:right">{{ $c->orders_count }}</td>
-                <td style="text-align:right;font-weight:700;color:var(--success)">৳{{ number_format($c->total_spent, 0) }}</td>
+                <td style="text-align:right;font-weight:700;color:var(--success)">{{ money($c->total_spent, 0) }}</td>
                 <td style="text-align:right;font-size:12px;color:var(--text-muted)">{{ \Carbon\Carbon::parse($c->last_order_at)->format('M d, Y') }}</td>
             </tr>
             @endforeach

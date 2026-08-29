@@ -13,7 +13,18 @@ class CurrencyController extends Controller
     public function index(): View
     {
         $currencies = Currency::orderByDesc('is_default')->orderBy('code')->get();
-        return view('admin.currencies.index', compact('currencies'));
+        $registry = app(\App\Integrations\ProviderRegistry::class);
+        $fxRows   = \App\Models\Integration::where('group', 'fx')->get()->keyBy('provider');
+        $fxSources = [];
+        foreach ($registry->group('fx') as $slug => $definition) {
+            $fxSources[] = [
+                'definition' => $definition,
+                'row'        => $fxRows->get($slug) ?? \App\Models\Integration::forSlug($slug),
+            ];
+        }
+
+        return view('admin.currencies.index', compact('currencies'))->with('fxSources', $fxSources);
+    
     }
 
     public function store(Request $request): RedirectResponse
@@ -35,15 +46,19 @@ class CurrencyController extends Controller
         $data = $request->validate([
             'symbol'    => 'required|string|max:10',
             'name'      => 'required|string|max:60',
-            'rate'      => 'required|numeric|min:0.000001',
-            'is_active' => 'boolean',
+            'rate'        => 'required|numeric|min:0.000001',
+            'rate_source' => 'nullable|in:manual,api',
+            'is_active'   => 'boolean',
         ]);
 
         $currency->update([
-            'symbol'    => $data['symbol'],
-            'name'      => $data['name'],
-            'rate'      => $data['rate'],
-            'is_active' => $request->boolean('is_active'),
+            'symbol'      => $data['symbol'],
+            'name'        => $data['name'],
+            'rate'        => $data['rate'],
+            'rate_source' => $data['rate_source'] ?? 'manual',
+            // A hand-edited rate is a deliberate override, so stamp it as fresh.
+            'rate_updated_at' => now(),
+            'is_active'   => $request->boolean('is_active'),
         ]);
 
         return redirect()->route('admin.currencies.index')->with('success', "Currency {$currency->code} updated.");

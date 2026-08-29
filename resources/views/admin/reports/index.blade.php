@@ -26,7 +26,7 @@
         <div class="between" style="width:100%">
             <span class="tile t-accent"><span class="ico" data-ico="dollar"></span></span>
         </div>
-        <div><div class="num" style="font-size:26px">৳{{ number_format($revenue30, 0) }}</div><div class="lbl">Total revenue (30d)</div></div>
+        <div><div class="num" style="font-size:26px">{{ money($revenue30, 0) }}</div><div class="lbl">Total revenue (30d)</div></div>
     </div>
     <div class="card lift stat" style="flex-direction:column;align-items:flex-start;gap:10px;padding:20px">
         <div class="between" style="width:100%">
@@ -68,7 +68,7 @@
                     <div style="font-weight:700;font-size:13.5px">{{ $p->product_name }}</div>
                     <div class="faint" style="font-size:12px">{{ number_format($p->qty_sold) }} sold</div>
                 </div>
-                <span class="tnum" style="font-weight:700">৳{{ number_format($p->revenue, 0) }}</span>
+                <span class="tnum" style="font-weight:700">{{ money($p->revenue, 0) }}</span>
             </div>
             @endforeach
         </div>
@@ -94,7 +94,7 @@
             <div>
                 <div class="between" style="margin-bottom:6px">
                     <span style="font-weight:600;font-size:13.5px">{{ $cat->name }}</span>
-                    <span class="tnum faint" style="font-size:13px">৳{{ number_format($cat->revenue, 0) }} · {{ $pct }}%</span>
+                    <span class="tnum faint" style="font-size:13px">{{ money($cat->revenue, 0) }} · {{ $pct }}%</span>
                 </div>
                 <div style="height:8px;border-radius:99px;background:var(--surface-3)">
                     <div style="width:{{ $pct }}%;height:100%;border-radius:99px;background:{{ $barColors[$i % count($barColors)] }}"></div>
